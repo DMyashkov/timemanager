@@ -1,10 +1,18 @@
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: {
+  header: {
     flex: 1,
+  },
+  headerContentContainer: {
+    flexDirection: "column",
+  },
+  titleContainer: {
     justifyContent: "center",
-    alignItems: "center",
+    paddingLeft: 20,
+  },
+  title: {
+    fontSize: 25,
   },
 });
 

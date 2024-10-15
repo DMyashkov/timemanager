@@ -1,4 +1,6 @@
 import { View, Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet } from "react-native";
 import styles from "./styles";
 
 interface Button {
@@ -18,8 +20,13 @@ const Header: React.FC<HeaderProps> = ({
   showSearchBar = false,
 }) => {
   return (
-    <View>
-      <Text>Header</Text>
+    <View style={styles.header}>
+      <SafeAreaView style={styles.headerContentContainer}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{title}</Text>
+        </View>
+        <View />
+      </SafeAreaView>
     </View>
   );
 };
