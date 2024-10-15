@@ -13,7 +13,10 @@
       ],
       "@constants/*": [
         "constants/*"
-      ]
+      ],
+      "@context/*": [
+        "context/*"
+      ],
     }
   },
   "include": [

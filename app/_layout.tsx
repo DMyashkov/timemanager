@@ -1,8 +1,10 @@
+// timemanager/app/_layout.tsx
 import { Stack } from "expo-router";
 import * as Font from "expo-font";
 import { FONTS } from "@/constants/fonts";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
+import { ThemeProvider } from "@context/ThemeContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -29,10 +31,14 @@ export default function Layout() {
     }
     prepare();
   }, []);
+
   if (!fontsLoaded) return null;
+
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <ThemeProvider>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </ThemeProvider>
   );
 }

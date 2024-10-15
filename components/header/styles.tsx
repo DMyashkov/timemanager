@@ -1,21 +1,36 @@
+// timemanager/components/header/styles.tsx
 import { StyleSheet } from "react-native";
-import { FONTS } from "@/constants/fonts";
+import { useTheme } from "@context/ThemeContext";
 
-const styles = StyleSheet.create({
-  header: {
-    flex: 1,
-  },
-  headerContentContainer: {
-    flexDirection: "column",
-  },
-  titleContainer: {
-    justifyContent: "center",
-    paddingLeft: 20,
-  },
-  title: {
-    fontSize: 25,
-    fontFamily: FONTS.semibold,
-  },
-});
+const useStyles = () => {
+  const { theme } = useTheme(); // Access the current theme from context
 
-export default styles;
+  return StyleSheet.create({
+    header: {
+      flex: 1,
+      padding: 10,
+    },
+    headerContentContainer: {
+      flexDirection: "column",
+      justifyContent: "center",
+    },
+    titleContainer: {
+      flex: 1,
+      justifyContent: "center",
+      paddingLeft: 15,
+    },
+    title: {
+      fontSize: theme.fontSize.large, // Use dynamic font size from theme
+      fontFamily: theme.fonts.semibold, // Use dynamic font family from theme
+    },
+    headerFirstRow: {
+      margin: 0,
+      flexDirection: "row",
+    },
+    searchBar: {
+      padding: 10,
+    },
+  });
+};
+
+export default useStyles;
