@@ -3,19 +3,27 @@ import { FONTS } from "@/constants/fonts";
 
 export const THEME = {
   light: {
-    fonts: FONTS,
+    font: FONTS,
     fontSize: {
       large: 25,
       medium: 18,
       small: 14,
     },
+    color: {
+      lightGrey: "#EFEFF0",
+      darkGrey: "#848488",
+      black: "#373737",
+    },
   },
   dark: {
-    fonts: FONTS,
+    font: FONTS,
     fontSize: {
       large: 25,
       medium: 18,
       small: 14,
+    },
+    color: {
+      lightGrey: "#EFEFF0",
     },
   },
 };

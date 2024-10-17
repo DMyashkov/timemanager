@@ -1,6 +1,6 @@
 // timemanager/context/ThemeContext.tsx
 import { THEME } from "@constants/theme";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
 // Define the shape of the ThemeContext
 type ThemeContextType = {
