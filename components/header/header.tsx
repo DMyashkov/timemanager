@@ -89,7 +89,6 @@ const Header: React.FC<HeaderProps> = ({
   });
 
   // Define the max height of the options container
-  const optionsContainerHeight = 100; // Adjust this to the actual height
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -115,10 +114,13 @@ const Header: React.FC<HeaderProps> = ({
               overflow: "hidden",
               height: expandAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [0, optionsContainerHeight], // From 0 to max height
+                outputRange: [0, styles.optionsContainer.height], // From 0 to max height
               }),
               marginTop: -styles.headerContentContainer.gap / 2,
-              marginBottom: -styles.headerContentContainer.gap / 2,
+              marginBottom: expandAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-styles.headerContentContainer.gap / 2, 0], // From 0 to negative max height
+              }),
             }}
           >
             <View style={styles.optionsContainer}>
@@ -161,10 +163,7 @@ const Header: React.FC<HeaderProps> = ({
                 numberOfLines={1} // Ensures it only takes one line
               />
               {searchText.length > 0 && ( // Show the clear button if there's text
-                <TouchableOpacity
-                  style={styles.xmark}
-                  onPress={handleClearInput}
-                >
+                <TouchableOpacity onPress={handleClearInput}>
                   <XMark
                     height={16}
                     width={16}

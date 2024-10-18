@@ -17,8 +17,8 @@ export const THEME = {
       },
       lightGrey: "#FBFBFB",
       mediumGrey: "#EEEEEE",
+      mediumGreyBorders: "#EBEBEB",
       black: "#373737",
-      red: "#FF0000",
     },
   },
   dark: {

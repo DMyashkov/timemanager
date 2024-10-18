@@ -14,7 +14,7 @@ const useStyles = () => {
     headerContentContainer: {
       flexDirection: "column",
       justifyContent: "center",
-      gap: 15,
+      gap: 10,
     },
     titleContainer: {
       flex: 1,
@@ -29,6 +29,7 @@ const useStyles = () => {
       flexDirection: "row",
       paddingLeft: 10,
       paddingRight: 10,
+      marginBottom: 8,
     },
     searchBar: {
       backgroundColor: theme.color.searchBar.background, // Use dynamic color from theme
@@ -57,11 +58,12 @@ const useStyles = () => {
       marginLeft: 0,
       flex: 1,
     },
-    xmark: {},
     optionsContainer: {
       height: 82,
       borderRadius: 10,
       overflow: "hidden",
+      borderColor: theme.color.mediumGreyBorders,
+      borderWidth: 0.5,
     },
     optionButton: {
       flex: 1,
