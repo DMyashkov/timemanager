@@ -7,6 +7,7 @@ export const THEME = {
     fontSize: {
       large: 25,
       medium: 18,
+      mediumSmall: 17,
       small: 14,
     },
     color: {
@@ -25,6 +26,7 @@ export const THEME = {
     fontSize: {
       large: 25,
       medium: 18,
+      mediumSmall: 20,
       small: 14,
     },
     color: {

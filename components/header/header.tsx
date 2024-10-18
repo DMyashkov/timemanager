@@ -5,14 +5,15 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated, // Import Animated from React Native
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useStyles from "./styles";
 import MagnifyingGlass from "@assets/icons/magnifying-glass.svg";
 import XMark from "@assets/icons/xmark.svg";
 import { useTheme } from "@context/ThemeContext";
-import { useState } from "react";
-import { Animated, Easing } from "react-native";
+import { useRef, useState } from "react";
 
 interface Button {
   id: string; // Added id for unique key
@@ -35,19 +36,46 @@ const Header: React.FC<HeaderProps> = ({
   const { theme } = useTheme(); // Access the current theme from context
   const [searchText, setSearchText] = useState(""); // State for managing input text
   const [isExpanded, setIsExpanded] = useState(false); // State for header expansion
-  const [selectedOption, setSelectedOption] = useState("Activities"); // "Tags" or "All"
+  const [selectedOption, setSelectedOption] = useState("Activities"); // "Activities" or "Projects"
+
+  // Initialize the animated value
+  const expandAnim = useRef(new Animated.Value(0)).current;
 
   const handleClearInput = () => {
     setSearchText(""); // Clear the input text
   };
 
+  const expandHeader = () => {
+    Animated.timing(expandAnim, {
+      toValue: 1,
+      duration: 200,
+      easing: Easing.linear,
+      useNativeDriver: false, // Must be false when animating height
+    }).start();
+  };
+
+  const collapseHeader = () => {
+    Animated.timing(expandAnim, {
+      toValue: 0,
+      duration: 200,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start();
+  };
+
   const handleBarsPress = () => {
+    if (!isExpanded) {
+      expandHeader();
+    } else {
+      collapseHeader();
+    }
     setIsExpanded(!isExpanded);
   };
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
-    setIsExpanded(false); // Collapse the header after selection
+    collapseHeader(); // Collapse the header after selection
+    setIsExpanded(false);
   };
 
   const modifiedButtons = buttons.map((button) => {
@@ -60,6 +88,9 @@ const Header: React.FC<HeaderProps> = ({
     return button;
   });
 
+  // Define the max height of the options container
+  const optionsContainerHeight = 100; // Adjust this to the actual height
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.header}>
@@ -71,14 +102,25 @@ const Header: React.FC<HeaderProps> = ({
             <View style={styles.buttonContainer}>
               {/* Render buttons or search bar if needed */}
               {modifiedButtons.map((button) => (
-                <View key={button.id} onTouchEnd={button.onPress}>
+                <TouchableOpacity key={button.id} onPress={button.onPress}>
                   {button.iconElement}
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
 
-          {isExpanded && (
+          {/* Animated options container */}
+          <Animated.View
+            style={{
+              overflow: "hidden",
+              height: expandAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, optionsContainerHeight], // From 0 to max height
+              }),
+              marginTop: -styles.headerContentContainer.gap / 2,
+              marginBottom: -styles.headerContentContainer.gap / 2,
+            }}
+          >
             <View style={styles.optionsContainer}>
               <TouchableOpacity
                 style={[
@@ -99,7 +141,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Text style={styles.optionText}>Projects</Text>
               </TouchableOpacity>
             </View>
-          )}
+          </Animated.View>
 
           {showSearchBar && (
             <View style={styles.searchBar}>

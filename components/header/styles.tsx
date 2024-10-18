@@ -74,6 +74,7 @@ const useStyles = () => {
     },
     optionText: {
       fontFamily: theme.font.regular,
+      fontSize: theme.fontSize.mediumSmall,
     },
   });
 };
