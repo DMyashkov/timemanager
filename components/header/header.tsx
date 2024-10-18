@@ -12,6 +12,7 @@ import MagnifyingGlass from "@assets/icons/magnifying-glass.svg";
 import XMark from "@assets/icons/xmark.svg";
 import { useTheme } from "@context/ThemeContext";
 import { useState } from "react";
+import { Animated, Easing } from "react-native";
 
 interface Button {
   id: string; // Added id for unique key
@@ -33,10 +34,31 @@ const Header: React.FC<HeaderProps> = ({
   const styles = useStyles(); // Retrieve styles using the custom hook
   const { theme } = useTheme(); // Access the current theme from context
   const [searchText, setSearchText] = useState(""); // State for managing input text
+  const [isExpanded, setIsExpanded] = useState(false); // State for header expansion
+  const [selectedOption, setSelectedOption] = useState("Activities"); // "Tags" or "All"
 
   const handleClearInput = () => {
     setSearchText(""); // Clear the input text
   };
+
+  const handleBarsPress = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const handleOptionSelect = (option: string) => {
+    setSelectedOption(option);
+    setIsExpanded(false); // Collapse the header after selection
+  };
+
+  const modifiedButtons = buttons.map((button) => {
+    if (button.id === "bars") {
+      return {
+        ...button,
+        onPress: handleBarsPress, // Override onPress for the bars icon
+      };
+    }
+    return button;
+  });
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -48,26 +70,50 @@ const Header: React.FC<HeaderProps> = ({
             </View>
             <View style={styles.buttonContainer}>
               {/* Render buttons or search bar if needed */}
-              {buttons.map((button) => (
+              {modifiedButtons.map((button) => (
                 <View key={button.id} onTouchEnd={button.onPress}>
                   {button.iconElement}
                 </View>
               ))}
             </View>
           </View>
+
+          {isExpanded && (
+            <View style={styles.optionsContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.optionButton,
+                  selectedOption === "Activities" && styles.selectedOption,
+                ]}
+                onPress={() => handleOptionSelect("Activities")}
+              >
+                <Text style={styles.optionText}>Activities</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.optionButton,
+                  selectedOption === "Projects" && styles.selectedOption,
+                ]}
+                onPress={() => handleOptionSelect("Projects")}
+              >
+                <Text style={styles.optionText}>Projects</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {showSearchBar && (
             <View style={styles.searchBar}>
               <View style={styles.magnifyingGlassContainer}>
                 <MagnifyingGlass
                   height={16}
                   width={16}
-                  fill={theme.color.darkGrey}
+                  fill={theme.color.searchBar.text}
                 />
               </View>
               <TextInput
                 style={styles.textInput}
                 placeholder="Search"
-                placeholderTextColor={theme.color.darkGrey}
+                placeholderTextColor={theme.color.searchBar.text}
                 value={searchText}
                 onChangeText={setSearchText}
                 numberOfLines={1} // Ensures it only takes one line
@@ -77,7 +123,11 @@ const Header: React.FC<HeaderProps> = ({
                   style={styles.xmark}
                   onPress={handleClearInput}
                 >
-                  <XMark height={16} width={16} fill={theme.color.darkGrey} />
+                  <XMark
+                    height={16}
+                    width={16}
+                    fill={theme.color.searchBar.text}
+                  />
                 </TouchableOpacity>
               )}
             </View>

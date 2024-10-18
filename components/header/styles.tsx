@@ -23,6 +23,7 @@ const useStyles = () => {
     title: {
       fontSize: theme.fontSize.large, // Use dynamic font size from theme
       fontFamily: theme.font.semibold, // Use dynamic font family from theme
+      color: theme.color.black, // Use dynamic color from theme
     },
     headerFirstRow: {
       flexDirection: "row",
@@ -30,7 +31,7 @@ const useStyles = () => {
       paddingRight: 10,
     },
     searchBar: {
-      backgroundColor: theme.color.lightGrey, // Use dynamic color from theme
+      backgroundColor: theme.color.searchBar.background, // Use dynamic color from theme
       height: 36,
       width: "100%",
       borderRadius: 10,
@@ -40,9 +41,7 @@ const useStyles = () => {
       paddingLeft: 8,
       paddingRight: 8,
     },
-    button: {
-      color: "red",
-    },
+    button: {},
     buttonContainer: {
       flexDirection: "row",
       gap: 10,
@@ -59,6 +58,23 @@ const useStyles = () => {
       flex: 1,
     },
     xmark: {},
+    optionsContainer: {
+      height: 82,
+      borderRadius: 10,
+      overflow: "hidden",
+    },
+    optionButton: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.color.lightGrey,
+    },
+    selectedOption: {
+      backgroundColor: theme.color.mediumGrey,
+    },
+    optionText: {
+      fontFamily: theme.font.regular,
+    },
   });
 };
 

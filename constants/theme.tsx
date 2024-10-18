@@ -10,9 +10,14 @@ export const THEME = {
       small: 14,
     },
     color: {
-      lightGrey: "#EFEFF0",
-      darkGrey: "#848488",
+      searchBar: {
+        background: "#EFEFF0",
+        text: "#848488",
+      },
+      lightGrey: "#FBFBFB",
+      mediumGrey: "#EEEEEE",
       black: "#373737",
+      red: "#FF0000",
     },
   },
   dark: {
@@ -23,7 +28,14 @@ export const THEME = {
       small: 14,
     },
     color: {
-      lightGrey: "#EFEFF0",
+      searchBar: {
+        background: "#EFEFF0",
+        text: "#848488",
+      },
+      lightGrey: "#FBFBFB",
+      mediumGrey: "#EEEEEE",
+      black: "#373737",
+      red: "#FF0000",
     },
   },
 };
