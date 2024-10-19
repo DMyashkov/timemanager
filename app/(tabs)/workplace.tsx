@@ -1,9 +1,9 @@
 import Header from "@components/header/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 
-const WorkplaceScreen = () => {
+export default function WorkplaceScreen() {
   return (
     <View style={styles.workplaceScreen}>
       <Header
@@ -22,9 +22,10 @@ const WorkplaceScreen = () => {
         ]}
         showSearchBar={true}
       />
+      <ScrollView></ScrollView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   workplaceScreen: {
@@ -32,5 +33,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default WorkplaceScreen;

@@ -1,4 +1,3 @@
-// timemanager/app/_layout.tsx
 import { Stack } from "expo-router";
 import * as Font from "expo-font";
 import { FONTS } from "@/constants/fonts";

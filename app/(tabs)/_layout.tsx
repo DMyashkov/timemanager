@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 
-export default () => {
+export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
@@ -10,4 +10,4 @@ export default () => {
       <Tabs.Screen name="workplace" />
     </Tabs>
   );
-};
+}

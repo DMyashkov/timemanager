@@ -1,7 +1,5 @@
 import { Redirect } from "expo-router";
 
-const StartPage = () => {
+export default function StartPage() {
   return <Redirect href="/workplace" />;
-};
-
-export default StartPage;
+}
