@@ -125,6 +125,7 @@ const Header: React.FC<HeaderProps> = ({
           >
             <View style={styles.optionsContainer}>
               <TouchableOpacity
+                activeOpacity={1}
                 style={[
                   styles.optionButton,
                   selectedOption === "Activities" && styles.selectedOption,
@@ -134,6 +135,7 @@ const Header: React.FC<HeaderProps> = ({
                 <Text style={styles.optionText}>Activities</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                activeOpacity={1}
                 style={[
                   styles.optionButton,
                   selectedOption === "Projects" && styles.selectedOption,
