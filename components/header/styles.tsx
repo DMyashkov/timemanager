@@ -2,18 +2,16 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-const useStyles = () => {
+export default function useStyles() {
   const { theme } = useTheme(); // Access the current theme from context
 
   return StyleSheet.create({
     header: {
-      flex: 1,
       paddingLeft: 15,
       paddingRight: 15,
     },
     headerContentContainer: {
       flexDirection: "column",
-      justifyContent: "center",
       gap: 10,
     },
     titleContainer: {
@@ -29,7 +27,7 @@ const useStyles = () => {
       flexDirection: "row",
       paddingLeft: 10,
       paddingRight: 10,
-      marginBottom: 8,
+      marginBottom: 7,
     },
     searchBar: {
       backgroundColor: theme.color.searchBar.background, // Use dynamic color from theme
@@ -42,7 +40,6 @@ const useStyles = () => {
       paddingLeft: 8,
       paddingRight: 8,
     },
-    button: {},
     buttonContainer: {
       flexDirection: "row",
       gap: 10,
@@ -79,6 +76,4 @@ const useStyles = () => {
       fontSize: theme.fontSize.mediumSmall,
     },
   });
-};
-
-export default useStyles;
+}

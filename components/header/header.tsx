@@ -77,6 +77,7 @@ export default function Header({
     collapseHeader(); // Collapse the header after selection
     setIsExpanded(false);
   };
+  const isThereOptions = buttons.some((button) => button.id === "bars");
 
   const modifiedButtons = buttons.map((button) => {
     if (button.id === "bars") {
@@ -91,13 +92,15 @@ export default function Header({
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.header}>
-        <SafeAreaView style={styles.headerContentContainer}>
+        <SafeAreaView
+          edges={["right", "top", "left"]}
+          style={styles.headerContentContainer}
+        >
           <View style={styles.headerFirstRow}>
             <View style={styles.titleContainer}>
               <Text style={styles.title}>{title}</Text>
             </View>
             <View style={styles.buttonContainer}>
-              {/* Render buttons or search bar if needed */}
               {modifiedButtons.map((button) => (
                 <TouchableOpacity key={button.id} onPress={button.onPress}>
                   {button.iconElement}
@@ -107,43 +110,45 @@ export default function Header({
           </View>
 
           {/* Animated options container */}
-          <Animated.View
-            style={{
-              overflow: "hidden",
-              height: expandAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, styles.optionsContainer.height], // From 0 to max height
-              }),
-              marginTop: -styles.headerContentContainer.gap / 2,
-              marginBottom: expandAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-styles.headerContentContainer.gap / 2, 0], // From 0 to negative max height
-              }),
-            }}
-          >
-            <View style={styles.optionsContainer}>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[
-                  styles.optionButton,
-                  selectedOption === "Activities" && styles.selectedOption,
-                ]}
-                onPress={() => handleOptionSelect("Activities")}
-              >
-                <Text style={styles.optionText}>Activities</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={1}
-                style={[
-                  styles.optionButton,
-                  selectedOption === "Projects" && styles.selectedOption,
-                ]}
-                onPress={() => handleOptionSelect("Projects")}
-              >
-                <Text style={styles.optionText}>Projects</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+          {isThereOptions && (
+            <Animated.View
+              style={{
+                overflow: "hidden",
+                height: expandAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, styles.optionsContainer.height], // From 0 to max height
+                }),
+                marginTop: -styles.headerContentContainer.gap / 2,
+                marginBottom: expandAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-styles.headerContentContainer.gap / 2, 0], // From 0 to negative max height
+                }),
+              }}
+            >
+              <View style={styles.optionsContainer}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  style={[
+                    styles.optionButton,
+                    selectedOption === "Activities" && styles.selectedOption,
+                  ]}
+                  onPress={() => handleOptionSelect("Activities")}
+                >
+                  <Text style={styles.optionText}>Activities</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  style={[
+                    styles.optionButton,
+                    selectedOption === "Projects" && styles.selectedOption,
+                  ]}
+                  onPress={() => handleOptionSelect("Projects")}
+                >
+                  <Text style={styles.optionText}>Projects</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+          )}
 
           {showSearchBar && (
             <View style={styles.searchBar}>
