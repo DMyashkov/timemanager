@@ -59,7 +59,7 @@ export default function useStyles() {
       height: 82,
       borderRadius: 10,
       overflow: "hidden",
-      borderColor: theme.color.mediumGreyBorders,
+      borderColor: theme.color.borderLight,
       borderWidth: 0.5,
     },
     optionButton: {

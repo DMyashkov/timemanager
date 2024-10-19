@@ -11,13 +11,17 @@ export const THEME = {
       small: 14,
     },
     color: {
+      presets: {
+        green: "#97BB78",
+      },
       searchBar: {
         background: "#EFEFF0",
         text: "#848488",
       },
       lightGrey: "#FBFBFB",
       mediumGrey: "#EEEEEE",
-      mediumGreyBorders: "#EBEBEB",
+      borderLight: "#EBEBEB",
+      borderMedium: "#D3D3D3",
       black: "#373737",
     },
   },
