@@ -6,8 +6,8 @@ export const THEME = {
     font: FONTS,
     fontSize: {
       large: 25,
-      medium: 18,
-      mediumSmall: 17,
+      mediumBig: 18,
+      medium: 17,
       small: 14,
     },
     color: {
