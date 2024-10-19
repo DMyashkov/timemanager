@@ -73,7 +73,7 @@ export default function useStyles() {
     },
     optionText: {
       fontFamily: theme.font.regular,
-      fontSize: theme.fontSize.mediumSmall,
+      fontSize: theme.fontSize.medium,
     },
   });
 }

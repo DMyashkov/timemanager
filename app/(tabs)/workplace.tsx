@@ -2,8 +2,8 @@ import Header from "@components/header/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
 import { ScrollView, StyleSheet, View } from "react-native";
-import Activity from "@components/module/activity/activity";
 import { useTheme } from "@context/ThemeContext";
+import Activity from "@components/module/activity/activity";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
