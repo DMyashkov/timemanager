@@ -27,11 +27,11 @@ interface HeaderProps {
   showSearchBar?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
+export default function Header({
   title,
   buttons = [],
   showSearchBar = false,
-}) => {
+}: HeaderProps) {
   const styles = useStyles(); // Retrieve styles using the custom hook
   const { theme } = useTheme(); // Access the current theme from context
   const [searchText, setSearchText] = useState(""); // State for managing input text
@@ -87,8 +87,6 @@ const Header: React.FC<HeaderProps> = ({
     }
     return button;
   });
-
-  // Define the max height of the options container
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -164,7 +162,7 @@ const Header: React.FC<HeaderProps> = ({
                 onChangeText={setSearchText}
                 numberOfLines={1} // Ensures it only takes one line
               />
-              {searchText.length > 0 && ( // Show the clear button if there's text
+              {searchText.length > 0 && (
                 <TouchableOpacity onPress={handleClearInput}>
                   <XMark
                     height={16}
@@ -179,6 +177,4 @@ const Header: React.FC<HeaderProps> = ({
       </View>
     </TouchableWithoutFeedback>
   );
-};
-
-export default Header;
+}
