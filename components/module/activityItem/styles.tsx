@@ -10,11 +10,13 @@ export default function useStyles() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingLeft: 11,
-      paddingRight: 11,
       gap: 7,
     },
-    leftButton: {
+    leftButtonTag: {
+      aspectRatio: 23 / 26,
+      height: "100%",
+    },
+    leftButtonUnfocus: {
       aspectRatio: 1,
       height: "100%",
     },
@@ -23,12 +25,14 @@ export default function useStyles() {
       alignItems: "center",
       paddingTop: 7,
       paddingBottom: 7,
+      paddingLeft: 11,
     },
     chevronContainer: {
       justifyContent: "center",
       alignItems: "center",
       paddingTop: 11,
       paddingBottom: 11,
+      paddingRight: 11,
     },
     textContiner: {
       justifyContent: "flex-start",

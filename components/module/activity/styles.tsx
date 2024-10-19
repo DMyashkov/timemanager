@@ -5,9 +5,24 @@ export default function useStyles() {
   const { theme } = useTheme();
 
   return StyleSheet.create({
-    line: {
+    childrenContainer: {
+      flexDirection: "row",
+      backgroundColor: "green",
+      marginTop: 8,
+    },
+    lineContainer: {
       borderColor: theme.color.borderMedium,
+      backgroundColor: "red",
+      width: 35,
+      height: "100%",
+    },
+    list: {
+      flex: 1,
+      flexDirection: "column",
+      gap: 8,
+    },
+    activityItem: {
+      marginBottom: 2,
     },
   });
 }
-

@@ -22,6 +22,8 @@ interface ActivityProps {
   onExpand?: () => void;
   onFocus?: () => void;
   onUnfocus?: () => void;
+  hasChildren?: boolean;
+  style?: object;
 }
 
 export default function Activity({
@@ -32,7 +34,9 @@ export default function Activity({
   onExpand = () => {},
   onFocus = () => {},
   onUnfocus = () => {},
+  hasChildren = false,
   buttons = [],
+  style = {},
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -72,7 +76,7 @@ export default function Activity({
   }, [buttons, theme]); // Only track necessary dependencies
 
   return (
-    <View style={styles.activity}>
+    <View style={[styles.activity, style]}>
       {isFocused && (
         <View style={styles.buttonContainer}>
           {mergedButtons.map((button) => (
@@ -93,23 +97,31 @@ export default function Activity({
             style={styles.leftButtonContainer}
             onPress={onUnfocus}
           >
-            <Unfocus style={styles.leftButton} fill={activityColor} />
+            <Unfocus style={styles.leftButtonUnfocus} fill={activityColor} />
           </TouchableOpacity>
         ) : (
           <View style={styles.leftButtonContainer}>
-            <Tag style={styles.leftButton} fill={activityColor} />
+            <Tag
+              style={styles.leftButtonTag}
+              fill={activityColor}
+              width={23}
+              height={26}
+            />
           </View>
         )}
         <View style={styles.textContiner}>
           <Text style={styles.text}>{activityName}</Text>
         </View>
-        <TouchableOpacity style={styles.chevronContainer} onPress={onExpand}>
-          {isExpanded ? (
-            <ChevronDown style={styles.chevron} fill={activityColor} />
-          ) : (
-            <ChevronLeft style={styles.chevron} fill={activityColor} />
-          )}
-        </TouchableOpacity>
+
+        {hasChildren && (
+          <TouchableOpacity style={styles.chevronContainer} onPress={onExpand}>
+            {isExpanded ? (
+              <ChevronDown style={styles.chevron} fill={activityColor} />
+            ) : (
+              <ChevronLeft style={styles.chevron} fill={activityColor} />
+            )}
+          </TouchableOpacity>
+        )}
       </TouchableOpacity>
     </View>
   );

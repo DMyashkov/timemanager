@@ -43,11 +43,16 @@ type ActivityData = {
   activities?: ActivityData[];
 };
 
-export default function Activity(activityData: ActivityData = data) {
+type ActivityProps = {
+  activityData: ActivityData;
+};
+
+export default function Activity({ activityData = data }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
+  console.log(activityData);
 
   return (
     <View>
@@ -64,13 +69,19 @@ export default function Activity(activityData: ActivityData = data) {
         }}
         isExpanded={isExpanded}
         isFocused={isFocused}
+        hasChildren={!!activityData.activities?.length}
+        style={styles.activityItem}
       />
-      <View>
-        <View style={styles.line} />
-        {activityData.activities?.map((activity) => (
-          <Activity key={activity.id} {...activity} />
-        ))}
-      </View>
+      {activityData.activities?.length && isExpanded && (
+        <View style={styles.childrenContainer}>
+          <View style={styles.lineContainer} />
+          <View style={styles.list}>
+            {activityData.activities?.map((activity) => (
+              <Activity key={activity.id} activityData={activity} />
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 }
