@@ -7,14 +7,14 @@ export default function useStyles() {
   return StyleSheet.create({
     childrenContainer: {
       flexDirection: "row",
-      backgroundColor: "green",
       marginTop: 8,
     },
     lineContainer: {
       borderColor: theme.color.borderMedium,
-      backgroundColor: "red",
       width: 35,
       height: "100%",
+      flexDirection: "row",
+      justifyContent: "flex-end",
     },
     list: {
       flex: 1,
@@ -23,6 +23,14 @@ export default function useStyles() {
     },
     activityItem: {
       marginBottom: 2,
+    },
+    line: {
+      width: 5,
+      borderColor: theme.color.borderMedium,
+      borderLeftWidth: 1.5,
+      borderBottomWidth: 1.5,
+      marginRight: 5,
+      borderBottomLeftRadius: 3,
     },
   });
 }

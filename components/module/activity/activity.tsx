@@ -45,9 +45,15 @@ type ActivityData = {
 
 type ActivityProps = {
   activityData: ActivityData;
+  focusedLevel: number;
+  level: number;
 };
 
-export default function Activity({ activityData = data }: ActivityProps) {
+export default function Activity({
+  activityData = data,
+  focusedLevel = 1,
+  level = 1,
+}: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -74,10 +80,17 @@ export default function Activity({ activityData = data }: ActivityProps) {
       />
       {activityData.activities?.length && isExpanded && (
         <View style={styles.childrenContainer}>
-          <View style={styles.lineContainer} />
+          <View style={styles.lineContainer}>
+            <View style={styles.line} />
+          </View>
           <View style={styles.list}>
             {activityData.activities?.map((activity) => (
-              <Activity key={activity.id} activityData={activity} />
+              <Activity
+                key={activity.id}
+                activityData={activity}
+                focusedLevel={focusedLevel}
+                level={level + 1}
+              />
             ))}
           </View>
         </View>
