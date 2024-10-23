@@ -35,15 +35,15 @@ export default function Layout() {
 
   return (
     <ThemeProvider>
-      <Stack screenOptions={{ contentStyle: { backgroundColor: "red" } }}>
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-            contentStyle: { backgroundColor: "red" },
-          }}
-        />
-      </Stack>
+        <Stack screenOptions={{ contentStyle: { backgroundColor: "red" } }}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{
+              headerShown: false,
+              contentStyle: { backgroundColor: "red" },
+            }}
+          />
+        </Stack>
     </ThemeProvider>
   );
 }

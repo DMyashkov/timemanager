@@ -44,9 +44,9 @@ type ActivityData = {
 };
 
 type ActivityProps = {
-  activityData: ActivityData;
-  focusedLevel: number;
-  level: number;
+  activityData?: ActivityData;
+  focusedLevel?: number;
+  level?: number;
 };
 
 export default function Activity({

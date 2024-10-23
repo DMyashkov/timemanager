@@ -4,6 +4,7 @@ import Bars from "@assets/icons/bars.svg";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import Activity from "@components/module/activity/activity";
+import { FocusProvider } from "@context/FocusContext";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
@@ -29,9 +30,11 @@ export default function WorkplaceScreen() {
         ]}
         showSearchBar={true}
       />
-      <View style={styles.listView}>
-        <Activity />
-      </View>
+      <FocusProvider>
+        <View style={styles.listView}>
+          <Activity />
+        </View>
+      </FocusProvider>
     </View>
   );
 }
