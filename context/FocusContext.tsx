@@ -3,6 +3,7 @@ import { createContext, useContext, useState } from "react";
 interface FocusContextType {
   focusedLevel: number;
   setFocusedLevel: (level: number) => void;
+  focusedId?: string;
 }
 
 const FocusContext = createContext<FocusContextType | undefined>(undefined);

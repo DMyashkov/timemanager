@@ -1,8 +1,9 @@
-import { View, Text } from "react-native";
+import { View, Text, Animated, type LayoutChangeEvent } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@components/module/activityItem/activityItem";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocus } from "@/context/FocusContext";
 
 const data = {
   id: "root",
@@ -51,14 +52,32 @@ type ActivityProps = {
 
 export default function Activity({
   activityData = data,
-  focusedLevel = 1,
-  level = 1,
+  level = 0,
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  console.log(activityData);
+
+  const { focusedLevel, setFocusedLevel } = useFocus();
+  const [activityItemHeight, setActivityItemHeight] = useState<number>(0);
+  const [isActivityItemHeightCalculated, setIsActivityItemHeightCalculated] =
+    useState<boolean>(false); // State to track height calculation
+
+  const shrinkAnim = useRef(new Animated.Value(35)).current; // Original width
+  const shouldShrink = level < focusedLevel;
+  useEffect(() => {
+    console.log("Should shrink: ", shouldShrink);
+    Animated.timing(shrinkAnim, {
+      toValue: shouldShrink ? 0 : 1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(({ finished }) => {
+      if (finished) {
+        setIsActivityItemHeightCalculated(false);
+      }
+    });
+  }, [shouldShrink, shrinkAnim]);
 
   return (
     <View>
@@ -69,21 +88,45 @@ export default function Activity({
         }}
         onFocus={() => {
           setIsFocused(true);
+          setFocusedLevel(level);
+          console.log("Focused level: ", level);
+          console.log("Actual focused level: ", focusedLevel);
         }}
         onUnfocus={() => {
           setIsFocused(false);
+          setFocusedLevel(0);
         }}
         isExpanded={isExpanded}
         isFocused={isFocused}
         hasChildren={!!activityData.activities?.length}
-        style={styles.activityItem}
+        style={[styles.activityItem, {}]}
+        onLayout={(event: LayoutChangeEvent) => {
+          if (!isActivityItemHeightCalculated) {
+            setActivityItemHeight(event.nativeEvent.layout.height);
+            setIsActivityItemHeightCalculated(true);
+            console.log(
+              "Activity item height: ",
+              event.nativeEvent.layout.height,
+            );
+          }
+        }}
       />
       {activityData.activities?.length && isExpanded && (
         <View style={styles.childrenContainer}>
-          <View style={styles.lineContainer}>
-            <View style={styles.line} />
-          </View>
-          <View style={styles.list}>
+          <Animated.View
+            style={[
+              styles.lineContainer,
+              {
+                width: shrinkAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 35],
+                }),
+              },
+            ]}
+          >
+            <Animated.View style={[styles.line, { opacity: shrinkAnim }]} />
+          </Animated.View>
+          <View style={[styles.list]}>
             {activityData.activities?.map((activity) => (
               <Activity
                 key={activity.id}

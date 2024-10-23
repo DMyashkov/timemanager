@@ -50,6 +50,7 @@ export default function useStyles() {
       height: "100%",
     },
     activity: {
+      height: 40,
       borderRadius: 10,
       borderColor: theme.color.borderMedium,
       borderWidth: 0.18,
@@ -79,6 +80,12 @@ export default function useStyles() {
       fontSize: theme.fontSize.medium,
       fontFamily: theme.font.regular,
       color: theme.color.black,
+    },
+    activityInternal: {
+      flex: 1,
+      overflow: "hidden",
+      flexDirection: "column",
+      justifyContent: "flex-end",
     },
   });
 }

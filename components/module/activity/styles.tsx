@@ -19,6 +19,7 @@ export default function useStyles() {
     list: {
       flex: 1,
       flexDirection: "column",
+      justifyContent: "flex-end",
       gap: 8,
     },
     activityItem: {
