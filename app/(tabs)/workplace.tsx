@@ -64,7 +64,11 @@ export default function WorkplaceScreen() {
       />
       <FocusProvider>
         <View style={styles.listView}>
-          <ListModule addScreen={addScreen} addAnim={addAnim} />
+          <ListModule
+            addScreen={addScreen}
+            addAnim={addAnim}
+            onFocusAdditional={() => setAddScreen(false)}
+          />
         </View>
       </FocusProvider>
     </View>
