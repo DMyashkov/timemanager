@@ -1,9 +1,10 @@
-import { View, Animated } from "react-native";
+import { View, Animated, Easing } from "react-native";
 import useStyles from "./styles";
 // import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@components/module/activityItem/activityItem";
 import { useEffect, useRef, useState } from "react";
 import { useFocus } from "@/context/FocusContext";
+import AddItem from "../addItem/addItem";
 
 const data = {
   id: "root",
@@ -51,6 +52,9 @@ type ActivityProps = {
   isFirstInList?: boolean;
   isLastInList?: boolean;
   path?: string;
+  addScreen?: boolean;
+  onClickAddButton?: () => void;
+  addAnim?: Animated.Value;
 };
 
 export default function Activity({
@@ -59,6 +63,9 @@ export default function Activity({
   isFirstInList = true,
   isLastInList = true,
   path = "/root",
+  addScreen = false,
+  onClickAddButton = () => {},
+  addAnim = useRef(new Animated.Value(0)).current,
 }: ActivityProps) {
   const styles = useStyles();
   // const { theme } = useTheme();
@@ -176,6 +183,24 @@ export default function Activity({
             />
           </Animated.View>
           <View style={[styles.list]}>
+            <AddItem
+              style={{
+                marginBottom: addAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 2],
+                }),
+                marginTop: addAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-8, 0],
+                }),
+                height: addAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 40],
+                }),
+                zIndex: 2,
+              }}
+              onClickAddButton={onClickAddButton}
+            />
             {activityData.activities?.map((activity, index, array) => (
               <Activity
                 key={activity.id}
@@ -184,6 +209,9 @@ export default function Activity({
                 isFirstInList={index === 0}
                 isLastInList={index === array.length - 1}
                 path={`${path}/${activity.id}`}
+                addScreen={addScreen}
+                onClickAddButton={onClickAddButton}
+                addAnim={addAnim}
               />
             ))}
           </View>

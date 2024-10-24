@@ -19,6 +19,7 @@ export const THEME = {
         text: "#848488",
       },
       lightGrey: "#FBFBFB",
+      red: "#FF4E4E",
       mediumGrey: "#EEEEEE",
       borderLight: "#EBEBEB",
       borderMedium: "#D3D3D3",

@@ -1,0 +1,25 @@
+import { View, Text, TouchableOpacity, Animated } from "react-native";
+import useStyles from "./styles";
+import { useTheme } from "@context/ThemeContext";
+
+// Add props
+interface AddItemProps {
+  style?: object;
+  onClickAddButton?: () => void;
+}
+
+export default function AddItem({
+  style = {},
+  onClickAddButton,
+}: AddItemProps) {
+  const styles = useStyles();
+  const { theme } = useTheme();
+
+  return (
+    <Animated.View style={[styles.additemOuter, style]}>
+      <TouchableOpacity style={[styles.additem]} onPress={onClickAddButton}>
+        <Text style={styles.addtext}>Add</Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
