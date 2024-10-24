@@ -3,7 +3,7 @@ import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
 import { StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
-import Activity from "@components/module/activity/activity";
+import Activity from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
 
 export default function WorkplaceScreen() {
