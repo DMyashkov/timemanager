@@ -33,5 +33,8 @@ export default function useStyles() {
       marginRight: 5,
       borderBottomLeftRadius: 3,
     },
+    activity: {
+      // marginTop: 8,
+    },
   });
 }

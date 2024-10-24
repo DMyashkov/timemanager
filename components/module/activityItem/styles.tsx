@@ -64,7 +64,7 @@ export default function useStyles() {
       shadowRadius: 13,
     },
     buttonContainer: {
-      height: 41.5,
+      height: 42,
       flexDirection: "row",
       borderTopEndRadius: 10,
       borderTopStartRadius: 10,

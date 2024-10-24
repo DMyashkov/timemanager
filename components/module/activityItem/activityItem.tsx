@@ -83,26 +83,12 @@ export default function Activity({
     return allButtons;
   }, [buttons, theme]); // Only track necessary dependencies
 
-  const focusAnim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-  }, [isFocused, focusAnim]);
 
   return (
     <Animated.View
       style={[
         styles.activity,
         style,
-        {
-          height: focusAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [40, 80],
-          }),
-        },
       ]}
       onLayout={onLayout}
     >

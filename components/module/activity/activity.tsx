@@ -46,41 +46,71 @@ type ActivityData = {
 
 type ActivityProps = {
   activityData?: ActivityData;
-  focusedLevel?: number;
   level?: number;
+  style?: object;
+  isFirstInList?: boolean;
+  isLastInList?: boolean;
+  path?: string;
 };
 
 export default function Activity({
   activityData = data,
   level = 0,
+  isFirstInList = true,
+  isLastInList = true,
+  path = "/root",
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const { focusedLevel, setFocusedLevel } = useFocus();
-  const [activityItemHeight, setActivityItemHeight] = useState<number>(0);
-  const [isActivityItemHeightCalculated, setIsActivityItemHeightCalculated] =
-    useState<boolean>(false); // State to track height calculation
 
-  const shrinkAnim = useRef(new Animated.Value(35)).current; // Original width
+  const shrinkAnim = useRef(new Animated.Value(0)).current; // Original width
   const shouldShrink = level < focusedLevel;
   useEffect(() => {
     console.log("Should shrink: ", shouldShrink);
     Animated.timing(shrinkAnim, {
-      toValue: shouldShrink ? 0 : 1,
+      toValue: shouldShrink ? 1 : 0,
       duration: 300,
       useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (finished) {
-        setIsActivityItemHeightCalculated(false);
-      }
-    });
+    }).start();
   }, [shouldShrink, shrinkAnim]);
 
+  const focusAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(focusAnim, {
+      toValue: isFocused ? 1 : 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [isFocused, focusAnim]);
+
+  const combinedHeightAnim = Animated.multiply(
+    shrinkAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0],
+    }),
+    focusAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [40, 82],
+    }),
+  );
+
   return (
-    <View>
+    <Animated.View
+      style={{
+        marginTop: shrinkAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, isFirstInList ? 0 : -4],
+        }),
+        marginBottom: shrinkAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, isLastInList ? 0 : -4],
+        }),
+      }}
+    >
       <ActivityItem
         activityName={activityData.title}
         onExpand={() => {
@@ -99,45 +129,66 @@ export default function Activity({
         isExpanded={isExpanded}
         isFocused={isFocused}
         hasChildren={!!activityData.activities?.length}
-        style={[styles.activityItem, {}]}
-        onLayout={(event: LayoutChangeEvent) => {
-          if (!isActivityItemHeightCalculated) {
-            setActivityItemHeight(event.nativeEvent.layout.height);
-            setIsActivityItemHeightCalculated(true);
-            console.log(
-              "Activity item height: ",
-              event.nativeEvent.layout.height,
-            );
-          }
-        }}
+        style={[
+          styles.activityItem,
+          {
+            height: combinedHeightAnim,
+            marginBottom: shrinkAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [2, 0],
+            }),
+          },
+        ]}
       />
       {activityData.activities?.length && isExpanded && (
-        <View style={styles.childrenContainer}>
+        <Animated.View
+          style={[
+            styles.childrenContainer,
+            {
+              marginTop: shrinkAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [8, 0],
+              }),
+            },
+          ]}
+        >
           <Animated.View
             style={[
               styles.lineContainer,
               {
                 width: shrinkAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [0, 35],
+                  outputRange: [35, 0],
                 }),
               },
             ]}
           >
-            <Animated.View style={[styles.line, { opacity: shrinkAnim }]} />
+            <Animated.View
+              style={[
+                styles.line,
+                {
+                  opacity: shrinkAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 0],
+                  }),
+                },
+              ]}
+            />
           </Animated.View>
           <View style={[styles.list]}>
-            {activityData.activities?.map((activity) => (
+            {activityData.activities?.map((activity, index, array) => (
               <Activity
                 key={activity.id}
                 activityData={activity}
-                focusedLevel={focusedLevel}
                 level={level + 1}
+                isFirstInList={index === 0}
+                isLastInList={index === array.length - 1}
+                path={`$(path)/${activity.id}`}
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
       )}
-    </View>
+    </Animated.View>
   );
 }
