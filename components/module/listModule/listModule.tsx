@@ -112,7 +112,7 @@ export default function Activity({
 
   const addShrinkAnim = Animated.multiply(
     shrinkAnim.interpolate({
-      inputRange: [0, 0.0001],
+      inputRange: [0, 1],
       outputRange: [1, 0],
       extrapolate: "clamp",
     }),
