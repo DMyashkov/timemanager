@@ -7,7 +7,7 @@ import { useFocus } from "@/context/FocusContext";
 
 const data = {
   id: "root",
-  title: "Main Activity",
+  title: "Root",
   activities: [
     {
       id: "activity-1",
@@ -61,16 +61,17 @@ export default function Activity({
   path = "/root",
 }: ActivityProps) {
   const styles = useStyles();
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  const { focusedLevel, setFocusedLevel } = useFocus();
+  // const { focusedLevel, setFocusedLevel } = useFocus();
+  const { focusedPath, setFocusedPath, popFocusStack } = useFocus();
+  const isFocused = path === focusedPath;
+  const isRoot = path === "/root";
 
   const shrinkAnim = useRef(new Animated.Value(0)).current; // Original width
-  const shouldShrink = level < focusedLevel;
+  const shouldShrink = !path.startsWith(focusedPath);
   useEffect(() => {
-    console.log("Should shrink: ", shouldShrink);
     Animated.timing(shrinkAnim, {
       toValue: shouldShrink ? 1 : 0,
       duration: 300,
@@ -111,35 +112,33 @@ export default function Activity({
         }),
       }}
     >
-      <ActivityItem
-        activityName={activityData.title}
-        onExpand={() => {
-          setIsExpanded(!isExpanded);
-        }}
-        onFocus={() => {
-          setIsFocused(true);
-          setFocusedLevel(level);
-          console.log("Focused level: ", level);
-          console.log("Actual focused level: ", focusedLevel);
-        }}
-        onUnfocus={() => {
-          setIsFocused(false);
-          setFocusedLevel(0);
-        }}
-        isExpanded={isExpanded}
-        isFocused={isFocused}
-        hasChildren={!!activityData.activities?.length}
-        style={[
-          styles.activityItem,
-          {
-            height: combinedHeightAnim,
-            marginBottom: shrinkAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [2, 0],
-            }),
-          },
-        ]}
-      />
+      {level !== 0 && (
+        <ActivityItem
+          activityName={activityData.title}
+          onExpand={() => {
+            setIsExpanded(!isExpanded);
+          }}
+          onFocus={() => {
+            setFocusedPath(path);
+          }}
+          onUnfocus={() => {
+            popFocusStack();
+          }}
+          isExpanded={isExpanded}
+          isFocused={isFocused}
+          hasChildren={!!activityData.activities?.length}
+          style={[
+            styles.activityItem,
+            {
+              height: combinedHeightAnim,
+              marginBottom: shrinkAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [2, 0],
+              }),
+            },
+          ]}
+        />
+      )}
       {activityData.activities?.length && isExpanded && (
         <Animated.View
           style={[
@@ -147,7 +146,7 @@ export default function Activity({
             {
               marginTop: shrinkAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [8, 0],
+                outputRange: [!isRoot ? 8 : 0, 0],
               }),
             },
           ]}
@@ -158,7 +157,7 @@ export default function Activity({
               {
                 width: shrinkAnim.interpolate({
                   inputRange: [0, 1],
-                  outputRange: [35, 0],
+                  outputRange: [!isRoot ? 35 : 0, 0],
                 }),
               },
             ]}
@@ -169,7 +168,7 @@ export default function Activity({
                 {
                   opacity: shrinkAnim.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [1, 0],
+                    outputRange: [!isRoot ? 1 : 0, 0],
                   }),
                 },
               ]}
@@ -183,7 +182,7 @@ export default function Activity({
                 level={level + 1}
                 isFirstInList={index === 0}
                 isLastInList={index === array.length - 1}
-                path={`$(path)/${activity.id}`}
+                path={`${path}/${activity.id}`}
               />
             ))}
           </View>
