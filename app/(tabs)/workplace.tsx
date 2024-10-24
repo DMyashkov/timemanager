@@ -1,7 +1,7 @@
 import Header from "@components/header/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import Activity from "@components/module/activity/activity";
 import { FocusProvider } from "@context/FocusContext";

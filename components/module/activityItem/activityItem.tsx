@@ -2,7 +2,7 @@ import {
   View,
   Text,
   TouchableOpacity,
-  LayoutChangeEvent,
+  type LayoutChangeEvent,
   Animated,
 } from "react-native";
 import useStyles from "./styles";
@@ -83,15 +83,8 @@ export default function Activity({
     return allButtons;
   }, [buttons, theme]); // Only track necessary dependencies
 
-
   return (
-    <Animated.View
-      style={[
-        styles.activity,
-        style,
-      ]}
-      onLayout={onLayout}
-    >
+    <Animated.View style={[styles.activity, style]} onLayout={onLayout}>
       <View style={styles.activityInternal}>
         <View style={styles.buttonContainer}>
           {mergedButtons.map((button) => (

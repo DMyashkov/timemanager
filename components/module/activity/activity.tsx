@@ -1,6 +1,6 @@
-import { View, Text, Animated, type LayoutChangeEvent } from "react-native";
+import { View, Animated } from "react-native";
 import useStyles from "./styles";
-import { useTheme } from "@context/ThemeContext";
+// import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@components/module/activityItem/activityItem";
 import { useEffect, useRef, useState } from "react";
 import { useFocus } from "@/context/FocusContext";
@@ -62,7 +62,6 @@ export default function Activity({
 }: ActivityProps) {
   const styles = useStyles();
   // const { theme } = useTheme();
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   // const { focusedLevel, setFocusedLevel } = useFocus();
   const { focusedPath, setFocusedPath, popFocusStack } = useFocus();
@@ -71,6 +70,8 @@ export default function Activity({
 
   const shrinkAnim = useRef(new Animated.Value(0)).current; // Original width
   const shouldShrink = !path.startsWith(focusedPath);
+  const [isExpanded, setIsExpanded] = useState<boolean>(isRoot);
+
   useEffect(() => {
     Animated.timing(shrinkAnim, {
       toValue: shouldShrink ? 1 : 0,
