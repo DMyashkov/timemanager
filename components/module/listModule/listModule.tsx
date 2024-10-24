@@ -1,4 +1,5 @@
-import { View, Animated, Easing } from "react-native";
+import { View, Easing, Animated } from "react-native";
+
 import useStyles from "./styles";
 // import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@components/module/activityItem/activityItem";
@@ -55,6 +56,7 @@ type ActivityProps = {
   addScreen?: boolean;
   onClickAddButton?: () => void;
   addAnim?: Animated.Value;
+  onFocusAdditional?: () => void;
 };
 
 export default function Activity({
@@ -66,6 +68,7 @@ export default function Activity({
   addScreen = false,
   onClickAddButton = () => {},
   addAnim = useRef(new Animated.Value(0)).current,
+  onFocusAdditional = () => {},
 }: ActivityProps) {
   const styles = useStyles();
   // const { theme } = useTheme();
@@ -107,6 +110,18 @@ export default function Activity({
     }),
   );
 
+  const addShrinkAnim = Animated.multiply(
+    shrinkAnim.interpolate({
+      inputRange: [0, 0.0001],
+      outputRange: [1, 0],
+      extrapolate: "clamp",
+    }),
+    addAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+    }),
+  );
+
   return (
     <Animated.View
       style={{
@@ -128,9 +143,11 @@ export default function Activity({
           }}
           onFocus={() => {
             setFocusedPath(path);
+            onFocusAdditional();
           }}
           onUnfocus={() => {
             popFocusStack();
+            onFocusAdditional();
           }}
           isExpanded={isExpanded}
           isFocused={isFocused}
@@ -185,18 +202,24 @@ export default function Activity({
           <View style={[styles.list]}>
             <AddItem
               style={{
-                marginBottom: addAnim.interpolate({
+                marginBottom: addShrinkAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: [0, 2],
                 }),
-                marginTop: addAnim.interpolate({
+                marginTop: addShrinkAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: [-8, 0],
                 }),
-                height: addAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 40],
-                }),
+                height: Animated.multiply(
+                  shrinkAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 0],
+                  }),
+                  addAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 40],
+                  }),
+                ),
                 zIndex: 2,
               }}
               onClickAddButton={onClickAddButton}
@@ -212,6 +235,7 @@ export default function Activity({
                 addScreen={addScreen}
                 onClickAddButton={onClickAddButton}
                 addAnim={addAnim}
+                onFocusAdditional={onFocusAdditional}
               />
             ))}
           </View>
