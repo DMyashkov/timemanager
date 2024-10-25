@@ -140,9 +140,16 @@ export default function Activity({
       opacity: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 1 : 0, 0]),
     })),
     addItem: useAnimatedStyle(() => {
+      const addShrinkAnimStrict =
+        interpolate(
+          shrinkAnim.value,
+          [0, 1],
+          [shrinkAnim.value > 0 ? 0 : 1, 0],
+        ) * interpolate(addAnim.value, [0, 1], [0, 1]);
       const addShrinkAnim =
         interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
         interpolate(addAnim.value, [0, 1], [0, 1]);
+
       return {
         marginBottom: interpolate(
           addShrinkAnim,
@@ -154,7 +161,11 @@ export default function Activity({
           [0, 1],
           [-styles.childrenContainer.marginTop, 0],
         ),
-        height: interpolate(addShrinkAnim, [0, 1], [0, 40]),
+        height: interpolate(
+          shouldShrink === false ? addShrinkAnimStrict : addShrinkAnim,
+          [0, 1],
+          [0, 40],
+        ),
       };
     }),
   };
