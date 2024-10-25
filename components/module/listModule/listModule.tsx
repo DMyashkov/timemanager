@@ -104,25 +104,37 @@ export default function Activity({
       height:
         interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
         interpolate(focusAnim.value, [0, 1], [40, 82]),
-      marginBottom: interpolate(shrinkAnim.value, [0, 1], [2, 0]),
+      marginBottom: interpolate(
+        shrinkAnim.value,
+        [0, 1],
+        [styles.activityItem.marginBottom, 0],
+      ),
     })),
     listModule: useAnimatedStyle(() => ({
       marginTop: interpolate(
         shrinkAnim.value,
         [0, 1],
-        [0, isFirstInList ? 0 : -4],
+        [0, isFirstInList ? 0 : -styles.list.gap / 2],
       ),
       marginBottom: interpolate(
         shrinkAnim.value,
         [0, 1],
-        [0, isLastInList ? 0 : -4],
+        [0, isLastInList ? 0 : -styles.list.gap / 2],
       ),
     })),
     childrenContainer: useAnimatedStyle(() => ({
-      marginTop: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 8 : 0, 0]),
+      marginTop: interpolate(
+        shrinkAnim.value,
+        [0, 1],
+        [!isRoot ? styles.childrenContainer.marginTop : 0, 0],
+      ),
     })),
     lineContainer: useAnimatedStyle(() => ({
-      width: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 35 : 0, 0]),
+      width: interpolate(
+        shrinkAnim.value,
+        [0, 1],
+        [!isRoot ? styles.lineContainer.width : 0, 0],
+      ),
     })),
     line: useAnimatedStyle(() => ({
       opacity: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 1 : 0, 0]),
@@ -132,8 +144,16 @@ export default function Activity({
         interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
         interpolate(addAnim.value, [0, 1], [0, 1]);
       return {
-        marginBottom: interpolate(addShrinkAnim, [0, 1], [0, 2]),
-        marginTop: interpolate(addShrinkAnim, [0, 1], [-8, 0]),
+        marginBottom: interpolate(
+          addShrinkAnim,
+          [0, 1],
+          [0, styles.activityItem.marginBottom],
+        ),
+        marginTop: interpolate(
+          addShrinkAnim,
+          [0, 1],
+          [-styles.childrenContainer.marginTop, 0],
+        ),
         height: interpolate(addShrinkAnim, [0, 1], [0, 40]),
       };
     }),
