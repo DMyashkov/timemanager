@@ -1,24 +1,35 @@
 import Header from "@components/header/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { Animated, Easing, StyleSheet, View } from "react-native";
+import { Easing, StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import ListModule from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
 import { useEffect, useRef, useState } from "react";
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
   const [addScreen, setAddScreen] = useState<boolean>(false);
-  const addAnim = useRef(new Animated.Value(0)).current;
+  const addAnim = useSharedValue(0);
   useEffect(() => {
-    Animated.timing(addAnim, {
-      toValue: addScreen ? 1 : 0,
-      duration: 250,
-      easing: Easing.out(Easing.ease),
-      useNativeDriver: false,
-    }).start();
+    addAnim.value = withTiming(Number(addScreen), { duration: 250 });
   }, [addAnim, addScreen]);
+
+  const animStyles = {
+    plusContainer: useAnimatedStyle(() => ({
+      transform: [
+        {
+          rotate: `${interpolate(addAnim.value, [0, 1], [0, 45])}deg`,
+        },
+      ],
+    })),
+  };
 
   return (
     <View style={styles.workplaceScreen}>
@@ -36,22 +47,7 @@ export default function WorkplaceScreen() {
           {
             id: "plus",
             iconElement: (
-              <Animated.View
-                style={{
-                  transform: [
-                    {
-                      // rotate: `${addAnim.interpolate({
-                      //   inputRange: [0, 1],
-                      //   outputRange: [47, 45],
-                      // })}deg`,
-                      rotate: addAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0deg", "45deg"], // Ensure degrees are strings
-                      }),
-                    },
-                  ],
-                }}
-              >
+              <Animated.View style={[animStyles.plusContainer]}>
                 <Plus height={25} width={23} fill={theme.color.black} />
               </Animated.View>
             ),

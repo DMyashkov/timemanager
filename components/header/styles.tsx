@@ -4,6 +4,7 @@ import { useTheme } from "@context/ThemeContext";
 
 export default function useStyles() {
   const { theme } = useTheme(); // Access the current theme from context
+  const headerContentContainerGap = 10;
 
   return StyleSheet.create({
     header: {
@@ -12,7 +13,7 @@ export default function useStyles() {
     },
     headerContentContainer: {
       flexDirection: "column",
-      gap: 10,
+      gap: headerContentContainerGap,
     },
     titleContainer: {
       flex: 1,
@@ -74,6 +75,10 @@ export default function useStyles() {
     optionText: {
       fontFamily: theme.font.regular,
       fontSize: theme.fontSize.medium,
+    },
+    optionsContainerOuter: {
+      overflow: "hidden",
+      marginTop: -headerContentContainerGap / 2,
     },
   });
 }

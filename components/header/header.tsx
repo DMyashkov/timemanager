@@ -5,15 +5,20 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
-  Animated, // Import Animated from React Native
   Easing,
 } from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useStyles from "./styles";
 import MagnifyingGlass from "@assets/icons/magnifying-glass.svg";
 import XMark from "@assets/icons/xmark.svg";
 import { useTheme } from "@context/ThemeContext";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Button {
   id: string; // Added id for unique key
@@ -39,42 +44,36 @@ export default function Header({
   const [selectedOption, setSelectedOption] = useState("Activities"); // "Activities" or "Projects"
 
   // Initialize the animated value
-  const expandAnim = useRef(new Animated.Value(0)).current;
+  const expandAnim = useSharedValue(0);
+  const animStyles = {
+    optionsContainerOuter: useAnimatedStyle(() => ({
+      height: interpolate(
+        expandAnim.value,
+        [0, 1],
+        [0, styles.optionsContainer.height],
+      ),
+      marginBottom: interpolate(
+        expandAnim.value,
+        [0, 1],
+        [-styles.headerContentContainer.gap / 2, 0],
+      ),
+    })),
+  };
 
   const handleClearInput = () => {
     setSearchText(""); // Clear the input text
   };
-
-  const expandHeader = () => {
-    Animated.timing(expandAnim, {
-      toValue: 1,
-      duration: 200,
-      easing: Easing.linear,
-      useNativeDriver: false, // Must be false when animating height
-    }).start();
-  };
-
-  const collapseHeader = () => {
-    Animated.timing(expandAnim, {
-      toValue: 0,
-      duration: 200,
-      easing: Easing.linear,
-      useNativeDriver: false,
-    }).start();
-  };
+  useEffect(() => {
+    // toggle options
+    expandAnim.value = withTiming(Number(!isExpanded), { duration: 250 });
+  }, [isExpanded, expandAnim]);
 
   const handleBarsPress = () => {
-    if (!isExpanded) {
-      expandHeader();
-    } else {
-      collapseHeader();
-    }
     setIsExpanded(!isExpanded);
   };
 
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option);
-    collapseHeader(); // Collapse the header after selection
     setIsExpanded(false);
   };
   const isThereOptions = buttons.some((button) => button.id === "bars");
@@ -112,18 +111,10 @@ export default function Header({
           {/* Animated options container */}
           {isThereOptions && (
             <Animated.View
-              style={{
-                overflow: "hidden",
-                height: expandAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, styles.optionsContainer.height], // From 0 to max height
-                }),
-                marginTop: -styles.headerContentContainer.gap / 2,
-                marginBottom: expandAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-styles.headerContentContainer.gap / 2, 0], // From 0 to negative max height
-                }),
-              }}
+              style={[
+                styles.optionsContainerOuter,
+                animStyles.optionsContainerOuter,
+              ]}
             >
               <View style={styles.optionsContainer}>
                 <TouchableOpacity

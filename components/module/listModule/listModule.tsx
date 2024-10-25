@@ -1,4 +1,10 @@
-import { View, Easing, Animated } from "react-native";
+import { View, Easing } from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 import useStyles from "./styles";
 // import { useTheme } from "@context/ThemeContext";
@@ -6,6 +12,8 @@ import ActivityItem from "@components/module/activityItem/activityItem";
 import { useEffect, useRef, useState } from "react";
 import { useFocus } from "@/context/FocusContext";
 import AddItem from "../addItem/addItem";
+import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
+import { useLocalSearchParams } from "expo-router";
 
 const data = {
   id: "root",
@@ -55,7 +63,7 @@ type ActivityProps = {
   path?: string;
   addScreen?: boolean;
   onClickAddButton?: () => void;
-  addAnim?: Animated.Value;
+  addAnim?: SharedValue<number>;
   onFocusAdditional?: () => void;
 };
 
@@ -67,7 +75,7 @@ export default function Activity({
   path = "/root",
   addScreen = false,
   onClickAddButton = () => {},
-  addAnim = useRef(new Animated.Value(0)).current,
+  addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
 }: ActivityProps) {
   const styles = useStyles();
@@ -78,63 +86,61 @@ export default function Activity({
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 
-  const shrinkAnim = useRef(new Animated.Value(0)).current; // Original width
+  const shrinkAnim = useSharedValue(0);
   const shouldShrink = !path.startsWith(focusedPath);
   const [isExpanded, setIsExpanded] = useState<boolean>(isRoot);
 
   useEffect(() => {
-    Animated.timing(shrinkAnim, {
-      toValue: shouldShrink ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
   }, [shouldShrink, shrinkAnim]);
 
-  const focusAnim = useRef(new Animated.Value(0)).current;
+  const focusAnim = useSharedValue(0);
   useEffect(() => {
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+    focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
   }, [isFocused, focusAnim]);
 
-  const combinedHeightAnim = Animated.multiply(
-    shrinkAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 0],
+  const animStyles = {
+    activityItem: useAnimatedStyle(() => ({
+      height:
+        interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
+        interpolate(focusAnim.value, [0, 1], [40, 82]),
+      marginBottom: interpolate(shrinkAnim.value, [0, 1], [2, 0]),
+    })),
+    listModule: useAnimatedStyle(() => ({
+      marginTop: interpolate(
+        shrinkAnim.value,
+        [0, 1],
+        [0, isFirstInList ? 0 : -4],
+      ),
+      marginBottom: interpolate(
+        shrinkAnim.value,
+        [0, 1],
+        [0, isLastInList ? 0 : -4],
+      ),
+    })),
+    childrenContainer: useAnimatedStyle(() => ({
+      marginTop: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 8 : 0, 0]),
+    })),
+    lineContainer: useAnimatedStyle(() => ({
+      width: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 35 : 0, 0]),
+    })),
+    line: useAnimatedStyle(() => ({
+      opacity: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 1 : 0, 0]),
+    })),
+    addItem: useAnimatedStyle(() => {
+      const addShrinkAnim =
+        interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
+        interpolate(addAnim.value, [0, 1], [0, 1]);
+      return {
+        marginBottom: interpolate(addShrinkAnim, [0, 1], [0, 2]),
+        marginTop: interpolate(addShrinkAnim, [0, 1], [-8, 0]),
+        height: interpolate(addShrinkAnim, [0, 1], [0, 40]),
+      };
     }),
-    focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [40, 82],
-    }),
-  );
-
-  const addShrinkAnim = Animated.multiply(
-    shrinkAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 0],
-      extrapolate: "clamp",
-    }),
-    addAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 1],
-    }),
-  );
+  };
 
   return (
-    <Animated.View
-      style={{
-        marginTop: shrinkAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, isFirstInList ? 0 : -4],
-        }),
-        marginBottom: shrinkAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [0, isLastInList ? 0 : -4],
-        }),
-      }}
-    >
+    <Animated.View style={animStyles.listModule}>
       {level !== 0 && (
         <ActivityItem
           activityName={activityData.title}
@@ -152,77 +158,22 @@ export default function Activity({
           isExpanded={isExpanded}
           isFocused={isFocused}
           hasChildren={!!activityData.activities?.length}
-          style={[
-            styles.activityItem,
-            {
-              height: combinedHeightAnim,
-              marginBottom: shrinkAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [2, 0],
-              }),
-            },
-          ]}
+          style={[styles.activityItem, animStyles.activityItem]}
         />
       )}
       {activityData.activities?.length && isExpanded && (
         <Animated.View
-          style={[
-            styles.childrenContainer,
-            {
-              marginTop: shrinkAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [!isRoot ? 8 : 0, 0],
-              }),
-            },
-          ]}
+          style={[styles.childrenContainer, animStyles.childrenContainer]}
         >
           <Animated.View
-            style={[
-              styles.lineContainer,
-              {
-                width: shrinkAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [!isRoot ? 35 : 0, 0],
-                }),
-              },
-            ]}
+            style={[styles.lineContainer, animStyles.lineContainer]}
           >
-            <Animated.View
-              style={[
-                styles.line,
-                {
-                  opacity: shrinkAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [!isRoot ? 1 : 0, 0],
-                  }),
-                },
-              ]}
-            />
+            <Animated.View style={[styles.line, animStyles.line]} />
           </Animated.View>
           <View style={[styles.list]}>
             <AddItem
-              style={{
-                marginBottom: addShrinkAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 2],
-                }),
-                marginTop: addShrinkAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-8, 0],
-                }),
-                height: Animated.multiply(
-                  shrinkAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 0],
-                  }),
-                  addAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 40],
-                  }),
-                ),
-                zIndex: 2,
-              }}
               onClickAddButton={onClickAddButton}
+              style={animStyles.addItem}
             />
             {activityData.activities?.map((activity, index, array) => (
               <Activity

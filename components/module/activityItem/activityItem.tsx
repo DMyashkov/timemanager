@@ -3,15 +3,15 @@ import {
   Text,
   TouchableOpacity,
   type LayoutChangeEvent,
-  Animated,
 } from "react-native";
+import Animated from "react-native-reanimated";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Tag from "@assets/icons/tag.svg";
 import ChevronDown from "@assets/icons/chevron-down.svg";
 import ChevronLeft from "@assets/icons/chevron-left.svg";
 import Unfocus from "@assets/icons/unfocus.svg";
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 
 export interface ButtonActivityInfo {
   text: string;

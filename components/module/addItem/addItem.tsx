@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity, Animated } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
+import Animated from "react-native-reanimated";
 import useStyles from "./styles";
-import { useTheme } from "@context/ThemeContext";
+// import { useTheme } from "@context/ThemeContext";
 
 // Add props
 interface AddItemProps {
@@ -13,7 +14,7 @@ export default function AddItem({
   onClickAddButton,
 }: AddItemProps) {
   const styles = useStyles();
-  const { theme } = useTheme();
+  // const { theme } = useTheme();
 
   return (
     <Animated.View style={[styles.additemOuter, style]}>
