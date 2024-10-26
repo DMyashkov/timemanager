@@ -22,12 +22,6 @@ export default function Test() {
         ? shrinkAnim.value
         : interpolate(addAnim.value, [0, 1], [0, 50]);
 
-      // Debug statements to monitor the value of `marginTop`
-      console.log("isExpanded", isExpanded ? 1 : 0);
-      console.log("shrinkAnim value", shrinkAnim.value);
-      console.log("addAnim value", addAnim.value);
-      console.log("shouldThereBeMarginTop", shouldThereBeMarginTop);
-
       return {
         marginTop: shouldThereBeMarginTop,
       };

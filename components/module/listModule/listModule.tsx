@@ -124,21 +124,6 @@ export default function Activity({
       ),
     })),
     childrenContainer: useAnimatedStyle(() => {
-      console.log(
-        "name",
-        activityData.title,
-        "isExpanded",
-        isExpanded.value,
-
-        "addAnim",
-        addAnim.value,
-        "shrinkAnim",
-        shrinkAnim.value,
-        "isThereNotAMargin",
-        isExpanded.value
-          ? shrinkAnim.value
-          : shrinkAnim.value * interpolate(addAnim.value, [0, 1], [0, 1]),
-      );
       const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
         marginTop: interpolate(
