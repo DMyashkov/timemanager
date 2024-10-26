@@ -90,6 +90,8 @@ export default function Activity({
   const shouldShrink = !path.startsWith(focusedPath);
   const isExpanded = useSharedValue(isRoot);
   const [expandedState, setExpandedState] = useState(isRoot);
+  const [renderTrigger, setRenderTrigger] = useState(false);
+  const triggerRerender = () => setRenderTrigger((prev) => !prev);
 
   useEffect(() => {
     shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
@@ -174,14 +176,17 @@ export default function Activity({
     }),
   };
 
+  useEffect(() => {
+    isExpanded.value = expandedState;
+  }, [expandedState, isExpanded]);
+
   return (
     <Animated.View style={animStyles.listModule}>
       {level !== 0 && (
         <ActivityItem
           activityName={activityData.title}
           onExpand={() => {
-            isExpanded.value = !isExpanded.value;
-            setExpandedState(!expandedState);
+            setExpandedState((prev) => !prev);
           }}
           onFocus={() => {
             setFocusedPath(path);
