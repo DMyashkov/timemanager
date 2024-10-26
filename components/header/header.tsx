@@ -40,7 +40,7 @@ export default function Header({
   const styles = useStyles(); // Retrieve styles using the custom hook
   const { theme } = useTheme(); // Access the current theme from context
   const [searchText, setSearchText] = useState(""); // State for managing input text
-  const [isExpanded, setIsExpanded] = useState(false); // State for header expansion
+  const [isExpanded, setIsExpanded] = useState(true); // State for header expansion
   const [selectedOption, setSelectedOption] = useState("Activities"); // "Activities" or "Projects"
 
   // Initialize the animated value
