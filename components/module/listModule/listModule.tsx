@@ -88,7 +88,8 @@ export default function Activity({
 
   const shrinkAnim = useSharedValue(0);
   const shouldShrink = !path.startsWith(focusedPath);
-  const [isExpanded, setIsExpanded] = useState<boolean>(isRoot);
+  const isExpanded = useSharedValue(isRoot);
+  const [expandedState, setExpandedState] = useState(isRoot);
 
   useEffect(() => {
     shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
@@ -176,7 +177,8 @@ export default function Activity({
         <ActivityItem
           activityName={activityData.title}
           onExpand={() => {
-            setIsExpanded(!isExpanded);
+            isExpanded.value = !isExpanded.value;
+            setExpandedState(!expandedState);
           }}
           onFocus={() => {
             setFocusedPath(path);
@@ -186,13 +188,13 @@ export default function Activity({
             popFocusStack();
             onFocusAdditional();
           }}
-          isExpanded={isExpanded}
+          isExpanded={expandedState}
           isFocused={isFocused}
           hasChildren={!!activityData.activities?.length}
           style={[styles.activityItem, animStyles.activityItem]}
         />
       )}
-      {activityData.activities?.length && isExpanded && (
+      {expandedState && (
         <Animated.View
           style={[styles.childrenContainer, animStyles.childrenContainer]}
         >
