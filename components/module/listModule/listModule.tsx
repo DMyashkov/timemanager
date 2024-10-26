@@ -123,13 +123,31 @@ export default function Activity({
         [0, isLastInList ? 0 : -styles.list.gap / 2],
       ),
     })),
-    childrenContainer: useAnimatedStyle(() => ({
-      marginTop: interpolate(
+    childrenContainer: useAnimatedStyle(() => {
+      console.log(
+        "name",
+        activityData.title,
+        "isExpanded",
+        isExpanded.value,
+
+        "addAnim",
+        addAnim.value,
+        "shrinkAnim",
         shrinkAnim.value,
-        [0, 1],
-        [!isRoot ? styles.childrenContainer.marginTop : 0, 0],
-      ),
-    })),
+        "isThereNotAMargin",
+        isExpanded.value
+          ? shrinkAnim.value
+          : shrinkAnim.value * interpolate(addAnim.value, [0, 1], [0, 1]),
+      );
+      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
+      return {
+        marginTop: interpolate(
+          isExpanded.value ? isParentVisible : isParentVisible * addAnim.value,
+          [0, 1],
+          [0, !isRoot ? styles.childrenContainer.marginTop : 0],
+        ),
+      };
+    }),
     lineContainer: useAnimatedStyle(() => ({
       width: interpolate(
         shrinkAnim.value,
@@ -194,21 +212,19 @@ export default function Activity({
           style={[styles.activityItem, animStyles.activityItem]}
         />
       )}
-      {expandedState && (
-        <Animated.View
-          style={[styles.childrenContainer, animStyles.childrenContainer]}
-        >
-          <Animated.View
-            style={[styles.lineContainer, animStyles.lineContainer]}
-          >
-            <Animated.View style={[styles.line, animStyles.line]} />
-          </Animated.View>
-          <View style={[styles.list]}>
-            <AddItem
-              onClickAddButton={onClickAddButton}
-              style={animStyles.addItem}
-            />
-            {activityData.activities?.map((activity, index, array) => (
+      <Animated.View
+        style={[styles.childrenContainer, animStyles.childrenContainer]}
+      >
+        <Animated.View style={[styles.lineContainer, animStyles.lineContainer]}>
+          <Animated.View style={[styles.line, animStyles.line]} />
+        </Animated.View>
+        <View style={[styles.list]}>
+          <AddItem
+            onClickAddButton={onClickAddButton}
+            style={animStyles.addItem}
+          />
+          {expandedState &&
+            activityData.activities?.map((activity, index, array) => (
               <Activity
                 key={activity.id}
                 activityData={activity}
@@ -222,9 +238,8 @@ export default function Activity({
                 onFocusAdditional={onFocusAdditional}
               />
             ))}
-          </View>
-        </Animated.View>
-      )}
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 }
