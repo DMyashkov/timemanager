@@ -65,7 +65,6 @@ type ActivityProps = {
   activityData?: ActivityData;
   level?: number;
   style?: object;
-  isFirstInList?: boolean;
   isLastInList?: boolean;
   path?: string;
   addScreen?: boolean;
@@ -73,13 +72,11 @@ type ActivityProps = {
   addAnim?: SharedValue<number>;
   onFocusAdditional?: () => void;
   expandAnimProp?: SharedValue<number>;
-  isParentInFocusGroup?: boolean;
 };
 
 export default function Activity({
   activityData = data,
   level = 0,
-  isFirstInList = true,
   isLastInList = true,
   path = "/root",
   addScreen = false,
@@ -87,7 +84,6 @@ export default function Activity({
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
   expandAnimProp = useSharedValue(1),
-  isParentInFocusGroup = true,
 }: ActivityProps) {
   const styles = useStyles();
   // const { theme } = useTheme();
@@ -266,7 +262,6 @@ export default function Activity({
               key={activity.id}
               activityData={activity}
               level={level + 1}
-              isFirstInList={index === 0}
               isLastInList={index === array.length - 1}
               path={`${path}/${activity.id}`}
               addScreen={addScreen}
@@ -274,7 +269,6 @@ export default function Activity({
               addAnim={addAnim}
               onFocusAdditional={onFocusAdditional}
               expandAnimProp={childVisibilityAnim}
-              isParentInFocusGroup={isInFocusGroup}
             />
           ))}
         </View>
