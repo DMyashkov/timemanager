@@ -108,11 +108,6 @@ export default function Activity({
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
   }, [isFocused, focusAnim]);
 
-  const expandedAnim = useDerivedValue(
-    () => (expandedState ? 1 : 0),
-    [expandedState],
-  );
-
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height:
