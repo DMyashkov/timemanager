@@ -94,14 +94,14 @@ export default function Activity({
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 
-  const shrinkAnim = useSharedValue(0);
+  const expandAnim = useSharedValue(0);
   const shouldShrink = !path.startsWith(focusedPath);
   // const isExpanded = useSharedValue(isRoot);
   const [expandedState, setExpandedState] = useState(isRoot);
 
   useEffect(() => {
-    shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
-  }, [shouldShrink, shrinkAnim]);
+    expandAnim.value = withTiming(shouldShrink ? 0 : 1, { duration: 300 });
+  }, [shouldShrink, expandAnim]);
 
   const focusAnim = useSharedValue(0);
   useEffect(() => {
@@ -110,42 +110,38 @@ export default function Activity({
 
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
-      height:
-        interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
-        interpolate(focusAnim.value, [0, 1], [40, 82]),
+      height: expandAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82]),
       marginBottom: interpolate(
-        shrinkAnim.value,
+        expandAnim.value,
         [0, 1],
-        [styles.activityItem.marginBottom, 0],
+        [0, styles.activityItem.marginBottom],
       ),
     })),
     listModule: useAnimatedStyle(() => ({
       marginTop: interpolate(
-        shrinkAnim.value,
+        expandAnim.value,
         [0, 1],
-        [0, isFirstInList ? 0 : -styles.list.gap / 2],
+        [isFirstInList ? 0 : -styles.list.gap / 2, 0],
       ),
       marginBottom: interpolate(
-        shrinkAnim.value,
+        expandAnim.value,
         [0, 1],
-        [0, isLastInList ? 0 : -styles.list.gap / 2],
+        [isLastInList ? 0 : -styles.list.gap / 2, 0],
       ),
     })),
     childrenContainerExpanded: useAnimatedStyle(() => {
-      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
         marginTop: interpolate(
-          isParentVisible,
+          expandAnim.value,
           [0, 1],
           [0, !isRoot ? styles.childrenContainer.marginTop : 0],
         ),
       };
     }),
     childrenContainerCollapsed: useAnimatedStyle(() => {
-      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
         marginTop: interpolate(
-          isParentVisible * addAnim.value,
+          expandAnim.value * addAnim.value,
           [0, 1],
           [0, !isRoot ? styles.childrenContainer.marginTop : 0],
         ),
@@ -153,22 +149,20 @@ export default function Activity({
     }),
     lineContainer: useAnimatedStyle(() => ({
       width: interpolate(
-        shrinkAnim.value,
+        expandAnim.value,
         [0, 1],
-        [!isRoot ? styles.lineContainer.width : 0, 0],
+        [0, !isRoot ? styles.lineContainer.width : 0],
       ),
     })),
     lineExpanded: useAnimatedStyle(() => {
-      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
-        opacity: interpolate(isParentVisible, [0, 1], [0, !isRoot ? 1 : 0]),
+        opacity: interpolate(expandAnim.value, [0, 1], [0, !isRoot ? 1 : 0]),
       };
     }),
     lineCollapsed: useAnimatedStyle(() => {
-      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
         opacity: interpolate(
-          isParentVisible * addAnim.value,
+          expandAnim.value * addAnim.value,
           [0, 1],
           [0, !isRoot ? 1 : 0],
         ),
@@ -177,13 +171,12 @@ export default function Activity({
     addItem: useAnimatedStyle(() => {
       const addShrinkAnimStrict =
         interpolate(
-          shrinkAnim.value,
+          interpolate(expandAnim.value, [0, 1], [1, 0]),
           [0, 1],
-          [shrinkAnim.value > 0 ? 0 : 1, 0],
+          [interpolate(expandAnim.value, [0, 1], [1, 0]) > 0 ? 0 : 1, 0],
         ) * interpolate(addAnim.value, [0, 1], [0, 1]);
       const addShrinkAnim =
-        interpolate(shrinkAnim.value, [0, 1], [1, 0]) *
-        interpolate(addAnim.value, [0, 1], [0, 1]);
+        expandAnim.value * interpolate(addAnim.value, [0, 1], [0, 1]);
 
       return {
         marginBottom: interpolate(
