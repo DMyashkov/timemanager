@@ -35,6 +35,12 @@ const data = {
                 {
                   id: "activity-1-1-1-1",
                   title: "Activity 1.1.1.1",
+                  activities: [
+                    {
+                      id: "activity-1-1-1-1-1",
+                      title: "Activity 1.1.1.1.1",
+                    },
+                  ],
                 },
               ],
             },
@@ -83,7 +89,8 @@ export default function Activity({
   // const { theme } = useTheme();
 
   // const { focusedLevel, setFocusedLevel } = useFocus();
-  const { focusedPath, setFocusedPath, popFocusStack } = useFocus();
+  const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
+    useFocus();
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 

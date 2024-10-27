@@ -14,19 +14,22 @@ interface FocusProviderProps {
 }
 
 export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
-  // const [focusedLevel, setFocusedLevel] = useState<number>(0);
   const [focusedPath, setFocusedPath] = useState<string>("/root");
   const [focusStack, setFocusStack] = useState<string[]>([]);
   const [focusedLevel, setFocusedLevel] = useState<number>(0);
+  const setLevel = (path: string) => {
+    setFocusedLevel(path.split("/").length - 1);
+  };
   const setPath = (path: string) => {
     setFocusedPath(path);
-    setFocusedLevel(path.split("/").length - 1);
+    setLevel(path);
     setFocusStack([...focusStack, focusedPath]);
   };
   const popFocusStack = () => {
     const lastPath = focusStack.pop();
     if (lastPath) {
       setFocusedPath(lastPath);
+      setLevel(lastPath);
     }
   };
 
