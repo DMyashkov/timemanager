@@ -46,8 +46,17 @@ const data = {
             },
           ],
         },
+        {
+          id: "activity-1-2",
+          title: "Activity 1.2",
+        },
+        {
+          id: "activity-1-3",
+          title: "Activity 1.3",
+        },
       ],
     },
+
     {
       id: "activity-2",
       title: "Activity 2",
@@ -65,6 +74,8 @@ type ActivityProps = {
   activityData?: ActivityData;
   level?: number;
   style?: object;
+  isFirstInList?: boolean;
+
   isLastInList?: boolean;
   path?: string;
   addScreen?: boolean;
@@ -77,6 +88,7 @@ type ActivityProps = {
 export default function Activity({
   activityData = data,
   level = 0,
+  isFirstInList = true,
   isLastInList = true,
   path = "/root",
   addScreen = false,
@@ -102,9 +114,7 @@ export default function Activity({
   const localExpandAnim = useSharedValue(isRoot ? 1 : 0);
 
   const expandAnim = useDerivedValue(() => {
-    return focusAnim.value > 0
-      ? 1
-      : expandAnimProp.value * localExpandAnim.value;
+    return focusAnim.value ? 1 : expandAnimProp.value * localExpandAnim.value;
   });
 
   const expandAnimChild = useSharedValue(0);
@@ -113,6 +123,7 @@ export default function Activity({
     return expandAnim.value * expandAnimChild.value;
   });
 
+  // const isInFocusGroup = true;
   const isInFocusGroup = path.startsWith(focusedPath);
   const [expandedState, setExpandedState] = useState(isRoot);
 
@@ -131,14 +142,16 @@ export default function Activity({
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height: expandAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82]),
-      marginBottom: interpolate(expandAnim.value, [0, 1], [0, 2]),
+      marginBottom: interpolate(expandAnim.value, [0, 1], [0, 1.5]),
     })),
     listModule: useAnimatedStyle(() => ({
-      marginTop: interpolate(
-        expandAnim.value,
-        [0, 1],
-        [-styles.list.gap / 2, 0],
-      ),
+      marginTop: isFirstInList
+        ? interpolate(
+            expandAnim.value,
+            [0, 1],
+            [interpolate(addAnim.value, [0, 1], [-styles.list.gap / 2, 0]), 0],
+          )
+        : interpolate(expandAnim.value, [0, 1], [-styles.list.gap / 2, 0]),
       marginBottom: interpolate(
         expandAnim.value,
         [0, 1],
@@ -262,6 +275,7 @@ export default function Activity({
               key={activity.id}
               activityData={activity}
               level={level + 1}
+              isFirstInList={index === 0}
               isLastInList={index === array.length - 1}
               path={`${path}/${activity.id}`}
               addScreen={addScreen}
