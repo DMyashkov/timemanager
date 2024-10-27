@@ -88,10 +88,8 @@ export default function Activity({
 
   const shrinkAnim = useSharedValue(0);
   const shouldShrink = !path.startsWith(focusedPath);
-  const isExpanded = useSharedValue(isRoot);
+  // const isExpanded = useSharedValue(isRoot);
   const [expandedState, setExpandedState] = useState(isRoot);
-  const [renderTrigger, setRenderTrigger] = useState(false);
-  const triggerRerender = () => setRenderTrigger((prev) => !prev);
 
   useEffect(() => {
     shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
@@ -125,11 +123,21 @@ export default function Activity({
         [0, isLastInList ? 0 : -styles.list.gap / 2],
       ),
     })),
-    childrenContainer: useAnimatedStyle(() => {
+    childrenContainerExpanded: useAnimatedStyle(() => {
       const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
       return {
         marginTop: interpolate(
-          isExpanded.value ? isParentVisible : isParentVisible * addAnim.value,
+          isParentVisible,
+          [0, 1],
+          [0, !isRoot ? styles.childrenContainer.marginTop : 0],
+        ),
+      };
+    }),
+    childrenContainerCollapsed: useAnimatedStyle(() => {
+      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
+      return {
+        marginTop: interpolate(
+          isParentVisible * addAnim.value,
           [0, 1],
           [0, !isRoot ? styles.childrenContainer.marginTop : 0],
         ),
@@ -142,9 +150,22 @@ export default function Activity({
         [!isRoot ? styles.lineContainer.width : 0, 0],
       ),
     })),
-    line: useAnimatedStyle(() => ({
-      opacity: interpolate(shrinkAnim.value, [0, 1], [!isRoot ? 1 : 0, 0]),
-    })),
+    lineExpanded: useAnimatedStyle(() => {
+      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
+      return {
+        opacity: interpolate(isParentVisible, [0, 1], [0, !isRoot ? 1 : 0]),
+      };
+    }),
+    lineCollapsed: useAnimatedStyle(() => {
+      const isParentVisible = interpolate(shrinkAnim.value, [0, 1], [1, 0]);
+      return {
+        opacity: interpolate(
+          isParentVisible * addAnim.value,
+          [0, 1],
+          [0, !isRoot ? 1 : 0],
+        ),
+      };
+    }),
     addItem: useAnimatedStyle(() => {
       const addShrinkAnimStrict =
         interpolate(
@@ -176,9 +197,9 @@ export default function Activity({
     }),
   };
 
-  useEffect(() => {
-    isExpanded.value = expandedState;
-  }, [expandedState, isExpanded]);
+  // useEffect(() => {
+  //   isExpanded.value = expandedState;
+  // }, [expandedState, isExpanded]);
 
   return (
     <Animated.View style={animStyles.listModule}>
@@ -203,10 +224,22 @@ export default function Activity({
         />
       )}
       <Animated.View
-        style={[styles.childrenContainer, animStyles.childrenContainer]}
+        style={[
+          styles.childrenContainer,
+          expandedState
+            ? animStyles.childrenContainerExpanded
+            : animStyles.childrenContainerCollapsed,
+        ]}
       >
         <Animated.View style={[styles.lineContainer, animStyles.lineContainer]}>
-          <Animated.View style={[styles.line, animStyles.line]} />
+          <Animated.View
+            style={[
+              styles.line,
+              expandedState
+                ? animStyles.lineExpanded
+                : animStyles.lineCollapsed,
+            ]}
+          />
         </Animated.View>
         <View style={[styles.list]}>
           <AddItem
