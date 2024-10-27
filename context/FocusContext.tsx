@@ -4,6 +4,7 @@ interface FocusContextType {
   focusedPath: string;
   setFocusedPath: (path: string) => void;
   popFocusStack: () => void;
+  focusedLevel: number;
 }
 
 const FocusContext = createContext<FocusContextType | undefined>(undefined);
@@ -16,8 +17,10 @@ export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
   // const [focusedLevel, setFocusedLevel] = useState<number>(0);
   const [focusedPath, setFocusedPath] = useState<string>("/root");
   const [focusStack, setFocusStack] = useState<string[]>([]);
+  const [focusedLevel, setFocusedLevel] = useState<number>(0);
   const setPath = (path: string) => {
     setFocusedPath(path);
+    setFocusedLevel(path.split("/").length - 1);
     setFocusStack([...focusStack, focusedPath]);
   };
   const popFocusStack = () => {
@@ -29,7 +32,12 @@ export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
 
   return (
     <FocusContext.Provider
-      value={{ focusedPath, setFocusedPath: setPath, popFocusStack }}
+      value={{
+        focusedPath,
+        setFocusedPath: setPath,
+        popFocusStack,
+        focusedLevel,
+      }}
     >
       {children}
     </FocusContext.Provider>

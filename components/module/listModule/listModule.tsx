@@ -2,6 +2,7 @@ import { View, Easing } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -9,7 +10,7 @@ import Animated, {
 import useStyles from "./styles";
 // import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@components/module/activityItem/activityItem";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocus } from "@/context/FocusContext";
 import AddItem from "../addItem/addItem";
 import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
@@ -99,6 +100,11 @@ export default function Activity({
   useEffect(() => {
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
   }, [isFocused, focusAnim]);
+
+  const expandedAnim = useDerivedValue(
+    () => (expandedState ? 1 : 0),
+    [expandedState],
+  );
 
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
@@ -201,13 +207,17 @@ export default function Activity({
   //   isExpanded.value = expandedState;
   // }, [expandedState, isExpanded]);
 
+  const handleExpand = useCallback(() => {
+    setExpandedState((prev) => !prev);
+  }, []);
+
   return (
     <Animated.View style={animStyles.listModule}>
       {level !== 0 && (
         <ActivityItem
           activityName={activityData.title}
           onExpand={() => {
-            setExpandedState((prev) => !prev);
+            handleExpand();
           }}
           onFocus={() => {
             setFocusedPath(path);
@@ -224,6 +234,7 @@ export default function Activity({
         />
       )}
       <Animated.View
+        key={`children-container-${expandedState}`}
         style={[
           styles.childrenContainer,
           expandedState
