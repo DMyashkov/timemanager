@@ -95,23 +95,18 @@ export default function Activity({
   const isRoot = path === "/root";
 
   const shrinkAnim = useSharedValue(0);
-  const shouldShrink = !path.startsWith(focusedPath);
+  const shouldBeVisible = path.startsWith(focusedPath);
   // const isExpanded = useSharedValue(isRoot);
   const [expandedState, setExpandedState] = useState(isRoot);
 
   useEffect(() => {
-    shrinkAnim.value = withTiming(shouldShrink ? 1 : 0, { duration: 300 });
-  }, [shouldShrink, shrinkAnim]);
+    shrinkAnim.value = withTiming(shouldBeVisible ? 0 : 1, { duration: 300 });
+  }, [shouldBeVisible, shrinkAnim]);
 
   const focusAnim = useSharedValue(0);
   useEffect(() => {
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
   }, [isFocused, focusAnim]);
-
-  const expandedAnim = useDerivedValue(
-    () => (expandedState ? 1 : 0),
-    [expandedState],
-  );
 
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
@@ -202,7 +197,7 @@ export default function Activity({
           [-styles.childrenContainer.marginTop, 0],
         ),
         height: interpolate(
-          shouldShrink === false ? addShrinkAnimStrict : addShrinkAnim,
+          shouldBeVisible === true ? addShrinkAnim : addShrinkAnimStrict,
           [0, 1],
           [0, 40],
         ),
