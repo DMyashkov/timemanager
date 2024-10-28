@@ -145,13 +145,11 @@ export default function Activity({
       marginBottom: interpolate(expandAnim.value, [0, 1], [0, 1.5]),
     })),
     listModule: useAnimatedStyle(() => ({
-      marginTop: isFirstInList
-        ? interpolate(
-            expandAnim.value,
-            [0, 1],
-            [interpolate(addAnim.value, [0, 1], [-styles.list.gap / 2, 0]), 0],
-          )
-        : interpolate(expandAnim.value, [0, 1], [-styles.list.gap / 2, 0]),
+      marginTop: interpolate(
+        expandAnim.value,
+        [0, 1],
+        [isFirstInList ? 0 : -styles.list.gap / 2, 0],
+      ),
       marginBottom: interpolate(
         expandAnim.value,
         [0, 1],

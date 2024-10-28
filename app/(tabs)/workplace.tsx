@@ -1,7 +1,7 @@
 import Header from "@components/header/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { Easing, StyleSheet, View } from "react-native";
+import { Easing, ScrollView, StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import ListModule from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
@@ -59,13 +59,13 @@ export default function WorkplaceScreen() {
         showSearchBar={true}
       />
       <FocusProvider>
-        <View style={styles.listView}>
+        <ScrollView style={styles.listView}>
           <ListModule
             addScreen={addScreen}
             addAnim={addAnim}
             onFocusAdditional={() => setAddScreen(false)}
           />
-        </View>
+        </ScrollView>
       </FocusProvider>
     </View>
   );
