@@ -72,6 +72,7 @@ type ActivityProps = {
   onClickAddButton?: () => void;
   addAnim?: SharedValue<number>;
   onFocusAdditional?: () => void;
+  expandAnimOfParent?: SharedValue<number>;
 };
 
 export default function Activity({
@@ -84,6 +85,7 @@ export default function Activity({
   onClickAddButton = () => {},
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
+  expandAnimOfParent = useSharedValue(1),
 }: ActivityProps) {
   const styles = useStyles();
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
@@ -91,13 +93,23 @@ export default function Activity({
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 
-  const visibleAnim = useSharedValue(1);
+  // const visibleAnim = useSharedValue(1);
+
+  const expandAnim = useSharedValue(0);
   const shouldBeVisible = path.startsWith(focusedPath);
-  const [expandedState, setExpandedState] = useState(isRoot);
+  const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
 
   useEffect(() => {
-    visibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, { duration: 300 });
-  }, [shouldBeVisible, visibleAnim]);
+    shouldBeVisibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, {
+      duration: 300,
+    });
+  }, [shouldBeVisible, shouldBeVisibleAnim]);
+
+  const visibleAnim = useDerivedValue(() => {
+    return shouldBeVisibleAnim.value * expandAnimOfParent.value;
+  });
+
+  const [expandedState, setExpandedState] = useState(isRoot);
 
   const focusAnim = useSharedValue(0);
   useEffect(() => {
@@ -192,13 +204,17 @@ export default function Activity({
     }, [shouldBeVisible]),
   };
 
-  // useEffect(() => {
-  //   isExpanded.value = expandedState;
-  // }, [expandedState, isExpanded]);
-
   const handleExpand = useCallback(() => {
     setExpandedState((prev) => !prev);
   }, []);
+
+  useEffect(() => {
+    expandAnim.value = withTiming(expandedState ? 1 : 0, { duration: 300 });
+  }, [expandedState, expandAnim]);
+
+  const multipliedExpandAnim = useDerivedValue(() => {
+    return expandAnim.value * expandAnimOfParent.value;
+  });
 
   return (
     <Animated.View style={animStyles.listModule}>
@@ -223,7 +239,6 @@ export default function Activity({
         />
       )}
       <Animated.View
-        key={`children-container-${expandedState}`}
         style={[
           styles.childrenContainer,
           expandedState
@@ -246,21 +261,21 @@ export default function Activity({
             onClickAddButton={onClickAddButton}
             style={animStyles.addItem}
           />
-          {expandedState &&
-            activityData.activities?.map((activity, index, array) => (
-              <Activity
-                key={activity.id}
-                activityData={activity}
-                level={level + 1}
-                isFirstInList={index === 0}
-                isLastInList={index === array.length - 1}
-                path={`${path}/${activity.id}`}
-                addScreen={addScreen}
-                onClickAddButton={onClickAddButton}
-                addAnim={addAnim}
-                onFocusAdditional={onFocusAdditional}
-              />
-            ))}
+          {activityData.activities?.map((activity, index, array) => (
+            <Activity
+              key={activity.id}
+              activityData={activity}
+              level={level + 1}
+              isFirstInList={index === 0}
+              isLastInList={index === array.length - 1}
+              path={`${path}/${activity.id}`}
+              addScreen={addScreen}
+              onClickAddButton={onClickAddButton}
+              addAnim={addAnim}
+              onFocusAdditional={onFocusAdditional}
+              expandAnimOfParent={multipliedExpandAnim}
+            />
+          ))}
         </View>
       </Animated.View>
     </Animated.View>
