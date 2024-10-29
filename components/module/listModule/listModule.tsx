@@ -127,7 +127,7 @@ export default function Activity({
         visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82]),
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
       marginBottom: interpolate(
-        visibleAnim.value * expandAnim.value,
+        visibleAnim.value * maxOfAddAndExpandAnim.value,
         [0, 1],
         [0, styles.activityItem.marginBottom],
       ),
@@ -177,8 +177,15 @@ export default function Activity({
         marginBottom: interpolate(
           addVisiblity,
           [0, 1],
-          [-styles.list.gap / 2, styles.activityItem.marginBottom],
+          [
+            hasChildren ? -styles.list.gap : 0,
+            styles.activityItem.marginBottom +
+              (hasChildren ? 1 : 0) *
+                interpolate(expandAnim.value, [0, 1], [1, 0]) *
+                -styles.list.gap,
+          ],
         ),
+        marginTop: 0,
         height: interpolate(addVisiblity, [0, 1], [0, 40]),
       };
     }, [shouldBeVisible]),
@@ -225,10 +232,10 @@ export default function Activity({
           <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
-          {/* <AddItem */}
-          {/*   onClickAddButton={onClickAddButton} */}
-          {/*   style={animStyles.addItem} */}
-          {/* /> */}
+          <AddItem
+            onClickAddButton={onClickAddButton}
+            style={animStyles.addItem}
+          />
           {activityData.activities?.map((activity, index, array) => (
             <Activity
               key={activity.id}
