@@ -111,6 +111,10 @@ export default function Activity({
 
   const [expandedState, setExpandedState] = useState(isRoot);
 
+  const maxOfAddAndExpandAnim = useDerivedValue(() => {
+    return Math.max(addAnim.value, expandAnim.value);
+  });
+
   const focusAnim = useSharedValue(0);
   useEffect(() => {
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
@@ -138,19 +142,10 @@ export default function Activity({
         [isLastInList ? 0 : -styles.list.gap / 2, 0],
       ),
     })),
-    childrenContainerExpanded: useAnimatedStyle(() => {
+    childrenContainer: useAnimatedStyle(() => {
       return {
         marginTop: interpolate(
-          visibleAnim.value,
-          [0, 1],
-          [0, !isRoot ? styles.childrenContainer.marginTop : 0],
-        ),
-      };
-    }),
-    childrenContainerCollapsed: useAnimatedStyle(() => {
-      return {
-        marginTop: interpolate(
-          visibleAnim.value * addAnim.value,
+          visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
           [0, !isRoot ? styles.childrenContainer.marginTop : 0],
         ),
@@ -163,15 +158,10 @@ export default function Activity({
         [0, !isRoot ? styles.lineContainer.width : 0],
       ),
     })),
-    lineExpanded: useAnimatedStyle(() => {
-      return {
-        opacity: interpolate(visibleAnim.value, [0, 1], [0, !isRoot ? 1 : 0]),
-      };
-    }),
-    lineCollapsed: useAnimatedStyle(() => {
+    line: useAnimatedStyle(() => {
       return {
         opacity: interpolate(
-          visibleAnim.value * addAnim.value,
+          visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
           [0, !isRoot ? 1 : 0],
         ),
@@ -195,11 +185,7 @@ export default function Activity({
           [0, 1],
           [-styles.childrenContainer.marginTop, 0],
         ),
-        height: interpolate(
-          shouldBeVisible ? addVisiblityStrict : addVisiblity,
-          [0, 1],
-          [0, 40],
-        ),
+        height: interpolate(addVisiblity, [0, 1], [0, 40]),
       };
     }, [shouldBeVisible]),
   };
@@ -239,22 +225,10 @@ export default function Activity({
         />
       )}
       <Animated.View
-        style={[
-          styles.childrenContainer,
-          expandedState
-            ? animStyles.childrenContainerExpanded
-            : animStyles.childrenContainerCollapsed,
-        ]}
+        style={[styles.childrenContainer, animStyles.childrenContainer]}
       >
         <Animated.View style={[styles.lineContainer, animStyles.lineContainer]}>
-          <Animated.View
-            style={[
-              styles.line,
-              expandedState
-                ? animStyles.lineExpanded
-                : animStyles.lineCollapsed,
-            ]}
-          />
+          <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
           <AddItem
