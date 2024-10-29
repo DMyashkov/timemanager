@@ -99,11 +99,16 @@ export default function Activity({
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
   const hasChildren = !!activityData.activities?.length;
+  const [addItemStrictModel, setAddItemStrictModel] = useState(false);
 
   useEffect(() => {
-    shouldBeVisibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, {
-      duration: 300,
-    });
+    shouldBeVisibleAnim.value = withTiming(
+      shouldBeVisible ? 1 : 0,
+      {
+        duration: 300,
+      },
+      () => {},
+    );
   }, [shouldBeVisible, shouldBeVisibleAnim]);
 
   const visibleAnim = useDerivedValue(() => {
@@ -120,6 +125,14 @@ export default function Activity({
   useEffect(() => {
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
   }, [isFocused, focusAnim]);
+
+  const addVisiblity = useDerivedValue(() => {
+    return shouldBeVisibleAnim.value > 0 &&
+      shouldBeVisibleAnim.value < 1 &&
+      shouldBeVisible
+      ? 0
+      : visibleAnim.value * addAnim.value;
+  });
 
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
@@ -170,12 +183,9 @@ export default function Activity({
       };
     }),
     addItem: useAnimatedStyle(() => {
-      const addVisiblity =
-        visibleAnim.value * interpolate(addAnim.value, [0, 1], [0, 1]);
-
       return {
         marginBottom: interpolate(
-          addVisiblity,
+          addVisiblity.value,
           [0, 1],
           [
             hasChildren ? -styles.list.gap : 0,
@@ -186,7 +196,7 @@ export default function Activity({
           ],
         ),
         marginTop: 0,
-        height: interpolate(addVisiblity, [0, 1], [0, 40]),
+        height: interpolate(addVisiblity.value, [0, 1], [0, 40]),
       };
     }, [shouldBeVisible]),
   };
