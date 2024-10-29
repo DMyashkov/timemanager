@@ -86,9 +86,6 @@ export default function Activity({
   onFocusAdditional = () => {},
 }: ActivityProps) {
   const styles = useStyles();
-  // const { theme } = useTheme();
-
-  // const { focusedLevel, setFocusedLevel } = useFocus();
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
   const isFocused = path === focusedPath;
@@ -96,7 +93,6 @@ export default function Activity({
 
   const visibleAnim = useSharedValue(1);
   const shouldBeVisible = path.startsWith(focusedPath);
-  // const isExpanded = useSharedValue(isRoot);
   const [expandedState, setExpandedState] = useState(isRoot);
 
   useEffect(() => {
