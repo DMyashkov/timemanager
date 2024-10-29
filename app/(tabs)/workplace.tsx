@@ -1,4 +1,5 @@
 import Header from "@components/header/header";
+import ActivityItem from "@components/module/activityItem/activityItem";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
 import { Easing, StyleSheet, View } from "react-native";
@@ -65,6 +66,7 @@ export default function WorkplaceScreen() {
             addAnim={addAnim}
             onFocusAdditional={() => setAddScreen(false)}
           />
+          {/* <ActivityItem /> */}
         </View>
       </FocusProvider>
     </View>
@@ -76,6 +78,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flex: 1,
     zIndex: -1,
+    // backgroundColor: "red",
   },
   listView: {
     paddingTop: 15,

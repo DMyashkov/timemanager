@@ -50,7 +50,7 @@ export default function useStyles() {
       height: "100%",
     },
     activity: {
-      height: 40,
+      height: 0,
       borderRadius: 10,
       borderColor: theme.color.borderMedium,
       borderWidth: 0.18,

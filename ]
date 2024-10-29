@@ -98,7 +98,6 @@ export default function Activity({
   const expandAnim = useSharedValue(0);
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
-  const hasChildren = !!activityData.activities?.length;
 
   useEffect(() => {
     shouldBeVisibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, {
@@ -125,9 +124,8 @@ export default function Activity({
     activityItem: useAnimatedStyle(() => ({
       height:
         visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82]),
-      borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
       marginBottom: interpolate(
-        visibleAnim.value * expandAnim.value,
+        visibleAnim.value,
         [0, 1],
         [0, styles.activityItem.marginBottom],
       ),
@@ -170,6 +168,9 @@ export default function Activity({
       };
     }),
     addItem: useAnimatedStyle(() => {
+      const addVisiblityStrict =
+        (visibleAnim.value < 1 ? 0 : 1) *
+        interpolate(addAnim.value, [0, 1], [0, 1]);
       const addVisiblity =
         visibleAnim.value * interpolate(addAnim.value, [0, 1], [0, 1]);
 
@@ -177,8 +178,9 @@ export default function Activity({
         marginBottom: interpolate(
           addVisiblity,
           [0, 1],
-          [-styles.list.gap / 2, styles.activityItem.marginBottom],
+          [0, styles.activityItem.marginBottom],
         ),
+        marginTop: interpolate(addVisiblity, [0, 1], [-styles.list.gap / 2, 0]),
         height: interpolate(addVisiblity, [0, 1], [0, 40]),
       };
     }, [shouldBeVisible]),
@@ -225,10 +227,10 @@ export default function Activity({
           <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
-          {/* <AddItem */}
-          {/*   onClickAddButton={onClickAddButton} */}
-          {/*   style={animStyles.addItem} */}
-          {/* /> */}
+          <AddItem
+            onClickAddButton={onClickAddButton}
+            style={animStyles.addItem}
+          />
           {activityData.activities?.map((activity, index, array) => (
             <Activity
               key={activity.id}
