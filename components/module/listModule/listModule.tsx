@@ -99,7 +99,6 @@ export default function Activity({
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
   const hasChildren = !!activityData.activities?.length;
-  const [addItemStrictModel, setAddItemStrictModel] = useState(false);
 
   useEffect(() => {
     shouldBeVisibleAnim.value = withTiming(
@@ -202,8 +201,17 @@ export default function Activity({
   };
 
   const handleExpand = useCallback(() => {
+    if (!expandedState && level >= focusedLevel + 3) {
+      setFocusedPath(path.split("/").slice(0, -1).join("/"));
+    }
     setExpandedState((prev) => !prev);
-  }, []);
+  }, [expandedState, level, focusedLevel, path, setFocusedPath]);
+
+  useEffect(() => {
+    if (level >= focusedLevel + 3) {
+      setExpandedState(false);
+    }
+  }, [level, focusedLevel]);
 
   useEffect(() => {
     expandAnim.value = withTiming(expandedState ? 1 : 0, { duration: 300 });
@@ -233,6 +241,7 @@ export default function Activity({
           isFocused={isFocused}
           hasChildren={!!activityData.activities?.length}
           style={[styles.activityItem, animStyles.activityItem]}
+          expandAnim={expandAnim}
         />
       )}
       <Animated.View
