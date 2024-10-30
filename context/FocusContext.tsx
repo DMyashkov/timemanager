@@ -18,7 +18,7 @@ export const FocusProvider: React.FC<FocusProviderProps> = ({ children }) => {
   const [focusStack, setFocusStack] = useState<string[]>([]);
   const [focusedLevel, setFocusedLevel] = useState<number>(0);
   const setLevel = (path: string) => {
-    setFocusedLevel(path.split("/").length - 1);
+    setFocusedLevel(path.split("/").length - 2);
   };
   const setPath = (path: string) => {
     setFocusedPath(path);
