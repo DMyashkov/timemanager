@@ -4,7 +4,12 @@ import {
   TouchableOpacity,
   type LayoutChangeEvent,
 } from "react-native";
-import Animated from "react-native-reanimated";
+import Animated, {
+  interpolate,
+  useAnimatedRef,
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Tag from "@assets/icons/tag.svg";
@@ -31,6 +36,7 @@ interface ActivityProps {
   hasChildren?: boolean;
   style?: object;
   onLayout?: (event: LayoutChangeEvent) => void;
+  expandAnim?: Animated.SharedValue<number>;
 }
 
 export default function Activity({
@@ -45,6 +51,7 @@ export default function Activity({
   buttons = [],
   style = {},
   onLayout,
+  expandAnim = useSharedValue(0),
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -82,6 +89,16 @@ export default function Activity({
 
     return allButtons;
   }, [buttons, theme]); // Only track necessary dependencies
+
+  const animStyles = {
+    chevron: useAnimatedStyle(() => ({
+      transform: [
+        {
+          rotate: `${interpolate(expandAnim.value, [0, 1], [1, 0]) * 90}deg`,
+        },
+      ],
+    })),
+  };
 
   return (
     <Animated.View style={[styles.activity, style]} onLayout={onLayout}>
@@ -125,11 +142,11 @@ export default function Activity({
               style={styles.chevronContainer}
               onPress={onExpand}
             >
-              {isExpanded ? (
+              <Animated.View
+                style={[styles.chevronInnerContainer, animStyles.chevron]}
+              >
                 <ChevronDown style={styles.chevron} fill={activityColor} />
-              ) : (
-                <ChevronLeft style={styles.chevron} fill={activityColor} />
-              )}
+              </Animated.View>
             </TouchableOpacity>
           )}
         </TouchableOpacity>

@@ -233,6 +233,7 @@ export default function Activity({
           isFocused={isFocused}
           hasChildren={!!activityData.activities?.length}
           style={[styles.activityItem, animStyles.activityItem]}
+          expandAnim={expandAnim}
         />
       )}
       <Animated.View

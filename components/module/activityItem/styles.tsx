@@ -87,5 +87,6 @@ export default function useStyles() {
       flexDirection: "column",
       justifyContent: "flex-end",
     },
+    chevronInnerContainer: {},
   });
 }
