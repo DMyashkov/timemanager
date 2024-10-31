@@ -46,5 +46,9 @@ export default function useStyles() {
       height: 0,
       flex: 1,
     },
+    emptyView: {
+      height: 0,
+      flex: 1,
+    },
   });
 }

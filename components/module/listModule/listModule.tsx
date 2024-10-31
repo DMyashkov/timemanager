@@ -94,7 +94,7 @@ export default function Activity({
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height:
-        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82]),
+        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82.2]),
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
       marginBottom: interpolate(
         visibleAnim.value * maxOfAddAndExpandAnim.value,
@@ -119,7 +119,7 @@ export default function Activity({
         marginTop: interpolate(
           visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
-          [0, !isRoot ? styles.childrenContainer.marginTop : 0],
+          [0, /* !isRoot ? styles.childrenContainer.marginTop : 0 */ 0],
         ),
       };
     }),
@@ -132,10 +132,15 @@ export default function Activity({
     })),
     line: useAnimatedStyle(() => {
       return {
-        opacity: interpolate(
+        borderLeftWidth: interpolate(
           visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
-          [0, !isRoot ? 1 : 0],
+          [0, isRoot ? 0 : 1.5],
+        ),
+        borderBottomWidth: interpolate(
+          visibleAnim.value * maxOfAddAndExpandAnim.value,
+          [0, 1],
+          [0, isRoot ? 0 : 1.5],
         ),
       };
     }),
@@ -144,13 +149,13 @@ export default function Activity({
         marginBottom: interpolate(
           addVisiblity.value,
           [0, 1],
-          [
-            -styles.list.gap,
-            styles.activityItem.marginBottom +
-              interpolate(expandAnim.value, [0, 1], [1, 0]) * -styles.list.gap,
-          ],
+          [-styles.list.gap / 2, styles.activityItem.marginBottom],
         ),
-        marginTop: 0,
+        marginTop: interpolate(
+          addVisiblity.value,
+          [0, 1],
+          [-styles.list.gap / 2, 0],
+        ),
         height: interpolate(addVisiblity.value, [0, 1], [0, 40]),
       };
     }, [shouldBeVisible]),
@@ -213,10 +218,10 @@ export default function Activity({
           <View
             style={[styles.emptyView, { marginBottom: -styles.list.gap / 2 }]}
           />
-          <AddItem
-            onClickAddButton={onClickAddButton}
-            style={animStyles.addItem}
-          />
+          {/* <AddItem */}
+          {/*   onClickAddButton={onClickAddButton} */}
+          {/*   style={animStyles.addItem} */}
+          {/* /> */}
           {activityData.activities?.map((activity, index, array) => (
             <Activity
               key={activity.id}
