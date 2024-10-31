@@ -51,8 +51,6 @@ export default function Activity({
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 
-  // const visibleAnim = useSharedValue(1);
-
   const expandAnim = useSharedValue(0);
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
@@ -239,10 +237,6 @@ export default function Activity({
         </Animated.View>
         <View style={[styles.list]}>
           <Animated.View style={[styles.emptyView, animStyles.emptyViewTop]} />
-          {/* <AddItem */}
-          {/*   onClickAddButton={onClickAddButton} */}
-          {/*   style={animStyles.addItem} */}
-          {/* /> */}
           {activityData.activities?.map((activity, index, array) => (
             <Activity
               key={activity.id}
