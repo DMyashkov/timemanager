@@ -9,11 +9,11 @@ import { FocusProvider } from "@context/FocusContext";
 import { useEffect, useRef, useState } from "react";
 import Animated, {
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import NestedFlatLists from "@/components/module/test/test";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();

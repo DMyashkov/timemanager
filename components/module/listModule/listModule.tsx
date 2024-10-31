@@ -60,26 +60,13 @@ export default function Activity({
   const hasChildren = !!activityData.activities?.length;
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
-  const [isShrinkedAndNotAPartOfFocus, setIsShrinkedAndNotAPartOfFocus] =
-    useState(false);
   const isParentOfFocused = focusedPath.startsWith(path);
 
   useEffect(() => {
-    if (shouldBeVisible) {
-      setIsShrinkedAndNotAPartOfFocus(false);
-    }
-    shouldBeVisibleAnim.value = withTiming(
-      shouldBeVisible ? 1 : 0,
-      {
-        duration: 300,
-      },
-      (isFinished) => {
-        if (isFinished && !shouldBeVisible && !isParentOfFocused) {
-          runOnJS(setIsShrinkedAndNotAPartOfFocus)(true);
-        }
-      },
-    );
-  }, [shouldBeVisible, shouldBeVisibleAnim, isParentOfFocused]);
+    shouldBeVisibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, {
+      duration: 300,
+    });
+  }, [shouldBeVisible, shouldBeVisibleAnim]);
 
   const visibleAnim = useDerivedValue(() => {
     return shouldBeVisibleAnim.value * expandAnimOfParent.value;
@@ -219,7 +206,7 @@ export default function Activity({
     return expandAnim.value * expandAnimOfParent.value;
   });
 
-  return isShrinkedAndNotAPartOfFocus ? null : (
+  return (
     <Animated.View style={[animStyles.listModule]}>
       {level !== 0 && (
         <ActivityItem

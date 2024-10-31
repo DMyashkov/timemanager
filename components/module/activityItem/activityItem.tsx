@@ -100,6 +100,14 @@ export default function Activity({
     })),
   };
 
+  const handleFocus = () => {
+    if (isFocused) {
+      onUnfocus();
+    } else {
+      onFocus();
+    }
+  };
+
   return (
     <Animated.View style={[styles.activity, style]} onLayout={onLayout}>
       <View style={styles.activityInternal}>
@@ -115,11 +123,14 @@ export default function Activity({
             </TouchableOpacity>
           ))}
         </View>
-        <TouchableOpacity style={styles.collapsedActivity} onPress={onFocus}>
+        <TouchableOpacity
+          style={styles.collapsedActivity}
+          onPress={handleFocus}
+        >
           {isFocused ? (
             <TouchableOpacity
               style={styles.leftButtonContainer}
-              onPress={onUnfocus}
+              onPress={handleFocus}
             >
               <Unfocus style={styles.leftButtonUnfocus} fill={activityColor} />
             </TouchableOpacity>
