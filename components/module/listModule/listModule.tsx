@@ -1,6 +1,7 @@
 import { View, Easing } from "react-native";
 import Animated, {
   interpolate,
+  runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -55,6 +56,8 @@ export default function Activity({
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
   const hasChildren = !!activityData.activities?.length;
+  const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
+    useState(false);
 
   useEffect(() => {
     shouldBeVisibleAnim.value = withTiming(
@@ -70,7 +73,14 @@ export default function Activity({
     return shouldBeVisibleAnim.value * expandAnimOfParent.value;
   });
 
-  const [expandedState, setExpandedState] = useState(isRoot);
+  const [expandedState, setExpandedStateLocal] = useState(isRoot);
+
+  const setExpandedState = useCallback((value: boolean) => {
+    setExpandedStateLocal(value);
+    if (value) {
+      setIsExpandAnimGreaterThanZero(true);
+    }
+  }, []);
 
   const maxOfAddAndExpandAnim = useDerivedValue(() => {
     return Math.max(addAnim.value, expandAnim.value);
@@ -82,7 +92,7 @@ export default function Activity({
     if (isFocused) {
       setExpandedState(true);
     }
-  }, [isFocused, focusAnim]);
+  }, [isFocused, focusAnim, setExpandedState]);
 
   const addVisiblity = useDerivedValue(() => {
     return shouldBeVisibleAnim.value > 0 &&
@@ -189,17 +199,32 @@ export default function Activity({
     ) {
       setFocusedPath(path.split("/").slice(0, -2).join("/"));
     }
-    setExpandedState((prev) => !prev);
-  }, [expandedState, level, focusedLevel, path, setFocusedPath]);
+    setExpandedState(!expandedState);
+  }, [
+    expandedState,
+    level,
+    focusedLevel,
+    path,
+    setFocusedPath,
+    setExpandedState,
+  ]);
 
   useEffect(() => {
     if (level >= focusedLevel + 3) {
       setExpandedState(false);
     }
-  }, [level, focusedLevel]);
+  }, [level, focusedLevel, setExpandedState]);
 
   useEffect(() => {
-    expandAnim.value = withTiming(expandedState ? 1 : 0, { duration: 300 });
+    expandAnim.value = withTiming(
+      expandedState ? 1 : 0,
+      { duration: 300 },
+      (isFinished) => {
+        if (isFinished && !expandedState) {
+          runOnJS(setIsExpandAnimGreaterThanZero)(false);
+        }
+      },
+    );
   }, [expandedState, expandAnim]);
 
   const multipliedExpandAnim = useDerivedValue(() => {
@@ -237,19 +262,24 @@ export default function Activity({
         </Animated.View>
         <View style={[styles.list]}>
           <Animated.View style={[styles.emptyView, animStyles.emptyViewTop]} />
-          {activityData.activities?.map((activity, index, array) => (
-            <Activity
-              key={activity.id}
-              activityData={activity}
-              level={level + 1}
-              path={`${path}/${activity.id}`}
-              addScreen={addScreen}
-              onClickAddButton={onClickAddButton}
-              addAnim={addAnim}
-              onFocusAdditional={onFocusAdditional}
-              expandAnimOfParent={multipliedExpandAnim}
-            />
-          ))}
+          <AddItem
+            onClickAddButton={onClickAddButton}
+            style={animStyles.addItem}
+          />
+          {isExpandAnimGreaterThanZero &&
+            activityData.activities?.map((activity, index, array) => (
+              <Activity
+                key={activity.id}
+                activityData={activity}
+                level={level + 1}
+                path={`${path}/${activity.id}`}
+                addScreen={addScreen}
+                onClickAddButton={onClickAddButton}
+                addAnim={addAnim}
+                onFocusAdditional={onFocusAdditional}
+                expandAnimOfParent={multipliedExpandAnim}
+              />
+            ))}
           <Animated.View
             style={[styles.emptyView, animStyles.emptyViewBottom]}
           />
