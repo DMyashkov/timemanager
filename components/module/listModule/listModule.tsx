@@ -147,10 +147,15 @@ export default function Activity({
     })),
     line: useAnimatedStyle(() => {
       return {
-        borderLeftWidth: interpolate(
+        opacity: interpolate(
           visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
-          [0, isRoot ? 0 : 1.5],
+          [0, 1],
+        ),
+        borderLeftWidth: interpolate(
+          visibleAnim.value * maxOfAddAndExpandAnim.value,
+          [0, 0.1, 1],
+          [0, isRoot ? 0 : 1.5, isRoot ? 0 : 1.5],
         ),
         borderBottomWidth: interpolate(
           visibleAnim.value * maxOfAddAndExpandAnim.value,
