@@ -16,45 +16,7 @@ import AddItem from "../addItem/addItem";
 import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
 import { useLocalSearchParams } from "expo-router";
 
-const data = {
-  id: "root",
-  title: "Root",
-  activities: [
-    {
-      id: "activity-1",
-      title: "Activity 1",
-      activities: [
-        {
-          id: "activity-1-1",
-          title: "Activity 1.1",
-          activities: [
-            {
-              id: "activity-1-1-1",
-              title: "Activity 1.1.1",
-              activities: [
-                {
-                  id: "activity-1-1-1-1",
-                  title: "Activity 1.1.1.1",
-                  activities: [
-                    {
-                      id: "activity-1-1-1-1-1",
-                      title: "Activity 1.1.1.1.1",
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "activity-2",
-      title: "Activity 2",
-    },
-  ],
-};
-
+import data from "./exampleData";
 type ActivityData = {
   id: string;
   title: string;
@@ -65,8 +27,6 @@ type ActivityProps = {
   activityData?: ActivityData;
   level?: number;
   style?: object;
-  isFirstInList?: boolean;
-  isLastInList?: boolean;
   path?: string;
   addScreen?: boolean;
   onClickAddButton?: () => void;
@@ -78,8 +38,6 @@ type ActivityProps = {
 export default function Activity({
   activityData = data,
   level = 0,
-  isFirstInList = true,
-  isLastInList = true,
   path = "/root",
   addScreen = false,
   onClickAddButton = () => {},
@@ -148,12 +106,12 @@ export default function Activity({
       marginTop: interpolate(
         visibleAnim.value,
         [0, 1],
-        [isFirstInList ? 0 : -styles.list.gap / 2, 0],
+        [-styles.list.gap / 2, 0],
       ),
       marginBottom: interpolate(
         visibleAnim.value,
         [0, 1],
-        [isLastInList ? 0 : -styles.list.gap / 2, 0],
+        [-styles.list.gap / 2, 0],
       ),
     })),
     childrenContainer: useAnimatedStyle(() => {
@@ -187,11 +145,9 @@ export default function Activity({
           addVisiblity.value,
           [0, 1],
           [
-            hasChildren ? -styles.list.gap : 0,
+            -styles.list.gap,
             styles.activityItem.marginBottom +
-              (hasChildren ? 1 : 0) *
-                interpolate(expandAnim.value, [0, 1], [1, 0]) *
-                -styles.list.gap,
+              interpolate(expandAnim.value, [0, 1], [1, 0]) * -styles.list.gap,
           ],
         ),
         marginTop: 0,
@@ -201,8 +157,11 @@ export default function Activity({
   };
 
   const handleExpand = useCallback(() => {
-    if (!expandedState && level >= focusedLevel + 3) {
-      setFocusedPath(path.split("/").slice(0, -1).join("/"));
+    if (
+      !expandedState &&
+      level >= focusedLevel + 3 + (focusedLevel === 0 ? 1 : 0)
+    ) {
+      setFocusedPath(path.split("/").slice(0, -2).join("/"));
     }
     setExpandedState((prev) => !prev);
   }, [expandedState, level, focusedLevel, path, setFocusedPath]);
@@ -251,6 +210,9 @@ export default function Activity({
           <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
+          <View
+            style={[styles.emptyView, { marginBottom: -styles.list.gap / 2 }]}
+          />
           <AddItem
             onClickAddButton={onClickAddButton}
             style={animStyles.addItem}
@@ -260,8 +222,6 @@ export default function Activity({
               key={activity.id}
               activityData={activity}
               level={level + 1}
-              isFirstInList={index === 0}
-              isLastInList={index === array.length - 1}
               path={`${path}/${activity.id}`}
               addScreen={addScreen}
               onClickAddButton={onClickAddButton}
@@ -270,6 +230,9 @@ export default function Activity({
               expandAnimOfParent={multipliedExpandAnim}
             />
           ))}
+          <View
+            style={[styles.emptyView, { marginTop: -styles.list.gap / 2 }]}
+          />
         </View>
       </Animated.View>
     </Animated.View>

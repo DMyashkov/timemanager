@@ -36,5 +36,15 @@ export default function useStyles() {
     activity: {
       // marginTop: 8,
     },
+    emptyTop: {
+      backgroundColor: "red",
+      height: 0,
+      flex: 1,
+    },
+    emptyBottom: {
+      backgroundColor: "red",
+      height: 0,
+      flex: 1,
+    },
   });
 }
