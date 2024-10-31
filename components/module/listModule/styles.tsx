@@ -20,7 +20,7 @@ export default function useStyles() {
       flex: 1,
       flexDirection: "column",
       justifyContent: "flex-end",
-      gap: 8,
+      gap: 0,
     },
     activityItem: {
       marginBottom: 0,

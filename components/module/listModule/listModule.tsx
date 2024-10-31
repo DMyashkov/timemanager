@@ -1,4 +1,4 @@
-import { View, Easing } from "react-native";
+import { View, Easing, FlatList } from "react-native";
 import Animated, {
   interpolate,
   runOnJS,
@@ -34,6 +34,7 @@ type ActivityProps = {
   addAnim?: SharedValue<number>;
   onFocusAdditional?: () => void;
   expandAnimOfParent?: SharedValue<number>;
+  isLastInList?: boolean;
 };
 
 export default function Activity({
@@ -45,6 +46,7 @@ export default function Activity({
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
   expandAnimOfParent = useSharedValue(1),
+  isLastInList = true,
 }: ActivityProps) {
   const styles = useStyles();
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
@@ -114,29 +116,10 @@ export default function Activity({
       ),
     })),
     listModule: useAnimatedStyle(() => ({
-      marginTop: interpolate(
-        visibleAnim.value,
-        [0, 1],
-        [-styles.list.gap / 2, 0],
-      ),
       marginBottom: interpolate(
         visibleAnim.value,
         [0, 1],
-        [-styles.list.gap / 2, 0],
-      ),
-    })),
-    emptyViewTop: useAnimatedStyle(() => ({
-      marginBottom: interpolate(
-        visibleAnim.value,
-        [0, 1],
-        [-styles.list.gap / 2, -styles.list.gap],
-      ),
-    })),
-    emptyViewBottom: useAnimatedStyle(() => ({
-      marginTop: interpolate(
-        visibleAnim.value,
-        [0, 1],
-        [-styles.list.gap / 2, -styles.list.gap],
+        [0, !isLastInList ? styles.childrenContainer.marginTop : 0],
       ),
     })),
 
@@ -178,14 +161,9 @@ export default function Activity({
     addItem: useAnimatedStyle(() => {
       return {
         marginBottom: interpolate(
-          addVisiblity.value,
+          addVisiblity.value * expandAnim.value,
           [0, 1],
-          [-styles.list.gap / 2, styles.activityItem.marginBottom],
-        ),
-        marginTop: interpolate(
-          addVisiblity.value,
-          [0, 1],
-          [-styles.list.gap / 2, 0],
+          [0, styles.childrenContainer.marginTop],
         ),
         height: interpolate(addVisiblity.value, [0, 1], [0, 40]),
       };
@@ -261,18 +239,27 @@ export default function Activity({
           <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
-          <Animated.View style={[styles.emptyView, animStyles.emptyViewTop]} />
           <AddItem
             onClickAddButton={onClickAddButton}
             style={animStyles.addItem}
           />
           {isExpandAnimGreaterThanZero && (
-            <View style={{ gap: styles.list.gap }}>
-              {activityData.activities?.map((activity, index, array) => (
+            <FlatList
+              data={activityData.activities}
+              contentContainerStyle={{
+                gap: 0,
+                paddingBottom: 0,
+                paddingTop: 0,
+              }}
+              keyExtractor={(activity) => activity.id.toString()} // Convert id to string if it's a number
+              renderItem={({ item: activity }) => (
                 <Activity
-                  key={activity.id}
+                  key={activity.id} // Not required, but still good to include in FlatList items
                   activityData={activity}
                   level={level + 1}
+                  isLastInList={
+                    activity.id === activityData.activities?.slice(-1)[0].id
+                  }
                   path={`${path}/${activity.id}`}
                   addScreen={addScreen}
                   onClickAddButton={onClickAddButton}
@@ -280,12 +267,18 @@ export default function Activity({
                   onFocusAdditional={onFocusAdditional}
                   expandAnimOfParent={multipliedExpandAnim}
                 />
-              ))}
-            </View>
+              )}
+              style={{ overflow: "visible" }}
+              extraData={{
+                level,
+                path,
+                addScreen,
+                addAnim,
+                onFocusAdditional,
+                multipliedExpandAnim,
+              }}
+            />
           )}
-          <Animated.View
-            style={[styles.emptyView, animStyles.emptyViewBottom]}
-          />
         </View>
       </Animated.View>
     </Animated.View>

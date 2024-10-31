@@ -13,6 +13,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import NestedFlatLists from "@/components/module/test/test";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
@@ -60,14 +61,15 @@ export default function WorkplaceScreen() {
         showSearchBar={true}
       />
       <FocusProvider>
-        <ScrollView style={styles.listView}>
+        <View style={styles.listView}>
           <ListModule
             addScreen={addScreen}
             addAnim={addAnim}
             onFocusAdditional={() => setAddScreen(false)}
           />
           {/* <ActivityItem /> */}
-        </ScrollView>
+          {/* <NestedFlatLists /> */}
+        </View>
       </FocusProvider>
     </View>
   );
