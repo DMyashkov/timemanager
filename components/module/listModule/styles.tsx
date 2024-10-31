@@ -23,7 +23,7 @@ export default function useStyles() {
       gap: 8,
     },
     activityItem: {
-      marginBottom: 2,
+      marginBottom: 0,
     },
     line: {
       width: 5,

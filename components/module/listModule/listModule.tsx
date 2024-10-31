@@ -99,7 +99,7 @@ export default function Activity({
       marginBottom: interpolate(
         visibleAnim.value * maxOfAddAndExpandAnim.value,
         [0, 1],
-        [0, styles.activityItem.marginBottom],
+        [0, 0],
       ),
     })),
     listModule: useAnimatedStyle(() => ({
@@ -114,12 +114,27 @@ export default function Activity({
         [-styles.list.gap / 2, 0],
       ),
     })),
+    emptyViewTop: useAnimatedStyle(() => ({
+      marginBottom: interpolate(
+        visibleAnim.value,
+        [0, 1],
+        [-styles.list.gap / 2, -styles.list.gap],
+      ),
+    })),
+    emptyViewBottom: useAnimatedStyle(() => ({
+      marginTop: interpolate(
+        visibleAnim.value,
+        [0, 1],
+        [-styles.list.gap / 2, -styles.list.gap],
+      ),
+    })),
+
     childrenContainer: useAnimatedStyle(() => {
       return {
         marginTop: interpolate(
           visibleAnim.value * maxOfAddAndExpandAnim.value,
           [0, 1],
-          [0, /* !isRoot ? styles.childrenContainer.marginTop : 0 */ 0],
+          [0, !isRoot ? styles.childrenContainer.marginTop : 0],
         ),
       };
     }),
@@ -186,7 +201,7 @@ export default function Activity({
   });
 
   return (
-    <Animated.View style={animStyles.listModule}>
+    <Animated.View style={[animStyles.listModule]}>
       {level !== 0 && (
         <ActivityItem
           activityName={activityData.title}
@@ -215,9 +230,7 @@ export default function Activity({
           <Animated.View style={[styles.line, animStyles.line]} />
         </Animated.View>
         <View style={[styles.list]}>
-          <View
-            style={[styles.emptyView, { marginBottom: -styles.list.gap / 2 }]}
-          />
+          <Animated.View style={[styles.emptyView, animStyles.emptyViewTop]} />
           {/* <AddItem */}
           {/*   onClickAddButton={onClickAddButton} */}
           {/*   style={animStyles.addItem} */}
@@ -235,8 +248,8 @@ export default function Activity({
               expandAnimOfParent={multipliedExpandAnim}
             />
           ))}
-          <View
-            style={[styles.emptyView, { marginTop: -styles.list.gap / 2 }]}
+          <Animated.View
+            style={[styles.emptyView, animStyles.emptyViewBottom]}
           />
         </View>
       </Animated.View>
