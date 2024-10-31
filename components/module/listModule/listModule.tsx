@@ -81,6 +81,9 @@ export default function Activity({
   const focusAnim = useSharedValue(0);
   useEffect(() => {
     focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 300 });
+    if (isFocused) {
+      setExpandedState(true);
+    }
   }, [isFocused, focusAnim]);
 
   const addVisiblity = useDerivedValue(() => {
