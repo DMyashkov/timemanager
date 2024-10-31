@@ -266,20 +266,23 @@ export default function Activity({
             onClickAddButton={onClickAddButton}
             style={animStyles.addItem}
           />
-          {isExpandAnimGreaterThanZero &&
-            activityData.activities?.map((activity, index, array) => (
-              <Activity
-                key={activity.id}
-                activityData={activity}
-                level={level + 1}
-                path={`${path}/${activity.id}`}
-                addScreen={addScreen}
-                onClickAddButton={onClickAddButton}
-                addAnim={addAnim}
-                onFocusAdditional={onFocusAdditional}
-                expandAnimOfParent={multipliedExpandAnim}
-              />
-            ))}
+          {isExpandAnimGreaterThanZero && (
+            <View style={{ gap: 8 }}>
+              {activityData.activities?.map((activity, index, array) => (
+                <Activity
+                  key={activity.id}
+                  activityData={activity}
+                  level={level + 1}
+                  path={`${path}/${activity.id}`}
+                  addScreen={addScreen}
+                  onClickAddButton={onClickAddButton}
+                  addAnim={addAnim}
+                  onFocusAdditional={onFocusAdditional}
+                  expandAnimOfParent={multipliedExpandAnim}
+                />
+              ))}
+            </View>
+          )}
           <Animated.View
             style={[styles.emptyView, animStyles.emptyViewBottom]}
           />
