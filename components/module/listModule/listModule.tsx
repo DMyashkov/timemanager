@@ -267,7 +267,7 @@ export default function Activity({
             style={animStyles.addItem}
           />
           {isExpandAnimGreaterThanZero && (
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: styles.list.gap }}>
               {activityData.activities?.map((activity, index, array) => (
                 <Activity
                   key={activity.id}
