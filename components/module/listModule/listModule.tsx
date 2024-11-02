@@ -119,13 +119,20 @@ function ActivityInner({
   });
 
   const [expandedState, setExpandedStateLocal] = useState(isRoot);
+  const hasChildren = !!activityData.activities?.length;
 
-  const setExpandedState = useCallback((value: boolean) => {
-    setExpandedStateLocal(value);
-    if (value) {
-      setIsExpandAnimGreaterThanZero(true);
-    }
-  }, []);
+  const setExpandedState = useCallback(
+    (value: boolean) => {
+      if (!hasChildren) {
+        return;
+      }
+      setExpandedStateLocal(value);
+      if (value) {
+        setIsExpandAnimGreaterThanZero(true);
+      }
+    },
+    [hasChildren],
+  );
 
   const maxOfAddAndExpandAnim = useDerivedValue(() => {
     return Math.max(addAnim.value, expandAnim.value);
