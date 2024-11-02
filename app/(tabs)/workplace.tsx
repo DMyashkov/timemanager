@@ -2,7 +2,7 @@ import Header from "@components/header/header";
 import ActivityItem from "@components/module/activityItem/activityItem";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { Easing, ScrollView, StyleSheet, View } from "react-native";
+import { Easing, FlatList, ScrollView, StyleSheet, View } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import ListModule from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
@@ -61,15 +61,18 @@ export default function WorkplaceScreen() {
         showSearchBar={true}
       />
       <FocusProvider>
-        <View style={styles.listView}>
-          <ListModule
-            addScreen={addScreen}
-            addAnim={addAnim}
-            onFocusAdditional={() => setAddScreen(false)}
-          />
-          {/* <ActivityItem /> */}
-          {/* <NestedFlatLists /> */}
-        </View>
+        <FlatList
+          data={[{ key: "single-item" }]} // Array with one element
+          renderItem={() => (
+            <ListModule
+              addScreen={addScreen}
+              addAnim={addAnim}
+              onFocusAdditional={() => setAddScreen(false)}
+            />
+          )}
+          keyExtractor={(item) => item.key}
+          style={styles.listView}
+        />
       </FocusProvider>
     </View>
   );

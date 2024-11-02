@@ -94,10 +94,8 @@ function ActivityInner({
   const expandAnim = useSharedValue(0);
   const shouldBeVisible = path.startsWith(focusedPath);
   const shouldBeVisibleAnim = useSharedValue(0);
-  const hasChildren = !!activityData.activities?.length;
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
-  const isParentOfFocused = focusedPath.startsWith(path);
 
   useEffect(() => {
     if (shouldBeVisible) {
