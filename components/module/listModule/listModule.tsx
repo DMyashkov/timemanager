@@ -155,16 +155,6 @@ function ListModuleInner({
   });
 
   const animStyles = {
-    activityItem: useAnimatedStyle(() => ({
-      height:
-        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82.2]),
-      borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
-      marginBottom: interpolate(
-        visibleAnim.value * maxOfAddAndExpandAnim.value,
-        [0, 1],
-        [0, 0],
-      ),
-    })),
     listModule: useAnimatedStyle(() => ({
       marginBottom: interpolate(
         visibleAnim.value,
@@ -280,6 +270,8 @@ function ListModuleInner({
           hasChildren={!!activityData.activities?.length}
           style={[styles.activityItem, animStyles.activityItem]}
           expandAnim={expandAnim}
+          focusAnim={focusAnim}
+          visibleAnim={visibleAnim}
         />
       )}
       <Animated.View

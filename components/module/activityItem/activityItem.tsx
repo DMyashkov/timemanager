@@ -37,6 +37,8 @@ interface ActivityProps {
   style?: object;
   onLayout?: (event: LayoutChangeEvent) => void;
   expandAnim?: Animated.SharedValue<number>;
+  focusAnim?: Animated.SharedValue<number>;
+  visibleAnim?: Animated.SharedValue<number>;
 }
 
 export default function Activity({
@@ -52,6 +54,8 @@ export default function Activity({
   style = {},
   onLayout,
   expandAnim = useSharedValue(0),
+  focusAnim = useSharedValue(0),
+  visibleAnim = useSharedValue(1),
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -98,6 +102,11 @@ export default function Activity({
         },
       ],
     })),
+    activityItem: useAnimatedStyle(() => ({
+      height:
+        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82.2]),
+      borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
+    })),
   };
 
   const handleFocus = () => {
@@ -109,7 +118,10 @@ export default function Activity({
   };
 
   return (
-    <Animated.View style={[styles.activity, style]} onLayout={onLayout}>
+    <Animated.View
+      style={[styles.activity, style, animStyles.activityItem]}
+      onLayout={onLayout}
+    >
       <View style={styles.activityInternal}>
         <View style={styles.buttonContainer}>
           {mergedButtons.map((button) => (
