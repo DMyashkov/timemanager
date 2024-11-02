@@ -35,9 +35,44 @@ type ActivityProps = {
   onFocusAdditional?: () => void;
   expandAnimOfParent?: SharedValue<number>;
   isLastInList?: boolean;
+  setIsVisibleAnimZero?: (value: boolean) => void;
 };
 
-export default function Activity({
+export default function Activity(props: ActivityProps) {
+  const [existState, setExistState] = useState(true);
+  const [isVisibleAnimZero, setIsVisibleAnimZero] = useState(false);
+  const { focusedPath } = useFocus();
+  const shouldBeVisible = props.path
+    ? props.path.startsWith(focusedPath)
+    : false;
+
+  const isPartOfFocusGroup =
+    props.path?.startsWith(focusedPath) ||
+    focusedPath.startsWith(props.path || "/");
+
+  useEffect(() => {
+    if (shouldBeVisible) {
+      setExistState(true);
+    }
+  }, [shouldBeVisible]);
+
+  useEffect(() => {
+    if (isVisibleAnimZero && !isPartOfFocusGroup) {
+      setExistState(false);
+    }
+  }, [isVisibleAnimZero, isPartOfFocusGroup]);
+
+  // Early return if `existState` is false, avoiding the render of the heavy logic component
+  if (!existState) {
+    return null;
+  }
+
+  return (
+    <ActivityInner {...props} setIsVisibleAnimZero={setIsVisibleAnimZero} />
+  );
+}
+
+function ActivityInner({
   activityData = data,
   level = 0,
   path = "/root",
@@ -47,26 +82,39 @@ export default function Activity({
   onFocusAdditional = () => {},
   expandAnimOfParent = useSharedValue(1),
   isLastInList = true,
+  setIsVisibleAnimZero = () => {},
 }: ActivityProps) {
-  const styles = useStyles();
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
+
+  const styles = useStyles();
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
 
   const expandAnim = useSharedValue(0);
   const shouldBeVisible = path.startsWith(focusedPath);
-  const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
+  const shouldBeVisibleAnim = useSharedValue(0);
   const hasChildren = !!activityData.activities?.length;
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
   const isParentOfFocused = focusedPath.startsWith(path);
 
   useEffect(() => {
-    shouldBeVisibleAnim.value = withTiming(shouldBeVisible ? 1 : 0, {
-      duration: 300,
-    });
-  }, [shouldBeVisible, shouldBeVisibleAnim]);
+    if (shouldBeVisible) {
+      setIsVisibleAnimZero(false);
+    }
+    shouldBeVisibleAnim.value = withTiming(
+      shouldBeVisible ? 1 : 0,
+      {
+        duration: 300,
+      },
+      (isFinished) => {
+        if (isFinished && !shouldBeVisible) {
+          runOnJS(setIsVisibleAnimZero)(true);
+        }
+      },
+    );
+  }, [shouldBeVisible, shouldBeVisibleAnim, setIsVisibleAnimZero]);
 
   const visibleAnim = useDerivedValue(() => {
     return shouldBeVisibleAnim.value * expandAnimOfParent.value;
