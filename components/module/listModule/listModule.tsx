@@ -38,7 +38,7 @@ type ActivityProps = {
   setIsVisibleAnimZero?: (value: boolean) => void;
 };
 
-export default function Activity(props: ActivityProps) {
+export default function ListModule(props: ActivityProps) {
   const [existState, setExistState] = useState(true);
   const [isVisibleAnimZero, setIsVisibleAnimZero] = useState(false);
   const { focusedPath } = useFocus();
@@ -68,11 +68,11 @@ export default function Activity(props: ActivityProps) {
   }
 
   return (
-    <ActivityInner {...props} setIsVisibleAnimZero={setIsVisibleAnimZero} />
+    <ListModuleInner {...props} setIsVisibleAnimZero={setIsVisibleAnimZero} />
   );
 }
 
-function ActivityInner({
+function ListModuleInner({
   activityData = data,
   level = 0,
   path = "/root",
@@ -303,7 +303,7 @@ function ActivityInner({
               }}
               keyExtractor={(activity) => activity.id.toString()}
               renderItem={({ item: activity }) => (
-                <Activity
+                <ListModule
                   key={activity.id}
                   activityData={activity}
                   level={level + 1}
