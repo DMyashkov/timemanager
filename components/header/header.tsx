@@ -30,12 +30,14 @@ interface HeaderProps {
   title: string;
   buttons?: Button[];
   showSearchBar?: boolean;
+  additionalTitleStyles?: object;
 }
 
 export default function Header({
   title,
   buttons = [],
   showSearchBar = false,
+  additionalTitleStyles = {},
 }: HeaderProps) {
   const styles = useStyles(); // Retrieve styles using the custom hook
   const { theme } = useTheme(); // Access the current theme from context
@@ -97,7 +99,7 @@ export default function Header({
         >
           <View style={styles.headerFirstRow}>
             <View style={styles.titleContainer}>
-              <Text style={styles.title}>{title}</Text>
+              <Text style={[styles.title, additionalTitleStyles]}>{title}</Text>
             </View>
             <View style={styles.buttonContainer}>
               {modifiedButtons.map((button) => (

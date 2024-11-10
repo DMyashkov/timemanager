@@ -24,6 +24,7 @@ export const THEME = {
       borderLight: "#EBEBEB",
       borderMedium: "#D3D3D3",
       black: "#373737",
+      darkGrey: "#8B8C90",
     },
   },
   dark: {
