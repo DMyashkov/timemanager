@@ -21,8 +21,14 @@ import data from "./exampleData";
 type ActivityData = {
   id: string;
   title: string;
+  type: moduleType;
   activities?: ActivityData[];
 };
+
+enum moduleType {
+  activity = 0,
+  project = 1,
+}
 
 type ActivityProps = {
   activityData?: ActivityData;
@@ -36,6 +42,7 @@ type ActivityProps = {
   expandAnimOfParent?: SharedValue<number>;
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
+  typeOfModule?: moduleType;
 };
 
 export default function ListModule(props: ActivityProps) {
@@ -83,6 +90,7 @@ function ListModuleInner({
   expandAnimOfParent = useSharedValue(1),
   isLastInList = true,
   setIsVisibleAnimZero = () => {},
+  typeOfModule = moduleType.activity,
 }: ActivityProps) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
@@ -275,55 +283,60 @@ function ListModuleInner({
           visibleAnim={visibleAnim}
         />
       )}
-      <Animated.View
-        style={[styles.childrenContainer, animStyles.childrenContainer]}
-      >
-        <Animated.View style={[styles.lineContainer, animStyles.lineContainer]}>
-          <Animated.View style={[styles.line, animStyles.line]} />
-        </Animated.View>
-        <View style={[styles.list]}>
-          <AddItem
-            onClickAddButton={onClickAddButton}
-            style={animStyles.addItem}
-          />
-          {isExpandAnimGreaterThanZero && (
-            <FlatList
-              data={activityData.activities}
-              contentContainerStyle={{
-                gap: 0,
-                paddingBottom: 0,
-                paddingTop: 0,
-              }}
-              keyExtractor={(activity) => activity.id.toString()}
-              renderItem={({ item: activity }) => (
-                <ListModule
-                  key={activity.id}
-                  activityData={activity}
-                  level={level + 1}
-                  isLastInList={
-                    activity.id === activityData.activities?.slice(-1)[0].id
-                  }
-                  path={`${path}/${activity.id}`}
-                  addScreen={addScreen}
-                  onClickAddButton={onClickAddButton}
-                  addAnim={addAnim}
-                  onFocusAdditional={onFocusAdditional}
-                  expandAnimOfParent={multipliedExpandAnim}
-                />
-              )}
-              style={{ overflow: "visible" }}
-              extraData={{
-                level,
-                path,
-                addScreen,
-                addAnim,
-                onFocusAdditional,
-                multipliedExpandAnim,
-              }}
+      {typeOfModule === moduleType.activity && (
+        <Animated.View
+          style={[styles.childrenContainer, animStyles.childrenContainer]}
+        >
+          <Animated.View
+            style={[styles.lineContainer, animStyles.lineContainer]}
+          >
+            <Animated.View style={[styles.line, animStyles.line]} />
+          </Animated.View>
+          <View style={[styles.list]}>
+            <AddItem
+              onClickAddButton={onClickAddButton}
+              style={animStyles.addItem}
             />
-          )}
-        </View>
-      </Animated.View>
+            {isExpandAnimGreaterThanZero && (
+              <FlatList
+                data={activityData.activities}
+                contentContainerStyle={{
+                  gap: 0,
+                  paddingBottom: 0,
+                  paddingTop: 0,
+                }}
+                keyExtractor={(activity) => activity.id.toString()}
+                renderItem={({ item: activity }) => (
+                  <ListModule
+                    key={activity.id}
+                    activityData={activity}
+                    level={level + 1}
+                    isLastInList={
+                      activity.id === activityData.activities?.slice(-1)[0].id
+                    }
+                    path={`${path}/${activity.id}`}
+                    addScreen={addScreen}
+                    onClickAddButton={onClickAddButton}
+                    addAnim={addAnim}
+                    onFocusAdditional={onFocusAdditional}
+                    expandAnimOfParent={multipliedExpandAnim}
+                    typeOfModule={activity.type}
+                  />
+                )}
+                style={{ overflow: "visible" }}
+                extraData={{
+                  level,
+                  path,
+                  addScreen,
+                  addAnim,
+                  onFocusAdditional,
+                  multipliedExpandAnim,
+                }}
+              />
+            )}
+          </View>
+        </Animated.View>
+      )}
     </Animated.View>
   );
 }
