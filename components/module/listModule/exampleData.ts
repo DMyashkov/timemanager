@@ -216,26 +216,36 @@ const data: ActivityData = {
 const data2 = {
   id: "root",
   title: "Root",
+  type: moduleType.activity,
   activities: [
     {
       id: "activity-1",
       title: "Activity 1",
+      type: moduleType.activity,
+
       activities: [
         {
           id: "activity-1-1",
           title: "Activity 1.1",
+          type: moduleType.activity,
+
           activities: [
             {
               id: "activity-1-1-1",
               title: "Activity 1.1.1",
+              type: moduleType.activity,
+
               activities: [
                 {
                   id: "activity-1-1-1-1",
                   title: "Activity 1.1.1.1",
+                  type: moduleType.activity,
+
                   activities: [
                     {
                       id: "activity-1-1-1-1-1",
                       title: "Activity 1.1.1.1.1",
+                      type: moduleType.activity,
                     },
                   ],
                 },
@@ -248,8 +258,9 @@ const data2 = {
     {
       id: "activity-2",
       title: "Activity 2",
+      type: moduleType.activity,
     },
   ],
 };
 
-export default data;
+export default data2;

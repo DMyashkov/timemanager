@@ -72,9 +72,9 @@ export default function ListModule(props: ActivityProps) {
   }, [isVisibleAnimZero, isPartOfFocusGroup]);
 
   // Early return if `existState` is false, avoiding the render of the heavy logic component
-  if (!existState) {
-    return null;
-  }
+  // if (!existState) {
+  //   return null;
+  // }
 
   return (
     <ListModuleInner {...props} setIsVisibleAnimZero={setIsVisibleAnimZero} />
