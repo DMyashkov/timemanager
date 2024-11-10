@@ -147,7 +147,8 @@ function ListModuleInner({
   }, [isFocused, focusAnim, setExpandedState]);
 
   const addVisiblity = useDerivedValue(() => {
-    return shouldBeVisibleAnim.value > 0 &&
+    return addAnim.value < 1 &&
+      shouldBeVisibleAnim.value > 0 &&
       shouldBeVisibleAnim.value < 1 &&
       shouldBeVisible
       ? 0
@@ -268,7 +269,7 @@ function ListModuleInner({
           isExpanded={expandedState}
           isFocused={isFocused}
           hasChildren={!!activityData.activities?.length}
-          style={[styles.activityItem, animStyles.activityItem]}
+          style={[styles.activityItem]}
           expandAnim={expandAnim}
           focusAnim={focusAnim}
           visibleAnim={visibleAnim}
