@@ -18,6 +18,8 @@ import type { SharedValue } from "react-native-reanimated/lib/typescript/Animate
 import { useLocalSearchParams } from "expo-router";
 
 import data from "./exampleData";
+import Project from "../projectItem/projectItem";
+import ProjectItem from "../projectItem/projectItem";
 type ActivityData = {
   id: string;
   title: string;
@@ -260,29 +262,32 @@ function ListModuleInner({
 
   return (
     <Animated.View style={[animStyles.listModule]}>
-      {level !== 0 && (
-        <ActivityItem
-          activityName={activityData.title}
-          onExpand={() => {
-            handleExpand();
-          }}
-          onFocus={() => {
-            setFocusedPath(path);
-            onFocusAdditional();
-          }}
-          onUnfocus={() => {
-            popFocusStack();
-            onFocusAdditional();
-          }}
-          isExpanded={expandedState}
-          isFocused={isFocused}
-          hasChildren={!!activityData.activities?.length}
-          style={[styles.activityItem]}
-          expandAnim={expandAnim}
-          focusAnim={focusAnim}
-          visibleAnim={visibleAnim}
-        />
-      )}
+      {level !== 0 &&
+        (typeOfModule === moduleType.activity ? (
+          <ActivityItem
+            activityName={activityData.title}
+            onExpand={() => {
+              handleExpand();
+            }}
+            onFocus={() => {
+              setFocusedPath(path);
+              onFocusAdditional();
+            }}
+            onUnfocus={() => {
+              popFocusStack();
+              onFocusAdditional();
+            }}
+            isExpanded={expandedState}
+            isFocused={isFocused}
+            hasChildren={!!activityData.activities?.length}
+            style={[styles.activityItem]}
+            expandAnim={expandAnim}
+            focusAnim={focusAnim}
+            visibleAnim={visibleAnim}
+          />
+        ) : (
+          <ProjectItem />
+        ))}
       {typeOfModule === moduleType.activity && (
         <Animated.View
           style={[styles.childrenContainer, animStyles.childrenContainer]}

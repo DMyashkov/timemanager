@@ -45,15 +45,12 @@ export default function Project({
   activityName = "Activity",
   activityColor = "",
   isFocused = false,
-  isExpanded = false,
   onExpand = () => {},
   onFocus = () => {},
   onUnfocus = () => {},
   hasChildren = false,
-  buttons = [],
   style = {},
   onLayout,
-  expandAnim = useSharedValue(0),
   focusAnim = useSharedValue(0),
   visibleAnim = useSharedValue(1),
 }: ActivityProps) {
@@ -62,49 +59,9 @@ export default function Project({
 
   activityColor = activityColor || theme.color.presets.green;
 
-  const mergedButtons = useMemo(() => {
-    const defaultButtons: ButtonActivityInfo[] = [
-      {
-        text: "Start timer",
-        color: theme.color.lightGrey, // Use theme color as default
-        onPress: () => {},
-      },
-      {
-        text: "Edit",
-        color: theme.color.mediumGrey,
-        onPress: () => {},
-      },
-    ];
-
-    const allButtons = [...defaultButtons];
-
-    // Overwrite any default button with the one provided in `buttons` if present
-    buttons.forEach((button, index) => {
-      allButtons[index] = {
-        ...allButtons[index],
-        ...button, // override properties
-      };
-    });
-
-    // Add additional buttons (beyond the default two)
-    if (buttons.length > defaultButtons.length) {
-      allButtons.push(...buttons.slice(defaultButtons.length));
-    }
-
-    return allButtons;
-  }, [buttons, theme]); // Only track necessary dependencies
-
   const animStyles = {
-    chevron: useAnimatedStyle(() => ({
-      transform: [
-        {
-          rotate: `${interpolate(expandAnim.value, [0, 1], [1, 0]) * 90}deg`,
-        },
-      ],
-    })),
     activityItem: useAnimatedStyle(() => ({
-      height:
-        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [40, 82.2]),
+      height: visibleAnim.value * 40,
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
     })),
   };
@@ -119,22 +76,10 @@ export default function Project({
 
   return (
     <Animated.View
-      style={[styles.activity, style, animStyles.activityItem]}
+      style={[styles.activity, animStyles.activityItem]}
       onLayout={onLayout}
     >
       <View style={styles.activityInternal}>
-        <View style={styles.buttonContainer}>
-          {mergedButtons.map((button) => (
-            <TouchableOpacity
-              style={[{ backgroundColor: button.color }, styles.button]}
-              key={button.text}
-              onPress={button.onPress}
-              activeOpacity={0.75}
-            >
-              <Text style={styles.buttonText}>{button.text}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
         <TouchableOpacity
           style={styles.collapsedActivity}
           onPress={handleFocus}
@@ -159,19 +104,6 @@ export default function Project({
           <View style={styles.textContiner}>
             <Text style={styles.text}>{activityName}</Text>
           </View>
-
-          {hasChildren && (
-            <TouchableOpacity
-              style={styles.chevronContainer}
-              onPress={onExpand}
-            >
-              <Animated.View
-                style={[styles.chevronInnerContainer, animStyles.chevron]}
-              >
-                <ChevronDown style={styles.chevron} fill={activityColor} />
-              </Animated.View>
-            </TouchableOpacity>
-          )}
         </TouchableOpacity>
       </View>
     </Animated.View>
