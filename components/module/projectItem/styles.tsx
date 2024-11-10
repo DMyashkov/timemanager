@@ -11,6 +11,7 @@ export default function useStyles() {
       justifyContent: "space-between",
       alignItems: "center",
       gap: 7,
+      paddingTop: 5,
     },
     leftButtonTag: {
       aspectRatio: 23 / 26,
@@ -25,7 +26,8 @@ export default function useStyles() {
       alignItems: "center",
       paddingTop: 7,
       paddingBottom: 7,
-      paddingLeft: 11,
+      paddingLeft: 7,
+      paddingRight: 3,
     },
     chevronContainer: {
       justifyContent: "center",
@@ -52,7 +54,7 @@ export default function useStyles() {
     activity: {
       height: 0,
       borderRadius: 10,
-      borderColor: theme.color.borderMedium,
+      borderColor: theme.color.presets.green,
       borderWidth: 0.18,
       shadowColor: "#000", // Black shadow
       backgroundColor: "#fff",
@@ -87,6 +89,5 @@ export default function useStyles() {
       flexDirection: "column",
       justifyContent: "flex-end",
     },
-    chevronInnerContainer: {},
   });
 }

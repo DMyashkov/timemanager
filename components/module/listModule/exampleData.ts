@@ -15,11 +15,11 @@ const data: ActivityData = {
   title: "Root",
   type: moduleType.activity,
   activities: [
-    {
-      id: "project-1",
-      title: "Project 1",
-      type: moduleType.project,
-    },
+    // {
+    //   id: "project-1",
+    //   title: "Project 1",
+    //   type: moduleType.project,
+    // },
     {
       id: "activity-1",
       title: "Activity 1",
@@ -189,6 +189,7 @@ const data: ActivityData = {
     {
       id: "activity-3",
       title: "Activity 3",
+      type: moduleType.activity,
       activities: [
         {
           id: "activity-3-1",

@@ -286,7 +286,27 @@ function ListModuleInner({
             visibleAnim={visibleAnim}
           />
         ) : (
-          <ProjectItem />
+          <ProjectItem
+            activityName={activityData.title}
+            onExpand={() => {
+              handleExpand();
+            }}
+            onFocus={() => {
+              setFocusedPath(path);
+              onFocusAdditional();
+            }}
+            onUnfocus={() => {
+              popFocusStack();
+              onFocusAdditional();
+            }}
+            isExpanded={expandedState}
+            isFocused={isFocused}
+            hasChildren={!!activityData.activities?.length}
+            style={[styles.activityItem]}
+            expandAnim={expandAnim}
+            focusAnim={focusAnim}
+            visibleAnim={visibleAnim}
+          />
         ))}
       {typeOfModule === moduleType.activity && (
         <Animated.View
@@ -305,15 +325,10 @@ function ListModuleInner({
             {isExpandAnimGreaterThanZero && (
               <FlatList
                 data={activityData.activities}
-                contentContainerStyle={{
-                  gap: 0,
-                  paddingBottom: 0,
-                  paddingTop: 0,
-                }}
                 keyExtractor={(activity) => activity.id.toString()}
                 renderItem={({ item: activity }) => (
                   <ListModule
-                    key={activity.id}
+                    // key={activity.id}
                     activityData={activity}
                     level={level + 1}
                     isLastInList={
@@ -329,14 +344,6 @@ function ListModuleInner({
                   />
                 )}
                 style={{ overflow: "visible" }}
-                extraData={{
-                  level,
-                  path,
-                  addScreen,
-                  addAnim,
-                  onFocusAdditional,
-                  multipliedExpandAnim,
-                }}
               />
             )}
           </View>

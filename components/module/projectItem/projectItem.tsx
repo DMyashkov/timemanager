@@ -17,6 +17,7 @@ import ChevronDown from "@assets/icons/chevron-down.svg";
 import ChevronLeft from "@assets/icons/chevron-left.svg";
 import Unfocus from "@assets/icons/unfocus.svg";
 import { useMemo } from "react";
+import At from "@assets/icons/at.svg";
 
 export interface ButtonActivityInfo {
   text: string;
@@ -41,16 +42,19 @@ interface ActivityProps {
   visibleAnim?: Animated.SharedValue<number>;
 }
 
-export default function Project({
+export default function Activity({
   activityName = "Activity",
   activityColor = "",
   isFocused = false,
+  isExpanded = false,
   onExpand = () => {},
   onFocus = () => {},
   onUnfocus = () => {},
   hasChildren = false,
+  buttons = [],
   style = {},
   onLayout,
+  expandAnim = useSharedValue(0),
   focusAnim = useSharedValue(0),
   visibleAnim = useSharedValue(1),
 }: ActivityProps) {
@@ -62,7 +66,7 @@ export default function Project({
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height: visibleAnim.value * 40,
-      borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 0.18, 0.18]),
+      borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 3, 3]),
     })),
   };
 
@@ -76,7 +80,7 @@ export default function Project({
 
   return (
     <Animated.View
-      style={[styles.activity, animStyles.activityItem]}
+      style={[styles.activity, style, animStyles.activityItem]}
       onLayout={onLayout}
     >
       <View style={styles.activityInternal}>
@@ -93,11 +97,11 @@ export default function Project({
             </TouchableOpacity>
           ) : (
             <View style={styles.leftButtonContainer}>
-              <Tag
+              <At
                 style={styles.leftButtonTag}
                 fill={activityColor}
                 width={23}
-                height={26}
+                height={23}
               />
             </View>
           )}
