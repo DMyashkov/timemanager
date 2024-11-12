@@ -5,6 +5,7 @@ export const THEME = {
   light: {
     font: FONTS,
     fontSize: {
+      extraExtraLarge: 80,
       large: 25,
       mediumBig: 18,
       medium: 17,

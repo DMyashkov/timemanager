@@ -15,6 +15,7 @@ export default function TabsLayout() {
     >
       <Tabs.Screen name="watch" />
       <Tabs.Screen name="workplace" />
+      <Tabs.Screen name="styles/watchStyles" options={{ href: null }} />
     </Tabs>
   );
 }

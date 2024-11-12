@@ -251,6 +251,18 @@ const data2 = {
                 },
               ],
             },
+            {
+              id: "activity-1-1-2",
+              title: "Activity 1.1.2",
+              type: moduleType.activity,
+              activities: [
+                {
+                  id: "activity-1-1-2-1",
+                  title: "Activity 1.1.2.1",
+                  type: moduleType.activity,
+                },
+              ],
+            },
           ],
         },
       ],

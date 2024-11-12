@@ -7,10 +7,12 @@ import ClearModeIcon from "@assets/icons/circle-check-regular.svg";
 import FullModeIcon from "@assets/icons/circle-check-solid.svg";
 import ThreeDots from "@assets/icons/three-dots.svg";
 import { useState } from "react";
+import useStyles from "./styles/watchStyles";
 
 export default function Watch() {
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
+  const styles = useStyles();
 
   return (
     <View style={styles.watchScreen}>
@@ -45,13 +47,11 @@ export default function Watch() {
           },
         ]}
       />
+      <View style={styles.content}>
+        <View style={styles.clock}>
+          <Text style={styles.time}>25:43</Text>
+        </View>
+      </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  watchScreen: {
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-});
