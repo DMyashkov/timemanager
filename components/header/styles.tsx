@@ -20,9 +20,9 @@ export default function useStyles() {
       justifyContent: "center",
     },
     title: {
-      fontSize: theme.fontSize.large, // Use dynamic font size from theme
-      fontFamily: theme.font.semibold, // Use dynamic font family from theme
-      color: theme.color.black, // Use dynamic color from theme
+      fontSize: theme.fontSize.large,
+      fontFamily: theme.font.semibold,
+      color: theme.color.black,
     },
     headerFirstRow: {
       flexDirection: "row",
@@ -67,7 +67,7 @@ export default function useStyles() {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: theme.color.lightGrey,
+      backgroundColor: theme.color.veryLightGrey,
     },
     selectedOption: {
       backgroundColor: theme.color.mediumGrey,

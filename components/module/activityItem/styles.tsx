@@ -52,7 +52,7 @@ export default function useStyles() {
     activity: {
       height: 0,
       borderRadius: 10,
-      borderColor: theme.color.borderMedium,
+      borderColor: theme.color.lightGrey,
       borderWidth: 0.18,
       shadowColor: "#000", // Black shadow
       backgroundColor: "#fff",

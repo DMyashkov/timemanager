@@ -66,7 +66,7 @@ export default function Activity({
     const defaultButtons: ButtonActivityInfo[] = [
       {
         text: "Start timer",
-        color: theme.color.lightGrey, // Use theme color as default
+        color: theme.color.veryLightGrey, // Use theme color as default
         onPress: () => {},
       },
       {

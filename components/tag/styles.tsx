@@ -3,7 +3,7 @@ import { useTheme } from "@context/ThemeContext";
 
 export default function useStyles(isProject = false) {
   const { theme } = useTheme();
-  const borderWidthProject = 2;
+  const borderWidthProject = 2.2;
 
   return !isProject
     ? StyleSheet.create({
@@ -12,7 +12,7 @@ export default function useStyles(isProject = false) {
           flexDirection: "row",
           gap: 4,
           alignItems: "center",
-          padding: 6,
+          padding: 6.5,
           borderRadius: 8,
           paddingRight: 7,
           paddingLeft: 7,
@@ -37,7 +37,7 @@ export default function useStyles(isProject = false) {
           flexDirection: "row",
           gap: 3,
           alignItems: "center",
-          padding: 6 - borderWidthProject,
+          padding: 6.5 - borderWidthProject,
           borderRadius: 8,
           paddingRight: 7 - borderWidthProject,
           paddingLeft: 7 - borderWidthProject,

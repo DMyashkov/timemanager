@@ -10,7 +10,7 @@ export default function useStyles() {
       marginTop: 8,
     },
     lineContainer: {
-      borderColor: theme.color.borderMedium,
+      borderColor: theme.color.lightGrey,
       width: 35,
       height: "100%",
       flexDirection: "row",
@@ -27,7 +27,7 @@ export default function useStyles() {
     },
     line: {
       width: 5,
-      borderColor: theme.color.borderMedium,
+      borderColor: theme.color.lightGrey,
       borderLeftWidth: 1.5,
       borderBottomWidth: 1.5,
       marginRight: 5,
@@ -47,7 +47,7 @@ export default function useStyles() {
       flex: 1,
     },
     emptyView: {
-      height: 0,
+      height: 300,
       flex: 1,
     },
   });
