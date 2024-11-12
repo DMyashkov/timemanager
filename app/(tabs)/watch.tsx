@@ -49,6 +49,7 @@ export default function Watch() {
   const animStyles = {
     lapsView: useAnimatedStyle(() => ({
       height: fullModeAnim.value * lapsViewMaxHeight,
+      marginTop: fullModeAnim.value * styles.lapsView.marginTop,
     })),
   };
 
