@@ -8,6 +8,7 @@ import FullModeIcon from "@assets/icons/circle-check-solid.svg";
 import ThreeDots from "@assets/icons/three-dots.svg";
 import { useState } from "react";
 import useStyles from "./styles/watchStyles";
+import Tag from "@components/tag/tagComponent";
 
 export default function Watch() {
   const { theme } = useTheme();
@@ -49,6 +50,10 @@ export default function Watch() {
       />
       <View style={styles.content}>
         <View style={styles.clock}>
+          <View style={styles.tagContainer}>
+            <Tag />
+            <Tag isProject={true} />
+          </View>
           <Text style={styles.time}>25:43</Text>
         </View>
       </View>

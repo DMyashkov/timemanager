@@ -18,10 +18,19 @@ export default function useStyles() {
     },
     clock: {
       // backgroundColor: "red",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
     },
     time: {
       fontSize: theme.fontSize.extraExtraLarge,
       color: theme.color.black,
+    },
+    tagContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
     },
   });
   return styles;

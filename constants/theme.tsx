@@ -9,11 +9,16 @@ export const THEME = {
       large: 25,
       mediumBig: 18,
       medium: 17,
+      mediumSmall: 15,
       small: 14,
     },
     color: {
       presets: {
-        green: "#97BB78",
+        green: {
+          light: "#97BB78A6",
+          medium: "#97BB78",
+          dark: "#688153",
+        },
       },
       searchBar: {
         background: "#EFEFF0",

@@ -60,7 +60,7 @@ export default function Activity({
   const styles = useStyles();
   const { theme } = useTheme();
 
-  activityColor = activityColor || theme.color.presets.green;
+  activityColor = activityColor || theme.color.presets.green.medium;
 
   const mergedButtons = useMemo(() => {
     const defaultButtons: ButtonActivityInfo[] = [
