@@ -6,12 +6,12 @@ export default function useStyles() {
 
   return StyleSheet.create({
     collapsedProject: {
-      height: 40,
+      height: 43,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingLeft: 7,
-      paddingRight: 7,
+      marginTop: -4.5,
+      paddingTop: 4.5,
     },
     leftButtonTag: {
       aspectRatio: 1,
@@ -103,6 +103,28 @@ export default function useStyles() {
       fontFamily: theme.font.semibold,
       color: theme.color.presets.green.medium,
       fontSize: theme.fontSize.medium,
+    },
+    secondRow: {
+      flexDirection: "column",
+      justifyContent: "center",
+      overflow: "hidden",
+      height: 45,
+    },
+    innerSecondRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      flex: 1,
+      alignItems: "center",
+      marginBottom: 3,
+      // marginLeft: 3,
+    },
+    touchableView: {
+      paddingLeft: 7,
+      paddingRight: 7,
+    },
+    tag: {
+      marginBottom: 7,
+      marginRight: 1,
     },
   });
 }

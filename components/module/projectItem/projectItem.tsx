@@ -28,32 +28,27 @@ interface ActivityProps {
   activityName?: string;
   activityColor?: string;
   isFocused?: boolean;
-  isExpanded?: boolean;
   buttons?: ButtonActivityInfo[];
   onExpand?: () => void;
   onFocus?: () => void;
   onUnfocus?: () => void;
-  hasChildren?: boolean;
   style?: object;
-  expandAnim?: Animated.SharedValue<number>;
   focusAnim?: Animated.SharedValue<number>;
   visibleAnim?: Animated.SharedValue<number>;
+  isInHalfFocusedMode?: boolean;
 }
 
 export default function Activity({
   activityName = "Activity",
   activityColor = "",
   isFocused = false,
-  isExpanded = false,
-  onExpand = () => {},
   onFocus = () => {},
   onUnfocus = () => {},
-  hasChildren = false,
   buttons = [],
   style = {},
-  expandAnim = useSharedValue(0),
   focusAnim = useSharedValue(0),
   visibleAnim = useSharedValue(1),
+  isInHalfFocusedMode = false,
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -94,18 +89,55 @@ export default function Activity({
 
   const [isUnfocusStarted, setIsUnfocusStarted] = useState<boolean>(false);
 
-  const hoursOpacity = useDerivedValue(() => {
-    return focusAnim.value * (isUnfocusStarted ? 0 : 1);
-  });
-
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height:
-        visibleAnim.value * interpolate(focusAnim.value, [0, 1], [43, 87]),
+        visibleAnim.value *
+        interpolate(
+          focusAnim.value,
+          [0, 1],
+          [
+            !isInHalfFocusedMode
+              ? styles.collapsedProject.height
+              : styles.collapsedProject.height + styles.secondRow.height,
+            styles.collapsedProject.height +
+              styles.secondRow.height +
+              styles.buttonContainer.height -
+              1,
+          ],
+        ),
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 3, 3]),
     })),
     hoursText: useAnimatedStyle(() => ({
-      opacity: hoursOpacity.value,
+      opacity: !isInHalfFocusedMode ? focusAnim.value : 1,
+    })),
+    secondRow: useAnimatedStyle(() => ({
+      height: interpolate(
+        focusAnim.value,
+        [0, 1],
+        [
+          !isInHalfFocusedMode ? 0 : styles.secondRow.height,
+          styles.secondRow.height,
+        ],
+      ),
+    })),
+    tag: useAnimatedStyle(() => ({
+      marginBottom: interpolate(
+        focusAnim.value,
+        [0, 1],
+        [
+          !isInHalfFocusedMode ? 0 : styles.tag.marginBottom,
+          styles.tag.marginBottom,
+        ],
+      ),
+      marginRight: interpolate(
+        focusAnim.value,
+        [0, 1],
+        [
+          !isInHalfFocusedMode ? 0 : styles.tag.marginRight,
+          styles.tag.marginRight,
+        ],
+      ),
     })),
   };
 
@@ -138,6 +170,7 @@ export default function Activity({
             handleFocus();
             setIsUnfocusStarted(isFocused);
           }}
+          style={styles.touchableView}
         >
           <Animated.View style={[styles.collapsedProject]}>
             <View style={styles.collapsedProjectLeft}>
@@ -166,6 +199,11 @@ export default function Activity({
               <Animated.View style={animStyles.hoursText}>
                 <Text style={styles.hoursText}>12 hours</Text>
               </Animated.View>
+            </View>
+          </Animated.View>
+          <Animated.View style={[styles.secondRow, animStyles.secondRow]}>
+            <View style={styles.innerSecondRow}>
+              <Tag style={animStyles.tag} />
             </View>
           </Animated.View>
         </TouchableOpacity>

@@ -299,11 +299,8 @@ function ListModuleInner({
               popFocusStack();
               onFocusAdditional();
             }}
-            isExpanded={expandedState}
             isFocused={isFocused}
-            hasChildren={!!activityData.activities?.length}
             style={[styles.activityItem]}
-            expandAnim={expandAnim}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
           />
