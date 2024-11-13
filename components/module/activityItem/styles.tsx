@@ -86,6 +86,7 @@ export default function useStyles() {
       overflow: "hidden",
       flexDirection: "column",
       justifyContent: "flex-end",
+      borderRadius: 8,
     },
     chevronInnerContainer: {},
   });

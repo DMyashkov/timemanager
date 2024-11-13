@@ -225,6 +225,11 @@ const data2 = {
 
       activities: [
         {
+          id: "project-1",
+          title: "Project 1",
+          type: moduleType.project,
+        },
+        {
           id: "activity-1-1",
           title: "Activity 1.1",
           type: moduleType.activity,

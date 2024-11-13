@@ -11,7 +11,6 @@ export default function useStyles() {
       justifyContent: "space-between",
       alignItems: "center",
       gap: 7,
-      paddingTop: 5,
     },
     leftButtonTag: {
       aspectRatio: 23 / 26,
@@ -24,7 +23,7 @@ export default function useStyles() {
     leftButtonContainer: {
       justifyContent: "center",
       alignItems: "center",
-      paddingTop: 7,
+      paddingTop: 8,
       paddingBottom: 7,
       paddingLeft: 7,
       paddingRight: 3,
@@ -58,6 +57,7 @@ export default function useStyles() {
       borderWidth: 0.18,
       shadowColor: "#000", // Black shadow
       backgroundColor: "#fff",
+      width: "100%",
       shadowOpacity: 0.1, // 25% opacity
       shadowOffset: {
         width: 0,
@@ -72,6 +72,8 @@ export default function useStyles() {
       borderTopStartRadius: 10,
       backgroundColor: "#0000",
       overflow: "hidden",
+      borderBottomWidth: 3,
+      borderBottomColor: theme.color.presets.green.medium,
     },
     button: {
       flex: 1,
@@ -88,6 +90,9 @@ export default function useStyles() {
       overflow: "hidden",
       flexDirection: "column",
       justifyContent: "flex-end",
+      borderRadius: 8,
     },
+    collapsedActivityOuter: {},
+    secondRow: {},
   });
 }
