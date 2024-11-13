@@ -1,6 +1,7 @@
 import { Text, TouchableOpacity } from "react-native";
 import Animated from "react-native-reanimated";
 import useStyles from "./styles";
+import { Link, router } from "expo-router";
 // import { useTheme } from "@context/ThemeContext";
 
 // Add props

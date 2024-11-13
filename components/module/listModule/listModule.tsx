@@ -15,11 +15,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocus } from "@/context/FocusContext";
 import AddItem from "../addItem/addItem";
 import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 import data from "./exampleData";
 import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
+import { useNavigation } from "expo-router";
 type ActivityData = {
   id: string;
   title: string;
@@ -86,7 +87,9 @@ function ListModuleInner({
   level = 0,
   path = "/root",
   addScreen = false,
-  onClickAddButton = () => {},
+  onClickAddButton = () => {
+    router.push("/add");
+  },
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
   expandAnimOfParent = useSharedValue(1),

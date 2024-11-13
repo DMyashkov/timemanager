@@ -20,7 +20,7 @@ export default function useStyles() {
       justifyContent: "center",
     },
     title: {
-      fontSize: theme.fontSize.large,
+      fontSize: theme.fontSize.largeLarge,
       fontFamily: theme.font.semibold,
       color: theme.color.black,
     },

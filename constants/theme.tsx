@@ -6,7 +6,7 @@ export const THEME = {
     font: FONTS,
     fontSize: {
       extraExtraLarge: 80,
-      large: 25,
+      largeLarge: 25,
       largeSmall: 20,
       mediumBig: 18,
       medium: 17,
@@ -32,6 +32,7 @@ export const THEME = {
       lightGrey: "#D3D3D3",
       black: "#373737",
       darkGrey: "#8B8C90",
+      sysBlue: "#007AFF",
     },
   },
   dark: {

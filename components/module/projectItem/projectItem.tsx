@@ -102,8 +102,7 @@ export default function Activity({
               : styles.collapsedProject.height + styles.secondRow.height,
             styles.collapsedProject.height +
               styles.secondRow.height +
-              styles.buttonContainer.height -
-              1,
+              styles.buttonContainer.height,
           ],
         ),
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 3, 3]),
