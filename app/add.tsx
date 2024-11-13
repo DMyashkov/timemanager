@@ -1,13 +1,13 @@
 import { View, Text } from "react-native";
-// import useStyles from "./styles";
+import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
 
 export default function AddScreen() {
-  // const styles = useStyles();
+  const styles = useStyles();
   const { theme } = useTheme();
 
   return (
-    <View>
+    <View style={styles.addScreen}>
       <Text>AddScreen</Text>
     </View>
   );

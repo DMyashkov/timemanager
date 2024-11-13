@@ -37,12 +37,10 @@ export default function useStyles() {
       // marginTop: 8,
     },
     emptyTop: {
-      backgroundColor: "red",
       height: 0,
       flex: 1,
     },
     emptyBottom: {
-      backgroundColor: "red",
       height: 0,
       flex: 1,
     },
