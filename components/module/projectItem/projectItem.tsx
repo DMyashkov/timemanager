@@ -8,6 +8,7 @@ import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import useStyles from "./styles";
@@ -91,11 +92,20 @@ export default function Activity({
     return allButtons;
   }, [buttons, theme]); // Only track necessary dependencies
 
+  const [isUnfocusStarted, setIsUnfocusStarted] = useState<boolean>(false);
+
+  const hoursOpacity = useDerivedValue(() => {
+    return focusAnim.value * (isUnfocusStarted ? 0 : 1);
+  });
+
   const animStyles = {
     activityItem: useAnimatedStyle(() => ({
       height:
         visibleAnim.value * interpolate(focusAnim.value, [0, 1], [43, 87]),
       borderWidth: interpolate(visibleAnim.value, [0, 0.1, 1], [0, 3, 3]),
+    })),
+    hoursText: useAnimatedStyle(() => ({
+      opacity: hoursOpacity.value,
     })),
   };
 
@@ -124,23 +134,22 @@ export default function Activity({
         </View>
 
         <TouchableOpacity
-          style={styles.collapsedActivityOuter}
-          onPress={handleFocus}
+          onPress={() => {
+            handleFocus();
+            setIsUnfocusStarted(isFocused);
+          }}
         >
           <Animated.View style={[styles.collapsedProject]}>
             <View style={styles.collapsedProjectLeft}>
               {isFocused ? (
-                <TouchableOpacity
-                  style={styles.leftButtonContainer}
-                  onPress={handleFocus}
-                >
+                <View style={styles.leftButtonContainer}>
                   <Unfocus
                     style={styles.leftButtonUnfocus}
                     fill={activityColor}
                     width={23}
                     height={23}
                   />
-                </TouchableOpacity>
+                </View>
               ) : (
                 <View style={styles.leftButtonContainer}>
                   <At
@@ -154,6 +163,9 @@ export default function Activity({
               <View style={styles.textContiner}>
                 <Text style={styles.text}>{activityName}</Text>
               </View>
+              <Animated.View style={animStyles.hoursText}>
+                <Text style={styles.hoursText}>12 hours</Text>
+              </Animated.View>
             </View>
           </Animated.View>
         </TouchableOpacity>

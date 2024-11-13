@@ -10,6 +10,8 @@ export default function useStyles() {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingLeft: 7,
+      paddingRight: 7,
     },
     leftButtonTag: {
       aspectRatio: 1,
@@ -24,7 +26,6 @@ export default function useStyles() {
       alignItems: "center",
       paddingTop: 8,
       paddingBottom: 7,
-      paddingLeft: 7,
       paddingRight: 3,
     },
     chevronContainer: {
@@ -91,14 +92,17 @@ export default function useStyles() {
       justifyContent: "flex-end",
       borderRadius: 8,
     },
-    collapsedActivityOuter: {},
-    secondRow: {},
     collapsedProjectLeft: {
       flexDirection: "row",
       flex: 1,
       alignItems: "center",
       justifyContent: "flex-start",
       gap: 7,
+    },
+    hoursText: {
+      fontFamily: theme.font.semibold,
+      color: theme.color.presets.green.medium,
+      fontSize: theme.fontSize.medium,
     },
   });
 }
