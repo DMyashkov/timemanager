@@ -42,7 +42,7 @@ export default function Header({
   const styles = useStyles(); // Retrieve styles using the custom hook
   const { theme } = useTheme(); // Access the current theme from context
   const [searchText, setSearchText] = useState(""); // State for managing input text
-  const [isExpanded, setIsExpanded] = useState(true); // State for header expansion
+  const [isExpanded, setIsExpanded] = useState<boolean>(false); // State for header expansion
   const [selectedOption, setSelectedOption] = useState("Activities"); // "Activities" or "Projects"
 
   // Initialize the animated value
@@ -67,7 +67,7 @@ export default function Header({
   };
   useEffect(() => {
     // toggle options
-    expandAnim.value = withTiming(Number(!isExpanded), { duration: 250 });
+    expandAnim.value = withTiming(isExpanded ? 1 : 0, { duration: 250 });
   }, [isExpanded, expandAnim]);
 
   const handleBarsPress = () => {
