@@ -127,34 +127,35 @@ export default function Activity({
           style={styles.collapsedActivityOuter}
           onPress={handleFocus}
         >
-          <Animated.View style={[styles.collapsedActivity]}>
-            {isFocused ? (
-              <TouchableOpacity
-                style={styles.leftButtonContainer}
-                onPress={handleFocus}
-              >
-                <Unfocus
-                  style={styles.leftButtonUnfocus}
-                  fill={activityColor}
-                />
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.leftButtonContainer}>
-                <At
-                  style={styles.leftButtonTag}
-                  fill={activityColor}
-                  width={23}
-                  height={23}
-                />
+          <Animated.View style={[styles.collapsedProject]}>
+            <View style={styles.collapsedProjectLeft}>
+              {isFocused ? (
+                <TouchableOpacity
+                  style={styles.leftButtonContainer}
+                  onPress={handleFocus}
+                >
+                  <Unfocus
+                    style={styles.leftButtonUnfocus}
+                    fill={activityColor}
+                    width={23}
+                    height={23}
+                  />
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.leftButtonContainer}>
+                  <At
+                    style={styles.leftButtonTag}
+                    fill={activityColor}
+                    width={23}
+                    height={23}
+                  />
+                </View>
+              )}
+              <View style={styles.textContiner}>
+                <Text style={styles.text}>{activityName}</Text>
               </View>
-            )}
-            <View style={styles.textContiner}>
-              <Text style={styles.text}>{activityName}</Text>
             </View>
           </Animated.View>
-          {/* <View style={styles.secondRow}> */}
-          {/*   <Tag /> */}
-          {/* </View> */}
         </TouchableOpacity>
       </View>
     </Animated.View>

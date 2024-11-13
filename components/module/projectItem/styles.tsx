@@ -5,15 +5,14 @@ export default function useStyles() {
   const { theme } = useTheme();
 
   return StyleSheet.create({
-    collapsedActivity: {
+    collapsedProject: {
       height: 40,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      gap: 7,
     },
     leftButtonTag: {
-      aspectRatio: 23 / 26,
+      aspectRatio: 1,
       height: "100%",
     },
     leftButtonUnfocus: {
@@ -94,5 +93,12 @@ export default function useStyles() {
     },
     collapsedActivityOuter: {},
     secondRow: {},
+    collapsedProjectLeft: {
+      flexDirection: "row",
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "flex-start",
+      gap: 7,
+    },
   });
 }
