@@ -55,7 +55,7 @@ export default function useStyles() {
       borderRadius: 10,
       borderColor: theme.color.presets.green.medium,
       borderWidth: 0.18,
-      backgroundColor: "#fff",
+      backgroundColor:theme.color.white,
       width: "100%",
       ...theme.shadow,
     },

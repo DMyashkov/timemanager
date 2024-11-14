@@ -31,7 +31,7 @@ export default function useStyles() {
     },
     mainInner: {
       flex: 1,
-      backgroundColor: "#fff",
+      backgroundColor: theme.color.white,
       borderRadius: 5,
     },
     buttonText: {

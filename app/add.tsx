@@ -1,7 +1,8 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
-import Switch from "@/components/basic/switch/switch";
+import Switch from "@components/basic/switch/switch";
+import TextField from "@components/form/textField";
 
 export default function AddScreen() {
   const styles = useStyles();
@@ -22,6 +23,9 @@ export default function AddScreen() {
             },
           ]}
         />
+        <ScrollView style={styles.scrollView}>
+          <TextField />
+        </ScrollView>
       </View>
     </View>
   );

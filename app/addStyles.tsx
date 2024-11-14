@@ -13,7 +13,10 @@ export default function useStyles() {
       paddingTop: 11,
       paddingLeft: 22,
       paddingRight: 22,
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
     },
   });
 }
-

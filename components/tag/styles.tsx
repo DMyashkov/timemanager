@@ -31,7 +31,7 @@ export default function useStyles(isProject = false) {
       })
     : StyleSheet.create({
         container: {
-          backgroundColor: "#fff",
+          backgroundColor:theme.color.white,
           borderColor: theme.color.presets.green.medium,
           borderWidth: borderWidthProject,
           flexDirection: "row",

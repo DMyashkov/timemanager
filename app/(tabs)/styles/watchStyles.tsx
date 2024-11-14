@@ -6,7 +6,7 @@ export default function useStyles() {
 
   const styles = StyleSheet.create({
     watchScreen: {
-      backgroundColor: "#fff",
+      backgroundColor: theme.color.white,
       flex: 1,
     },
     content: {
@@ -73,7 +73,7 @@ export default function useStyles() {
     textInsideButton: {
       fontSize: theme.fontSize.largeSmall,
       fontFamily: theme.font.regular,
-      color: "#fff",
+      color: theme.color.white,
     },
     emptyView: {
       height: 5,

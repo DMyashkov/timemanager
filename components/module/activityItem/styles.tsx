@@ -54,7 +54,7 @@ export default function useStyles() {
       borderRadius: 10,
       borderColor: theme.color.lightGrey,
       borderWidth: 0.18,
-      backgroundColor: "#fff",
+      backgroundColor:theme.color.white,
       ...theme.shadow,
     },
     buttonContainer: {

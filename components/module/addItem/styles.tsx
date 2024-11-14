@@ -13,7 +13,7 @@ export default function useStyles() {
       justifyContent: "center",
       alignItems: "center",
       borderRadius: 10,
-      backgroundColor: "#fff",
+      backgroundColor:theme.color.white,
     },
     addtext: {
       color: theme.color.red,
