@@ -28,10 +28,13 @@ export default function Switch({ buttons = [] }: SwitchProps) {
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
 
   useEffect(() => {
-    positionAnim.value = withTiming(selectedButtonIndex, {
-      duration: 225,
-      easing: Easing.inOut(Easing.ease),
-    });
+    // Update positionAnim only if the selected index changes
+    if (positionAnim.value !== selectedButtonIndex) {
+      positionAnim.value = withTiming(selectedButtonIndex, {
+        duration: 225,
+        easing: Easing.inOut(Easing.ease),
+      });
+    }
   }, [selectedButtonIndex, positionAnim]);
 
   const animStyles = {
