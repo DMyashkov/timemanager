@@ -6,8 +6,13 @@ export default function useStyles() {
 
   return StyleSheet.create({
     addScreen: {
-      backgroundColor: "#fff",
+      backgroundColor: theme.color.coldGrey,
       flex: 1,
+    },
+    innerAddScreen: {
+      paddingTop: 11,
+      paddingLeft: 22,
+      paddingRight: 22,
     },
   });
 }

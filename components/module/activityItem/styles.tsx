@@ -54,14 +54,8 @@ export default function useStyles() {
       borderRadius: 10,
       borderColor: theme.color.lightGrey,
       borderWidth: 0.18,
-      shadowColor: "#000", // Black shadow
       backgroundColor: "#fff",
-      shadowOpacity: 0.1, // 25% opacity
-      shadowOffset: {
-        width: 0,
-        height: 4,
-      },
-      shadowRadius: 13,
+      ...theme.shadow,
     },
     buttonContainer: {
       height: 42,

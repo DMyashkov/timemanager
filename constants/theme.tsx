@@ -28,11 +28,31 @@ export const THEME = {
       veryLightGrey: "#FBFBFB",
       red: "#FF4E4E",
       mediumGrey: "#EEEEEE",
+      coldGrey: "#F2F3F5",
+      colderGrey: "#ECEDEE",
       borderLight: "#EBEBEB",
       lightGrey: "#D3D3D3",
       black: "#373737",
       darkGrey: "#8B8C90",
       sysBlue: "#007AFF",
+    },
+    shadow: {
+      shadowColor: "#000", // Black shadow
+      shadowOpacity: 0.1, // 25% opacity
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
+      shadowRadius: 13,
+    },
+    centerShadow: {
+      shadowColor: "#000", // Black shadow
+      shadowOpacity: 0.15, // 25% opacity
+      shadowOffset: {
+        width: 0,
+        height: 0,
+      },
+      shadowRadius: 10,
     },
   },
   dark: {

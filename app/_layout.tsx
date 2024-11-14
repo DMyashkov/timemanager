@@ -4,7 +4,7 @@ import { FONTS } from "@/constants/fonts";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
-import SysButton from "@components/button/blueSystemButton";
+import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { Text } from "react-native";
 
 const loadFonts = () => {
