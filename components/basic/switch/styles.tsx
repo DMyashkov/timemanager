@@ -34,5 +34,9 @@ export default function useStyles() {
       backgroundColor: "#fff",
       borderRadius: 5,
     },
+    buttonText: {
+      fontSize: theme.fontSize.small,
+      fontFamily: theme.font.regular,
+    },
   });
 }

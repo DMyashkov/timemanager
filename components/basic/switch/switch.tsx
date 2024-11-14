@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSequence,
   Easing,
 } from "react-native-reanimated";
 
@@ -23,6 +24,7 @@ export default function Switch({ buttons = [] }: SwitchProps) {
   const { theme } = useTheme();
   const [buttonWidth, setButtonWidth] = useState(0);
   const positionAnim = useSharedValue(0);
+  const scaleAnim = useSharedValue(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
 
   useEffect(() => {
@@ -37,7 +39,21 @@ export default function Switch({ buttons = [] }: SwitchProps) {
       marginLeft:
         positionAnim.value * (buttonWidth + styles.container.gap) +
         styles.container.padding,
+      transform: [{ scale: scaleAnim.value }],
     })),
+  };
+
+  const handleButtonPress = (index: number, onPress: () => void) => {
+    if (index === selectedButtonIndex) {
+      // Apply bounce effect to both main and button view if the same button is pressed again
+      scaleAnim.value = withSequence(
+        withTiming(0.95, { duration: 100, easing: Easing.out(Easing.ease) }),
+        withTiming(1, { duration: 100, easing: Easing.out(Easing.ease) }),
+      );
+    } else {
+      setSelectedButtonIndex(index);
+    }
+    onPress();
   };
 
   return (
@@ -61,16 +77,21 @@ export default function Switch({ buttons = [] }: SwitchProps) {
         <View style={styles.mainInner} />
       </Animated.View>
       {buttons.map((button, index) => {
+        const buttonAnimStyle = useAnimatedStyle(() => ({
+          transform: [
+            { scale: index === selectedButtonIndex ? scaleAnim.value : 1 },
+          ],
+        }));
+
         return (
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button]}
             key={button.text}
-            onPress={() => {
-              setSelectedButtonIndex(index);
-              button.onPress();
-            }}
+            onPress={() => handleButtonPress(index, button.onPress)}
           >
-            <Text>{button.text}</Text>
+            <Animated.View style={buttonAnimStyle}>
+              <Text style={[styles.buttonText]}>{button.text}</Text>
+            </Animated.View>
           </TouchableOpacity>
         );
       })}
