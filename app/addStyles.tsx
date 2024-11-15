@@ -15,7 +15,7 @@ export default function useStyles() {
       paddingRight: 22,
       flex: 1,
     },
-    scrollView: {
+    content: {
       flex: 1,
       flexDirection: "column",
       gap: 16,

@@ -8,7 +8,8 @@ import {
 import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
 import Switch from "@components/basic/switch/switch";
-import TextField from "@components/form/textField";
+import TextField from "@/components/form/textField/textField";
+import Picker from "@/components/form/picker/switch";
 
 export default function AddScreen() {
   const styles = useStyles();
@@ -24,16 +25,30 @@ export default function AddScreen() {
           buttons={[
             {
               text: "Activity",
-              onPress: () => console.log("Activity pressed"),
+              onPress: () => {},
             },
             {
               text: "Project",
-              onPress: () => console.log("Project pressed"),
+              onPress: () => {},
             },
           ]}
         />
-        <ScrollView style={styles.scrollView}>
-          <TextField />
+        <ScrollView>
+          <View style={styles.content}>
+            <TextField />
+            <Picker
+              buttons={[
+                {
+                  text: "Productive",
+                  onPress: () => {},
+                },
+                {
+                  text: "Unproductive",
+                  onPress: () => {},
+                },
+              ]}
+            />
+          </View>
         </ScrollView>
       </View>
     </TouchableWithoutFeedback>
