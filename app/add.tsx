@@ -9,7 +9,7 @@ import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
 import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";
-import Picker from "@/components/form/picker/switch";
+import Picker from "@/components/form/picker/picker";
 
 export default function AddScreen() {
   const styles = useStyles();
