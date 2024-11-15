@@ -52,7 +52,7 @@ export default function useStyles() {
     },
     activity: {
       height: 0,
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       borderColor: theme.color.presets.green.medium,
       borderWidth: 0.18,
       backgroundColor:theme.color.white,
@@ -84,7 +84,7 @@ export default function useStyles() {
       overflow: "hidden",
       flexDirection: "column",
       justifyContent: "flex-end",
-      borderRadius: 8,
+      borderRadius: theme.borderRadius.medium,
     },
     collapsedProjectLeft: {
       flexDirection: "row",

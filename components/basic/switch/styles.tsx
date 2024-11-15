@@ -9,7 +9,7 @@ export default function useStyles() {
     container: {
       backgroundColor: theme.color.colderGrey,
       height: 35,
-      borderRadius: 7,
+      borderRadius: theme.borderRadius.mediumSmall,
       flexDirection: "row",
       alignItems: "center",
       padding: PADDING,
@@ -32,7 +32,7 @@ export default function useStyles() {
     mainInner: {
       flex: 1,
       backgroundColor: theme.color.white,
-      borderRadius: 5,
+      borderRadius: theme.borderRadius.small,
     },
     buttonText: {
       fontSize: theme.fontSize.small,

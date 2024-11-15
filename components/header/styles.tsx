@@ -34,7 +34,7 @@ export default function useStyles() {
       backgroundColor: theme.color.searchBar.background, // Use dynamic color from theme
       height: 36,
       width: "100%",
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       flexDirection: "row",
       gap: 8,
       alignItems: "center",
@@ -58,7 +58,7 @@ export default function useStyles() {
     },
     optionsContainer: {
       height: 82,
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       overflow: "hidden",
       borderColor: theme.color.borderLight,
       borderWidth: 0.5,

@@ -12,7 +12,7 @@ export default function useStyles() {
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       backgroundColor:theme.color.white,
     },
     addtext: {

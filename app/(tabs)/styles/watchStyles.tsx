@@ -66,7 +66,7 @@ export default function useStyles() {
       backgroundColor: theme.color.presets.green.medium,
       aspectRatio: 1,
       height: 75,
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -83,7 +83,7 @@ export default function useStyles() {
       justifyContent: "center",
       paddingLeft: 12,
       paddingRight: 12,
-      borderRadius: 10,
+      borderRadius: theme.borderRadius.large,
       borderColor: theme.color.lightGrey,
     },
     lapNumberText: {

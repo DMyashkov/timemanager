@@ -37,7 +37,7 @@ export default function Layout() {
 
   return (
     <ThemeProvider>
-      <Stack screenOptions={{ contentStyle: { backgroundColor: "red" } }}>
+      <Stack screenOptions={{}}>
         <Stack.Screen
           name="(tabs)"
           options={{

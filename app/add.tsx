@@ -1,4 +1,10 @@
-import { View, Text, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
 import Switch from "@components/basic/switch/switch";
@@ -9,7 +15,10 @@ export default function AddScreen() {
   const { theme } = useTheme();
 
   return (
-    <View style={styles.addScreen}>
+    <TouchableWithoutFeedback
+      onPress={Keyboard.dismiss}
+      style={[styles.addScreen, { backgroundColor: "yellow" }]}
+    >
       <View style={styles.innerAddScreen}>
         <Switch
           buttons={[
@@ -27,6 +36,6 @@ export default function AddScreen() {
           <TextField />
         </ScrollView>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }

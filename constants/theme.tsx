@@ -32,6 +32,7 @@ export const THEME = {
       colderGrey: "#ECEDEE",
       borderLight: "#EBEBEB",
       lightGrey: "#D3D3D3",
+      darkerLightGrey: "#C5C5C7",
       black: "#373737",
       darkGrey: "#8B8C90",
       sysBlue: "#007AFF",
@@ -54,6 +55,12 @@ export const THEME = {
         height: 0,
       },
       shadowRadius: 10,
+    },
+    borderRadius: {
+      small: 5,
+      mediumSmall: 7,
+      medium: 8,
+      large: 10,
     },
   },
   dark: {

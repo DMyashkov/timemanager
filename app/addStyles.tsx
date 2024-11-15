@@ -17,6 +17,9 @@ export default function useStyles() {
     },
     scrollView: {
       flex: 1,
+      flexDirection: "column",
+      gap: 16,
+      paddingTop: 16,
     },
   });
 }
