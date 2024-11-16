@@ -53,6 +53,7 @@ export default function ColorPicker({
                     setSelectedColorIndex(absoluteIndex);
                   }}
                   hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+                  activeOpacity={1}
                 >
                   {absoluteIndex === selectedColorIndex && (
                     <Check width={19} height={19} fill={theme.color.white} />

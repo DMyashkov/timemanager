@@ -10,9 +10,10 @@ export default function useStyles() {
     container: {
       backgroundColor: theme.color.white,
       flexDirection: "column",
-      padding: 16,
+      padding: 20,
       borderRadius: theme.borderRadius.large,
-      gap: 16,
+      paddingTop: 16,
+      gap: 20,
     },
     row: {
       flexDirection: "row",
@@ -37,9 +38,8 @@ export default function useStyles() {
       flex: 1,
     },
     title: {
-      fontFamily: theme.font.regular,
+      fontFamily: theme.font.medium,
       fontSize: theme.fontSize.medium,
     },
   });
 }
-
