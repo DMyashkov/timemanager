@@ -12,14 +12,22 @@ import Animated, {
 
 import type { SwitchButton, SwitchProps } from "@/constants/interfaces";
 
-export default function Switch({ buttons = [] }: SwitchProps) {
+interface AdditionalSwitchProps {
+  positionAnim: Animated.SharedValue<number>;
+}
+
+export default function Switch({
+  positionAnim,
+  buttons = [],
+}: SwitchProps & AdditionalSwitchProps) {
   const styles = useStyles();
   const { theme } = useTheme();
   const [buttonWidth, setButtonWidth] = useState(0);
-  const positionAnim = useSharedValue(0);
   const scaleAnim = useSharedValue(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
 
+  console.log("positionAnim", positionAnim.value);
+  console.log("selectedButtonIndex", selectedButtonIndex);
   useEffect(() => {
     // Update positionAnim only if the selected index changes
     if (positionAnim.value !== selectedButtonIndex) {

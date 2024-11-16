@@ -84,8 +84,7 @@ export default function AddScreen() {
             colorArray={colorArray}
             parent={parent}
             setParent={setParent}
-            isProject={true}
-            style={{ paddingHorizontal: PADDING_HORIZONTAL }}
+            style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
           />
           <AddSegment
             selectedColorIndex={selectedColorIndex}
@@ -94,7 +93,7 @@ export default function AddScreen() {
             parent={parent}
             setParent={setParent}
             isProject={true}
-            style={{ paddingHorizontal: PADDING_HORIZONTAL }}
+            style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
           />
         </SwitchWrapper>
       </View>
@@ -103,7 +102,6 @@ export default function AddScreen() {
 }
 
 interface ContentProps {
-  selectedColorIndex: number;
   setSelectedColorIndex: (index: number) => void;
   colorArray: ColorPresets[];
   parent: DataIndexItem;
@@ -120,7 +118,7 @@ function AddSegment({
   setParent,
   isProject = false,
   style = {},
-}: ContentProps) {
+}: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [moduleNameState, setModuleNameState] = useState("");
   const moduleName =
@@ -155,7 +153,7 @@ function AddSegment({
           />
         ) : (
           <ProjectAddContent
-            selectedColorIndex={selectedColorIndex}
+            projectColor={dataIndex["activity-1-1-1-1-1"].colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
@@ -182,7 +180,7 @@ function ActivityAddContent({
   setParent,
   moduleName,
   setModuleName,
-}: ContentProps & AdditionalContentProps) {
+}: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   return (
     <>
@@ -209,6 +207,7 @@ function ActivityAddContent({
         setParent={setParent}
         moduleColorPallete={colorArray[selectedColorIndex]}
         moduleName={moduleName}
+        isProject={false}
       />
       <TouchableOpacity style={styles.button}>
         <Text style={styles.buttonText}>Create</Text>
@@ -218,14 +217,13 @@ function ActivityAddContent({
 }
 
 function ProjectAddContent({
-  selectedColorIndex,
-  setSelectedColorIndex,
+  projectColor,
   colorArray,
   parent,
   setParent,
   moduleName,
   setModuleName,
-}: ContentProps & AdditionalContentProps) {
+}: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
   return (
     <>
@@ -233,7 +231,7 @@ function ProjectAddContent({
       <PathPicker
         parent={parent}
         setParent={setParent}
-        moduleColorPallete={colorArray[selectedColorIndex]}
+        moduleColorPallete={projectColor}
         isProject={true}
         moduleName={moduleName}
       />

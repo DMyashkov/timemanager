@@ -10,10 +10,9 @@ export default function useStyles() {
     },
     main: {
       flexDirection: "row",
-      width: "200%",
       justifyContent: "space-between",
-      marginLeft: "-50%",
+      width: "200%",
+      marginLeft: -200,
     },
   });
 }
-

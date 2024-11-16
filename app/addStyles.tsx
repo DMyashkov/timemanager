@@ -20,7 +20,7 @@ export default function useStyles() {
       flexDirection: "column",
       gap: 16,
       paddingTop: 16,
-      paddingBottom: 70,
+      paddingBottom: 110,
     },
     button: {
       height: 45,
