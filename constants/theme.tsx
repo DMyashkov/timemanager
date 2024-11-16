@@ -20,6 +20,11 @@ export const THEME = {
           medium: "#97BB78",
           dark: "#688153",
         },
+        orange: {
+          light: "#F5AB71A6",
+          medium: "#F5AB71",
+          dark: "#EE812C",
+        },
       },
       searchBar: {
         background: "#EFEFF0",

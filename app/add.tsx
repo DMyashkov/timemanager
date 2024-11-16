@@ -10,10 +10,45 @@ import { useTheme } from "@context/ThemeContext";
 import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";
 import Picker from "@/components/form/picker/picker";
+import ColorPicker from "@/components/form/colorPicker/colorPicker";
+import { useState } from "react";
 
 export default function AddScreen() {
   const styles = useStyles();
   const { theme } = useTheme();
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const colorArray = [
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+    theme.color.presets.orange,
+    theme.color.presets.green,
+  ];
 
   return (
     <TouchableWithoutFeedback
@@ -47,6 +82,11 @@ export default function AddScreen() {
                   onPress: () => {},
                 },
               ]}
+            />
+            <ColorPicker
+              colors={colorArray}
+              selectedColorIndex={selectedColorIndex}
+              setSelectedColorIndex={setSelectedColorIndex}
             />
           </View>
         </ScrollView>
