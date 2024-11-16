@@ -4,6 +4,7 @@ import { useTheme } from "@context/ThemeContext";
 import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import { dataIndex } from "@/constants/exampleData";
+import Activity from "@/components/module/activityItem/activityItem";
 
 type Item = {
   id: string;
@@ -16,14 +17,15 @@ type DataIndexItem = {
   path: string[];
 };
 
-interface ParentPickerProps {
+interface PathPickerProps {
   parent: DataIndexItem;
   setParent: (parent: DataIndexItem) => void;
 }
 
-export default function PathPicker() {
+export default function PathPicker({ parent, setParent }: PathPickerProps) {
   const styles = useStyles();
   const { theme } = useTheme();
+  console.log(parent);
 
   return (
     <View style={styles.container}>
@@ -34,17 +36,17 @@ export default function PathPicker() {
         </TouchableOpacity>
       </View>
       <View style={styles.pathContainer}>
-        <ActivityItem
-          clickable={false}
-          hasChildren={true}
-          isExplicitlyExpanded={true}
-        />
-        <ActivityItem
-          clickable={false}
-          hasChildren={true}
-          isExplicitlyExpanded={true}
-        />
-        <ActivityItem />
+        {parent.path.map((id, index) => {
+          const item = dataIndex[id as keyof typeof dataIndex];
+          const name = item.item.title;
+          return (
+            <ActivityItem
+              isExplicitlyExpanded={true}
+              key={id}
+              activityName={name}
+            />
+          );
+        })}
       </View>
     </View>
   );

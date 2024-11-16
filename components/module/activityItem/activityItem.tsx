@@ -18,7 +18,7 @@ import ChevronDown from "@assets/icons/chevron-down.svg";
 import ChevronLeft from "@assets/icons/chevron-left.svg";
 import Unfocus from "@assets/icons/unfocus.svg";
 import { useMemo } from "react";
-import { THEME } from "@/constants/theme";
+import type { THEME } from "@/constants/theme";
 
 export interface ButtonActivityInfo {
   text: string;
@@ -64,23 +64,10 @@ export default function Activity({
   const styles = useStyles();
   const { theme } = useTheme();
 
-  function resolvePresetColor(
-    theme: typeof THEME.light,
-    preset: keyof typeof theme.color.presets, // Ensure the preset is a valid key
-    shade: "light" | "medium" | "dark", // Restrict to valid shades
-  ): string {
-    return theme.color.presets[preset][shade];
-  }
-
-  if (activityColor !== "" && activityColor in theme.color.presets) {
-    activityColor = resolvePresetColor(
-      theme,
-      activityColor as keyof typeof theme.color.presets,
-      "medium",
-    );
-  } else {
-    activityColor = resolvePresetColor(theme, "green", "medium");
-  }
+  const activityColorPallete =
+    activityColor !== "" && activityColor in theme.color.presets
+      ? theme.color.presets[activityColor as keyof typeof theme.color.presets]
+      : theme.color.presets.green;
 
   const expandAnim = useDerivedValue(() => {
     return isExplicitlyExpanded ? 1 : expandAnimParam.value;
@@ -170,13 +157,16 @@ export default function Activity({
               onPress={handleFocus}
               activeOpacity={clickable ? 0.2 : 1}
             >
-              <Unfocus style={styles.leftButtonUnfocus} fill={activityColor} />
+              <Unfocus
+                style={styles.leftButtonUnfocus}
+                fill={activityColorPallete.medium}
+              />
             </TouchableOpacity>
           ) : (
             <View style={styles.leftButtonContainer}>
               <Tag
                 style={styles.leftButtonTag}
-                fill={activityColor}
+                fill={activityColorPallete.medium}
                 width={23}
                 height={26}
               />
@@ -186,7 +176,7 @@ export default function Activity({
             <Text style={styles.text}>{activityName}</Text>
           </View>
 
-          {hasChildren && (
+          {(hasChildren || isExplicitlyExpanded) && (
             <TouchableOpacity
               style={styles.chevronContainer}
               onPress={onExpand}
@@ -195,7 +185,10 @@ export default function Activity({
               <Animated.View
                 style={[styles.chevronInnerContainer, animStyles.chevron]}
               >
-                <ChevronDown style={styles.chevron} fill={activityColor} />
+                <ChevronDown
+                  style={styles.chevron}
+                  fill={activityColorPallete.medium}
+                />
               </Animated.View>
             </TouchableOpacity>
           )}

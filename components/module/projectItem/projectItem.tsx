@@ -57,7 +57,7 @@ export default function Activity({
     activityColor !== "" && activityColor in theme.color.presets
       ? theme.color.presets[activityColor as keyof typeof theme.color.presets]
       : theme.color.presets.green;
-  console.log(activityColorPallete);
+
 
   const styles = useStyles(activityColorPallete);
   const mergedButtons = useMemo(() => {
