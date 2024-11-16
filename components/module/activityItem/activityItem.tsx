@@ -8,6 +8,7 @@ import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import useStyles from "./styles";
@@ -17,6 +18,7 @@ import ChevronDown from "@assets/icons/chevron-down.svg";
 import ChevronLeft from "@assets/icons/chevron-left.svg";
 import Unfocus from "@assets/icons/unfocus.svg";
 import { useMemo } from "react";
+import { THEME } from "@/constants/theme";
 
 export interface ButtonActivityInfo {
   text: string;
@@ -28,7 +30,7 @@ interface ActivityProps {
   activityName?: string;
   activityColor?: string;
   isFocused?: boolean;
-  isExpanded?: boolean;
+  isExplicitlyExpanded?: boolean;
   buttons?: ButtonActivityInfo[];
   onExpand?: () => void;
   onFocus?: () => void;
@@ -36,16 +38,17 @@ interface ActivityProps {
   hasChildren?: boolean;
   style?: object;
   onLayout?: (event: LayoutChangeEvent) => void;
-  expandAnim?: Animated.SharedValue<number>;
+  expandAnimParam?: Animated.SharedValue<number>;
   focusAnim?: Animated.SharedValue<number>;
   visibleAnim?: Animated.SharedValue<number>;
+  clickable?: boolean;
 }
 
 export default function Activity({
   activityName = "Activity",
   activityColor = "",
   isFocused = false,
-  isExpanded = false,
+  isExplicitlyExpanded = false,
   onExpand = () => {},
   onFocus = () => {},
   onUnfocus = () => {},
@@ -53,14 +56,35 @@ export default function Activity({
   buttons = [],
   style = {},
   onLayout,
-  expandAnim = useSharedValue(0),
+  expandAnimParam = useSharedValue(0),
   focusAnim = useSharedValue(0),
   visibleAnim = useSharedValue(1),
+  clickable = true,
 }: ActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
 
-  activityColor = activityColor || theme.color.presets.green.medium;
+  function resolvePresetColor(
+    theme: typeof THEME.light,
+    preset: keyof typeof theme.color.presets, // Ensure the preset is a valid key
+    shade: "light" | "medium" | "dark", // Restrict to valid shades
+  ): string {
+    return theme.color.presets[preset][shade];
+  }
+
+  if (activityColor !== "" && activityColor in theme.color.presets) {
+    activityColor = resolvePresetColor(
+      theme,
+      activityColor as keyof typeof theme.color.presets,
+      "medium",
+    );
+  } else {
+    activityColor = resolvePresetColor(theme, "green", "medium");
+  }
+
+  const expandAnim = useDerivedValue(() => {
+    return isExplicitlyExpanded ? 1 : expandAnimParam.value;
+  });
 
   const mergedButtons = useMemo(() => {
     const defaultButtons: ButtonActivityInfo[] = [
@@ -129,7 +153,7 @@ export default function Activity({
               style={[{ backgroundColor: button.color }, styles.button]}
               key={button.text}
               onPress={button.onPress}
-              activeOpacity={0.75}
+              activeOpacity={clickable ? 0.75 : 1}
             >
               <Text style={styles.buttonText}>{button.text}</Text>
             </TouchableOpacity>
@@ -138,11 +162,13 @@ export default function Activity({
         <TouchableOpacity
           style={styles.collapsedActivity}
           onPress={handleFocus}
+          activeOpacity={clickable ? 0.2 : 1}
         >
           {isFocused ? (
             <TouchableOpacity
               style={styles.leftButtonContainer}
               onPress={handleFocus}
+              activeOpacity={clickable ? 0.2 : 1}
             >
               <Unfocus style={styles.leftButtonUnfocus} fill={activityColor} />
             </TouchableOpacity>
@@ -164,6 +190,7 @@ export default function Activity({
             <TouchableOpacity
               style={styles.chevronContainer}
               onPress={onExpand}
+              activeOpacity={clickable ? 0.2 : 1}
             >
               <Animated.View
                 style={[styles.chevronInnerContainer, animStyles.chevron]}

@@ -1,14 +1,20 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-export default function useStyles(isProject = false) {
+interface Color {
+  light: string;
+  medium: string;
+  dark: string;
+}
+
+export default function useStyles(colorPallete: Color, isProject = false) {
   const { theme } = useTheme();
   const borderWidthProject = 2.2;
 
   return !isProject
     ? StyleSheet.create({
         container: {
-          backgroundColor: theme.color.presets.green.light,
+          backgroundColor: colorPallete.light,
           flexDirection: "row",
           gap: 4,
           alignItems: "center",
@@ -18,7 +24,7 @@ export default function useStyles(isProject = false) {
           paddingLeft: 7,
         },
         text: {
-          color: theme.color.presets.green.dark,
+          color: colorPallete.dark,
           fontFamily: theme.font.medium,
           fontSize: theme.fontSize.mediumSmall,
         },
@@ -31,8 +37,8 @@ export default function useStyles(isProject = false) {
       })
     : StyleSheet.create({
         container: {
-          backgroundColor:theme.color.white,
-          borderColor: theme.color.presets.green.medium,
+          backgroundColor: theme.color.white,
+          borderColor: colorPallete.medium,
           borderWidth: borderWidthProject,
           flexDirection: "row",
           gap: 3,
@@ -43,7 +49,7 @@ export default function useStyles(isProject = false) {
           paddingLeft: 7 - borderWidthProject,
         },
         text: {
-          color: theme.color.presets.green.medium,
+          color: colorPallete.medium,
           fontFamily: theme.font.medium,
           fontSize: theme.fontSize.mediumSmall,
         },

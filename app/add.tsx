@@ -12,6 +12,8 @@ import TextField from "@/components/form/textField/textField";
 import Picker from "@/components/form/picker/picker";
 import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useState } from "react";
+import { dataIndex } from "@/constants/exampleData";
+import PathPicker from "@/components/form/pathPicker/pathPicker";
 
 export default function AddScreen() {
   const styles = useStyles();
@@ -50,6 +52,8 @@ export default function AddScreen() {
     theme.color.presets.green,
   ];
 
+  const [parent, setParent] = useState(dataIndex["activity-1-1-1-1-1"]);
+
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
@@ -83,6 +87,7 @@ export default function AddScreen() {
                 },
               ]}
             />
+            <PathPicker parent={parent} setParent={setParent} />
             <ColorPicker
               colors={colorArray}
               selectedColorIndex={selectedColorIndex}

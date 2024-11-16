@@ -17,7 +17,7 @@ import AddItem from "../addItem/addItem";
 import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
 import { router, useLocalSearchParams } from "expo-router";
 
-import data from "./exampleData";
+import data, { dataIndex } from "../../../constants/exampleData";
 import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
@@ -109,6 +109,7 @@ function ListModuleInner({
   const shouldBeVisibleAnim = useSharedValue(0);
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
+  const hasChildren = !!activityData.activities?.length;
 
   useEffect(() => {
     if (shouldBeVisible) {
@@ -132,7 +133,6 @@ function ListModuleInner({
   });
 
   const [expandedState, setExpandedStateLocal] = useState(isRoot);
-  const hasChildren = !!activityData.activities?.length;
 
   const setExpandedState = useCallback(
     (value: boolean) => {
@@ -280,13 +280,13 @@ function ListModuleInner({
               popFocusStack();
               onFocusAdditional();
             }}
-            isExpanded={expandedState}
             isFocused={isFocused}
             hasChildren={!!activityData.activities?.length}
             style={[styles.activityItem]}
-            expandAnim={expandAnim}
+            expandAnimParam={expandAnim}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
+            activityColor={dataIndex[activityData.id].colorPreset}
           />
         ) : (
           <ProjectItem
@@ -306,6 +306,7 @@ function ListModuleInner({
             style={[styles.activityItem]}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
+            activityColor={dataIndex[activityData.id].colorPreset}
           />
         ))}
       {typeOfModule === moduleType.activity && (

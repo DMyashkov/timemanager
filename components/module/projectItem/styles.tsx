@@ -1,7 +1,13 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-export default function useStyles() {
+interface Color {
+  light: string; // Hex color or any valid CSS color string
+  medium: string;
+  dark: string;
+}
+
+export default function useStyles(activityColor: Color) {
   const { theme } = useTheme();
 
   return StyleSheet.create({
@@ -53,9 +59,9 @@ export default function useStyles() {
     activity: {
       height: 0,
       borderRadius: theme.borderRadius.large,
-      borderColor: theme.color.presets.green.medium,
+      borderColor: activityColor.medium,
       borderWidth: 0.18,
-      backgroundColor:theme.color.white,
+      backgroundColor: theme.color.white,
       width: "100%",
       ...theme.shadow,
     },
@@ -67,7 +73,7 @@ export default function useStyles() {
       backgroundColor: "#0000",
       overflow: "hidden",
       borderBottomWidth: 3,
-      borderBottomColor: theme.color.presets.green.medium,
+      borderBottomColor: activityColor.medium,
     },
     button: {
       flex: 1,
@@ -95,7 +101,7 @@ export default function useStyles() {
     },
     hoursText: {
       fontFamily: theme.font.semibold,
-      color: theme.color.presets.green.medium,
+      color: activityColor.medium,
       fontSize: theme.fontSize.medium,
     },
     secondRow: {

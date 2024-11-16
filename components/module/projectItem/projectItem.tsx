@@ -17,6 +17,7 @@ import Unfocus from "@assets/icons/unfocus.svg";
 import { useMemo, useState } from "react";
 import At from "@assets/icons/at.svg";
 import Tag from "@components/tag/tagComponent";
+import type { THEME } from "@/constants/theme";
 
 export interface ButtonActivityInfo {
   text: string;
@@ -50,11 +51,15 @@ export default function Activity({
   visibleAnim = useSharedValue(1),
   isInHalfFocusedMode = false,
 }: ActivityProps) {
-  const styles = useStyles();
   const { theme } = useTheme();
 
-  activityColor = activityColor || theme.color.presets.green.medium;
+  const activityColorPallete =
+    activityColor !== "" && activityColor in theme.color.presets
+      ? theme.color.presets[activityColor as keyof typeof theme.color.presets]
+      : theme.color.presets.green;
+  console.log(activityColorPallete);
 
+  const styles = useStyles(activityColorPallete);
   const mergedButtons = useMemo(() => {
     const defaultButtons: ButtonActivityInfo[] = [
       {
@@ -177,7 +182,7 @@ export default function Activity({
                 <View style={styles.leftButtonContainer}>
                   <Unfocus
                     style={styles.leftButtonUnfocus}
-                    fill={activityColor}
+                    fill={activityColorPallete.medium}
                     width={23}
                     height={23}
                   />
@@ -186,7 +191,7 @@ export default function Activity({
                 <View style={styles.leftButtonContainer}>
                   <At
                     style={styles.leftButtonTag}
-                    fill={activityColor}
+                    fill={activityColorPallete.medium}
                     width={23}
                     height={23}
                   />
@@ -202,7 +207,7 @@ export default function Activity({
           </Animated.View>
           <Animated.View style={[styles.secondRow, animStyles.secondRow]}>
             <View style={styles.innerSecondRow}>
-              <Tag style={animStyles.tag} />
+              <Tag style={animStyles.tag} colorPallete={activityColorPallete} />
             </View>
           </Animated.View>
         </TouchableOpacity>
