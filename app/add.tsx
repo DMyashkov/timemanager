@@ -235,9 +235,11 @@ function ProjectAddContent({
         isProject={true}
         moduleName={moduleName}
       />
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Create</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonProjectOuter}>
+        <TouchableOpacity style={styles.buttonProject}>
+          <Text style={styles.buttonTextProject}>Create</Text>
+        </TouchableOpacity>
+      </View>
     </>
   );
 }

@@ -43,5 +43,22 @@ export default function useStyles() {
     switchOuter: {
       paddingHorizontal: PADDING_HORIZONTAL,
     },
+    buttonProject: {
+      height: 45,
+      borderRadius: theme.borderRadius.large,
+      borderWidth: 3,
+      borderColor: theme.color.red,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    buttonTextProject: {
+      fontSize: theme.fontSize.medium,
+      fontFamily: theme.font.medium,
+      color: theme.color.red,
+    },
+    buttonProjectOuter: {
+      backgroundColor: theme.color.white,
+      borderRadius: theme.borderRadius.large,
+    },
   });
 }
