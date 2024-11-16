@@ -20,3 +20,12 @@ export enum ColorPresets {
   ORANGE = "orange",
   // Add more presets here as needed
 }
+
+export interface SwitchButton {
+  text: string;
+  onPress: () => void;
+}
+
+export interface SwitchProps {
+  buttons: SwitchButton[];
+}

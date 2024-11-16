@@ -3,6 +3,7 @@ import { useTheme } from "@context/ThemeContext";
 
 export default function useStyles() {
   const { theme } = useTheme();
+  const PADDING_HORIZONTAL = 22;
 
   return StyleSheet.create({
     addScreen: {
@@ -11,7 +12,7 @@ export default function useStyles() {
     },
     innerAddScreen: {
       paddingTop: 11,
-      paddingHorizontal: 22,
+      paddingHorizontal: 0,
       flex: 1,
     },
     content: {
@@ -32,6 +33,15 @@ export default function useStyles() {
       fontSize: theme.fontSize.medium,
       fontFamily: theme.font.regular,
       color: theme.color.white,
+    },
+    innerView: {
+      flexDirection: "row",
+      width: "200%",
+      justifyContent: "space-between",
+      marginLeft: "-50%",
+    },
+    switchOuter: {
+      paddingHorizontal: PADDING_HORIZONTAL,
     },
   });
 }

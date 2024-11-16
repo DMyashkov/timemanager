@@ -37,6 +37,7 @@ interface ActivityProps {
   focusAnim?: Animated.SharedValue<number>;
   visibleAnim?: Animated.SharedValue<number>;
   isInHalfFocusedMode?: boolean;
+  clickable?: boolean;
 }
 
 export default function Activity({
@@ -50,6 +51,7 @@ export default function Activity({
   focusAnim = useSharedValue(0),
   visibleAnim = useSharedValue(1),
   isInHalfFocusedMode = false,
+  clickable = true,
 }: ActivityProps) {
   const { theme } = useTheme();
 
@@ -57,7 +59,6 @@ export default function Activity({
     activityColor !== "" && activityColor in theme.color.presets
       ? theme.color.presets[activityColor as keyof typeof theme.color.presets]
       : theme.color.presets.green;
-
 
   const styles = useStyles(activityColorPallete);
   const mergedButtons = useMemo(() => {
@@ -162,7 +163,7 @@ export default function Activity({
               style={[{ backgroundColor: button.color }, styles.button]}
               key={button.text}
               onPress={button.onPress}
-              activeOpacity={0.75}
+              activeOpacity={clickable ? 0.75 : 1}
             >
               <Text style={styles.buttonText}>{button.text}</Text>
             </TouchableOpacity>
@@ -170,6 +171,7 @@ export default function Activity({
         </View>
 
         <TouchableOpacity
+          activeOpacity={clickable ? 0.2 : 1}
           onPress={() => {
             handleFocus();
             setIsUnfocusStarted(isFocused);

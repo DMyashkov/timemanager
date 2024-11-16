@@ -10,14 +10,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-interface Button {
-  text: string;
-  onPress: () => void;
-}
-
-interface SwitchProps {
-  buttons: Button[];
-}
+import type { SwitchButton, SwitchProps } from "@/constants/interfaces";
 
 export default function Switch({ buttons = [] }: SwitchProps) {
   const styles = useStyles();

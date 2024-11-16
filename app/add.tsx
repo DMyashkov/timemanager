@@ -16,7 +16,9 @@ import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useState } from "react";
 import { dataIndex } from "@/constants/exampleData";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
-import { ColorPresets } from "@/constants/interfaces";
+import { ColorPresets, DataIndexItem } from "@/constants/interfaces";
+import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
+import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 
 export default function AddScreen() {
   const styles = useStyles();
@@ -56,14 +58,14 @@ export default function AddScreen() {
   ];
 
   const [parent, setParent] = useState(dataIndex["activity-1-1-1-1-1"]);
-
+  const PADDING_HORIZONTAL = 22;
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
       style={[styles.addScreen, { backgroundColor: "yellow" }]}
     >
       <View style={styles.innerAddScreen}>
-        <Switch
+        <SwitchWrapper
           buttons={[
             {
               text: "Activity",
@@ -74,52 +76,170 @@ export default function AddScreen() {
               onPress: () => {},
             },
           ]}
-        />
-        <View>
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            style={{
-              marginHorizontal: -styles.innerAddScreen.paddingHorizontal,
-              paddingHorizontal: styles.innerAddScreen.paddingHorizontal,
-            }}
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.content}
-              onPress={Keyboard.dismiss}
-            >
-              <TextField />
-              <Picker
-                buttons={[
-                  {
-                    text: "Productive",
-                    onPress: () => {},
-                  },
-                  {
-                    text: "Unproductive",
-                    onPress: () => {},
-                  },
-                ]}
-              />
-              <ColorPicker
-                colorPresets={colorArray}
-                selectedColorIndex={selectedColorIndex}
-                setSelectedColorIndex={setSelectedColorIndex}
-              />
-              <PathPicker
-                parent={parent}
-                setParent={setParent}
-                moduleColorPallete={colorArray[selectedColorIndex]}
-              />
-              <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>Create</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+          styleSwitch={styles.switchOuter}
+        >
+          <AddSegment
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            colorArray={colorArray}
+            parent={parent}
+            setParent={setParent}
+            isProject={true}
+            style={{ paddingHorizontal: PADDING_HORIZONTAL }}
+          />
+          <AddSegment
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            colorArray={colorArray}
+            parent={parent}
+            setParent={setParent}
+            isProject={true}
+            style={{ paddingHorizontal: PADDING_HORIZONTAL }}
+          />
+        </SwitchWrapper>
       </View>
     </TouchableWithoutFeedback>
+  );
+}
+
+interface ContentProps {
+  selectedColorIndex: number;
+  setSelectedColorIndex: (index: number) => void;
+  colorArray: ColorPresets[];
+  parent: DataIndexItem;
+  setParent: (parent: DataIndexItem) => void;
+  isProject?: boolean;
+  style?: object;
+}
+
+function AddSegment({
+  selectedColorIndex,
+  setSelectedColorIndex,
+  colorArray,
+  parent,
+  setParent,
+  isProject = false,
+  style = {},
+}: ContentProps) {
+  const styles = useStyles();
+  const [moduleNameState, setModuleNameState] = useState("");
+  const moduleName =
+    moduleNameState || (isProject ? "New Project" : "New Activity");
+  return (
+    <ScrollView
+      showsHorizontalScrollIndicator={false}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      style={[
+        {
+          marginHorizontal: -styles.innerAddScreen.paddingHorizontal,
+          paddingHorizontal: styles.innerAddScreen.paddingHorizontal,
+        },
+        style,
+      ]}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        style={styles.content}
+        onPress={Keyboard.dismiss}
+      >
+        {!isProject ? (
+          <ActivityAddContent
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            colorArray={colorArray}
+            parent={parent}
+            setParent={setParent}
+            moduleName={moduleName}
+            setModuleName={setModuleNameState}
+          />
+        ) : (
+          <ProjectAddContent
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            colorArray={colorArray}
+            parent={parent}
+            setParent={setParent}
+            moduleName={moduleName}
+            setModuleName={setModuleNameState}
+          />
+        )}
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+interface AdditionalContentProps {
+  moduleName: string;
+  setModuleName: (name: string) => void;
+}
+
+function ActivityAddContent({
+  selectedColorIndex,
+  setSelectedColorIndex,
+  colorArray,
+  parent,
+  setParent,
+  moduleName,
+  setModuleName,
+}: ContentProps & AdditionalContentProps) {
+  const styles = useStyles();
+  return (
+    <>
+      <TextField placeholder="Activity Name" setModuleName={setModuleName} />
+      <Picker
+        buttons={[
+          {
+            text: "Productive",
+            onPress: () => {},
+          },
+          {
+            text: "Unproductive",
+            onPress: () => {},
+          },
+        ]}
+      />
+      <ColorPicker
+        colorPresets={colorArray}
+        selectedColorIndex={selectedColorIndex}
+        setSelectedColorIndex={setSelectedColorIndex}
+      />
+      <PathPicker
+        parent={parent}
+        setParent={setParent}
+        moduleColorPallete={colorArray[selectedColorIndex]}
+        moduleName={moduleName}
+      />
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Create</Text>
+      </TouchableOpacity>
+    </>
+  );
+}
+
+function ProjectAddContent({
+  selectedColorIndex,
+  setSelectedColorIndex,
+  colorArray,
+  parent,
+  setParent,
+  moduleName,
+  setModuleName,
+}: ContentProps & AdditionalContentProps) {
+  const styles = useStyles();
+  return (
+    <>
+      <TextField placeholder="Project Name" setModuleName={setModuleName} />
+      <PathPicker
+        parent={parent}
+        setParent={setParent}
+        moduleColorPallete={colorArray[selectedColorIndex]}
+        isProject={true}
+        moduleName={moduleName}
+      />
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Create</Text>
+      </TouchableOpacity>
+    </>
   );
 }

@@ -3,17 +3,27 @@ import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { useState } from "react";
 
-export default function TextField() {
+export default function TextField({
+  placeholder = "Activity Name",
+  setModuleName = () => {},
+}: {
+  placeholder?: string;
+  setModuleName?: (name: string) => void;
+}) {
   const styles = useStyles();
   const { theme } = useTheme();
-  const [text, onChangeText] = useState("");
+  const [text, setText] = useState("");
+  const onChangeText = (text: string) => {
+    setText(text);
+    setModuleName(text);
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.containerInner}>
         <TextInput
           style={styles.textInput}
-          placeholder="Activity Name"
+          placeholder={placeholder}
           placeholderTextColor={theme.color.darkerLightGrey}
           onChangeText={onChangeText}
         />

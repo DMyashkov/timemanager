@@ -5,6 +5,7 @@ import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import { dataIndex } from "@/constants/exampleData";
 import Activity from "@/components/module/activityItem/activityItem";
+import ProjectItem from "@/components/module/projectItem/projectItem";
 import type { DataIndexItem } from "@/constants/interfaces";
 import type { ColorPresets } from "@/constants/interfaces";
 
@@ -51,11 +52,19 @@ export default function PathPicker({
             />
           );
         })}
-        <ActivityItem
-          activityName="New Activity"
-          activityColor={moduleColorPallete}
-          clickable={false}
-        />
+        {!isProject ? (
+          <ActivityItem
+            activityName={moduleName}
+            activityColor={moduleColorPallete}
+            clickable={false}
+          />
+        ) : (
+          <ProjectItem
+            activityName={moduleName}
+            activityColor={moduleColorPallete}
+            clickable={false}
+          />
+        )}
       </View>
     </View>
   );
