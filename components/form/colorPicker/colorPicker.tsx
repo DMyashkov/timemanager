@@ -3,20 +3,16 @@ import { View, Text, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Check from "@assets/icons/check.svg";
-interface Color {
-  light: string; // Hex color or any valid CSS color string
-  medium: string;
-  dark: string;
-}
+import type { Color, ColorPresets } from "@constants/interfaces";
 
 interface ColorPickerProps {
-  colors: Color[]; // Array of Color objects
+  colorPresets: ColorPresets[]; // Array of Color objects
   selectedColorIndex: number;
   setSelectedColorIndex: (index: number) => void;
 }
 
 export default function ColorPicker({
-  colors,
+  colorPresets,
   selectedColorIndex,
   setSelectedColorIndex,
 }: ColorPickerProps): JSX.Element {
@@ -24,6 +20,10 @@ export default function ColorPicker({
   const { theme } = useTheme();
 
   const maxSwatchesPerRow = 6; // Maximum number of swatches per row
+
+  const colors: Color[] = colorPresets.map(
+    (color) => theme.color.presets[color],
+  );
 
   // Split colors into rows of `maxSwatchesPerRow`
   const rows: Color[][] = [];

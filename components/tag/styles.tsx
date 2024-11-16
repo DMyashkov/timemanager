@@ -1,11 +1,7 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-interface Color {
-  light: string;
-  medium: string;
-  dark: string;
-}
+import type { Color } from "@constants/interfaces";
 
 export default function useStyles(colorPallete: Color, isProject = false) {
   const { theme } = useTheme();

@@ -19,6 +19,7 @@ import ChevronLeft from "@assets/icons/chevron-left.svg";
 import Unfocus from "@assets/icons/unfocus.svg";
 import { useMemo } from "react";
 import type { THEME } from "@/constants/theme";
+import { ColorPresets } from "@/constants/interfaces";
 
 export interface ButtonActivityInfo {
   text: string;
@@ -28,7 +29,7 @@ export interface ButtonActivityInfo {
 
 interface ActivityProps {
   activityName?: string;
-  activityColor?: string;
+  activityColor?: ColorPresets;
   isFocused?: boolean;
   isExplicitlyExpanded?: boolean;
   buttons?: ButtonActivityInfo[];
@@ -46,7 +47,7 @@ interface ActivityProps {
 
 export default function Activity({
   activityName = "Activity",
-  activityColor = "",
+  activityColor = ColorPresets.GREEN,
   isFocused = false,
   isExplicitlyExpanded = false,
   onExpand = () => {},
@@ -65,9 +66,7 @@ export default function Activity({
   const { theme } = useTheme();
 
   const activityColorPallete =
-    activityColor !== "" && activityColor in theme.color.presets
-      ? theme.color.presets[activityColor as keyof typeof theme.color.presets]
-      : theme.color.presets.green;
+    theme.color.presets[activityColor as keyof typeof theme.color.presets];
 
   const expandAnim = useDerivedValue(() => {
     return isExplicitlyExpanded ? 1 : expandAnimParam.value;

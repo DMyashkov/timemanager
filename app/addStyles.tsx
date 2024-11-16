@@ -11,8 +11,7 @@ export default function useStyles() {
     },
     innerAddScreen: {
       paddingTop: 11,
-      paddingLeft: 22,
-      paddingRight: 22,
+      paddingHorizontal: 22,
       flex: 1,
     },
     content: {
@@ -20,6 +19,7 @@ export default function useStyles() {
       flexDirection: "column",
       gap: 16,
       paddingTop: 16,
+      paddingBottom: 70,
     },
   });
 }

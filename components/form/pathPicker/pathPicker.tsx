@@ -5,27 +5,28 @@ import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import { dataIndex } from "@/constants/exampleData";
 import Activity from "@/components/module/activityItem/activityItem";
+import type { DataIndexItem } from "@/constants/interfaces";
+import type { ColorPresets } from "@/constants/interfaces";
 
-type Item = {
-  id: string;
-  title: string;
-  type: string; // You can replace `string` with a specific union type like `"activity" | "project"` if known
-};
-
-type DataIndexItem = {
-  item: Item;
-  path: string[];
-};
+import type { Color } from "@constants/interfaces";
 
 interface PathPickerProps {
+  moduleName?: string;
+  isProject?: boolean;
+  moduleColorPallete: ColorPresets;
   parent: DataIndexItem;
   setParent: (parent: DataIndexItem) => void;
 }
 
-export default function PathPicker({ parent, setParent }: PathPickerProps) {
+export default function PathPicker({
+  moduleName = "New Activity",
+  moduleColorPallete,
+  parent,
+  setParent,
+  isProject = false,
+}: PathPickerProps) {
   const styles = useStyles();
-  const { theme } = useTheme();
-  console.log(parent);
+  // const { theme } = useTheme();
 
   return (
     <View style={styles.container}>
@@ -36,17 +37,25 @@ export default function PathPicker({ parent, setParent }: PathPickerProps) {
         </TouchableOpacity>
       </View>
       <View style={styles.pathContainer}>
-        {parent.path.map((id, index) => {
+        {parent.path.map((id, _) => {
           const item = dataIndex[id as keyof typeof dataIndex];
           const name = item.item.title;
+          const color = item.colorPreset;
           return (
             <ActivityItem
               isExplicitlyExpanded={true}
               key={id}
               activityName={name}
+              activityColor={color}
+              clickable={false}
             />
           );
         })}
+        <ActivityItem
+          activityName="New Activity"
+          activityColor={moduleColorPallete}
+          clickable={false}
+        />
       </View>
     </View>
   );

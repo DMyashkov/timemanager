@@ -6,11 +6,7 @@ import At from "@assets/icons/at.svg";
 import Animated, { interpolate } from "react-native-reanimated";
 import { isNativePlatformSupported } from "react-native-screens/lib/typescript/core";
 
-interface Color {
-  light: string;
-  medium: string;
-  dark: string;
-}
+import type { Color } from "@constants/interfaces";
 
 interface TagProps {
   isProject?: boolean;

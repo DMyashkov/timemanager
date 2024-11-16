@@ -4,6 +4,8 @@ import {
   ScrollView,
   TouchableWithoutFeedback,
   Keyboard,
+  KeyboardAvoidingView,
+  TouchableOpacity,
 } from "react-native";
 import useStyles from "./addStyles";
 import { useTheme } from "@context/ThemeContext";
@@ -14,42 +16,43 @@ import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useState } from "react";
 import { dataIndex } from "@/constants/exampleData";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
+import { ColorPresets } from "@/constants/interfaces";
 
 export default function AddScreen() {
   const styles = useStyles();
   const { theme } = useTheme();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const colorArray = [
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
-    theme.color.presets.orange,
-    theme.color.presets.green,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
   ];
 
   const [parent, setParent] = useState(dataIndex["activity-1-1-1-1-1"]);
@@ -72,29 +75,47 @@ export default function AddScreen() {
             },
           ]}
         />
-        <ScrollView>
-          <View style={styles.content}>
-            <TextField />
-            <Picker
-              buttons={[
-                {
-                  text: "Productive",
-                  onPress: () => {},
-                },
-                {
-                  text: "Unproductive",
-                  onPress: () => {},
-                },
-              ]}
-            />
-            <PathPicker parent={parent} setParent={setParent} />
-            <ColorPicker
-              colors={colorArray}
-              selectedColorIndex={selectedColorIndex}
-              setSelectedColorIndex={setSelectedColorIndex}
-            />
-          </View>
-        </ScrollView>
+        <View>
+          <ScrollView
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            style={{
+              marginHorizontal: -styles.innerAddScreen.paddingHorizontal,
+              paddingHorizontal: styles.innerAddScreen.paddingHorizontal,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.content}
+              onPress={Keyboard.dismiss}
+            >
+              <TextField />
+              <Picker
+                buttons={[
+                  {
+                    text: "Productive",
+                    onPress: () => {},
+                  },
+                  {
+                    text: "Unproductive",
+                    onPress: () => {},
+                  },
+                ]}
+              />
+              <ColorPicker
+                colorPresets={colorArray}
+                selectedColorIndex={selectedColorIndex}
+                setSelectedColorIndex={setSelectedColorIndex}
+              />
+              <PathPicker
+                parent={parent}
+                setParent={setParent}
+                moduleColorPallete={colorArray[selectedColorIndex]}
+              />
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );
