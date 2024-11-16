@@ -113,6 +113,9 @@ export default function AddScreen() {
                 setParent={setParent}
                 moduleColorPallete={colorArray[selectedColorIndex]}
               />
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>Create</Text>
+              </TouchableOpacity>
             </TouchableOpacity>
           </ScrollView>
         </View>

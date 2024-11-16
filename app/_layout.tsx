@@ -56,14 +56,14 @@ export default function Layout() {
                 }}
               />
             ),
-            headerRight: () => (
-              <SysButton
-                text="Save"
-                onPress={() => {
-                  router.back();
-                }}
-              />
-            ),
+            // headerRight: () => (
+            //   <SysButton
+            //     text="Save"
+            //     onPress={() => {
+            //       router.back();
+            //     }}
+            //   />
+            // ),
             headerTitle: (props) => (
               <Text
                 {...props}

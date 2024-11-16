@@ -21,5 +21,17 @@ export default function useStyles() {
       paddingTop: 16,
       paddingBottom: 70,
     },
+    button: {
+      height: 45,
+      backgroundColor: theme.color.red,
+      borderRadius: theme.borderRadius.large,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    buttonText: {
+      fontSize: theme.fontSize.medium,
+      fontFamily: theme.font.regular,
+      color: theme.color.white,
+    },
   });
 }
