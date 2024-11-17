@@ -19,7 +19,6 @@ export default function TextField({
   rightHint?: boolean;
   defaultText?: string;
 }) {
-  console.log(defaultText);
   const styles = useStyles();
   const { theme } = useTheme();
   const [text, setText] = useState("");

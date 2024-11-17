@@ -218,7 +218,6 @@ function ActivityAddContent({
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [productivity, setProductivity] = useState<boolean>(true);
-  console.log(parent.item);
   return (
     <>
       <TextField
@@ -294,6 +293,7 @@ function ProjectAddContent({
   handleCreate,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
+
   return (
     <>
       <TextField
