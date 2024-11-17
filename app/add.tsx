@@ -7,7 +7,7 @@ import {
   KeyboardAvoidingView,
   TouchableOpacity,
 } from "react-native";
-import useStyles from "./addStyles";
+import useStyles from "./styles/addStyles";
 import { useTheme } from "@context/ThemeContext";
 import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";

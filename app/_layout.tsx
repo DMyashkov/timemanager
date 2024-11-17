@@ -56,14 +56,6 @@ export default function Layout() {
                 }}
               />
             ),
-            // headerRight: () => (
-            //   <SysButton
-            //     text="Save"
-            //     onPress={() => {
-            //       router.back();
-            //     }}
-            //   />
-            // ),
             headerTitle: (props) => (
               <Text
                 {...props}
@@ -75,6 +67,12 @@ export default function Layout() {
                 Create tag
               </Text>
             ),
+          }}
+        />
+        <Stack.Screen
+          name="authSelection"
+          options={{
+            headerShown: false,
           }}
         />
       </Stack>

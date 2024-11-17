@@ -8,10 +8,12 @@ export const THEME = {
       extraExtraLarge: 80,
       largeLarge: 25,
       largeSmall: 20,
+      mediumBigBig: 19,
       mediumBig: 18,
       medium: 17,
       mediumSmall: 15,
       small: 14,
+      smaller: 13,
     },
     color: {
       presets: {
@@ -33,6 +35,7 @@ export const THEME = {
       veryLightGrey: "#FBFBFB",
       red: "#FF4E4E",
       mediumGrey: "#EEEEEE",
+      defaultGrey: "#CCCCCC",
       coldGrey: "#F2F3F5",
       colderGrey: "#ECEDEE",
       borderLight: "#EBEBEB",
@@ -40,6 +43,7 @@ export const THEME = {
       darkerLightGrey: "#C5C5C7",
       black: "#373737",
       darkGrey: "#8B8C90",
+      darkerGrey: "#7F7F7F",
       sysBlue: "#007AFF",
       white: "#FFFFFF",
     },
