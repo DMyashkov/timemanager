@@ -123,6 +123,8 @@ function AddSegment({
   const [moduleNameState, setModuleNameState] = useState("");
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
+  const [lapName, setLapName] = useState("");
+
   return (
     <ScrollView
       showsHorizontalScrollIndicator={false}
@@ -150,6 +152,8 @@ function AddSegment({
             setParent={setParent}
             moduleName={moduleName}
             setModuleName={setModuleNameState}
+            lapName={lapName}
+            setLapName={setLapName}
           />
         ) : (
           <ProjectAddContent
@@ -160,6 +164,8 @@ function AddSegment({
             setParent={setParent}
             moduleName={moduleName}
             setModuleName={setModuleNameState}
+            lapName={lapName}
+            setLapName={setLapName}
           />
         )}
       </TouchableOpacity>
@@ -170,6 +176,8 @@ function AddSegment({
 interface AdditionalContentProps {
   moduleName: string;
   setModuleName: (name: string) => void;
+  lapName: string;
+  setLapName: (name: string) => void;
 }
 
 function ActivityAddContent({
@@ -180,11 +188,17 @@ function ActivityAddContent({
   setParent,
   moduleName,
   setModuleName,
+  setLapName,
+  lapName,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   return (
     <>
-      <TextField placeholder="Activity Name" setModuleName={setModuleName} />
+      <TextField
+        placeholder="Activity Name"
+        setModuleName={setModuleName}
+        rightHint={true}
+      />
       <Picker
         buttons={[
           {
@@ -197,6 +211,13 @@ function ActivityAddContent({
           },
         ]}
       />
+      <TextField
+        placeholder="Lap Name"
+        setModuleName={setLapName}
+        rightHint={true}
+        defaultText={"Lap"}
+      />
+
       <ColorPicker
         colorPresets={colorArray}
         selectedColorIndex={selectedColorIndex}
@@ -209,9 +230,11 @@ function ActivityAddContent({
         moduleName={moduleName}
         isProject={false}
       />
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Create</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonProjectOuter}>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Create</Text>
+        </TouchableOpacity>
+      </View>
     </>
   );
 }

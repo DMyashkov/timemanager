@@ -1,8 +1,4 @@
-// metro.config.js
 const { getDefaultConfig } = require("expo/metro-config");
-// const {
-//   wrapWithReanimatedMetroConfig,
-// } = require("react-native-reanimated/metro-config");
 
 const config = async () => {
   const defaultConfig = await getDefaultConfig(__dirname);
@@ -21,6 +17,13 @@ const config = async () => {
       ...resolver,
       assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
       sourceExts: [...resolver.sourceExts, "svg"],
+      alias: {
+        ...resolver.alias,
+        "react-native/Libraries/Components/Touchable/TouchableOpacity":
+          require.resolve(
+            "./components/basic/touchableOpacity/touchableOpacity.tsx",
+          ),
+      },
     },
   };
 };

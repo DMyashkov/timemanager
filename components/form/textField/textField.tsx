@@ -1,14 +1,23 @@
 import { View, Text, TextInput } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 export default function TextField({
   placeholder = "Activity Name",
-  setModuleName = () => {},
+  setModuleName = (text: string) => {},
+  rightHint = false,
+  defaultText = "",
 }: {
   placeholder?: string;
-  setModuleName?: (name: string) => void;
+  setModuleName?: (text: string) => void;
+  rightHint?: boolean;
+  defaultText?: string;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -17,16 +26,82 @@ export default function TextField({
     setText(text);
     setModuleName(text);
   };
+  const [rightHintWidth, setRightHintWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [textWidth, setTextWidth] = useState(0);
+
+  const opacity = useSharedValue(0);
+  const prevCalculationCondition = useRef(false);
+
+  const calculationCondition =
+    containerWidth -
+      2 * styles.container.paddingLeft -
+      textWidth -
+      rightHintWidth >
+    0;
+
+  const shouldShowHint =
+    defaultText === "" ? rightHint && text !== "" : rightHint;
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+    };
+  });
+
+  useEffect(() => {
+    if (prevCalculationCondition.current !== calculationCondition) {
+      // Animate opacity when calculation condition changes
+      opacity.value = withTiming(calculationCondition ? 1 : 0, {
+        duration: 200,
+      });
+    } else {
+      // Immediate change when other conditions change
+      opacity.value = calculationCondition ? 1 : 0;
+    }
+
+    prevCalculationCondition.current = calculationCondition;
+  }, [calculationCondition, opacity]);
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={({
+        nativeEvent: {
+          layout: { width },
+        },
+      }) => setContainerWidth(width)}
+    >
       <View style={styles.containerInner}>
+        {shouldShowHint && (
+          <Animated.Text
+            style={[styles.hintText, animatedStyle]}
+            onLayout={({
+              nativeEvent: {
+                layout: { width },
+              },
+            }) => setRightHintWidth(width)}
+          >
+            {placeholder}
+          </Animated.Text>
+        )}
         <TextInput
-          style={styles.textInput}
-          placeholder={placeholder}
+          style={[styles.textInput]}
+          placeholder={defaultText || placeholder}
           placeholderTextColor={theme.color.darkerLightGrey}
           onChangeText={onChangeText}
+          hitSlop={{ left: 12 }}
         />
+        <Text
+          style={styles.hiddenText}
+          onLayout={({
+            nativeEvent: {
+              layout: { width },
+            },
+          }) => setTextWidth(width)}
+        >
+          {text}
+        </Text>
       </View>
     </View>
   );
