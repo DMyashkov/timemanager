@@ -250,7 +250,11 @@ function ProjectAddContent({
   const styles = useStyles();
   return (
     <>
-      <TextField placeholder="Project Name" setModuleName={setModuleName} />
+      <TextField
+        placeholder="Project Name"
+        setModuleName={setModuleName}
+        rightHint={true}
+      />
       <PathPicker
         parent={parent}
         setParent={setParent}

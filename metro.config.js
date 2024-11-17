@@ -13,18 +13,6 @@ const config = async () => {
         "react-native-svg-transformer/expo",
       ),
     },
-    resolver: {
-      ...resolver,
-      assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
-      sourceExts: [...resolver.sourceExts, "svg"],
-      alias: {
-        ...resolver.alias,
-        "react-native/Libraries/Components/Touchable/TouchableOpacity":
-          require.resolve(
-            "./components/basic/touchableOpacity/touchableOpacity.tsx",
-          ),
-      },
-    },
   };
 };
 
