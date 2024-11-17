@@ -6,10 +6,32 @@ import Stopwatch from "@assets/icons/stopwatch.svg";
 import Apple from "@assets/icons/apple.svg";
 import Mail from "@assets/icons/envelope.svg";
 import Google from "@assets/icons/google.svg";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { useEffect, useState } from "react";
 
 export default function Component() {
   const styles = useStyles();
   const { theme } = useTheme();
+
+  const focusAnim = useSharedValue(0);
+  const animStyles = {
+    emailButtons: useAnimatedStyle(() => ({
+      height: focusAnim.value * 45,
+    })),
+    border: useAnimatedStyle(() => ({
+      borderBottomWidth: focusAnim.value,
+    })),
+  };
+
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    focusAnim.value = withTiming(isFocused ? 1 : 0, { duration: 250 });
+  });
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -50,23 +72,30 @@ export default function Component() {
           </TouchableOpacity>
         </View>
         <View style={styles.optionEmailFull}>
-          <View style={styles.buttonsContainerOuter}>
+          <Animated.View
+            style={[
+              styles.buttonsContainerOuter,
+              animStyles.emailButtons,
+              animStyles.border,
+            ]}
+          >
             <View style={styles.buttonsContainer}>
               <View style={styles.line} />
-              <TouchableOpacity style={[ styles.button ]}>
+              <TouchableOpacity style={[styles.button]}>
                 <Text style={styles.buttonText}>Log In</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>Sign Up</Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
           <View style={[styles.optionEmailCollapsed]}>
             <View style={[styles.iconContainer, { marginRight: 4 }]}>
               <Mail width={20} height={20} fill={theme.color.black} />
             </View>
             <TouchableOpacity
               hitSlop={{ top: 13, bottom: 13, left: 90, right: 65 }}
+              onPress={() => setIsFocused(!isFocused)}
             >
               <Text style={styles.optionText}>Continue with Email</Text>
             </TouchableOpacity>

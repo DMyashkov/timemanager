@@ -13,7 +13,7 @@ export default function useStyles() {
       alignItems: "center",
       paddingHorizontal: 24,
       paddingBottom: 5,
-      paddingTop: 35,
+      paddingTop: 20,
     },
     underlined: {
       textDecorationLine: "underline",
@@ -46,11 +46,10 @@ export default function useStyles() {
     },
     imageContainer: {
       width: "100%",
-      aspectRatio: 1.02,
+      aspectRatio: 1.04,
       justifyContent: "center",
       alignItems: "center",
-      marginVertical: -30,
-      marginTop: -25,
+      marginVertical: -15,
     },
     slogan: {
       fontSize: theme.fontSize.largeLarge,
@@ -62,6 +61,7 @@ export default function useStyles() {
     choiceContainer: {
       width: "100%",
       gap: 18,
+      marginTop: -12,
       height: 90 + 18 + 45 + 18 + 45,
       flexDirection: "column",
       justifyContent: "center",
@@ -82,6 +82,8 @@ export default function useStyles() {
       justifyContent: "center",
       height: 45,
       gap: 4,
+      // borderTopWidth: 1,
+      // borderTopColor: theme.color.defaultGrey,
     },
     optionText: {
       fontSize: theme.fontSize.mediumBigBig,
@@ -101,8 +103,6 @@ export default function useStyles() {
     },
     buttonsContainer: {
       flexDirection: "row",
-      borderBottomWidth: 1,
-      borderBottomColor: theme.color.defaultGrey,
       height: 45,
     },
     button: {
@@ -113,6 +113,7 @@ export default function useStyles() {
     buttonText: {
       fontSize: 19,
       fontFamily: theme.font.semibold,
+      color: theme.color.black,
     },
     line: {
       width: 1,
@@ -124,6 +125,9 @@ export default function useStyles() {
     buttonsContainerOuter: {
       height: 45,
       justifyContent: "flex-start",
+      overflow: "hidden",
+      borderBottomWidth: 1,
+      borderBottomColor: theme.color.defaultGrey,
     },
   });
 }
