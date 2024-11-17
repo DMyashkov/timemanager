@@ -49,23 +49,38 @@ export default function Component() {
             <Text style={styles.optionText}>Continue with Google</Text>
           </TouchableOpacity>
         </View>
-        <View style={styles.option}>
-          <View style={[styles.iconContainer, { marginRight: 4 }]}>
-            <Mail width={20} height={20} fill={theme.color.black} />
+        <View style={styles.optionEmailFull}>
+          <View style={styles.buttonsContainerOuter}>
+            <View style={styles.buttonsContainer}>
+              <View style={styles.line} />
+              <TouchableOpacity style={[ styles.button ]}>
+                <Text style={styles.buttonText}>Log In</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button}>
+                <Text style={styles.buttonText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-          <TouchableOpacity
-            hitSlop={{ top: 13, bottom: 13, left: 90, right: 65 }}
-          >
-            <Text style={styles.optionText}>Continue with Email</Text>
-          </TouchableOpacity>
+          <View style={[styles.optionEmailCollapsed]}>
+            <View style={[styles.iconContainer, { marginRight: 4 }]}>
+              <Mail width={20} height={20} fill={theme.color.black} />
+            </View>
+            <TouchableOpacity
+              hitSlop={{ top: 13, bottom: 13, left: 90, right: 65 }}
+            >
+              <Text style={styles.optionText}>Continue with Email</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
-      <Text style={styles.termsOfService}>
-        By continuing you agree with out{" "}
-        <Text style={styles.underlined}>Terms of Service</Text> and{" "}
-        <Text style={styles.underlined}>Privacy Policy</Text>
-      </Text>
+      <View style={styles.termsOfServiceOuter}>
+        <Text style={styles.termsOfService}>
+          By continuing you agree with out{" "}
+          <Text style={styles.underlined}>Terms of Service</Text> and{" "}
+          <Text style={styles.underlined}>Privacy Policy</Text>
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }

@@ -62,6 +62,9 @@ export default function useStyles() {
     choiceContainer: {
       width: "100%",
       gap: 18,
+      height: 90 + 18 + 45 + 18 + 45,
+      flexDirection: "column",
+      justifyContent: "center",
     },
     option: {
       borderRadius: theme.borderRadius.mediumSmall,
@@ -73,11 +76,54 @@ export default function useStyles() {
       borderColor: theme.color.defaultGrey,
       gap: 4,
     },
+    optionEmailCollapsed: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      height: 45,
+      gap: 4,
+    },
     optionText: {
       fontSize: theme.fontSize.mediumBigBig,
       fontFamily: theme.font.semibold,
       color: theme.color.black,
     },
     iconContainer: {},
+    termsOfServiceOuter: {
+      paddingHorizontal: 5,
+    },
+    optionEmailFull: {
+      borderRadius: theme.borderRadius.mediumSmall,
+
+      justifyContent: "flex-end",
+      borderWidth: 1,
+      borderColor: theme.color.defaultGrey,
+    },
+    buttonsContainer: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderBottomColor: theme.color.defaultGrey,
+      height: 45,
+    },
+    button: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    buttonText: {
+      fontSize: 19,
+      fontFamily: theme.font.semibold,
+    },
+    line: {
+      width: 1,
+      height: "100%",
+      position: "absolute",
+      left: "49.5%",
+      backgroundColor: theme.color.defaultGrey,
+    },
+    buttonsContainerOuter: {
+      height: 45,
+      justifyContent: "flex-start",
+    },
   });
 }
