@@ -13,6 +13,11 @@ const config = async () => {
         "react-native-svg-transformer/expo",
       ),
     },
+    resolver: {
+      ...resolver,
+      assetExts: resolver.assetExts.filter((ext) => ext !== "svg"),
+      sourceExts: [...resolver.sourceExts, "svg"],
+    },
   };
 };
 

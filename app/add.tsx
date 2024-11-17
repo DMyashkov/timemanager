@@ -16,9 +16,19 @@ import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useState } from "react";
 import { dataIndex } from "@/constants/exampleData";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
-import { ColorPresets, DataIndexItem } from "@/constants/interfaces";
+import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
+import { moduleType } from "@/constants/interfaces";
+
+interface AddQuery {
+  type: moduleType;
+  title: string;
+  colorPreset: ColorPresets;
+  lapName: string;
+  parentId: string;
+  productive: boolean;
+}
 
 export default function AddScreen() {
   const styles = useStyles();
@@ -57,6 +67,14 @@ export default function AddScreen() {
     ColorPresets.GREEN,
   ];
 
+  const handleCreate = (data: AddQuery) => {
+    if (data.lapName === "") {
+      data.lapName = dataIndex[data.parentId].item.lapName;
+    }
+    const jsonData = JSON.stringify(data, null, 2);
+    console.log(jsonData);
+  };
+
   const [parent, setParent] = useState(dataIndex["activity-1-1-1-1-1"]);
   const PADDING_HORIZONTAL = 22;
   return (
@@ -85,6 +103,7 @@ export default function AddScreen() {
             parent={parent}
             setParent={setParent}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+            handleCreate={handleCreate}
           />
           <AddSegment
             selectedColorIndex={selectedColorIndex}
@@ -94,6 +113,7 @@ export default function AddScreen() {
             setParent={setParent}
             isProject={true}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+            handleCreate={handleCreate}
           />
         </SwitchWrapper>
       </View>
@@ -108,6 +128,7 @@ interface ContentProps {
   setParent: (parent: DataIndexItem) => void;
   isProject?: boolean;
   style?: object;
+  handleCreate: (data: AddQuery) => void;
 }
 
 function AddSegment({
@@ -118,6 +139,7 @@ function AddSegment({
   setParent,
   isProject = false,
   style = {},
+  handleCreate,
 }: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [moduleNameState, setModuleNameState] = useState("");
@@ -154,10 +176,11 @@ function AddSegment({
             setModuleName={setModuleNameState}
             lapName={lapName}
             setLapName={setLapName}
+            handleCreate={handleCreate}
           />
         ) : (
           <ProjectAddContent
-            projectColor={dataIndex["activity-1-1-1-1-1"].colorPreset}
+            projectColor={dataIndex["activity-1-1-1-1-1"].item.colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
@@ -166,6 +189,7 @@ function AddSegment({
             setModuleName={setModuleNameState}
             lapName={lapName}
             setLapName={setLapName}
+            handleCreate={handleCreate}
           />
         )}
       </TouchableOpacity>
@@ -190,8 +214,11 @@ function ActivityAddContent({
   setModuleName,
   setLapName,
   lapName,
+  handleCreate,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
+  const [productivity, setProductivity] = useState<boolean>(true);
+  console.log(parent.item);
   return (
     <>
       <TextField
@@ -203,11 +230,15 @@ function ActivityAddContent({
         buttons={[
           {
             text: "Productive",
-            onPress: () => {},
+            onPress: () => {
+              setProductivity(true);
+            },
           },
           {
             text: "Unproductive",
-            onPress: () => {},
+            onPress: () => {
+              setProductivity(false);
+            },
           },
         ]}
       />
@@ -215,7 +246,7 @@ function ActivityAddContent({
         placeholder="Lap Name"
         setModuleName={setLapName}
         rightHint={true}
-        defaultText={"Lap"}
+        defaultText={parent.item.lapName || "Lap"}
       />
 
       <ColorPicker
@@ -231,7 +262,19 @@ function ActivityAddContent({
         isProject={false}
       />
       <View style={styles.buttonProjectOuter}>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            handleCreate({
+              type: moduleType.activity,
+              title: moduleName,
+              colorPreset: colorArray[selectedColorIndex],
+              lapName: lapName,
+              parentId: parent.item.id,
+              productive: productivity,
+            });
+          }}
+        >
           <Text style={styles.buttonText}>Create</Text>
         </TouchableOpacity>
       </View>
@@ -246,6 +289,9 @@ function ProjectAddContent({
   setParent,
   moduleName,
   setModuleName,
+  lapName,
+  setLapName,
+  handleCreate,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
   return (
@@ -255,6 +301,13 @@ function ProjectAddContent({
         setModuleName={setModuleName}
         rightHint={true}
       />
+
+      <TextField
+        placeholder="Lap Name"
+        setModuleName={setLapName}
+        rightHint={true}
+        defaultText={parent.item.lapName || "Lap"}
+      />
       <PathPicker
         parent={parent}
         setParent={setParent}
@@ -263,7 +316,19 @@ function ProjectAddContent({
         moduleName={moduleName}
       />
       <View style={styles.buttonProjectOuter}>
-        <TouchableOpacity style={styles.buttonProject}>
+        <TouchableOpacity
+          style={styles.buttonProject}
+          onPress={() => {
+            handleCreate({
+              type: moduleType.project,
+              title: moduleName,
+              colorPreset: projectColor,
+              lapName: lapName,
+              parentId: parent.item.id,
+              productive: parent.item.productive,
+            });
+          }}
+        >
           <Text style={styles.buttonTextProject}>Create</Text>
         </TouchableOpacity>
       </View>

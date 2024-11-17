@@ -1,56 +1,70 @@
-import { type DataIndex, ColorPresets } from "@constants/interfaces";
+import {
+  type DataIndex,
+  ColorPresets,
+  type ActivityData,
+  moduleType,
+} from "@constants/interfaces";
 
-enum moduleType {
-  activity = 0,
-  project = 1,
-}
-
-type ActivityData = {
-  id: string;
-  title: string;
-  type: moduleType;
-  activities?: ActivityData[];
-  colorPreset?: ColorPresets;
-};
-
-import { THEME } from "@/constants/theme";
 const data2: ActivityData = {
   id: "root",
   title: "Root",
   type: moduleType.activity,
+  productive: true,
+  lapName: "Lap",
+  colorPreset: ColorPresets.GREEN,
+
   activities: [
     {
       id: "activity-1",
       title: "Activity 1",
       type: moduleType.activity,
       colorPreset: ColorPresets.ORANGE,
+      productive: true,
+      lapName: "Lap",
+
       activities: [
         {
           id: "project-1",
           title: "Project 1",
           type: moduleType.project,
           colorPreset: ColorPresets.ORANGE,
+          productive: true,
+          lapName: "Lap",
         },
         {
           id: "activity-1-1",
           title: "Activity 1.1",
           type: moduleType.activity,
           colorPreset: ColorPresets.GREEN,
+          productive: true,
+          lapName: "Lap",
+
           activities: [
             {
               id: "activity-1-1-1",
               title: "Activity 1.1.1",
               type: moduleType.activity,
+              productive: true,
+              lapName: "Lap",
+              colorPreset: ColorPresets.GREEN,
+
               activities: [
                 {
                   id: "activity-1-1-1-1",
                   title: "Activity 1.1.1.1",
                   type: moduleType.activity,
+                  productive: true,
+                  colorPreset: ColorPresets.GREEN,
+
+                  lapName: "Lap",
                   activities: [
                     {
                       id: "activity-1-1-1-1-1",
                       title: "Activity 1.1.1.1.1",
                       type: moduleType.activity,
+                      productive: true,
+                      colorPreset: ColorPresets.ORANGE,
+                      lapName: "Exercise",
                     },
                   ],
                 },
@@ -65,20 +79,11 @@ const data2: ActivityData = {
       title: "Activity 2",
       type: moduleType.activity,
       colorPreset: ColorPresets.GREEN,
+      productive: true,
+      lapName: "Lap",
     },
   ],
 };
-
-const colorPresetsKeys = Object.keys(THEME.light.color.presets) as Array<
-  keyof typeof ColorPresets
->;
-
-// Function to get a random color preset key
-function getRandomColorPreset(): ColorPresets {
-  const randomKey =
-    colorPresetsKeys[Math.floor(Math.random() * colorPresetsKeys.length)];
-  return ColorPresets[randomKey.toUpperCase() as keyof typeof ColorPresets];
-}
 
 function createDataIndex(
   node: ActivityData,
@@ -90,10 +95,12 @@ function createDataIndex(
       id: node.id,
       title: node.title,
       type: node.type,
+      productive: node.productive,
+      lapName: node.lapName,
+      colorPreset: node.colorPreset, // Default color preset
     },
     children: node.activities ? node.activities.map((child) => child.id) : [],
     path: [...path],
-    colorPreset: node.colorPreset || ColorPresets.GREEN, // Default color preset
   };
 
   if (node.activities) {

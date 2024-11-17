@@ -38,20 +38,22 @@ export default function PathPicker({
         </TouchableOpacity>
       </View>
       <View style={styles.pathContainer}>
-        {parent.path.slice(1, parent.path.length).map((id, _) => {
-          const item = dataIndex[id as keyof typeof dataIndex];
-          const name = item.item.title;
-          const color = item.colorPreset;
-          return (
-            <ActivityItem
-              isExplicitlyExpanded={true}
-              key={id}
-              activityName={name}
-              activityColor={color}
-              clickable={false}
-            />
-          );
-        })}
+        {[...parent.path.slice(1, parent.path.length), parent.item.id].map(
+          (id, _) => {
+            const item = dataIndex[id as keyof typeof dataIndex];
+            const name = item.item.title;
+            const color = item.item.colorPreset;
+            return (
+              <ActivityItem
+                isExplicitlyExpanded={true}
+                key={id}
+                activityName={name}
+                activityColor={color}
+                clickable={false}
+              />
+            );
+          },
+        )}
         {!isProject ? (
           <ActivityItem
             activityName={moduleName}

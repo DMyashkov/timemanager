@@ -4,11 +4,20 @@ export interface Color {
   dark: string;
 }
 
+export type ActivityData = {
+  id: string;
+  title: string;
+  type: moduleType;
+  activities?: ActivityData[];
+  colorPreset: ColorPresets;
+  productive: boolean;
+  lapName: string;
+};
+
 export type DataIndexItem = {
   item: Omit<ActivityData, "activities">; // Item without `activities`
   children: string[]; // IDs of direct children
   path: string[]; // Parent IDs
-  colorPreset: ColorPresets; // Assigned color preset
 };
 
 export type DataIndex = {
@@ -28,4 +37,9 @@ export interface SwitchButton {
 
 export interface SwitchProps {
   buttons: SwitchButton[];
+}
+
+export enum moduleType {
+  activity = 0,
+  project = 1,
 }

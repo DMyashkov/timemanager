@@ -286,7 +286,7 @@ function ListModuleInner({
             expandAnimParam={expandAnim}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={dataIndex[activityData.id].colorPreset}
+            activityColor={dataIndex[activityData.id].item.colorPreset}
           />
         ) : (
           <ProjectItem
@@ -306,7 +306,7 @@ function ListModuleInner({
             style={[styles.activityItem]}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={dataIndex[activityData.id].colorPreset}
+            activityColor={dataIndex[activityData.id].item.colorPreset}
           />
         ))}
       {typeOfModule === moduleType.activity && (

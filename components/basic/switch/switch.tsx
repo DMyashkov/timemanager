@@ -26,8 +26,6 @@ export default function Switch({
   const scaleAnim = useSharedValue(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
 
-  console.log("positionAnim", positionAnim.value);
-  console.log("selectedButtonIndex", selectedButtonIndex);
   useEffect(() => {
     // Update positionAnim only if the selected index changes
     if (positionAnim.value !== selectedButtonIndex) {
