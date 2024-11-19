@@ -90,7 +90,12 @@ export default function Component() {
               >
                 <Text style={styles.buttonText}>Log In</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.button}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  router.push("/signup");
+                }}
+              >
                 <Text style={styles.buttonText}>Sign Up</Text>
               </TouchableOpacity>
             </View>

@@ -74,16 +74,13 @@ export default function Layout() {
           options={{
             headerShown: false,
             presentation: "modal",
-            headerLeft: () => (
-              <SysButton
-                text="Cancel"
-                onPress={() => {
-                  router.back();
-                }}
-                isRed={true}
-              />
-            ),
-            title: "",
+          }}
+        />
+        <Stack.Screen
+          name="signup"
+          options={{
+            headerShown: false,
+            presentation: "modal",
           }}
         />
 
