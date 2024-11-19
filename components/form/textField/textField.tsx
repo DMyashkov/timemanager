@@ -12,6 +12,7 @@ import Eye from "@assets/icons/eye.svg";
 import EyeSlash from "@assets/icons/eye-slash.svg";
 
 export default function TextField({
+  autoFocus = false,
   placeholder = "Activity Name",
   setModuleName = (text: string) => {},
   rightHint = false,
@@ -25,6 +26,7 @@ export default function TextField({
   defaultText?: string;
   topHint?: string;
   hideOption?: boolean;
+  autoFocus?: boolean;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -116,6 +118,7 @@ export default function TextField({
             hitSlop={{ left: 12 }}
             value={text}
             secureTextEntry={isHidden}
+            autoFocus={autoFocus}
           />
           <View
             style={styles.buttonsContainer}

@@ -16,8 +16,8 @@ export default function Login() {
   const { theme } = useTheme();
 
   return (
-    <View style={styles.view}>
-      <SafeAreaView style={styles.innerView}>
+    <SafeAreaView style={styles.view}>
+      <View style={styles.innerView}>
         <View style={[styles.headerButtonContainer]}>
           <SysButton
             text="Cancel"
@@ -32,7 +32,11 @@ export default function Login() {
             <Text style={styles.title}>Log In</Text>
             <Text style={styles.description}>Add your email and password.</Text>
           </View>
-          <TextField placeholder="Email" topHint="YOUR EMAIL" />
+          <TextField
+            placeholder="Email"
+            topHint="YOUR EMAIL"
+            autoFocus={true}
+          />
           <TextField
             placeholder="Password"
             topHint="YOUR PASSWORD"
@@ -47,8 +51,8 @@ export default function Login() {
             </TouchableOpacity>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
       <View style={styles.empty} />
-    </View>
+    </SafeAreaView>
   );
 }

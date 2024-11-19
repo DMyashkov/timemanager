@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useEffect, useState } from "react";
+import { router } from "expo-router";
 
 export default function Component() {
   const styles = useStyles();
@@ -81,7 +82,12 @@ export default function Component() {
           >
             <View style={styles.buttonsContainer}>
               <View style={styles.line} />
-              <TouchableOpacity style={[styles.button]}>
+              <TouchableOpacity
+                style={[styles.button]}
+                onPress={() => {
+                  router.push("/login");
+                }}
+              >
                 <Text style={styles.buttonText}>Log In</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.button}>

@@ -16,6 +16,7 @@ export default function useStyles() {
     },
     headerButtonContainer: {
       backgroundColor: theme.color.warmGrey,
+      marginTop: 20,
     },
     title: {
       fontFamily: theme.font.bold,
@@ -47,9 +48,11 @@ export default function useStyles() {
       paddingHorizontal: 16,
       gap: 15,
       flexDirection: "column",
-      height: "60%",
+      flex: 1,
     },
-    empty: {},
+    empty: {
+      height: "50%",
+    },
     forgotPassword: {
       color: theme.color.darkGrey,
       fontFamily: theme.font.regular,
