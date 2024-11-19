@@ -48,10 +48,6 @@ export default function useStyles() {
       paddingHorizontal: 16,
       gap: 15,
       flexDirection: "column",
-      flex: 1,
-    },
-    empty: {
-      height: "50%",
     },
     forgotPassword: {
       color: theme.color.darkGrey,

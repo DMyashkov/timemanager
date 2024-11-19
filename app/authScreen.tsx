@@ -1,8 +1,8 @@
 import {
   View,
   Text,
-  KeyboardAvoidingView,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
 import useStyles from "./styles/loginStyles";
 import { useTheme } from "@context/ThemeContext";
@@ -14,6 +14,8 @@ import { useState } from "react";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
+  const { height } = useWindowDimensions();
+
   const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +34,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
   return (
     <SafeAreaView style={styles.view}>
-      <View style={styles.innerView}>
+      <View style={[styles.innerView, { height: height / 2 }]}>
         <View style={[styles.headerButtonContainer]}>
           <SysButton
             text="Cancel"
@@ -42,7 +44,14 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
             isRed={true}
           />
         </View>
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            {
+              height: height / 2,
+            },
+          ]}
+        >
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{!isSignUp ? "Log In" : "Sign Up"}</Text>
             <Text style={styles.description}>Add your email and password.</Text>
@@ -78,7 +87,6 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
           </View>
         </View>
       </View>
-      <View style={styles.empty} />
     </SafeAreaView>
   );
 }
