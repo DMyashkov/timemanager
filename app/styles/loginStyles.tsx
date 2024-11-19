@@ -32,12 +32,12 @@ export default function useStyles() {
       gap: 10,
     },
     button: {
-      height: 45,
       backgroundColor: theme.color.red,
       borderRadius: theme.borderRadius.large,
       justifyContent: "center",
       alignSelf: "stretch",
       alignItems: "center",
+      height: "100%",
     },
     buttonText: {
       fontSize: theme.fontSize.medium,
@@ -62,6 +62,14 @@ export default function useStyles() {
     loginButtonOuter: {
       alignItems: "center",
       gap: 15,
+    },
+    outerButton: {
+      height: 45,
+      backgroundColor: theme.color.white,
+      borderRadius: theme.borderRadius.large,
+      justifyContent: "center",
+      alignSelf: "stretch",
+      alignItems: "center",
     },
   });
 }

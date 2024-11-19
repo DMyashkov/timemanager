@@ -60,14 +60,16 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
             setModuleName={setPassword}
           />
           <View style={styles.loginButtonOuter}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={!isSignUp ? handleLogin : handleSignUp}
-            >
-              <Text style={styles.buttonText}>
-                {!isSignUp ? "Log In" : "Sign Up"}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.outerButton}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={!isSignUp ? handleLogin : handleSignUp}
+              >
+                <Text style={styles.buttonText}>
+                  {!isSignUp ? "Log In" : "Sign Up"}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={styles.forgotPassword}>
                 {!isSignUp ? "Forgot your password?" : ""}
