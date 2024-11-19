@@ -129,8 +129,12 @@ export default function TextField({
             }) => setButtonContainerWidth(width)}
           >
             {text.length > 0 && (
-              <TouchableOpacity onPress={handleClearInput}>
-                <Xmark height={16} width={16} fill={theme.color.darkGrey} />
+              <TouchableOpacity
+                onPress={handleClearInput}
+                hitSlop={{ top: 20, bottom: 15, left: 15, right: 15 }}
+                style={{ marginTop: 1.5 }}
+              >
+                <Xmark height={20} width={20} fill={theme.color.darkGrey} />
               </TouchableOpacity>
             )}
             {hideOption && (
@@ -138,15 +142,16 @@ export default function TextField({
                 onPress={() => {
                   setIsHidden(!isHidden);
                 }}
+                hitSlop={{ top: 20, bottom: 15, left: 7, right: 15 }}
               >
                 {!isHidden ? (
                   <EyeSlash
-                    height={20}
-                    width={20}
+                    height={24}
+                    width={24}
                     fill={theme.color.darkGrey}
                   />
                 ) : (
-                  <Eye height={20} width={20} fill={theme.color.darkGrey} />
+                  <Eye height={24} width={24} fill={theme.color.darkGrey} />
                 )}
               </TouchableOpacity>
             )}

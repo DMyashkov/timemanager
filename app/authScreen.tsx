@@ -10,10 +10,25 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { router } from "expo-router";
 import TextField from "@/components/form/textField/textField";
+import { useState } from "react";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
   const { theme } = useTheme();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    // login logic
+  };
+
+  const handleSignUp = () => {
+    // signup logic
+  };
+
+  const handleForgotPassword = () => {
+    // forgot password logic
+  };
 
   return (
     <SafeAreaView style={styles.view}>
@@ -36,19 +51,24 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
             placeholder="Email"
             topHint="YOUR EMAIL"
             autoFocus={true}
+            setModuleName={setEmail}
           />
           <TextField
             placeholder="Password"
             topHint="YOUR PASSWORD"
             hideOption={true}
+            setModuleName={setPassword}
           />
           <View style={styles.loginButtonOuter}>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={!isSignUp ? handleLogin : handleSignUp}
+            >
               <Text style={styles.buttonText}>
                 {!isSignUp ? "Log In" : "Sign Up"}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleForgotPassword}>
               <Text style={styles.forgotPassword}>
                 {!isSignUp ? "Forgot your password?" : ""}
               </Text>
