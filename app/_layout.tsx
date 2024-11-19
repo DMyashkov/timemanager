@@ -70,6 +70,24 @@ export default function Layout() {
           }}
         />
         <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+            headerLeft: () => (
+              <SysButton
+                text="Cancel"
+                onPress={() => {
+                  router.back();
+                }}
+                isRed={true}
+              />
+            ),
+            title: "",
+          }}
+        />
+
+        <Stack.Screen
           name="authSelection"
           options={{
             headerShown: false,

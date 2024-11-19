@@ -46,6 +46,7 @@ export const THEME = {
       darkerGrey: "#7F7F7F",
       sysBlue: "#007AFF",
       white: "#FFFFFF",
+      warmGrey: "#F7f7F7",
     },
     shadow: {
       shadowColor: "#000", // Black shadow

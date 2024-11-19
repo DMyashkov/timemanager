@@ -1,4 +1,4 @@
-import { View, Text, TextInput } from "react-native";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { useEffect, useRef, useState } from "react";
@@ -7,17 +7,24 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import Xmark from "@assets/icons/xmark.svg";
+import Eye from "@assets/icons/eye.svg";
+import EyeSlash from "@assets/icons/eye-slash.svg";
 
 export default function TextField({
   placeholder = "Activity Name",
   setModuleName = (text: string) => {},
   rightHint = false,
   defaultText = "",
+  topHint = "",
+  hideOption = false,
 }: {
   placeholder?: string;
   setModuleName?: (text: string) => void;
   rightHint?: boolean;
   defaultText?: string;
+  topHint?: string;
+  hideOption?: boolean;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -28,7 +35,9 @@ export default function TextField({
   };
   const [rightHintWidth, setRightHintWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [buttonContainerWidth, setButtonContainerWidth] = useState(0);
   const [textWidth, setTextWidth] = useState(0);
+  const [isHidden, setIsHidden] = useState(hideOption);
 
   const opacity = useSharedValue(0);
   const prevCalculationCondition = useRef(false);
@@ -37,7 +46,9 @@ export default function TextField({
     containerWidth -
       2 * styles.container.paddingLeft -
       textWidth -
-      rightHintWidth >
+      rightHintWidth -
+      buttonContainerWidth -
+      11 >
     0;
 
   const shouldShowHint =
@@ -63,45 +74,92 @@ export default function TextField({
     prevCalculationCondition.current = calculationCondition;
   }, [calculationCondition, opacity]);
 
+  const handleClearInput = () => {
+    setText(""); // Clear the input text
+  };
+
   return (
-    <View
-      style={styles.container}
-      onLayout={({
-        nativeEvent: {
-          layout: { width },
-        },
-      }) => setContainerWidth(width)}
-    >
-      <View style={styles.containerInner}>
-        {shouldShowHint && (
-          <Animated.Text
-            style={[styles.hintText, animatedStyle]}
+    <View style={styles.outerContainer}>
+      {topHint && <Text style={styles.topHint}>{topHint}</Text>}
+      <View
+        style={styles.container}
+        onLayout={({
+          nativeEvent: {
+            layout: { width },
+          },
+        }) => setContainerWidth(width)}
+      >
+        <View style={styles.containerInner}>
+          {shouldShowHint && (
+            <Animated.Text
+              style={[
+                styles.hintText,
+                animatedStyle,
+                {
+                  right: buttonContainerWidth + 12 + 11,
+                },
+              ]}
+              onLayout={({
+                nativeEvent: {
+                  layout: { width },
+                },
+              }) => setRightHintWidth(width)}
+            >
+              {placeholder}
+            </Animated.Text>
+          )}
+          <TextInput
+            style={[styles.textInput]}
+            placeholder={defaultText || placeholder}
+            placeholderTextColor={theme.color.darkerLightGrey}
+            onChangeText={onChangeText}
+            hitSlop={{ left: 12 }}
+            value={text}
+            secureTextEntry={isHidden}
+          />
+          <View
+            style={styles.buttonsContainer}
             onLayout={({
               nativeEvent: {
                 layout: { width },
               },
-            }) => setRightHintWidth(width)}
+            }) => setButtonContainerWidth(width)}
           >
-            {placeholder}
-          </Animated.Text>
-        )}
-        <TextInput
-          style={[styles.textInput]}
-          placeholder={defaultText || placeholder}
-          placeholderTextColor={theme.color.darkerLightGrey}
-          onChangeText={onChangeText}
-          hitSlop={{ left: 12 }}
-        />
-        <Text
-          style={styles.hiddenText}
-          onLayout={({
-            nativeEvent: {
-              layout: { width },
-            },
-          }) => setTextWidth(width)}
-        >
-          {text}
-        </Text>
+            {text.length > 0 && (
+              <TouchableOpacity onPress={handleClearInput}>
+                <Xmark height={16} width={16} fill={theme.color.darkGrey} />
+              </TouchableOpacity>
+            )}
+            {hideOption && (
+              <TouchableOpacity
+                onPress={() => {
+                  setIsHidden(!isHidden);
+                }}
+              >
+                {!isHidden ? (
+                  <EyeSlash
+                    height={20}
+                    width={20}
+                    fill={theme.color.darkGrey}
+                  />
+                ) : (
+                  <Eye height={20} width={20} fill={theme.color.darkGrey} />
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Text
+            style={styles.hiddenText}
+            onLayout={({
+              nativeEvent: {
+                layout: { width },
+              },
+            }) => setTextWidth(width)}
+          >
+            {text}
+          </Text>
+        </View>
       </View>
     </View>
   );

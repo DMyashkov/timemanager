@@ -7,7 +7,7 @@ export default function useStyles() {
   return StyleSheet.create({
     container: {
       backgroundColor: theme.color.white,
-      height: 42,
+      height: 45,
       borderRadius: theme.borderRadius.large,
       justifyContent: "center",
       paddingLeft: 12,
@@ -37,6 +37,18 @@ export default function useStyles() {
       color: "transparent",
       fontFamily: theme.font.regular,
       fontSize: theme.fontSize.medium,
+    },
+    outerContainer: {},
+    topHint: {
+      fontSize: theme.fontSize.mediumSmall,
+      color: theme.color.darkGrey,
+      fontFamily: theme.font.regular,
+      marginLeft: 6,
+      marginBottom: 2,
+    },
+    buttonsContainer: {
+      gap: 11,
+      flexDirection: "row",
     },
   });
 }
