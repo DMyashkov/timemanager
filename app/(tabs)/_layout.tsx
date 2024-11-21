@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { useTheme } from "@context/ThemeContext";
 import Stopwatch from "@assets/icons/stopwatch.svg";
 import Workplace from "@assets/icons/workplace.svg";
+import House from "@assets/icons/house.svg";
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -16,6 +17,15 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: theme.color.darkGrey,
       }}
     >
+      <Tabs.Screen
+        name="tasks"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <House height={tabIconSize} width={tabIconSize} fill={color} />
+          ),
+        }}
+      />
+
       <Tabs.Screen
         name="watch"
         options={{
@@ -33,6 +43,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen name="styles/watchStyles" options={{ href: null }} />
+      <Tabs.Screen name="styles/tasksStyles" options={{ href: null }} />
     </Tabs>
   );
 }

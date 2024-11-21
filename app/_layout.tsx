@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { Text } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -36,61 +37,63 @@ export default function Layout() {
   if (!fontsLoaded) return null;
 
   return (
-    <ThemeProvider>
-      <Stack screenOptions={{}}>
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="add"
-          options={{
-            presentation: "modal",
-            headerLeft: () => (
-              <SysButton
-                text="Cancel"
-                onPress={() => {
-                  router.back();
-                }}
-              />
-            ),
-            headerTitle: (props) => (
-              <Text
-                {...props}
-                style={{
-                  fontSize: useTheme().theme.fontSize.medium,
-                  fontFamily: useTheme().theme.font.semibold,
-                }}
-              >
-                Create tag
-              </Text>
-            ),
-          }}
-        />
-        <Stack.Screen
-          name="login"
-          options={{
-            headerShown: false,
-            presentation: "modal",
-          }}
-        />
-        <Stack.Screen
-          name="signup"
-          options={{
-            headerShown: false,
-            presentation: "modal",
-          }}
-        />
+    <GestureHandlerRootView>
+      <ThemeProvider>
+        <Stack screenOptions={{}}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="add"
+            options={{
+              presentation: "modal",
+              headerLeft: () => (
+                <SysButton
+                  text="Cancel"
+                  onPress={() => {
+                    router.back();
+                  }}
+                />
+              ),
+              headerTitle: (props) => (
+                <Text
+                  {...props}
+                  style={{
+                    fontSize: useTheme().theme.fontSize.medium,
+                    fontFamily: useTheme().theme.font.semibold,
+                  }}
+                >
+                  Create tag
+                </Text>
+              ),
+            }}
+          />
+          <Stack.Screen
+            name="login"
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+          />
+          <Stack.Screen
+            name="signup"
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+          />
 
-        <Stack.Screen
-          name="authSelection"
-          options={{
-            headerShown: false,
-          }}
-        />
-      </Stack>
-    </ThemeProvider>
+          <Stack.Screen
+            name="authSelection"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
