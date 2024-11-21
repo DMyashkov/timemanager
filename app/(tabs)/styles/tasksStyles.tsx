@@ -5,10 +5,14 @@ export default function useStyles() {
   const { theme } = useTheme();
 
   return StyleSheet.create({
-    screen: {
+    container: {
       flex: 1,
-      backgroundColor: theme.color.white,
+      backgroundColor: "grey",
+    },
+    contentContainer: {
+      flex: 1,
+      padding: 36,
+      alignItems: "center",
     },
   });
 }
-

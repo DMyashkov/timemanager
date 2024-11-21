@@ -37,7 +37,7 @@ export default function Layout() {
   if (!fontsLoaded) return null;
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
         <Stack screenOptions={{}}>
           <Stack.Screen
