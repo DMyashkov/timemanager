@@ -1,12 +1,12 @@
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from "react-native-gesture-handler";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useStyles from "./styles/tasksStyles";
 import { useCallback, useRef } from "react";
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { Text } from "react-native";
+import BottomSheet, {
+  BottomSheetTextInput,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { TextInput } from "react-native";
+import { useTheme } from "@context/ThemeContext";
 
 export default function Ball() {
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -17,13 +17,28 @@ export default function Ball() {
   }, []);
 
   const styles = useStyles();
+  const { theme } = useTheme();
 
   // renders
   return (
     <GestureHandlerRootView style={styles.container}>
-      <BottomSheet ref={bottomSheetRef} onChange={handleSheetChanges}>
+      <BottomSheet
+        ref={bottomSheetRef}
+        onChange={handleSheetChanges}
+        enableDynamicSizing={false}
+        snapPoints={[200]}
+        keyboardBehavior="interactive"
+      >
         <BottomSheetView style={styles.contentContainer}>
-          <Text>Awesome 🎉</Text>
+          <BottomSheetView style={styles.titleContainer}>
+            <BottomSheetTextInput
+              placeholder="Task Name"
+              style={styles.titleInput}
+              placeholderTextColor={theme.color.darkGrey}
+              selectionColor={theme.color.red}
+              keyboardType="twitter"
+            />
+          </BottomSheetView>
         </BottomSheetView>
       </BottomSheet>
     </GestureHandlerRootView>
