@@ -1,9 +1,6 @@
 import {
   View,
   Text,
-  StyleSheet,
-  Touchable,
-  TouchableOpacityBase,
   TouchableOpacity,
   FlatList,
   Dimensions,
@@ -21,7 +18,6 @@ import { useEffect, useState } from "react";
 import useStyles from "./styles/watchStyles";
 import Tag from "@components/tag/tagComponent";
 import Animated, {
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
