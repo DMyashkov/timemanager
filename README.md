@@ -1,4 +1,4 @@
-docker-compose up --build
+Стартирай docker desktop рънни docker-compose up --build
 и после отиди на
 http://localhost:8081/
 и basically това което има е authentication с имейл. 
