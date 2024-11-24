@@ -1,4 +1,4 @@
-# timemanager
+# Backend test
 
 ## Run
  1. Go into the backend folder
