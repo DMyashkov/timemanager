@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+
+from authentication.models import CustomUser
 
 
 @api_view(['GET'])
@@ -11,13 +12,13 @@ def home(request):
 
 @api_view(['POST'])
 def login_page(request):
-    username = request.data.get('username')
+    email = request.data.get('email')  # Use email instead of username
     password = request.data.get('password')
 
-    if not User.objects.filter(username=username).exists():
-        return Response({"error": "Invalid Username"}, status=400)
+    if not CustomUser.objects.filter(email=email).exists():
+        return Response({"error": "Invalid Email"}, status=400)
 
-    user = authenticate(username=username, password=password)
+    user = authenticate(request, email=email, password=password)
 
     if user is None:
         return Response({"error": "Invalid Password"}, status=400)
@@ -28,18 +29,15 @@ def login_page(request):
 
 @api_view(['POST'])
 def register_page(request):
-    first_name = request.data.get('first_name')
-    last_name = request.data.get('last_name')
-    username = request.data.get('username')
+    email = request.data.get('email')  # Use email for registration
     password = request.data.get('password')
 
-    if User.objects.filter(username=username).exists():
-        return Response({"error": "Username already taken"}, status=400)
+    if CustomUser.objects.filter(email=email).exists():
+        return Response({"error": "Email already taken"}, status=400)
 
-    user = User.objects.create_user(
-        first_name=first_name,
-        last_name=last_name,
-        username=username,
+    # Create user
+    user = CustomUser.objects.create_user(
+        email=email,
         password=password,
     )
     user.save()

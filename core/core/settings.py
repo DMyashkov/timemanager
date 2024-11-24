@@ -114,7 +114,8 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-# AUTH_USER_MODEL = 'authentication.CustomUser'
+
+AUTH_USER_MODEL = 'authentication.CustomUser'
 
 
 # Static files (CSS, JavaScript, Images)
@@ -135,3 +136,14 @@ STATICFILES_DIR = {
 }
 MEDIA_ROOT = os.path.join(BASE_DIR, 'public/static')
 MEDIA_URL = '/media/'
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'timemanager_db',
+        'USER': 'myuser',
+        'PASSWORD': 'mypassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
