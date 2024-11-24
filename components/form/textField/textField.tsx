@@ -119,6 +119,7 @@ export default function TextField({
             value={text}
             secureTextEntry={isHidden}
             autoFocus={autoFocus}
+            autoCapitalize="none"
           />
           <View
             style={styles.buttonsContainer}

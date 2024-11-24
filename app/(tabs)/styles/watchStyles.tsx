@@ -32,6 +32,7 @@ export default function useStyles() {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
+      gap: 8,
     },
     bottomClockView: {
       marginTop: -6,
