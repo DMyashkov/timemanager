@@ -1,3 +1,4 @@
+from authentication.models import CustomUser
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -6,8 +7,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-
-from authentication.models import CustomUser
 
 
 @api_view(['GET'])

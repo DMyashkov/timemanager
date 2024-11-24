@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-@wd7db*7=egw83rw^x(e_z^u!=$d7+#8@+cwd%e3jvn9m=pkld
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "10.0.2.2", "192.168.1.100"]
 
 
 # Application definition
@@ -60,9 +60,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
-ROOT_URLCONF = 'core.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -80,18 +81,11 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'core.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
 
 # Password validation
@@ -152,7 +146,39 @@ DATABASES = {
         'NAME': 'timemanager_db',
         'USER': 'myuser',
         'PASSWORD': 'mypassword',
-        'HOST': 'localhost',
+        'HOST': 'postgres-db',
         'PORT': '5432',
     }
 }
+
+INSTALLED_APPS += [
+    'corsheaders',
+]
+
+MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:19006",  # React Native development server (Expo)
+    "http://localhost:8000",  # Replace with the URL of your Docker app
+    "http://127.0.0.1:8081",  # Replace with the URL of your Docker app
+
+]
+
+# If credentials (cookies) are used:
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow headers and methods for preflight
+CORS_ALLOW_HEADERS = [
+    "Content-Type",
+    "Authorization",
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS",
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
