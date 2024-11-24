@@ -21,6 +21,7 @@
     "@gorhom/bottom-sheet": "^5.0.6",
     "@react-native/metro-config": "^0.75.4",
     "@react-navigation/native": "^6.0.2",
+    "axios": "^1.7.7",
     "expo": "^52.0.7",
     "expo-app-loading": "^2.1.1",
     "expo-constants": "~17.0.3",
