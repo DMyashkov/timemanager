@@ -7,6 +7,11 @@ export default function useStyles() {
   const SEND_BUTTON_SIZE = 34;
 
   return StyleSheet.create({
+    contentContainer: {
+      flex: 1,
+      paddingHorizontal: 22,
+    },
+
     titleInput: {
       fontSize: theme.fontSize.largeSmall,
       fontFamily: theme.font.regular,
