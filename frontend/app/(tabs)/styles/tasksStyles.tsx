@@ -9,7 +9,7 @@ export default function useStyles() {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "grey",
+      backgroundColor: theme.color.white,
     },
     contentContainer: {
       flex: 1,

@@ -1,9 +1,13 @@
 import React, { useRef, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  GestureHandlerRootView,
+  TouchableWithoutFeedback,
+} from "react-native-gesture-handler";
 import TaskBottomSheet from "@components/tasks/addTaskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TasksScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
@@ -18,11 +22,25 @@ export default function TasksScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View style={styles.contentContainer}>
-        <TouchableOpacity onPress={openBottomSheet}>
-          <Text>Add Task</Text>
+      <SafeAreaView style={{ flex: 1, alignSelf: "stretch" }}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            alignSelf: "stretch",
+          }}
+          activeOpacity={1}
+          onPress={() => {
+            bottomSheetRef.current?.close();
+          }}
+        >
+          <SafeAreaView style={styles.contentContainer}>
+            <TouchableOpacity onPress={openBottomSheet}>
+              <Text>Add Task</Text>
+            </TouchableOpacity>
+          </SafeAreaView>
         </TouchableOpacity>
-      </View>
+        {/* </TouchableWithoutFeedback> */}
+      </SafeAreaView>
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
         title={title}

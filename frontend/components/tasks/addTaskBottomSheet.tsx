@@ -51,6 +51,7 @@ export default function AddTaskSheet({
       // backdropComponent={() => (
       //   <View style={{ flex: 1, opacity: 0.1 }}></View>
       // )}
+      index={-1}
     >
       <View style={styles.outer}>
         <BottomSheetScrollView
