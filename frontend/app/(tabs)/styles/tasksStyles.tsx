@@ -13,7 +13,6 @@ export default function useStyles() {
     },
     contentContainer: {
       flex: 1,
-      paddingHorizontal: 22,
     },
   });
 }

@@ -8,10 +8,14 @@ import TaskBottomSheet from "@components/tasks/addTaskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Header from "@/components/header/header";
+import Plus from "@/assets/icons/plus.svg";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function TasksScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
   const styles = useStyles();
+  const { theme } = useTheme();
 
   const [title, setTitle] = useState(""); // State for task title
   const [description, setDescription] = useState(""); // State for task description
@@ -22,25 +26,20 @@ export default function TasksScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <SafeAreaView style={{ flex: 1, alignSelf: "stretch" }}>
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            alignSelf: "stretch",
-          }}
-          activeOpacity={1}
-          onPress={() => {
-            bottomSheetRef.current?.close();
-          }}
-        >
-          <SafeAreaView style={styles.contentContainer}>
-            <TouchableOpacity onPress={openBottomSheet}>
-              <Text>Add Task</Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-        </TouchableOpacity>
-        {/* </TouchableWithoutFeedback> */}
-      </SafeAreaView>
+      <Header
+        title="Tasks"
+        buttons={[
+          {
+            id: "plus",
+            iconElement: (
+              <Plus height={25} width={25} fill={theme.color.black} />
+            ),
+            onPress: openBottomSheet,
+          },
+        ]}
+        showSearchBar={true}
+      />
+      <View style={styles.contentContainer} />
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
         title={title}
