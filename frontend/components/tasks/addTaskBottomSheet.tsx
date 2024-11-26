@@ -2,11 +2,13 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useStyles from "./styles";
 import { useCallback, useRef, useState } from "react";
 import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
   BottomSheetScrollView,
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { TextInput, View, Text } from "react-native";
+import { TextInput, View, Text, Keyboard } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
 import type { SvgProps } from "react-native-svg";
@@ -27,15 +29,39 @@ export default function AddTaskSheet({
   setDescription: (s: string) => void;
   bottomSheetRef: React.RefObject<BottomSheet>;
 }) {
+  const taskNameInputRef = useRef<TextInput>(null); // Ref for Task Name input
+
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+    if (index >= 0) {
+      // When the sheet is opened, focus on the Task Name input
+      taskNameInputRef.current?.focus();
+    } else {
+      // When the sheet is closed, dismiss the keyboard
+      Keyboard.dismiss();
+    }
   }, []);
 
   const styles = useStyles();
   const { theme } = useTheme();
 
   const isSendable = title.length > 0;
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1} // Hides the backdrop when the sheet is closed
+        appearsOnIndex={0} // Shows the backdrop when the sheet is opened
+        style={{
+          backgroundColor: "#000",
+          opacity: 0.4,
+          marginTop: -20000,
+        }}
+      />
+    ),
+    [],
+  );
 
   // renders
   return (
@@ -48,6 +74,7 @@ export default function AddTaskSheet({
       keyboardBlurBehavior="restore"
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: "transparent" }}
+      backdropComponent={renderBackdrop}
       // backdropComponent={() => (
       //   <View style={{ flex: 1, opacity: 0.1 }}></View>
       // )}
@@ -64,6 +91,7 @@ export default function AddTaskSheet({
           <BottomSheetView style={styles.titleContainer}>
             <BottomSheetTextInput
               placeholder="Task Name"
+              ref={taskNameInputRef}
               style={[styles.titleInput]}
               placeholderTextColor={theme.color.darkGrey}
               selectionColor={theme.color.red}
