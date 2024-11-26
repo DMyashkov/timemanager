@@ -3,7 +3,11 @@ import { useTheme } from "@context/ThemeContext";
 
 import type { Color } from "@constants/interfaces";
 
-export default function useStyles(colorPallete: Color, isProject = false) {
+export default function useStyles(
+  colorPallete: Color,
+  isProject = false,
+  coefficient = 1,
+) {
   const { theme } = useTheme();
   const borderWidthProject = 2.2;
 
@@ -12,21 +16,21 @@ export default function useStyles(colorPallete: Color, isProject = false) {
         container: {
           backgroundColor: colorPallete.light,
           flexDirection: "row",
-          gap: 4,
+          gap: coefficient * 4,
           alignItems: "center",
-          padding: 6.5,
-          borderRadius: theme.borderRadius.medium,
-          paddingRight: 7,
-          paddingLeft: 7,
+          padding: coefficient * 6.5,
+          borderRadius: coefficient * theme.borderRadius.medium,
+          paddingRight: coefficient * 7,
+          paddingLeft: coefficient * 7,
         },
         text: {
           color: colorPallete.dark,
           fontFamily: theme.font.medium,
-          fontSize: theme.fontSize.mediumSmall,
+          fontSize: coefficient * theme.fontSize.mediumSmall,
         },
         iconOuter: {
-          height: 22,
-          width: 22,
+          height: coefficient * 22,
+          width: coefficient * 22,
           alignItems: "center",
           justifyContent: "center",
         },
@@ -35,23 +39,23 @@ export default function useStyles(colorPallete: Color, isProject = false) {
         container: {
           backgroundColor: theme.color.white,
           borderColor: colorPallete.medium,
-          borderWidth: borderWidthProject,
+          borderWidth: coefficient * borderWidthProject,
           flexDirection: "row",
-          gap: 3,
+          gap: coefficient * 3,
           alignItems: "center",
-          padding: 6.5 - borderWidthProject,
-          borderRadius: theme.borderRadius.medium,
-          paddingRight: 7 - borderWidthProject,
-          paddingLeft: 7 - borderWidthProject,
+          padding: coefficient * (6.5 - borderWidthProject),
+          borderRadius: coefficient * theme.borderRadius.medium,
+          paddingRight: coefficient * (7 - borderWidthProject),
+          paddingLeft: coefficient * (7 - borderWidthProject),
         },
         text: {
           color: colorPallete.medium,
           fontFamily: theme.font.medium,
-          fontSize: theme.fontSize.mediumSmall,
+          fontSize: coefficient * theme.fontSize.mediumSmall,
         },
         iconOuter: {
-          height: 22,
-          width: 22,
+          height: coefficient * 22,
+          width: coefficient * 22,
           alignItems: "center",
           justifyContent: "center",
         },

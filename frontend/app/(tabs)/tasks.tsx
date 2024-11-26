@@ -1,16 +1,23 @@
 import React, { useRef, useState } from "react";
-import { View, Text, TouchableOpacity, Keyboard } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Keyboard,
+  Touchable,
+} from "react-native";
 import {
   GestureHandlerRootView,
   TouchableWithoutFeedback,
 } from "react-native-gesture-handler";
-import TaskBottomSheet from "@components/tasks/addTaskBottomSheet";
+import TaskBottomSheet from "@/components/tasks/addTask/addTaskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/header/header";
 import Plus from "@/assets/icons/plus.svg";
 import { useTheme } from "@/context/ThemeContext";
+import Task from "@components/tasks/task/task";
 
 export default function TasksScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
@@ -39,7 +46,15 @@ export default function TasksScreen() {
         ]}
         showSearchBar={true}
       />
-      <View style={styles.contentContainer} />
+      <TouchableOpacity
+        style={styles.contentContainer}
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+        activeOpacity={1}
+      >
+        <Task title="Take a pic" />
+      </TouchableOpacity>
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
         title={title}
