@@ -27,6 +27,7 @@ export default function useStyles() {
       borderColor: theme.color.darkRed,
       borderWidth: 2.3,
       borderRadius: 2.5,
+      margin: 1,
     },
     content: {
       flexDirection: "column",

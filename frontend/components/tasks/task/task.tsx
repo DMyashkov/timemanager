@@ -1,9 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { useState } from "react";
 import Calendar from "@/assets/icons/calendar.svg";
 import Tag from "@/components/tag/tagComponent";
+import Checkmark from "@/assets/icons/checkmark.svg";
 
 function formatDate(date: Date, today: Date): string {
   const dayInMs = 24 * 60 * 60 * 1000;
@@ -49,7 +50,17 @@ export default function Task({
   return (
     <View style={styles.container}>
       <View style={styles.leftColumn}>
-        <View style={styles.checkMark} />
+        <TouchableOpacity
+          onPress={() => {
+            setCheckMark(!checkMark);
+          }}
+        >
+          {checkMark ? (
+            <View style={styles.checkMark} />
+          ) : (
+            <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
+          )}
+        </TouchableOpacity>
       </View>
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
