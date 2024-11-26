@@ -55,6 +55,7 @@ export default function useStyles() {
       justifyContent: "space-between",
       width: "100%",
       alignItems: "flex-start",
+      marginTop: 3,
     },
     tagContainer: {
       flexDirection: "row",
@@ -66,6 +67,11 @@ export default function useStyles() {
       rowGap: 7,
       columnGap: 5,
       flexShrink: 1,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
     },
   });
 }

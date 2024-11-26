@@ -59,7 +59,7 @@ export default function Task({
             setCheckMark(!checkMark);
           }}
         >
-          {checkMark ? (
+          {!checkMark ? (
             <View style={styles.checkMark} />
           ) : (
             <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
@@ -67,32 +67,34 @@ export default function Task({
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
-        <Text style={styles.title}>{title}</Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          {showDateAlways ||
+            (showDateIfPassed && date < todayDate && (
+              <View style={styles.date}>
+                <Text style={styles.dateText}>
+                  {formatDate(date, todayDate)}
+                </Text>
+                {/* <Calendar fill={theme.color.darkRed} height={14} width={14} /> */}
+              </View>
+            ))}
+        </View>
         <Text style={styles.description} numberOfLines={1}>
           {description}
         </Text>
         <View style={styles.footer}>
-          {showDateAlways ||
-            (showDateIfPassed && date < todayDate && (
-              <View style={styles.date}>
-                <Calendar fill={theme.color.darkRed} height={14} width={14} />
-                <Text style={styles.dateText}>
-                  {formatDate(date, todayDate)}
-                </Text>
-              </View>
-            ))}
           <View style={styles.tagContainer}>
-            {projectName !== "" && (
+            {activityName !== "" && (
               <Tag
-                text={projectName}
-                isProject={true}
+                text={activityName}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
               />
             )}
-            {activityName !== "" && (
+            {projectName !== "" && (
               <Tag
-                text={activityName}
+                text={projectName}
+                isProject={true}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
               />
