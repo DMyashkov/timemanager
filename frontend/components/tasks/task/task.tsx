@@ -33,14 +33,18 @@ export default function Task({
   description,
   activityName = "",
   projectName = "",
-  severity = 1,
+  priority = 1,
+  showDateIfPassed = true,
+  showDateAlways = false,
 }: {
   title: string;
   description: string;
   date: Date;
   activityName?: string;
   projectName?: string;
-  severity?: number;
+  priority?: number;
+  showDateIfPassed?: boolean;
+  showDateAlways?: boolean;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -68,10 +72,15 @@ export default function Task({
           {description}
         </Text>
         <View style={styles.footer}>
-          <View style={styles.date}>
-            <Calendar fill={theme.color.darkRed} height={14} width={14} />
-            <Text style={styles.dateText}>{formatDate(date, todayDate)}</Text>
-          </View>
+          {showDateAlways ||
+            (showDateIfPassed && date < todayDate && (
+              <View style={styles.date}>
+                <Calendar fill={theme.color.darkRed} height={14} width={14} />
+                <Text style={styles.dateText}>
+                  {formatDate(date, todayDate)}
+                </Text>
+              </View>
+            ))}
           <View style={styles.tagContainer}>
             {projectName !== "" && (
               <Tag
