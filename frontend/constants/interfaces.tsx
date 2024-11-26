@@ -43,3 +43,10 @@ export enum moduleType {
   activity = 0,
   project = 1,
 }
+
+export enum priority {
+  high = 1,
+  medium = 2,
+  low = 3,
+  none = 4,
+}

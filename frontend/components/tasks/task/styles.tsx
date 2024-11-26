@@ -6,7 +6,7 @@ export default function useStyles() {
 
   return StyleSheet.create({
     container: {
-      borderRadius: 5,
+      borderRadius: theme.borderRadius.medium,
       backgroundColor: theme.color.white,
       ...theme.shadow,
       paddingVertical: 14,
@@ -62,7 +62,8 @@ export default function useStyles() {
       alignItems: "center",
       marginTop: 3,
       marginBottom: -3,
-      gap: 5,
+      rowGap: 7,
+      columnGap: 5,
       flexShrink: 1,
     },
   });

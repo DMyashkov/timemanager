@@ -3,8 +3,6 @@ import { useTheme } from "@context/ThemeContext";
 
 export default function useStyles() {
   const { theme } = useTheme();
-  const HIT_SLOP_TEXT_INPUT = 10;
-  const SEND_BUTTON_SIZE = 34;
 
   return StyleSheet.create({
     container: {

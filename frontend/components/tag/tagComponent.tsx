@@ -14,6 +14,7 @@ interface TagProps {
   style?: object;
   colorPallete?: Color;
   desiredHeight?: number;
+  textSize?: number | null;
 }
 
 export default function Tag({
@@ -22,6 +23,7 @@ export default function Tag({
   style = {},
   colorPallete,
   desiredHeight = 35,
+  textSize = null,
 }: TagProps) {
   const { theme } = useTheme();
 
@@ -36,6 +38,7 @@ export default function Tag({
           colorPallete={colorPallete}
           desiredHeight={desiredHeight}
           text={text}
+          textSize={textSize}
         />
       );
     case true:
@@ -45,6 +48,7 @@ export default function Tag({
           colorPallete={colorPallete}
           desiredHeight={desiredHeight}
           text={text}
+          textSize={textSize}
         />
       );
   }
@@ -55,6 +59,7 @@ interface ComponentProps {
   colorPallete: Color;
   desiredHeight: number;
   text?: string;
+  textSize?: number | null;
 }
 
 function TagComponesnt({
@@ -62,10 +67,11 @@ function TagComponesnt({
   colorPallete,
   desiredHeight,
   text,
+  textSize = null,
 }: ComponentProps) {
   const NORMAL_HEIGHT = 35;
   const coefficient = desiredHeight / NORMAL_HEIGHT;
-  const styles = useStyles(colorPallete, false, coefficient);
+  const styles = useStyles(colorPallete, false, coefficient, textSize);
   const { theme } = useTheme();
 
   return (
@@ -87,10 +93,11 @@ function ProjectComponent({
   colorPallete,
   desiredHeight,
   text,
+  textSize,
 }: ComponentProps) {
   const NORMAL_HEIGHT = 35;
   const coefficient = desiredHeight / NORMAL_HEIGHT;
-  const styles = useStyles(colorPallete, true, coefficient);
+  const styles = useStyles(colorPallete, true, coefficient, textSize);
   const { theme } = useTheme();
 
   return (

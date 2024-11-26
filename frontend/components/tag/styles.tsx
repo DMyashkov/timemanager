@@ -7,6 +7,7 @@ export default function useStyles(
   colorPallete: Color,
   isProject = false,
   coefficient = 1,
+  textSize?: number | null,
 ) {
   const { theme } = useTheme();
   const borderWidthProject = 2.2;
@@ -26,7 +27,9 @@ export default function useStyles(
         text: {
           color: colorPallete.dark,
           fontFamily: theme.font.medium,
-          fontSize: coefficient * theme.fontSize.mediumSmall,
+          fontSize: textSize
+            ? textSize
+            : coefficient * theme.fontSize.mediumSmall,
         },
         iconOuter: {
           height: coefficient * 22,
@@ -51,7 +54,9 @@ export default function useStyles(
         text: {
           color: colorPallete.medium,
           fontFamily: theme.font.medium,
-          fontSize: coefficient * theme.fontSize.mediumSmall,
+          fontSize: textSize
+            ? textSize
+            : coefficient * theme.fontSize.mediumSmall,
         },
         iconOuter: {
           height: coefficient * 22,

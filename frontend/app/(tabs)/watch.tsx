@@ -95,8 +95,8 @@ export default function Watch() {
               },
             ]}
           >
-            <Tag />
-            <Tag isProject={true} />
+            <Tag text="Photography" />
+            <Tag isProject={true} text="Homework 1" />
             <TouchableOpacity>
               <Edit
                 width={additionalStyleConstants.editIconSize}

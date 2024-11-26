@@ -53,7 +53,13 @@ export default function TasksScreen() {
         }}
         activeOpacity={1}
       >
-        <Task title="Take a pic" />
+        <Task
+          title="Take a pic"
+          description="Take a picture of the sunset"
+          date={new Date(new Date().setDate(new Date().getDate() - 1))}
+          projectName="Homework 1"
+          activityName="Photography"
+        />
       </TouchableOpacity>
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
