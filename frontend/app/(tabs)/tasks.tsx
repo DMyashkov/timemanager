@@ -18,6 +18,7 @@ import Header from "@/components/header/header";
 import Plus from "@/assets/icons/plus.svg";
 import { useTheme } from "@/context/ThemeContext";
 import Task from "@components/tasks/task/task";
+import TaskListComponent from "@/components/tasks/taskListComponent/taskListComponent";
 
 export default function TasksScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
@@ -53,13 +54,7 @@ export default function TasksScreen() {
         }}
         activeOpacity={1}
       >
-        <Task
-          title="Take a pic"
-          description="Take a picture of the sunset"
-          date={new Date(new Date().setDate(new Date().getDate() - 1))}
-          projectName="Homework 1"
-          activityName="Photography"
-        />
+        <TaskListComponent />
       </TouchableOpacity>
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}

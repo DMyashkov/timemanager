@@ -44,7 +44,8 @@ export default function useStyles(priority: number) {
     date: {
       flexDirection: "row",
       gap: 2,
-      marginTop: 6,
+      alignItems: "center",
+      height: "100%",
     },
     dateText: {
       fontSize: theme.fontSize.small,
@@ -73,6 +74,7 @@ export default function useStyles(priority: number) {
       flexDirection: "row",
       justifyContent: "space-between",
       width: "100%",
+      alignItems: "center",
     },
   });
 }
