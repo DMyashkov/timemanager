@@ -44,7 +44,7 @@ export enum moduleType {
   project = 1,
 }
 
-export enum priority {
+export enum priorityEnum {
   high = 1,
   medium = 2,
   low = 3,

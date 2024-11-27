@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-export default function useStyles() {
+export default function useStyles(priority: number) {
   const { theme } = useTheme();
 
   return StyleSheet.create({
@@ -29,6 +29,7 @@ export default function useStyles() {
       borderRadius: 2.5,
       margin: 1,
     },
+    priority1Colors: {},
     content: {
       flexDirection: "column",
       gap: 5,

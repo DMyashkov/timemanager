@@ -27,7 +27,14 @@ export const THEME = {
           medium: "#F5AB71",
           dark: "#EE812C",
         },
-        grey: {},
+        yellow: {
+          light: "#F7B98826",
+          dark: "#F2B585",
+        },
+        blue: {
+          light: "#4874C926",
+          dark: "#4874C9",
+        },
       },
       searchBar: {
         background: "#EFEFF0",
