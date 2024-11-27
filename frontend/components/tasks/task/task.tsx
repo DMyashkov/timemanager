@@ -6,6 +6,7 @@ import Calendar from "@/assets/icons/calendar.svg";
 import Tag from "@/components/tag/tagComponent";
 import Checkmark from "@/assets/icons/checkmark.svg";
 import { priorityEnum } from "@/constants/interfaces";
+import { TaskProps } from "@/constants/interfaces";
 
 function formatDate(date: Date, today: Date): string {
   const dayInMs = 24 * 60 * 60 * 1000;
@@ -28,6 +29,11 @@ function formatDate(date: Date, today: Date): string {
   return date.toLocaleDateString("en-GB", options);
 }
 
+interface SpecificTaskProps extends TaskProps {
+  showDateIfPassed?: boolean;
+  showDateAlways?: boolean;
+}
+
 export default function Task({
   title,
   date,
@@ -37,16 +43,7 @@ export default function Task({
   priority = 2,
   showDateIfPassed = true,
   showDateAlways = false,
-}: {
-  title: string;
-  description: string;
-  date: Date;
-  activityName?: string;
-  projectName?: string;
-  priority?: priorityEnum;
-  showDateIfPassed?: boolean;
-  showDateAlways?: boolean;
-}) {
+}: SpecificTaskProps) {
   const styles = useStyles(priority);
   const { theme } = useTheme();
   const [checkMark, setCheckMark] = useState(false);

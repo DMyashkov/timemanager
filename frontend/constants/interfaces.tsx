@@ -50,3 +50,12 @@ export enum priorityEnum {
   low = 3,
   none = 4,
 }
+
+export interface TaskProps {
+  title: string;
+  description: string;
+  date: Date;
+  projectName: string;
+  activityName: string;
+  priority: priorityEnum;
+}

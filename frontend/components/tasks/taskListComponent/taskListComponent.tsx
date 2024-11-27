@@ -1,45 +1,51 @@
-import { View, Text } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Task from "@components/tasks/task/task";
 
-interface TaskProps {
-  title: string;
-  description: string;
-  date: Date;
-  projectName: string;
-  activityName: string;
-}
+import type { TaskProps } from "@constants/interfaces";
 
 export default function TaskListComponent({
-  rescheduleOption = true,
+  overdueOption = false,
   date,
   tasks = [],
 }: {
-  rescheduleOption?: boolean;
+  overdueOption?: boolean;
   date?: Date;
   tasks: TaskProps[];
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
+  const handleReschedule = () => {};
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.leftHeader}>
-          <Text style={styles.date}>Overdue</Text>
+          <Text style={styles.date}>
+            {overdueOption ? "Overdue" : "10 Sep • Tuesday"}
+          </Text>
           <Text style={styles.amount}>1</Text>
         </View>
-        <Text
-          style={[
-            styles.rightText,
-            {
-              color: rescheduleOption ? theme.color.darkRed : theme.color.black,
-            },
-          ]}
+        <TouchableOpacity
+          activeOpacity={overdueOption ? 0.2 : 1}
+          onPress={() => {
+            if (overdueOption) {
+              handleReschedule();
+            }
+          }}
         >
-          Reschedule
-        </Text>
+          <Text
+            style={[
+              styles.rightText,
+              {
+                color: overdueOption ? theme.color.darkRed : theme.color.black,
+              },
+            ]}
+          >
+            {overdueOption ? "Reschedule" : "Today"}
+          </Text>
+        </TouchableOpacity>
       </View>
       <Task
         title="Take a pic"
@@ -47,6 +53,20 @@ export default function TaskListComponent({
         date={new Date(new Date().setDate(new Date().getDate() - 1))}
         projectName="Homework 1"
         activityName="Photography"
+        priority={1}
+      />
+      <Task
+        title="Take a pic"
+        description="Take a picture of the sunset"
+        date={new Date(new Date().setDate(new Date().getDate() - 1))}
+        projectName="Homework 1"
+        activityName="Photography"
+        priority={1}
+      />
+
+      <FlatList
+        data={tasks}
+        renderItem={({ item }) => <Task {...item} showDateIfPassed={true} />}
       />
     </View>
   );
