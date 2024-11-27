@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Touchable } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { useState } from "react";
@@ -78,6 +78,7 @@ export default function Task({
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.touchContainer} onPress={() => {}} />
       <View style={styles.leftColumn}>
         <TouchableOpacity
           onPress={() => {

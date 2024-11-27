@@ -6,30 +6,31 @@ import {
   Keyboard,
   Touchable,
 } from "react-native";
-import {
-  GestureHandlerRootView,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
-import TaskBottomSheet from "@/components/tasks/addTask/addTaskBottomSheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import TaskBottomSheetAdd from "@/components/tasks/addTask/addTaskBottomSheet";
+import TaskBottomSheet from "@/components/tasks/taskBottomSheet/taskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/header/header";
 import Plus from "@/assets/icons/plus.svg";
 import { useTheme } from "@/context/ThemeContext";
-import Task from "@components/tasks/task/task";
 import TaskListComponent from "@/components/tasks/taskListComponent/taskListComponent";
 
 export default function TasksScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
+  const taskBottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
   const styles = useStyles();
   const { theme } = useTheme();
 
   const [title, setTitle] = useState(""); // State for task title
-  const [description, setDescription] = useState(""); // State for task description
+  const [description, setDescription] = useState("");
 
   const openBottomSheet = () => {
     bottomSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
+  };
+
+  const openTaskBottomSheet = () => {
+    taskBottomSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
   return (
@@ -57,9 +58,16 @@ export default function TasksScreen() {
         <TaskListComponent tasks={[]} />
         <TaskListComponent />
       </TouchableOpacity>
+      {/* <TaskBottomSheetAdd */}
+      {/*   bottomSheetRef={bottomSheetRef} */}
+      {/*   title={title} */}
+      {/*   setTitle={setTitle} */}
+      {/*   description={description} */}
+      {/*   setDescription={setDescription} */}
+      {/* /> */}
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
-        title={title}
+        title="Take a pic"
         setTitle={setTitle}
         description={description}
         setDescription={setDescription}
