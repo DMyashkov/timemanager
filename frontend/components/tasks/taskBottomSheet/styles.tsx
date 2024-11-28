@@ -13,7 +13,7 @@ export default function useStyles() {
     },
 
     titleInput: {
-      fontSize: theme.fontSize.largeSmall,
+      fontSize: theme.fontSize.largeSmall + 1,
       fontFamily: theme.font.regular,
       color: theme.color.black,
       width: "100%",
@@ -32,12 +32,11 @@ export default function useStyles() {
       fontSize: theme.fontSize.mediumSmall,
       fontFamily: theme.font.regular,
       color: theme.color.black,
-      width: "100%",
+      textAlignVertical: "top",
+      marginTop: -5 - HIT_SLOP_TEXT_INPUT / 2,
       paddingTop: HIT_SLOP_TEXT_INPUT / 2,
+      marginBottom: -HIT_SLOP_TEXT_INPUT,
       paddingBottom: HIT_SLOP_TEXT_INPUT,
-      marginTop: -HIT_SLOP_TEXT_INPUT / 2,
-      marginBottom: HIT_SLOP_TEXT_INPUT,
-      minHeight: 72,
     },
     footer: {
       height: 55,
@@ -78,6 +77,62 @@ export default function useStyles() {
     buttonView: {
       flexDirection: "row",
       gap: 11,
+    },
+    firstRow: {
+      flexDirection: "row",
+      gap: 7,
+      alignItems: "center",
+      marginBottom: 20,
+    },
+    checkMark: {
+      height: 23,
+      aspectRatio: 1,
+      backgroundColor: theme.color.veryLightRed,
+      borderColor: theme.color.darkRed,
+      borderWidth: 2.3,
+      borderRadius: 2.5,
+      margin: 1,
+    },
+    row: {
+      alignItems: "center",
+      flexDirection: "row",
+      gap: 12,
+    },
+    iconOuter: {
+      width: 24,
+      height: "100%",
+      alignItems: "center",
+    },
+    wrapDescription: {
+      flex: 1,
+      justifyContent: "center",
+    },
+    separator: {
+      height: 1,
+      width: "100%",
+      backgroundColor: theme.color.lightGrey,
+      marginTop: 13,
+      marginBottom: 13,
+    },
+    dateText: {
+      fontSize: theme.fontSize.mediumSmall,
+      fontFamily: theme.font.regular,
+      color: theme.color.black,
+    },
+    tagContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "flex-start",
+      alignItems: "center",
+      rowGap: 7,
+      columnGap: 5,
+    },
+    bigSeparator: {
+      height: 7,
+      backgroundColor: theme.color.defGrey,
+      width: "200%",
+      marginLeft: -22,
+      marginTop: 14,
     },
   });
 }

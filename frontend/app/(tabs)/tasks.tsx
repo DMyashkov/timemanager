@@ -67,10 +67,14 @@ export default function TasksScreen() {
       {/* /> */}
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
-        title="Take a pic"
+        title={title}
         setTitle={setTitle}
         description={description}
         setDescription={setDescription}
+        checkMark={false}
+        setCheckMark={() => {}}
+        priority={1}
+        tagId="project-1"
       />
     </GestureHandlerRootView>
   );

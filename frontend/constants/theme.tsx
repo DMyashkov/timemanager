@@ -60,6 +60,7 @@ export const THEME = {
       white: "#FFFFFF",
       warmGrey: "#F7f7F7",
       extraLightGrey: "#D9D9D9",
+      defGrey: "#F2F2F2",
     },
     shadow: {
       shadowColor: "#000", // Black shadow
