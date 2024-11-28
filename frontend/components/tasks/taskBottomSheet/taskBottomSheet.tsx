@@ -121,7 +121,7 @@ export default function TaskBottomSheet({
       enableDynamicSizing={false}
       snapPoints={["50%", "90%"]}
       enablePanDownToClose={true}
-      keyboardBehavior="interactive"
+      keyboardBehavior="extend"
       keyboardBlurBehavior="restore"
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: "transparent" }}
@@ -160,7 +160,7 @@ export default function TaskBottomSheet({
                 style={[styles.titleInput]}
                 placeholderTextColor={theme.color.darkGrey}
                 selectionColor={theme.color.red}
-                keyboardType="twitter"
+                keyboardType="default"
                 value={title}
                 onChangeText={setTitle}
               />
