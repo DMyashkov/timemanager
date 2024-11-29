@@ -12,12 +12,14 @@ import Animated, {
 interface SwitchWrapperProps extends SwitchProps {
   children: [React.ReactNode, React.ReactNode];
   styleSwitch?: object;
+  TopElement?: React.FC;
 }
 
 export default function SwitchWrapper({
   children,
   buttons = [],
   styleSwitch = {},
+  TopElement,
 }: SwitchWrapperProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -34,6 +36,7 @@ export default function SwitchWrapper({
       <View style={styleSwitch}>
         <Switch buttons={buttons} positionAnim={positionAnim} />
       </View>
+      {TopElement && <TopElement />}
       <Animated.View style={[styles.main, animStyles.main]}>
         {children[0]}
         {children[1]}

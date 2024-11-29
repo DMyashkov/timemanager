@@ -3,6 +3,9 @@ import { useTheme } from "@context/ThemeContext";
 import Stopwatch from "@assets/icons/stopwatch.svg";
 import Workplace from "@assets/icons/workplace.svg";
 import House from "@assets/icons/house.svg";
+import Calendar from "@assets/icons/calendar.svg";
+import CalendarDays from "@assets/icons/calendar-days.svg";
+import CalendarWeek from "@assets/icons/calendar-week.svg";
 
 export default function TabsLayout() {
   const { theme } = useTheme();
@@ -27,6 +30,19 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+        name="calendar"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <CalendarDays
+              height={tabIconSize}
+              width={tabIconSize}
+              fill={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="watch"
         options={{
           tabBarIcon: ({ color }) => (
@@ -44,6 +60,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen name="styles/watchStyles" options={{ href: null }} />
       <Tabs.Screen name="styles/tasksStyles" options={{ href: null }} />
+      <Tabs.Screen name="styles/calendarStyles" options={{ href: null }} />
     </Tabs>
   );
 }
