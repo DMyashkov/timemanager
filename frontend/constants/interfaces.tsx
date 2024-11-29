@@ -59,3 +59,12 @@ export interface TaskProps {
   activityName: string;
   priority: priorityEnum;
 }
+
+export function getDaysInMonth(month: number, year: number): number {
+  // Validate the month range
+  if (month < 1 || month > 12) {
+    throw new Error("Month must be between 1 and 12");
+  }
+  // Use Date object to calculate days in the given month
+  return new Date(year, month, 0).getDate();
+}

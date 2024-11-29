@@ -6,6 +6,15 @@ export default function useStyles() {
 
   return StyleSheet.create({
     outer: {},
+    week: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingHorizontal: 15,
+    },
+    textDay: {
+      fontSize: theme.fontSize.mediumSmall,
+      color: theme.color.black,
+    },
   });
 }
 
