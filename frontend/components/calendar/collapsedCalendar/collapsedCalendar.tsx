@@ -126,9 +126,10 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   const goBackToToday = () => {
     setFocusedDate(new DateStruct(today));
     setTransitioning(true);
-    flatListRef.current?.scrollToOffset({
-      offset: CURRENT_WEEK_INDEX * SCREEN_WIDTH, // Scroll to the current week
+    flatListRef.current?.scrollToIndex({
+      index: CURRENT_WEEK_INDEX, // Target the current week index
       animated: true,
+      viewPosition: 0.5, // Scroll to center the target index
     });
     setTimeout(() => {
       setFocusedDate(new DateStruct(today));
@@ -220,12 +221,14 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
         data={weeks}
         keyExtractor={(item) => `${item.startingDate.toString()}`}
         horizontal
-        pagingEnabled
+        pagingEnabled={false}
         snapToAlignment="center"
         snapToInterval={SCREEN_WIDTH}
         decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
         initialScrollIndex={CURRENT_WEEK_INDEX}
+        removeClippedSubviews={true}
+        windowSize={2}
         getItemLayout={(data, index) => ({
           length: SCREEN_WIDTH,
           offset: SCREEN_WIDTH * index,
