@@ -129,7 +129,28 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
   const focusedWeekStart = weeks[currentWeekIndex]?.startingDate;
 
-  console.log(currentWeekIndex);
+  // const getCertainDayFromWeekWithStart = (
+  //   weekStart: DateStruct,
+  //   dayOfWeek: number,
+  // ) => {
+  //   return DateStruct.addDays(weekStart, dayOfWeek - 1);
+  // };
+
+  useEffect(() => {
+    if (focusedWeekStart) {
+      const newFocusedDate = DateStruct.addDays(
+        focusedWeekStart,
+        dayOfWeekFocus - 1,
+      );
+      if (!newFocusedDate.equals(focusedDate)) {
+        setFocusedDate(newFocusedDate);
+        console.log("Updated focusedDate to:", newFocusedDate.toString());
+      }
+    }
+    console.log("1");
+  }, [focusedWeekStart, dayOfWeekFocus, focusedDate]);
+
+  // console.log(currentWeekIndex);
 
   return (
     <View style={styles.outer}>
@@ -255,11 +276,11 @@ function Week({
               // Only allow focusing on today or dates before today
               const today = DateStruct.fromDate(new Date());
               const selectedDate = new DateStruct(date);
-              console.log(
-                selectedDate,
-                today,
-                selectedDate.isSameOrBefore(today),
-              );
+              // console.log(
+              //   selectedDate,
+              //   today,
+              //   selectedDate.isSameOrBefore(today),
+              // );
               if (selectedDate.isSameOrBefore(today)) {
                 setFocusedDate(selectedDate);
               }
