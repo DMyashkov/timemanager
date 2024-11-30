@@ -2,13 +2,14 @@ import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import type { Color } from "@interfaces";
+import type { Session } from "@/utils/dateTimeSession";
 
 export default function SessionElement({
   style = {},
-  colorPallete: Color,
+  session,
 }: {
   style?: object;
-  colorPallete: Color;
+  session: Session;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();

@@ -15,9 +15,9 @@ export type ActivityData = {
 };
 
 export type DataIndexItem = {
-  item: Omit<ActivityData, "activities">; // Item without `activities`
-  children: string[]; // IDs of direct children
-  path: string[]; // Parent IDs
+  item: Omit<ActivityData, "activities">;
+  children: string[];
+  path: string[];
 };
 
 export type DataIndex = {

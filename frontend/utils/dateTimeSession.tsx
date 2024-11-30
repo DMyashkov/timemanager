@@ -1,3 +1,5 @@
+import type { ActivityData, DataIndex } from "@interfaces";
+
 export class DateStruct {
   year: number;
   month: number;
@@ -149,12 +151,14 @@ export class Interval {
   }
 }
 
-export class Session {
+class Session {
   private intervals: Interval[] = [];
-  private totalWorkTime = 0;
-  private totalBreakTime = 0;
+  private totalWorkTime: number = 0;
+  private totalBreakTime: number = 0;
+  private activityId: string; // Foreign key reference to ActivityData
 
-  constructor(intervals: Interval[] = []) {
+  constructor(activityId: string, intervals: Interval[] = []) {
+    this.activityId = activityId;
     this.intervals = intervals;
     this.recalculateTotals();
   }
@@ -173,20 +177,12 @@ export class Session {
     }
   }
 
-  addInterval(interval: Interval): void {
-    this.intervals.push(interval);
-    this.recalculateTotals();
+  // Method to validate the activityId reference
+  static validateActivityId(activityId: string, dataIndex: DataIndex): boolean {
+    return Boolean(dataIndex[activityId]);
   }
 
-  addTimeStamp(timestamp: DateTime, type: IntervalType): void {
-    const lastInterval = this.intervals[this.intervals.length - 1];
-    const startTime = lastInterval
-      ? lastInterval.endTime
-      : new DateTime(new DateStruct(1970, 1, 1), new Time());
-    const newInterval = new Interval(startTime, timestamp, type);
-    this.addInterval(newInterval);
-  }
-
+  // Getters
   getWorkTime(): Time {
     return Time.fromSeconds(this.totalWorkTime);
   }
@@ -199,7 +195,18 @@ export class Session {
     return Time.fromSeconds(this.totalWorkTime + this.totalBreakTime);
   }
 
+  // Utility to get associated activity data
+  getAssociatedActivityItem(dataIndex: DataIndex): ActivityData | null {
+    return dataIndex[this.activityId]?.item || null;
+  }
+
+  // Example toString() method
   toString(): string {
-    return this.intervals.map((interval) => interval.toString()).join("\n");
+    return (
+      `Session for Activity ID: ${this.activityId}\n` +
+      `Work Time: ${this.getWorkTime().toString()}\n` +
+      `Break Time: ${this.getBreakTime().toString()}\n` +
+      `Total Time: ${this.getTotalTime().toString()}`
+    );
   }
 }
