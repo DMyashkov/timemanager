@@ -165,11 +165,28 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
 
   // console.log(currentWeekIndex);
 
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
   return (
     <View style={styles.outer}>
       <View style={styles.header}>
         <View style={styles.leftPartHeader}>
-          <Text style={styles.leftHeaderText}>Sep 2024</Text>
+          <Text style={styles.leftHeaderText}>
+            {`${monthNames[focusedDate.month - 1]} ${focusedDate.year}`}
+          </Text>
           {/* <Calendar fill={theme.color.red} height={20} width={20} /> */}
           {shouldGoBackBeVisible && (
             <TouchableOpacity
@@ -242,7 +259,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
 function generateWeeks(startingDay: DateStruct, numberOfWeeks: number) {
   const weeks = [];
   const adjustedStartingDay = startingDay.getMonday(); // Adjust to ensure week starts on Monday
-  for (let i = -numberOfWeeks; i <= numberOfWeeks; i++) {
+  for (let i = -numberOfWeeks; i <= 0; i++) {
     const weekStart = DateStruct.addDays(adjustedStartingDay, i * 7);
     const weekEnd = DateStruct.addDays(weekStart, 6);
     weeks.push({ startingDate: weekStart, endingDate: weekEnd });
