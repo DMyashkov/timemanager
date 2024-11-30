@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,54 +13,126 @@ import Calendar from "@assets/icons/calendar.svg";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
+class DateStruct {
+  year: number;
+  month: number;
+  day: number;
+
+  // Constructor with overloads for creating a new DateStruct or copying an existing one
+  constructor(year: number, month: number, day: number);
+  constructor(date: DateStruct);
+  constructor(yearOrDate: number | DateStruct, month?: number, day?: number) {
+    if (yearOrDate instanceof DateStruct) {
+      // Copy constructor logic
+      this.year = yearOrDate.year;
+      this.month = yearOrDate.month;
+      this.day = yearOrDate.day;
+    } else {
+      // Regular constructor logic
+      if (month === undefined || day === undefined) {
+        throw new Error("Month and day must be provided.");
+      }
+      this.year = yearOrDate;
+      this.month = month;
+      this.day = day;
+    }
+  }
+
+  static fromDate(date: Date): DateStruct {
+    return new DateStruct(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate(),
+    );
+  }
+
+  equals(other: DateStruct): boolean {
+    return (
+      this.year === other.year &&
+      this.month === other.month &&
+      this.day === other.day
+    );
+  }
+
+  getDayOfTheWeek(): number {
+    const jsDate = new Date(this.year, this.month - 1, this.day);
+    const day = jsDate.getDay();
+    return (day + 6) % 7; // Adjust to make Monday = 0, Sunday = 6
+  }
+
+  static addDays(date: DateStruct, days: number): DateStruct {
+    const jsDate = new Date(date.year, date.month - 1, date.day);
+    jsDate.setDate(jsDate.getDate() + days);
+    return DateStruct.fromDate(jsDate);
+  }
+
+  isBefore(other: DateStruct): boolean {
+    if (this.year !== other.year) return this.year < other.year;
+    if (this.month !== other.month) return this.month < other.month;
+    return this.day < other.day;
+  }
+
+  isAfter(other: DateStruct): boolean {
+    if (this.year !== other.year) return this.year > other.year;
+    if (this.month !== other.month) return this.month > other.month;
+    return this.day > other.day;
+  }
+
+  isSameOrBefore(other: DateStruct): boolean {
+    return this.equals(other) || this.isBefore(other);
+  }
+
+  isSameOrAfter(other: DateStruct): boolean {
+    return this.equals(other) || this.isAfter(other);
+  }
+
+  toString(): string {
+    return `${this.year}-${this.month}-${this.day}`;
+  }
+}
+
 export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   // Calculate the current week's starting date
-  const today = new Date();
-  const currentDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-  const daysFromMonday = (currentDayOfWeek + 6) % 7; // How far today is from Monday
-  const startingDay = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - daysFromMonday,
-  ); // Previous Monday
+  const today = DateStruct.fromDate(new Date());
+  const startingDay = new DateStruct(
+    today.year,
+    today.month,
+    today.day - ((today.getDayOfTheWeek() - 1) % 7), // Adjust to Monday
+  );
+  const CURRENT_WEEK_INDEX = 10;
 
   // Manage current week index
   const [currentWeekIndex, setCurrentWeekIndex] = useState(10); // Start in the middle of generated weeks
-  const [isTransitioning, setIsTransitioning] = useState(false); // Prevent multiple swipes
   const flatListRef = useRef<FlatList>(null);
 
   // Generate weeks dynamically for rendering
-  const weeks = generateWeeks(startingDay, 10); // 10 weeks before and after the current week
+  const weeks = React.useMemo(
+    () => generateWeeks(startingDay, 10),
+    [startingDay],
+  );
 
-  // Handle swipe gestures with strict locking
-  const scrollToWeek = (direction: "prev" | "next") => {
-    if (isTransitioning) return; // Prevent swipe if already transitioning
+  const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
+  const goBackToToday = () => {
+    setFocusedDate(today); // Focus on today's date
+    setCurrentWeekIndex(CURRENT_WEEK_INDEX); // Update the current week index
 
-    let newIndex = currentWeekIndex;
-    if (direction === "prev" && currentWeekIndex > 0) {
-      newIndex = currentWeekIndex - 1;
-    } else if (direction === "next" && currentWeekIndex < weeks.length - 1) {
-      newIndex = currentWeekIndex + 1;
-    }
-
-    setIsTransitioning(true); // Lock swiping
     flatListRef.current?.scrollToOffset({
-      offset: newIndex * SCREEN_WIDTH,
+      offset: CURRENT_WEEK_INDEX * SCREEN_WIDTH, // Scroll to the current week
       animated: true,
     });
-
-    // Wait for the animation to complete before unlocking
-    setTimeout(() => {
-      setCurrentWeekIndex(newIndex);
-      setIsTransitioning(false);
-    }, 300); // Match animation duration
   };
 
-  const [focusedDate, setFocusedDate] = useState(new Date());
-  const goBackToToday = () => {};
+  const shouldGoBackBeVisible = !(
+    currentWeekIndex === CURRENT_WEEK_INDEX && focusedDate.equals(today)
+  );
+
+  const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
+  const focusedWeekStart = weeks[currentWeekIndex]?.startingDate;
+
+  console.log(currentWeekIndex);
 
   return (
     <View style={styles.outer}>
@@ -68,14 +140,17 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
         <View style={styles.leftPartHeader}>
           <Text style={styles.leftHeaderText}>Sep 2024</Text>
           {/* <Calendar fill={theme.color.red} height={20} width={20} /> */}
-          <TouchableOpacity
-            style={styles.goBackButton}
-            onPress={() => {
-              goBackToToday();
-            }}
-          >
-            <Text style={styles.goBackText}>25</Text>
-          </TouchableOpacity>
+          {shouldGoBackBeVisible && (
+            <TouchableOpacity
+              style={styles.goBackButton}
+              onPress={() => {
+                goBackToToday();
+              }}
+              activeOpacity={1}
+            >
+              <Text style={styles.goBackText}>{today.day}</Text>
+            </TouchableOpacity>
+          )}
         </View>
         <Text style={styles.rightHeaderText}>
           Productivity: <Text style={styles.productiveTimeText}>4:54:32</Text>
@@ -95,14 +170,14 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
       <FlatList
         ref={flatListRef}
         data={weeks}
-        keyExtractor={(item) => `${item.startingDate.toISOString()}`}
+        keyExtractor={(item) => `${item.startingDate.toString()}`}
         horizontal
         pagingEnabled
         snapToAlignment="center"
-        snapToInterval={SCREEN_WIDTH} // Snap to the screen width (one week at a time)
-        decelerationRate="fast" // Slow down momentum to prevent multiple snaps
+        snapToInterval={SCREEN_WIDTH}
+        decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
-        initialScrollIndex={currentWeekIndex}
+        initialScrollIndex={CURRENT_WEEK_INDEX}
         getItemLayout={(data, index) => ({
           length: SCREEN_WIDTH,
           offset: SCREEN_WIDTH * index,
@@ -113,32 +188,31 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
             <Week
               startingDate={item.startingDate}
               endingDate={item.endingDate}
-              month={item.startingDate.getMonth() + 1}
-              year={item.startingDate.getFullYear()}
+              month={item.startingDate.month}
+              year={item.startingDate.year}
               focusedDate={focusedDate}
               setFocusedDate={setFocusedDate}
             />
           </View>
         )}
+        onScroll={(event) => {
+          const offsetX = event.nativeEvent.contentOffset.x; // Current scroll offset
+          const newIndex = Math.round(offsetX / SCREEN_WIDTH); // Calculate the nearest index
+          if (newIndex !== currentWeekIndex) {
+            setCurrentWeekIndex(newIndex); // Update index only if it has changed
+          }
+        }}
       />
     </View>
   );
 }
 
 // Function to generate weeks dynamically
-function generateWeeks(startingDay: Date, numberOfWeeks: number) {
+function generateWeeks(startingDay: DateStruct, numberOfWeeks: number) {
   const weeks = [];
   for (let i = -numberOfWeeks; i <= numberOfWeeks; i++) {
-    const weekStart = new Date(
-      startingDay.getFullYear(),
-      startingDay.getMonth(),
-      startingDay.getDate() + i * 7,
-    );
-    const weekEnd = new Date(
-      weekStart.getFullYear(),
-      weekStart.getMonth(),
-      weekStart.getDate() + 6,
-    );
+    const weekStart = DateStruct.addDays(startingDay, i * 7);
+    const weekEnd = DateStruct.addDays(weekStart, 6);
     weeks.push({ startingDate: weekStart, endingDate: weekEnd });
   }
   return weeks;
@@ -152,22 +226,22 @@ function Week({
   focusedDate,
   setFocusedDate,
 }: {
-  startingDate: Date;
-  endingDate: Date;
+  startingDate: DateStruct;
+  endingDate: DateStruct;
   month: number;
   year: number;
-  focusedDate: Date;
-  setFocusedDate: (date: Date) => void;
+  focusedDate: DateStruct;
+  setFocusedDate: (date: DateStruct) => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
-  // Create a list of dates for the current week
   const weekDays = [];
-  const currentDate = new Date(startingDate);
-  while (currentDate <= endingDate) {
-    weekDays.push(new Date(currentDate));
-    currentDate.setDate(currentDate.getDate() + 1);
+  let currentDate = startingDate;
+
+  while (!currentDate.equals(DateStruct.addDays(endingDate, 1))) {
+    weekDays.push(currentDate);
+    currentDate = DateStruct.addDays(currentDate, 1);
   }
 
   return (
@@ -175,25 +249,21 @@ function Week({
       <View style={styles.week}>
         {weekDays.map((date) => (
           <DayElement
-            key={`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`}
-            day={date.getDate()}
-            month={date.getMonth() + 1}
-            year={date.getFullYear()}
-            isFocused={
-              focusedDate.getFullYear() === date.getFullYear() &&
-              focusedDate.getMonth() === date.getMonth() &&
-              focusedDate.getDate() === date.getDate()
-            }
+            key={date.toString()}
+            day={date.day}
+            month={date.month}
+            year={date.year}
+            isFocused={focusedDate.equals(date)}
             onPress={() => {
-              const selectedDate = new Date(
-                date.getFullYear(),
-                date.getMonth(),
-                date.getDate(),
-              );
-              const today = new Date();
-
               // Only allow focusing on today or dates before today
-              if (selectedDate <= today) {
+              const today = DateStruct.fromDate(new Date());
+              const selectedDate = new DateStruct(date);
+              console.log(
+                selectedDate,
+                today,
+                selectedDate.isSameOrBefore(today),
+              );
+              if (selectedDate.isSameOrBefore(today)) {
                 setFocusedDate(selectedDate);
               }
             }}
@@ -277,7 +347,7 @@ function DayElement({
           },
         ]}
       >
-        {isFirstOfMonth && (
+        {isFirstOfMonth && !isFocused && (
           <View>
             <Text
               style={[
