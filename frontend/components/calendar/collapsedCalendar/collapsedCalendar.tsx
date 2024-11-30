@@ -61,34 +61,59 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   };
 
   return (
-    <FlatList
-      ref={flatListRef}
-      data={weeks}
-      keyExtractor={(item) => `${item.startingDate.toISOString()}`}
-      horizontal
-      pagingEnabled
-      snapToAlignment="center"
-      snapToInterval={SCREEN_WIDTH} // Snap to the screen width (one week at a time)
-      decelerationRate="fast" // Slow down momentum to prevent multiple snaps
-      showsHorizontalScrollIndicator={false}
-      onMomentumScrollEnd={handleMomentumScrollEnd}
-      initialScrollIndex={currentWeekIndex}
-      getItemLayout={(data, index) => ({
-        length: SCREEN_WIDTH,
-        offset: SCREEN_WIDTH * index,
-        index,
-      })}
-      renderItem={({ item }) => (
-        <View style={{ width: SCREEN_WIDTH }}>
-          <Week
-            startingDate={item.startingDate}
-            endingDate={item.endingDate}
-            month={item.startingDate.getMonth() + 1}
-            year={item.startingDate.getFullYear()}
-          />
+    <View style={styles.outer}>
+      <View style={styles.week}>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>M</Text>
         </View>
-      )}
-    />
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>T</Text>
+        </View>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>W</Text>
+        </View>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>T</Text>
+        </View>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>F</Text>
+        </View>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>S</Text>
+        </View>
+        <View style={[styles.dayName]}>
+          <Text style={[styles.dayNameText]}>S</Text>
+        </View>
+      </View>
+      <FlatList
+        ref={flatListRef}
+        data={weeks}
+        keyExtractor={(item) => `${item.startingDate.toISOString()}`}
+        horizontal
+        pagingEnabled
+        snapToAlignment="center"
+        snapToInterval={SCREEN_WIDTH} // Snap to the screen width (one week at a time)
+        decelerationRate="fast" // Slow down momentum to prevent multiple snaps
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        initialScrollIndex={currentWeekIndex}
+        getItemLayout={(data, index) => ({
+          length: SCREEN_WIDTH,
+          offset: SCREEN_WIDTH * index,
+          index,
+        })}
+        renderItem={({ item }) => (
+          <View style={{ width: SCREEN_WIDTH }}>
+            <Week
+              startingDate={item.startingDate}
+              endingDate={item.endingDate}
+              month={item.startingDate.getMonth() + 1}
+              year={item.startingDate.getFullYear()}
+            />
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
@@ -134,15 +159,17 @@ function Week({
   }
 
   return (
-    <View style={styles.week}>
-      {weekDays.map((date) => (
-        <DayElement
-          key={`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`}
-          day={date.getDate()}
-          month={date.getMonth() + 1}
-          year={date.getFullYear()}
-        />
-      ))}
+    <View>
+      <View style={styles.week}>
+        {weekDays.map((date) => (
+          <DayElement
+            key={`${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`}
+            day={date.getDate()}
+            month={date.getMonth() + 1}
+            year={date.getFullYear()}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -178,23 +205,32 @@ function DayElement({
   if (isToday) {
     textColor = theme.color.white; // Today's date
   } else if (isAfterToday) {
-    textColor = theme.color.black; // Dates after today
+    textColor = theme.color.darkGrey; // Dates after today
   } else {
-    textColor = theme.color.darkGrey; // Dates before today
+    textColor = theme.color.black; // Dates before today
   }
 
   return (
     <View>
-      <Text
+      <View
         style={[
-          styles.textDay,
+          styles.outerDateDay,
           {
-            color: textColor,
+            backgroundColor: isToday ? theme.color.red : "transparent",
           },
         ]}
       >
-        {day}
-      </Text>
+        <Text
+          style={[
+            styles.textDay,
+            {
+              color: textColor,
+            },
+          ]}
+        >
+          {day}
+        </Text>
+      </View>
     </View>
   );
 }
