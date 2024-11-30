@@ -7,7 +7,7 @@ export default function SessionList({ style = {} }: { style?: object }) {
   const { theme } = useTheme();
 
   return (
-    <ScrollView style={styles.outer}>
+    <ScrollView style={[styles.outer, style]}>
       <Text>SessionList</Text>
     </ScrollView>
   );
