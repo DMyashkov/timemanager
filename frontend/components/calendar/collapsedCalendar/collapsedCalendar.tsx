@@ -27,15 +27,6 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   // Generate weeks dynamically for rendering
   const weeks = generateWeeks(startingDay, 10); // 10 weeks before and after the current week
 
-  // Snap to next or previous week
-  const handleMomentumScrollEnd = (event: any) => {
-    const newIndex = Math.round(
-      event.nativeEvent.contentOffset.x / SCREEN_WIDTH,
-    );
-    setCurrentWeekIndex(newIndex);
-    setIsTransitioning(false); // Re-enable swiping after the transition
-  };
-
   // Handle swipe gestures with strict locking
   const scrollToWeek = (direction: "prev" | "next") => {
     if (isTransitioning) return; // Prevent swipe if already transitioning
@@ -101,7 +92,6 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
         snapToInterval={SCREEN_WIDTH} // Snap to the screen width (one week at a time)
         decelerationRate="fast" // Slow down momentum to prevent multiple snaps
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
         initialScrollIndex={currentWeekIndex}
         getItemLayout={(data, index) => ({
           length: SCREEN_WIDTH,
