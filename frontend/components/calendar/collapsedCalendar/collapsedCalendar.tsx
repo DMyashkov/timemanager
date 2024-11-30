@@ -10,6 +10,7 @@ import {
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Calendar from "@assets/icons/calendar.svg";
+import { transform } from "@babel/core";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -89,6 +90,11 @@ class DateStruct {
   toString(): string {
     return `${this.year}-${this.month}-${this.day}`;
   }
+
+  getMonday(): DateStruct {
+    const dayOfWeek = this.getDayOfTheWeek(); // 0 = Monday, 6 = Sunday
+    return DateStruct.addDays(this, -dayOfWeek);
+  }
 }
 
 export default function CollapsedCalendar({ style = {} }: { style?: object }) {
@@ -115,16 +121,23 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   );
 
   const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
+  const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
+  const [transitioning, setTransitioning] = useState(false);
   const goBackToToday = () => {
+    setFocusedDate(new DateStruct(today));
+    setTransitioning(true);
     flatListRef.current?.scrollToOffset({
       offset: CURRENT_WEEK_INDEX * SCREEN_WIDTH, // Scroll to the current week
       animated: true,
     });
+    setTimeout(() => {
+      setFocusedDate(new DateStruct(today));
+      setTransitioning(false);
+    }, 300);
   };
 
   const shouldGoBackBeVisible = !focusedDate.equals(today);
 
-  const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
   const focusedWeekStart = weeks[currentWeekIndex]?.startingDate;
 
   // const getCertainDayFromWeekWithStart = (
@@ -135,7 +148,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   // };
 
   useEffect(() => {
-    if (focusedWeekStart) {
+    if (focusedWeekStart && !transitioning) {
       const newFocusedDate = DateStruct.addDays(
         focusedWeekStart,
         dayOfWeekFocus - 1,
@@ -146,7 +159,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
       }
     }
     console.log("1");
-  }, [focusedWeekStart, dayOfWeekFocus, focusedDate]);
+  }, [focusedWeekStart, dayOfWeekFocus, focusedDate, transitioning]);
 
   // console.log(currentWeekIndex);
 
