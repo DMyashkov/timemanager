@@ -116,9 +116,6 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
 
   const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
   const goBackToToday = () => {
-    setFocusedDate(today); // Focus on today's date
-    setCurrentWeekIndex(CURRENT_WEEK_INDEX); // Update the current week index
-
     flatListRef.current?.scrollToOffset({
       offset: CURRENT_WEEK_INDEX * SCREEN_WIDTH, // Scroll to the current week
       animated: true,
