@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { View, Text, FlatList, Dimensions } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
+import Calendar from "@assets/icons/calendar.svg";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
@@ -54,7 +55,13 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   return (
     <View style={styles.outer}>
       <View style={styles.header}>
-        <Text style={styles.leftHeaderText}>Sep 2024</Text>
+        <View style={styles.leftPartHeader}>
+          <Text style={styles.leftHeaderText}>Sep 2024</Text>
+          {/* <Calendar fill={theme.color.red} height={20} width={20} /> */}
+          <View style={styles.goBackButton}>
+            <Text style={styles.goBackText}>25</Text>
+          </View>
+        </View>
         <Text style={styles.rightHeaderText}>
           Productivity: <Text style={styles.productiveTimeText}>4:54:32</Text>
         </Text>

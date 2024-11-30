@@ -61,5 +61,23 @@ export default function useStyles() {
       fontFamily: theme.font.regular,
       color: theme.color.black,
     },
+    leftPartHeader: {
+      flexDirection: "row",
+      gap: 10,
+    },
+    goBackButton: {
+      borderWidth: 1,
+      aspectRatio: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 4,
+      padding: 2,
+      borderColor: theme.color.red,
+    },
+    goBackText: {
+      fontSize: theme.fontSize.smaller - 2,
+      fontFamily: theme.font.semibold,
+      color: theme.color.red,
+    },
   });
 }
