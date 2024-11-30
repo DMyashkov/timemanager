@@ -22,7 +22,14 @@
       ],
       "@assets/*": [
         "assets/*"
+      ],
+      "@interfaces": [
+        "constants/interfaces"
+      ],
+      "@utils/*": [
+        "utils/*"
       ]
+
     }
   },
   "include": [

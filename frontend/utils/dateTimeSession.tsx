@@ -1,0 +1,205 @@
+export class DateStruct {
+  year: number;
+  month: number;
+  day: number;
+
+  // Constructor with overloads for creating a new DateStruct or copying an existing one
+  constructor(year: number, month: number, day: number);
+  constructor(date: DateStruct);
+  constructor(yearOrDate: number | DateStruct, month?: number, day?: number) {
+    if (yearOrDate instanceof DateStruct) {
+      // Copy constructor logic
+      this.year = yearOrDate.year;
+      this.month = yearOrDate.month;
+      this.day = yearOrDate.day;
+    } else {
+      // Regular constructor logic
+      if (month === undefined || day === undefined) {
+        throw new Error("Month and day must be provided.");
+      }
+      this.year = yearOrDate;
+      this.month = month;
+      this.day = day;
+    }
+  }
+
+  static fromDate(date: Date): DateStruct {
+    return new DateStruct(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate(),
+    );
+  }
+
+  equals(other: DateStruct): boolean {
+    return (
+      this.year === other.year &&
+      this.month === other.month &&
+      this.day === other.day
+    );
+  }
+
+  getDayOfTheWeek(): number {
+    const jsDate = new Date(this.year, this.month - 1, this.day);
+    const day = jsDate.getDay();
+    return (day + 6) % 7; // Adjust to make Monday = 0, Sunday = 6
+  }
+
+  static addDays(date: DateStruct, days: number): DateStruct {
+    const jsDate = new Date(date.year, date.month - 1, date.day);
+    jsDate.setDate(jsDate.getDate() + days);
+    return DateStruct.fromDate(jsDate);
+  }
+
+  isBefore(other: DateStruct): boolean {
+    if (this.year !== other.year) return this.year < other.year;
+    if (this.month !== other.month) return this.month < other.month;
+    return this.day < other.day;
+  }
+
+  isAfter(other: DateStruct): boolean {
+    if (this.year !== other.year) return this.year > other.year;
+    if (this.month !== other.month) return this.month > other.month;
+    return this.day > other.day;
+  }
+
+  isSameOrBefore(other: DateStruct): boolean {
+    return this.equals(other) || this.isBefore(other);
+  }
+
+  isSameOrAfter(other: DateStruct): boolean {
+    return this.equals(other) || this.isAfter(other);
+  }
+
+  toString(): string {
+    return `${this.year}-${this.month}-${this.day}`;
+  }
+
+  getMonday(): DateStruct {
+    const dayOfWeek = this.getDayOfTheWeek(); // 0 = Monday, 6 = Sunday
+    return DateStruct.addDays(this, -dayOfWeek);
+  }
+}
+
+export enum IntervalType {
+  WORK = "Work",
+  BREAK = "Break",
+}
+
+export class Time {
+  hours: number;
+  minutes: number;
+  seconds: number;
+
+  constructor(hours = 0, minutes = 0, seconds = 0) {
+    this.hours = hours;
+    this.minutes = minutes;
+    this.seconds = seconds;
+  }
+
+  toString(): string {
+    return `${String(this.hours).padStart(2, "0")}:${String(this.minutes).padStart(2, "0")}:${String(this.seconds).padStart(2, "0")}`;
+  }
+
+  toSeconds(): number {
+    return this.hours * 3600 + this.minutes * 60 + this.seconds;
+  }
+
+  static fromSeconds(totalSeconds: number): Time {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return new Time(hours, minutes, seconds);
+  }
+}
+
+export class DateTime {
+  date: DateStruct;
+  time: Time;
+
+  constructor(date: DateStruct, time: Time) {
+    this.date = date;
+    this.time = time;
+  }
+
+  toString(): string {
+    return `${this.date.toString()} ${this.time.toString()}`;
+  }
+}
+
+export class Interval {
+  startTime: DateTime;
+  endTime: DateTime;
+  type: IntervalType;
+
+  constructor(startTime: DateTime, endTime: DateTime, type: IntervalType) {
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.type = type;
+  }
+
+  getDurationInSeconds(): number {
+    const startSeconds = this.startTime.time.toSeconds();
+    const endSeconds = this.endTime.time.toSeconds();
+    return endSeconds - startSeconds;
+  }
+
+  toString(): string {
+    return `${this.type}: ${this.startTime.toString()} - ${this.endTime.toString()}`;
+  }
+}
+
+export class Session {
+  private intervals: Interval[] = [];
+  private totalWorkTime = 0;
+  private totalBreakTime = 0;
+
+  constructor(intervals: Interval[] = []) {
+    this.intervals = intervals;
+    this.recalculateTotals();
+  }
+
+  private recalculateTotals(): void {
+    this.totalWorkTime = 0;
+    this.totalBreakTime = 0;
+
+    for (const interval of this.intervals) {
+      const duration = interval.getDurationInSeconds();
+      if (interval.type === IntervalType.WORK) {
+        this.totalWorkTime += duration;
+      } else if (interval.type === IntervalType.BREAK) {
+        this.totalBreakTime += duration;
+      }
+    }
+  }
+
+  addInterval(interval: Interval): void {
+    this.intervals.push(interval);
+    this.recalculateTotals();
+  }
+
+  addTimeStamp(timestamp: DateTime, type: IntervalType): void {
+    const lastInterval = this.intervals[this.intervals.length - 1];
+    const startTime = lastInterval
+      ? lastInterval.endTime
+      : new DateTime(new DateStruct(1970, 1, 1), new Time());
+    const newInterval = new Interval(startTime, timestamp, type);
+    this.addInterval(newInterval);
+  }
+
+  getWorkTime(): Time {
+    return Time.fromSeconds(this.totalWorkTime);
+  }
+
+  getBreakTime(): Time {
+    return Time.fromSeconds(this.totalBreakTime);
+  }
+
+  getTotalTime(): Time {
+    return Time.fromSeconds(this.totalWorkTime + this.totalBreakTime);
+  }
+
+  toString(): string {
+    return this.intervals.map((interval) => interval.toString()).join("\n");
+  }
+}
