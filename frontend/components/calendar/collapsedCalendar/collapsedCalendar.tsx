@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -115,7 +115,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
   const flatListRef = useRef<FlatList>(null);
 
   // Generate weeks dynamically for rendering
-  const weeks = React.useMemo(
+  const weeks = useMemo(
     () => generateWeeks(startingDay, CURRENT_WEEK_INDEX),
     [startingDay],
   );
