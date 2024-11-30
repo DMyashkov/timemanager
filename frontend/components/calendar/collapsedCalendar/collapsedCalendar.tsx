@@ -122,9 +122,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
     });
   };
 
-  const shouldGoBackBeVisible = !(
-    currentWeekIndex === CURRENT_WEEK_INDEX && focusedDate.equals(today)
-  );
+  const shouldGoBackBeVisible = !focusedDate.equals(today);
 
   const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
   const focusedWeekStart = weeks[currentWeekIndex]?.startingDate;
