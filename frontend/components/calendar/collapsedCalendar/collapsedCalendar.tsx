@@ -151,7 +151,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
     if (focusedWeekStart && !transitioning) {
       const newFocusedDate = DateStruct.addDays(
         focusedWeekStart,
-        dayOfWeekFocus - 1,
+        dayOfWeekFocus, // Use dayOfWeekFocus directly without subtracting 1
       );
       if (!newFocusedDate.equals(focusedDate)) {
         if (newFocusedDate.isSameOrBefore(today)) {
@@ -241,8 +241,9 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
 // Function to generate weeks dynamically
 function generateWeeks(startingDay: DateStruct, numberOfWeeks: number) {
   const weeks = [];
+  const adjustedStartingDay = startingDay.getMonday(); // Adjust to ensure week starts on Monday
   for (let i = -numberOfWeeks; i <= numberOfWeeks; i++) {
-    const weekStart = DateStruct.addDays(startingDay, i * 7);
+    const weekStart = DateStruct.addDays(adjustedStartingDay, i * 7);
     const weekEnd = DateStruct.addDays(weekStart, 6);
     weeks.push({ startingDate: weekStart, endingDate: weekEnd });
   }
