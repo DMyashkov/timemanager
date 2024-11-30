@@ -1,5 +1,12 @@
 import React, { useRef, useState } from "react";
-import { View, Text, FlatList, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  Touchable,
+  TouchableOpacity,
+} from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Calendar from "@assets/icons/calendar.svg";
@@ -52,42 +59,38 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
     }, 300); // Match animation duration
   };
 
+  const [focusedDate, setFocusedDate] = useState(new Date());
+  const goBackToToday = () => {};
+
   return (
     <View style={styles.outer}>
       <View style={styles.header}>
         <View style={styles.leftPartHeader}>
           <Text style={styles.leftHeaderText}>Sep 2024</Text>
           {/* <Calendar fill={theme.color.red} height={20} width={20} /> */}
-          <View style={styles.goBackButton}>
+          <TouchableOpacity
+            style={styles.goBackButton}
+            onPress={() => {
+              goBackToToday();
+            }}
+          >
             <Text style={styles.goBackText}>25</Text>
-          </View>
+          </TouchableOpacity>
         </View>
         <Text style={styles.rightHeaderText}>
           Productivity: <Text style={styles.productiveTimeText}>4:54:32</Text>
         </Text>
       </View>
       <View style={styles.week}>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>M</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>T</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>W</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>T</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>F</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>S</Text>
-        </View>
-        <View style={[styles.dayName]}>
-          <Text style={[styles.dayNameText]}>S</Text>
-        </View>
+        {["M", "T", "W", "T", "F", "S", "S"].map((dayName, index) => (
+          <View
+            // biome-ignore lint: a11y/no-index-key
+            key={`day-name-${index}`}
+            style={styles.dayName}
+          >
+            <Text style={styles.dayNameText}>{dayName}</Text>
+          </View>
+        ))}
       </View>
       <FlatList
         ref={flatListRef}
@@ -112,6 +115,8 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
               endingDate={item.endingDate}
               month={item.startingDate.getMonth() + 1}
               year={item.startingDate.getFullYear()}
+              focusedDate={focusedDate}
+              setFocusedDate={setFocusedDate}
             />
           </View>
         )}
@@ -144,11 +149,15 @@ function Week({
   endingDate,
   month,
   year,
+  focusedDate,
+  setFocusedDate,
 }: {
   startingDate: Date;
   endingDate: Date;
   month: number;
   year: number;
+  focusedDate: Date;
+  setFocusedDate: (date: Date) => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -170,6 +179,24 @@ function Week({
             day={date.getDate()}
             month={date.getMonth() + 1}
             year={date.getFullYear()}
+            isFocused={
+              focusedDate.getFullYear() === date.getFullYear() &&
+              focusedDate.getMonth() === date.getMonth() &&
+              focusedDate.getDate() === date.getDate()
+            }
+            onPress={() => {
+              const selectedDate = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+              );
+              const today = new Date();
+
+              // Only allow focusing on today or dates before today
+              if (selectedDate <= today) {
+                setFocusedDate(selectedDate);
+              }
+            }}
           />
         ))}
       </View>
@@ -181,10 +208,14 @@ function DayElement({
   day,
   month,
   year,
+  isFocused = false,
+  onPress,
 }: {
   day: number;
   month: number;
   year: number;
+  isFocused?: boolean;
+  onPress: () => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -205,7 +236,7 @@ function DayElement({
     | typeof theme.color.white
     | typeof theme.color.black
     | typeof theme.color.darkGrey;
-  if (isToday) {
+  if (isFocused) {
     textColor = theme.color.white; // Today's date
   } else if (isAfterToday) {
     textColor = theme.color.darkGrey; // Dates after today
@@ -232,12 +263,17 @@ function DayElement({
   const monthName = monthNames[month - 1];
 
   return (
-    <View>
+    <TouchableOpacity
+      onPress={() => {
+        onPress();
+      }}
+      activeOpacity={1}
+    >
       <View
         style={[
           styles.outerDateDay,
           {
-            backgroundColor: isToday ? theme.color.red : "transparent",
+            backgroundColor: isFocused ? theme.color.red : "transparent",
           },
         ]}
       >
@@ -260,13 +296,13 @@ function DayElement({
             styles.textDay,
             {
               color: textColor,
-              fontFamily: theme.font[isToday ? "medium" : "regular"],
+              fontFamily: theme.font[isFocused ? "medium" : "regular"],
             },
           ]}
         >
           {day}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
