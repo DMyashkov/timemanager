@@ -108,15 +108,15 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
     today.month,
     today.day - ((today.getDayOfTheWeek() - 1) % 7), // Adjust to Monday
   );
-  const CURRENT_WEEK_INDEX = 10;
+  const CURRENT_WEEK_INDEX = 480;
 
   // Manage current week index
-  const [currentWeekIndex, setCurrentWeekIndex] = useState(10); // Start in the middle of generated weeks
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(CURRENT_WEEK_INDEX); // Start in the middle of generated weeks
   const flatListRef = useRef<FlatList>(null);
 
   // Generate weeks dynamically for rendering
   const weeks = React.useMemo(
-    () => generateWeeks(startingDay, 10),
+    () => generateWeeks(startingDay, CURRENT_WEEK_INDEX),
     [startingDay],
   );
 
@@ -228,7 +228,7 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
         showsHorizontalScrollIndicator={false}
         initialScrollIndex={CURRENT_WEEK_INDEX}
         removeClippedSubviews={true}
-        windowSize={2}
+        windowSize={10}
         getItemLayout={(data, index) => ({
           length: SCREEN_WIDTH,
           offset: SCREEN_WIDTH * index,
