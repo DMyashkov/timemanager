@@ -62,6 +62,12 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
 
   return (
     <View style={styles.outer}>
+      <View style={styles.header}>
+        <Text style={styles.leftHeaderText}>Sep 2024</Text>
+        <Text style={styles.rightHeaderText}>
+          Productivity: <Text style={styles.productiveTimeText}>4:54:32</Text>
+        </Text>
+      </View>
       <View style={styles.week}>
         <View style={[styles.dayName]}>
           <Text style={[styles.dayNameText]}>M</Text>

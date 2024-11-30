@@ -78,7 +78,7 @@ export default function Task({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.touchContainer} onPress={() => {}} />
+      {/* <TouchableOpacity style={styles.touchContainer} onPress={() => {}} /> */}
       <View style={styles.leftColumn}>
         <TouchableOpacity
           onPress={() => {

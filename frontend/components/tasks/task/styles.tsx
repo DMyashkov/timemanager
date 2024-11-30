@@ -28,6 +28,7 @@ export default function useStyles(priority: number) {
       borderWidth: 2.3,
       borderRadius: 2.5,
       margin: 1,
+      zIndex: 2,
     },
     priority1Colors: {},
     content: {
@@ -86,4 +87,3 @@ export default function useStyles(priority: number) {
     },
   });
 }
-
