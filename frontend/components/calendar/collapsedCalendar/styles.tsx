@@ -56,6 +56,10 @@ export default function useStyles() {
     productiveTimeText: {
       color: theme.color.red,
     },
+    monthText: {
+      fontSize: theme.fontSize.mediumSmall,
+      fontFamily: theme.font.regular,
+      color: theme.color.black,
+    },
   });
 }
-

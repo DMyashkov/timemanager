@@ -206,6 +206,24 @@ function DayElement({
     textColor = theme.color.black; // Dates before today
   }
 
+  // Check if the day is the first of the month
+  const isFirstOfMonth = day === 1;
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const monthName = monthNames[month - 1];
+
   return (
     <View>
       <View
@@ -216,11 +234,26 @@ function DayElement({
           },
         ]}
       >
+        {isFirstOfMonth && (
+          <View>
+            <Text
+              style={[
+                styles.monthText,
+                {
+                  color: textColor,
+                },
+              ]}
+            >
+              {monthName}
+            </Text>
+          </View>
+        )}
         <Text
           style={[
             styles.textDay,
             {
               color: textColor,
+              fontFamily: theme.font[isToday ? "medium" : "regular"],
             },
           ]}
         >
