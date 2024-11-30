@@ -154,12 +154,14 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
         dayOfWeekFocus - 1,
       );
       if (!newFocusedDate.equals(focusedDate)) {
-        setFocusedDate(newFocusedDate);
-        console.log("Updated focusedDate to:", newFocusedDate.toString());
+        if (newFocusedDate.isSameOrBefore(today)) {
+          setFocusedDate(newFocusedDate);
+        } else {
+          setFocusedDate(new DateStruct(today));
+        }
       }
     }
-    console.log("1");
-  }, [focusedWeekStart, dayOfWeekFocus, focusedDate, transitioning]);
+  }, [focusedWeekStart, dayOfWeekFocus, focusedDate, transitioning, today]);
 
   // console.log(currentWeekIndex);
 
