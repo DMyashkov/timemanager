@@ -154,7 +154,6 @@ export default function TaskBottomSheet({
                   />
                 )}
               </TouchableOpacity>
-
               <BottomSheetTextInput
                 placeholder="Task Name"
                 style={[styles.titleInput]}

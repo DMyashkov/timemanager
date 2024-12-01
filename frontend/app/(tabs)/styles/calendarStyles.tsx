@@ -7,14 +7,14 @@ export default function useStyles() {
   return StyleSheet.create({
     screen: {
       flex: 1,
-      backgroundColor: theme.color.white,
       gap: 10,
+      backgroundColor: theme.color.white,
     },
     leftScreen: {
-      paddingHorizontal: 15,
+      flex: 1,
     },
     rightScreen: {
-      paddingHorizontal: 15,
+      flex: 1,
     },
   });
 }

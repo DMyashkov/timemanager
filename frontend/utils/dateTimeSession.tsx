@@ -151,10 +151,10 @@ export class Interval {
   }
 }
 
-class Session {
+export class Session {
   private intervals: Interval[] = [];
-  private totalWorkTime: number = 0;
-  private totalBreakTime: number = 0;
+  private totalWorkTime = 0;
+  private totalBreakTime = 0;
   private activityId: string; // Foreign key reference to ActivityData
 
   constructor(activityId: string, intervals: Interval[] = []) {

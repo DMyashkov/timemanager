@@ -80,7 +80,7 @@ export default function AddScreen() {
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
-      style={[styles.addScreen, { backgroundColor: "yellow" }]}
+      style={[styles.addScreen]}
     >
       <View style={styles.innerAddScreen}>
         <SwitchWrapper

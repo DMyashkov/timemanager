@@ -24,8 +24,8 @@ export default function CalendarScreen() {
           <CollapsedCalendar style={{ paddingHorizontal: 15 }} />
         )}
       >
-        <SessionList style={styles.rightScreen} />
-        <SessionCalendar style={styles.leftScreen} />
+        <SessionList style={styles.leftScreen} />
+        <SessionCalendar style={styles.rightScreen} />
       </SwitchWrapper>
     </View>
   );

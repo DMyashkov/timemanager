@@ -6,8 +6,13 @@ export default function useStyles() {
 
   return StyleSheet.create({
     outer: {
+      gap: 10,
+      paddingHorizontal: 15,
+    },
+    container: {
+      alignSelf: "stretch",
       flex: 1,
+      height: "100%",
     },
   });
 }
-
