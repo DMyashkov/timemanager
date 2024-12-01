@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
   withSequence,
   Easing,
+  useDerivedValue,
 } from "react-native-reanimated";
 
 import type { SwitchButton, SwitchProps } from "@/constants/interfaces";
@@ -26,20 +27,26 @@ export default function Switch({
   const scaleAnim = useSharedValue(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
 
+  // Derived value for animation updates
+  const derivedPositionAnim = useDerivedValue(
+    () => positionAnim.value,
+    [positionAnim],
+  );
+
   useEffect(() => {
     // Update positionAnim only if the selected index changes
-    if (positionAnim.value !== selectedButtonIndex) {
+    if (selectedButtonIndex !== derivedPositionAnim.value) {
       positionAnim.value = withTiming(selectedButtonIndex, {
         duration: 225,
         easing: Easing.inOut(Easing.ease),
       });
     }
-  }, [selectedButtonIndex, positionAnim]);
+  }, [selectedButtonIndex, positionAnim, derivedPositionAnim]);
 
   const animStyles = {
     main: useAnimatedStyle(() => ({
       marginLeft:
-        positionAnim.value * (buttonWidth + styles.container.gap) +
+        derivedPositionAnim.value * (buttonWidth + styles.container.gap) +
         styles.container.padding,
       transform: [{ scale: scaleAnim.value }],
     })),
