@@ -209,4 +209,8 @@ export class Session {
       `Total Time: ${this.getTotalTime().toString()}`
     );
   }
+
+  getWorkToTotalRatio(): number {
+    return this.totalWorkTime / (this.totalWorkTime + this.totalBreakTime);
+  }
 }
