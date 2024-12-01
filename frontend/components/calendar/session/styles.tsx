@@ -21,11 +21,45 @@ export default function useStyles(colorPallete: Color) {
       width: "100%",
     },
     workTime: {
-      backgroundColor: colorPallete.light,
+      backgroundColor: colorPallete.veryLight,
       height: "100%",
+      borderTopLeftRadius: theme.borderRadius.large,
+      borderWidth: 2.7,
+      borderRightWidth: 0,
+      borderColor: colorPallete.medium,
+      justifyContent: "center",
+      alignItems: "center",
     },
     content: {
       padding: 14,
+    },
+    workTimeText: {
+      fontFamily: theme.font.bold,
+      fontSize: theme.fontSize.mediumSmall,
+      color: colorPallete.dark,
+    },
+    breakTime: {
+      flex: 1,
+      borderWidth: 2.7,
+      borderColor: colorPallete.medium,
+      borderStyle: "dashed",
+      position: "relative",
+      borderTopRightRadius: theme.borderRadius.large,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    leftMask: {
+      height: "100%",
+      width: 3,
+      backgroundColor: theme.color.white,
+      position: "absolute",
+      top: 0,
+      left: -3,
+    },
+    breakTimeText: {
+      fontFamily: theme.font.bold,
+      fontSize: theme.fontSize.mediumSmall,
+      color: colorPallete.medium,
     },
   });
 }

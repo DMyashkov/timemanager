@@ -99,8 +99,13 @@ export class Time {
     this.seconds = seconds;
   }
 
-  toString(): string {
+  toStringLong(): string {
     return `${String(this.hours).padStart(2, "0")}:${String(this.minutes).padStart(2, "0")}:${String(this.seconds).padStart(2, "0")}`;
+  }
+
+  toString(): string {
+    const hours = this.hours === 0 ? "" : `${this.hours}:`;
+    return `${hours}${String(this.minutes).padStart(2, "0")}:${String(this.seconds).padStart(2, "0")}`;
   }
 
   toSeconds(): number {
