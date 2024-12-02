@@ -206,6 +206,10 @@ export class Session {
     return dataIndex[this.activityId]?.item || null;
   }
 
+  getActivityId(): string {
+    return this.activityId;
+  }
+
   // Example toString() method
   toString(): string {
     return (
