@@ -93,6 +93,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
         data={hours}
         renderItem={renderItem}
         keyExtractor={(item, index) => `hour-${index}`}
+        style={{ paddingHorizontal: 15 }}
       />
     </View>
   );
