@@ -20,7 +20,7 @@ const data2: ActivityData = {
       type: moduleType.activity,
       colorPreset: ColorPresets.ORANGE,
       productive: true,
-      lapName: "Lap",
+      lapName: "Exercise",
 
       activities: [
         {
@@ -29,7 +29,7 @@ const data2: ActivityData = {
           type: moduleType.project,
           colorPreset: ColorPresets.ORANGE,
           productive: true,
-          lapName: "Lap",
+          lapName: "Exercise",
         },
         {
           id: "activity-1-1",

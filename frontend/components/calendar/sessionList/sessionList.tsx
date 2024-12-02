@@ -19,6 +19,7 @@ export default function SessionList({ style = {} }: { style?: object }) {
         keyExtractor={(item) => item.toString()}
         ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
         ListHeaderComponent={() => <View style={{ height: 10 }} />}
+        ListFooterComponent={() => <View style={{ height: 10 }} />}
       />
     </View>
   );

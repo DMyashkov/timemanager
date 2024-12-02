@@ -161,6 +161,7 @@ export class Session {
   private totalWorkTime = 0;
   private totalBreakTime = 0;
   private activityId: string; // Foreign key reference to ActivityData
+  private laps: Time[] = [new Time(0, 0, 0), new Time(0, 0, 0)];
 
   constructor(activityId: string, intervals: Interval[] = []) {
     this.activityId = activityId;
@@ -217,5 +218,17 @@ export class Session {
 
   getWorkToTotalRatio(): number {
     return this.totalWorkTime / (this.totalWorkTime + this.totalBreakTime);
+  }
+
+  getLapAmount(): number {
+    return this.laps.length;
+  }
+
+  getStartTime(): Time {
+    return this.intervals[0].startTime.time;
+  }
+
+  getEndTime(): Time {
+    return this.intervals[this.intervals.length - 1].endTime.time;
   }
 }

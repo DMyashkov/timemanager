@@ -61,5 +61,21 @@ export default function useStyles(colorPallete: Color) {
       fontSize: theme.fontSize.mediumSmall,
       color: colorPallete.medium,
     },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 10,
+      alignItems: "center",
+    },
+    textFooter: {
+      color: theme.color.darkerDarkGrey,
+      fontFamily: theme.font.medium,
+      fontSize: theme.fontSize.mediumSmall,
+    },
+    rightFooter: {
+      flexDirection: "row",
+      gap: 5,
+      alignItems: "center",
+    },
   });
 }

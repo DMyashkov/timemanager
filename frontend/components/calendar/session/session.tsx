@@ -6,6 +6,7 @@ import type { Session, Time } from "@/utils/dateTimeSession";
 import { dataIndex } from "@/constants/exampleData";
 import { TagsFromId } from "@/utils/getComponentsFromTag";
 import type { ActivityData } from "@interfaces";
+import Stopwatch from "@/assets/icons/stopwatch.svg";
 
 export default function SessionElement({
   style = {},
@@ -34,7 +35,6 @@ export default function SessionElement({
     }
     return workTimeRatioPercentage;
   })();
-  console.log("roundedRatioPercentage", roundedRatioPercentage);
 
   return (
     <View style={styles.outer}>
@@ -79,6 +79,17 @@ export default function SessionElement({
               fontSize={theme.fontSize.small}
             />
           )}
+        </View>
+        <View style={styles.footer}>
+          <Text
+            style={styles.textFooter}
+          >{`${session.getLapAmount()} x ${activityItem ? activityItem.lapName : "Lap"}`}</Text>
+          <View style={styles.rightFooter}>
+            <Text style={styles.textFooter}>
+              {session.getStartTime().toString()} -{" "}
+              {session.getEndTime().toString()}
+            </Text>
+          </View>
         </View>
       </View>
     </View>
