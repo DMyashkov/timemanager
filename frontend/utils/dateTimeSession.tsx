@@ -201,6 +201,10 @@ export class Session {
     return Time.fromSeconds(this.totalWorkTime + this.totalBreakTime);
   }
 
+  getIntervals(): Interval[] {
+    return this.intervals;
+  }
+
   // Utility to get associated activity data
   getAssociatedActivityItem(dataIndex: DataIndex): ActivityData | null {
     return dataIndex[this.activityId]?.item || null;

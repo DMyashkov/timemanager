@@ -30,5 +30,12 @@ export default function useStyles() {
     empty: {
       height: FULL_ENTRY_HEIGHT - ENTRY_LINE_HEIGHT,
     },
+    session: {
+      position: "absolute",
+      left: 0,
+      width: "100%",
+      backgroundColor: "red",
+      zIndex: 1,
+    },
   });
 }

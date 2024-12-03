@@ -3,6 +3,8 @@ import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { FlatList } from "react-native-gesture-handler";
 import { exampleSessions } from "@/constants/exampleSessions";
+import { dataIndex } from "@/constants/exampleData";
+import { IntervalType, Time } from "@/utils/dateTimeSession";
 
 export default function SessionCalendar({ style = {} }: { style?: object }) {
   const styles = useStyles();
@@ -16,15 +18,9 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
     return `${hour}:00 ${period}`;
   });
 
-  const sessionData = exampleSessions.map((session) => ({
-    id: session.getActivityId() || "unknown",
-    startTime: session.getStartTime(),
-    endTime: session.getEndTime(),
-    workTime: session.getWorkTime(),
-  }));
+  const sessionData = exampleSessions;
 
   const renderItem = ({ item, index }: { item: string; index: number }) => {
-    // Filter sessions for this hour slot
     const hourStart = index; // Current hour index (0 for 12:00 AM, 1 for 1:00 AM, etc.)
     const hourEnd = index + 1;
 
@@ -32,7 +28,8 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
       index !== 24
         ? sessionData.filter((session) => {
             const sessionStartInHours =
-              session.startTime.hours + session.startTime.minutes / 60;
+              session.getStartTime().hours +
+              session.getStartTime().minutes / 60;
             return (
               sessionStartInHours >= hourStart && sessionStartInHours < hourEnd
             );
@@ -54,32 +51,69 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
 
         {/* Render Sessions */}
         {relevantSessions.map((session) => {
-          const startInMinutes =
-            session.startTime.hours * 60 + session.startTime.minutes;
+          const startTime: Time = session.getStartTime();
+          const totalTime: Time = session.getTotalTime();
+          const tagId = session.getActivityId();
+          const intervals = session.getIntervals();
+
+          const startInMinutes = startTime.hours * 60 + startTime.minutes;
           const offsetMinutes = startInMinutes - hourStart * 60; // Offset within this hour
           const topOffset =
             (FULL_ENTRY_HEIGHT / 60) * offsetMinutes + ENTRY_LINE_HEIGHT / 2;
 
-          const durationInMinutes =
-            session.workTime.hours * 60 + session.workTime.minutes;
+          const durationInMinutes = totalTime.hours * 60 + totalTime.minutes;
           const height = (FULL_ENTRY_HEIGHT / 60) * durationInMinutes;
+          const activityItem = dataIndex[tagId]?.item;
+          const colorPallete = theme.color.presets[activityItem?.colorPreset];
+
+          const breakIntervals = intervals.filter(
+            (interval) => interval.type === IntervalType.BREAK,
+          );
 
           return (
             <View
-              key={session.id}
-              style={{
-                position: "absolute",
-                top: topOffset,
-                left: 0,
-                height,
-                width: "100%",
-                backgroundColor: "red",
-                zIndex: 1,
-              }}
+              key={`${startTime.toString()}-${totalTime}-${tagId}`}
+              style={[
+                styles.session,
+                {
+                  top: topOffset,
+                  height,
+                  backgroundColor: colorPallete.medium,
+                },
+              ]}
             >
-              <Text style={{ color: theme.color.white }}>
-                {session.id} ({session.workTime.toString()})
-              </Text>
+              <Text>{tagId}</Text>
+              {/* Render Breaks */}
+              {breakIntervals.map((breakInterval, breakIndex) => {
+                const breakStartTime = breakInterval.startTime.time;
+                const breakDuration = breakInterval.getDurationInSeconds() / 60; // In minutes
+
+                const breakStartInMinutes =
+                  breakStartTime.hours * 60 + breakStartTime.minutes;
+                const breakOffsetMinutes = breakStartInMinutes - startInMinutes; // Offset within this hour
+                console.log(
+                  tagId,
+                  startInMinutes,
+                  breakStartInMinutes,
+                  breakOffsetMinutes,
+                );
+                const breakTopOffset =
+                  (FULL_ENTRY_HEIGHT / 60) * breakOffsetMinutes;
+                const breakHeight = (FULL_ENTRY_HEIGHT / 60) * breakDuration;
+
+                return (
+                  <View
+                    key={`break-${breakTopOffset}-${breakHeight}`}
+                    style={{
+                      position: "absolute",
+                      top: breakTopOffset,
+                      height: breakHeight,
+                      width: "100%",
+                      backgroundColor: `${theme.color.black}26`, // 15% opacity
+                    }}
+                  />
+                );
+              })}
             </View>
           );
         })}
