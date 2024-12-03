@@ -5,6 +5,7 @@ import { FlatList } from "react-native-gesture-handler";
 import { exampleSessions } from "@/constants/exampleSessions";
 import { dataIndex } from "@/constants/exampleData";
 import { IntervalType, Time } from "@/utils/dateTimeSession";
+import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 
 export default function SessionCalendar({ style = {} }: { style?: object }) {
   const styles = useStyles();
@@ -78,12 +79,15 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                 {
                   top: topOffset,
                   height,
-                  backgroundColor: colorPallete.medium,
+                  backgroundColor: blendColors(
+                    theme.color.white,
+                    colorPallete.medium,
+                    0.8,
+                  ),
                 },
               ]}
             >
               <Text>{tagId}</Text>
-              {/* Render Breaks */}
               {breakIntervals.map((breakInterval, breakIndex) => {
                 const breakStartTime = breakInterval.startTime.time;
                 const breakDuration = breakInterval.getDurationInSeconds() / 60; // In minutes
@@ -91,12 +95,6 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                 const breakStartInMinutes =
                   breakStartTime.hours * 60 + breakStartTime.minutes;
                 const breakOffsetMinutes = breakStartInMinutes - startInMinutes; // Offset within this hour
-                console.log(
-                  tagId,
-                  startInMinutes,
-                  breakStartInMinutes,
-                  breakOffsetMinutes,
-                );
                 const breakTopOffset =
                   (FULL_ENTRY_HEIGHT / 60) * breakOffsetMinutes;
                 const breakHeight = (FULL_ENTRY_HEIGHT / 60) * breakDuration;
@@ -109,7 +107,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       top: breakTopOffset,
                       height: breakHeight,
                       width: "100%",
-                      backgroundColor: `${theme.color.black}26`, // 15% opacity
+                      backgroundColor: hexWithOpacity(theme.color.black, 0.12), // 15% opacity
                     }}
                   />
                 );

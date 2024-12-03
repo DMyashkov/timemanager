@@ -32,10 +32,11 @@ export default function useStyles() {
     },
     session: {
       position: "absolute",
-      left: 0,
-      width: "100%",
       backgroundColor: "red",
+      right: 0,
+      width: "77%",
       zIndex: 1,
+      borderRadius: theme.borderRadius.mediumSmall,
     },
   });
 }
