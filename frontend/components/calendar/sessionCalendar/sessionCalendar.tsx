@@ -244,6 +244,19 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
         renderItem={renderItem}
         keyExtractor={(item, index) => `hour-${index}`}
         style={{ paddingHorizontal: 15 }}
+        initialScrollIndex={Math.max(
+          Math.min(currentTime.getHours(), 23) - 3,
+          0,
+        )}
+        getItemLayout={
+          // Optimized scroll
+          (_, index) => ({
+            length: index !== 24 ? FULL_ENTRY_HEIGHT : ENTRY_LINE_HEIGHT,
+            offset:
+              (index !== 24 ? FULL_ENTRY_HEIGHT : ENTRY_LINE_HEIGHT) * index,
+            index,
+          })
+        }
       />
     </View>
   );
