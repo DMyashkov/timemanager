@@ -130,6 +130,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                 styles.session,
                 {
                   top: topOffset,
+                  overflow: "hidden",
                   height,
                   backgroundColor: blendColors(
                     theme.color.white,
