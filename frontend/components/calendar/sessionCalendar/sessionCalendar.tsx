@@ -206,6 +206,8 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       height: breakHeight,
                       width: "100%",
                       backgroundColor: hexWithOpacity(colorPallete.dark, 0.3), // 15% opacity
+                      borderTopLeftRadius: 5,
+                      borderBottomLeftRadius: 5,
                     }}
                   />
                 );
@@ -219,14 +221,17 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
           <View
             style={{
               position: "absolute",
-              top: redLineTop,
+              top: redLineTop - 3 / 2,
               right: 0,
-              height: 2, // Thickness of the red line
+              height: 3, // Thickness of the red line
+
               backgroundColor: "red",
               width: currentLineWidth,
               zIndex: 5,
             }}
-          />
+          >
+            <View style={styles.dot} />
+          </View>
         )}
       </View>
     );

@@ -78,5 +78,14 @@ export default function useStyles(textColor: string) {
       flexDirection: "row",
       alignItems: "center",
     },
+    dot: {
+      position: "absolute",
+      width: 11,
+      aspectRatio: 1,
+      borderRadius: 11 / 2,
+      backgroundColor: theme.color.red,
+      left: 0,
+      marginTop: -11 / 2 + 3 / 2,
+    },
   });
 }
