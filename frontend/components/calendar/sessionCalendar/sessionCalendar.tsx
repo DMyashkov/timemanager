@@ -12,8 +12,9 @@ import ArrowRotateLeft from "@assets/icons/arrow-rotate-left.svg";
 import TagIcon from "@assets/icons/tag.svg";
 
 export default function SessionCalendar({ style = {} }: { style?: object }) {
-  const styles = useStyles();
   const { theme } = useTheme();
+  const textColor = theme.color.white;
+  const styles = useStyles(textColor);
   const FULL_ENTRY_HEIGHT = 55; // Height for one hour
   const ENTRY_LINE_HEIGHT = 17; // Height for the time line
 
@@ -106,7 +107,12 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                 <View style={styles.project}>
                   {itemProject && (
                     <>
-                      <At width={13} height={13} fill={theme.color.white} />
+                      <At
+                        width={13}
+                        height={13}
+                        fill={textColor}
+                        style={styles.textSession}
+                      />
                       <Text style={styles.textSession}>
                         {itemProject?.title}
                       </Text>
@@ -125,14 +131,16 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       <ArrowRotateLeft
                         width={13}
                         height={13}
-                        fill={theme.color.white}
+                        fill={textColor}
+                        style={styles.textSession}
                       />
                     </View>
                     <View style={styles.tagContainer}>
                       <TagIcon
                         width={13}
                         height={13}
-                        fill={theme.color.white}
+                        fill={textColor}
+                        style={styles.textSession}
                       />
                       <Text style={styles.textSession}>
                         {" "}
@@ -161,7 +169,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       top: breakTopOffset,
                       height: breakHeight,
                       width: "100%",
-                      backgroundColor: hexWithOpacity(theme.color.black, 0.1), // 15% opacity
+                      backgroundColor: hexWithOpacity(colorPallete.dark, 0.3), // 15% opacity
                     }}
                   />
                 );

@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 
-export default function useStyles() {
+export default function useStyles(textColor: string) {
   const { theme } = useTheme();
   const ENTRY_LINE_HEIGHT = 17;
   const FULL_ENTRY_HEIGHT = 45;
@@ -56,7 +56,7 @@ export default function useStyles() {
       alignItems: "center",
     },
     textSession: {
-      color: theme.color.white,
+      color: textColor,
       fontFamily: theme.font.medium,
       fontSize: theme.fontSize.small,
       zIndex: 1,
