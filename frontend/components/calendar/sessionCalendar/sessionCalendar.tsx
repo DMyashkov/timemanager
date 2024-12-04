@@ -40,6 +40,8 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
     return () => clearInterval(timer);
   }, []);
 
+  const [currentLineWidth, setCurrentLineWidth] = useState(0);
+
   const renderItem = ({ item, index }: { item: string; index: number }) => {
     const hourStart = index; // Current hour index (0 for 12:00 AM, 1 for 1:00 AM, etc.)
     const hourEnd = index + 1;
@@ -78,7 +80,15 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
         {/* Render Hour */}
         <View style={[styles.entryTime]}>
           <Text style={styles.timeText}>{item}</Text>
-          <View style={styles.line} />
+          <View
+            style={styles.line}
+            onLayout={(event) => {
+              if (isCurrentHour) {
+                const { width, x } = event.nativeEvent.layout;
+                setCurrentLineWidth(width);
+              }
+            }}
+          />
         </View>
 
         {/* Render Sessions */}
@@ -210,10 +220,10 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             style={{
               position: "absolute",
               top: redLineTop,
-              left: 0,
               right: 0,
               height: 2, // Thickness of the red line
               backgroundColor: "red",
+              width: currentLineWidth,
               zIndex: 5,
             }}
           />
