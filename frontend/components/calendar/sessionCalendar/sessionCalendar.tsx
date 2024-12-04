@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
@@ -15,7 +16,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   const { theme } = useTheme();
   const textColor = theme.color.white;
   const styles = useStyles(textColor);
-  const FULL_ENTRY_HEIGHT = 55; // Height for one hour
+  const FULL_ENTRY_HEIGHT = 60; // Height for one hour
   const ENTRY_LINE_HEIGHT = 17; // Height for the time line
 
   const hours = Array.from({ length: 25 }, (_, i) => {
@@ -25,6 +26,19 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   });
 
   const sessionData = exampleSessions;
+
+  // State to keep track of current time
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    // Cleanup on unmount
+    return () => clearInterval(timer);
+  }, []);
 
   const renderItem = ({ item, index }: { item: string; index: number }) => {
     const hourStart = index; // Current hour index (0 for 12:00 AM, 1 for 1:00 AM, etc.)
@@ -42,6 +56,18 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
           })
         : [];
 
+    // Determine if the current time is within this hour
+    const currentHour = currentTime.getHours() % 24; // 0-23
+    const isCurrentHour = currentHour === hourStart;
+
+    // Calculate the top position for the red line within the hour's view
+    let redLineTop = 0;
+    if (isCurrentHour && index !== 24) {
+      const minutesPassed = currentTime.getMinutes();
+      redLineTop =
+        (minutesPassed / 60) * FULL_ENTRY_HEIGHT + ENTRY_LINE_HEIGHT / 2;
+    }
+
     return (
       <View
         style={{
@@ -56,7 +82,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
         </View>
 
         {/* Render Sessions */}
-        {relevantSessions.map((session) => {
+        {relevantSessions.map((session, sessionIndex) => {
           const startTime: Time = session.getStartTime();
           const totalTime: Time = session.getTotalTime();
           const tagId = session.getActivityId();
@@ -177,6 +203,21 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             </View>
           );
         })}
+
+        {/* Render Red Line if current time is within this hour */}
+        {isCurrentHour && index !== 24 && (
+          <View
+            style={{
+              position: "absolute",
+              top: redLineTop,
+              left: 0,
+              right: 0,
+              height: 2, // Thickness of the red line
+              backgroundColor: "red",
+              zIndex: 5,
+            }}
+          />
+        )}
       </View>
     );
   };
