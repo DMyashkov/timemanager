@@ -38,5 +38,45 @@ export default function useStyles() {
       zIndex: 1,
       borderRadius: theme.borderRadius.mediumSmall,
     },
+    content: {
+      flexDirection: "column",
+      justifyContent: "space-between",
+      flex: 1,
+      padding: 5,
+      paddingHorizontal: 7,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+    },
+    project: {
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      gap: 5,
+      alignItems: "center",
+    },
+    textSession: {
+      color: theme.color.white,
+      fontFamily: theme.font.medium,
+      fontSize: theme.fontSize.small,
+      zIndex: 1,
+    },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    rightFooter: {
+      flexDirection: "row",
+      gap: 7,
+    },
+    lapsContainer: {
+      flexDirection: "row",
+      gap: 3,
+      alignItems: "center",
+    },
+    tagContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
   });
 }
