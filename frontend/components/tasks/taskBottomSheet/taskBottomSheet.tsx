@@ -114,6 +114,34 @@ export default function TaskBottomSheet({
     : dataIndex[tagId].item;
   const itemProject = isTagProject ? dataIndex[tagId].item : null;
 
+  const { showActionSheetWithOptions } = useActionSheet();
+
+  const onPressPriority = () => {
+    const options = ["Delete", "Save", "Cancel"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+      },
+      (selectedIndex?: number) => {
+        if (selectedIndex === undefined) return;
+        switch (selectedIndex) {
+          case 1:
+            break;
+
+          case destructiveButtonIndex:
+            break;
+
+          case cancelButtonIndex:
+        }
+      },
+    );
+  };
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -199,7 +227,7 @@ export default function TaskBottomSheet({
               <Text style={styles.dateText}>27 Nov</Text>
             </View>
             <View style={styles.separator} />
-            <View style={styles.row}>
+            <TouchableOpacity style={styles.row} onPress={onPressPriority}>
               <View style={styles.iconOuter}>
                 {priority === priorityEnum.none ? (
                   <FlagIconHollow
@@ -216,7 +244,7 @@ export default function TaskBottomSheet({
                 )}
               </View>
               <Text style={styles.dateText}>Priority 1</Text>
-            </View>
+            </TouchableOpacity>
             <View style={styles.separator} />
             <View style={styles.row}>
               <View
@@ -268,6 +296,15 @@ export default function TaskBottomSheet({
           </BottomSheetView>
         </BottomSheetScrollView>
       </View>
+      <ActionSheet
+        ref={this.getActionSheetRef}
+        title={title}
+        message="custom message custom message custom message custom message custom message custom message "
+        options={options}
+        cancelButtonIndex={CANCEL_INDEX}
+        destructiveButtonIndex={DESTRUCTIVE_INDEX}
+        onPress={this.handlePress}
+      />
     </BottomSheet>
   );
 }
