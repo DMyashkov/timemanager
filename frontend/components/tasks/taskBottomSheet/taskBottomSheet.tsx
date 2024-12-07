@@ -15,6 +15,7 @@ import {
   Text,
   Keyboard,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
@@ -29,6 +30,7 @@ import { priorityEnum } from "@/constants/interfaces";
 import { dataIndex } from "@/constants/exampleData";
 import Tag from "@/components/tag/tagComponent";
 import { moduleType } from "@/constants/interfaces";
+import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 
 export default function TaskBottomSheet({
   title = "asksak",
@@ -114,33 +116,30 @@ export default function TaskBottomSheet({
     : dataIndex[tagId].item;
   const itemProject = isTagProject ? dataIndex[tagId].item : null;
 
-  const { showActionSheetWithOptions } = useActionSheet();
-
-  const onPressPriority = () => {
-    const options = ["Delete", "Save", "Cancel"];
-    const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 2;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        destructiveButtonIndex,
-      },
-      (selectedIndex?: number) => {
-        if (selectedIndex === undefined) return;
-        switch (selectedIndex) {
-          case 1:
-            break;
-
-          case destructiveButtonIndex:
-            break;
-
-          case cancelButtonIndex:
-        }
-      },
-    );
-  };
+  const actionItems = [
+    {
+      id: 1,
+      label: "Action Item 1",
+      onPress: () => {},
+    },
+    {
+      id: 2,
+      label: "Action Item 2",
+      onPress: () => {},
+    },
+    {
+      id: 3,
+      label: "Action Item 3",
+      onPress: () => {},
+    },
+    {
+      id: 4,
+      label: "Action Item 4",
+      onPress: () => {},
+    },
+  ];
+  const [actionSheet, setActionSheet] = useState(false);
+  const closeActionSheet = () => setActionSheet(false);
 
   return (
     <BottomSheet
@@ -227,7 +226,10 @@ export default function TaskBottomSheet({
               <Text style={styles.dateText}>27 Nov</Text>
             </View>
             <View style={styles.separator} />
-            <TouchableOpacity style={styles.row} onPress={onPressPriority}>
+            <TouchableOpacity
+              style={styles.row}
+              onPress={() => setActionSheet(true)}
+            >
               <View style={styles.iconOuter}>
                 {priority === priorityEnum.none ? (
                   <FlagIconHollow
@@ -296,15 +298,18 @@ export default function TaskBottomSheet({
           </BottomSheetView>
         </BottomSheetScrollView>
       </View>
-      <ActionSheet
-        ref={this.getActionSheetRef}
-        title={title}
-        message="custom message custom message custom message custom message custom message custom message "
-        options={options}
-        cancelButtonIndex={CANCEL_INDEX}
-        destructiveButtonIndex={DESTRUCTIVE_INDEX}
-        onPress={this.handlePress}
-      />
+      <Modal
+        visible={actionSheet}
+        animationType="slide" // This enables the slide-in animation
+        transparent={true} // Ensures background is transparent
+        onRequestClose={closeActionSheet} // Handles back button press on Android
+        style={{
+          margin: 0,
+          justifyContent: "flex-end",
+        }}
+      >
+        <ActionSheet actionItems={actionItems} onCancel={closeActionSheet} />
+      </Modal>
     </BottomSheet>
   );
 }
