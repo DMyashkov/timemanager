@@ -84,7 +84,10 @@ export default function PickDateCalendar({
 
         <View style={styles.content}>
           <TouchableOpacity
-            onPress={() => handlePickDate(DateStruct.fromDate(new Date()))}
+            onPress={() => {
+              // handlePickDate(DateStruct.fromDate(new Date()));
+              bottomSheetRef.current?.close();
+            }}
             style={styles.row}
             hitSlop={{
               left: 15,
@@ -105,7 +108,17 @@ export default function PickDateCalendar({
           </TouchableOpacity>
           <View style={styles.separator} />
 
-          <View style={styles.row}>
+          <TouchableOpacity
+            onPress={() => {
+              // handlePickDate(DateStruct.fromDate(new Date()));
+              bottomSheetRef.current?.close();
+            }}
+            style={styles.row}
+            hitSlop={{
+              left: 15,
+              right: 15,
+            }}
+          >
             <View style={styles.icon}>
               <Sun
                 fill={theme.color.presets.orange.medium}
@@ -117,10 +130,19 @@ export default function PickDateCalendar({
               <Text style={styles.title}>Tommorow</Text>
               <Text style={styles.dayNameRight}>Sun</Text>
             </View>
-          </View>
+          </TouchableOpacity>
           <View style={styles.separator} />
 
-          <View style={styles.row}>
+          <TouchableOpacity
+            onPress={() => {
+              bottomSheetRef.current?.close();
+            }}
+            style={styles.row}
+            hitSlop={{
+              left: 15,
+              right: 15,
+            }}
+          >
             <View style={styles.icon}>
               <BanIcon
                 fill={theme.color.darkGrey}
@@ -133,7 +155,7 @@ export default function PickDateCalendar({
               <Text style={styles.title}>No Date</Text>
               <Text style={styles.dayNameRight} />
             </View>
-          </View>
+          </TouchableOpacity>
           <View style={styles.separator} />
         </View>
         <View style={styles.calendarContainer}>

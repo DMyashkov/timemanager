@@ -59,7 +59,6 @@ const ExpandedCalendar = forwardRef<ExpandedCalendarRef, { style?: object }>(
     };
 
     const goToDate = (date: DateStruct) => {
-      console.log("goToDate", date);
       const targetMonthIndex = months.findIndex(
         (month) =>
           month.monthStart.year === date.year &&
