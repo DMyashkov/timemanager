@@ -123,7 +123,8 @@ export default function TaskBottomSheet({
     : dataIndex[tagId].item;
   const itemProject = isTagProject ? dataIndex[tagId].item : null;
 
-  const actionItems = actionItemsArray();
+  const [priorityLevel, setPriorityLevel] = useState(4);
+  const actionItems = actionItemsArray(setPriorityLevel);
 
   return (
     <>

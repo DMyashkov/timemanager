@@ -4,9 +4,13 @@ import { useTheme } from "@context/ThemeContext";
 import FlagHollow from "@assets/icons/flag.svg";
 import FlagFull from "@assets/icons/flag-full.svg";
 import ActionItemElementFlag from "@components/basic/actionItemFlag/actionItemFlag";
-import { act } from "react";
+import { Dispatch, SetStateAction, act } from "react";
 
-export const actionItemsArray = (): Array<ActionSheetItem> => {
+export const actionItemsArray = ({
+  setPriority,
+}: {
+  setPriority: Dispatch<SetStateAction<number>>;
+}): Array<ActionSheetItem> => {
   const { theme } = useTheme(); // Must be inside the function to use hooks
 
   return [
