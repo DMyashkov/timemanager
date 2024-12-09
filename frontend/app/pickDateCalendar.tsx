@@ -28,6 +28,8 @@ export default function PickDateCalendar() {
             <Text style={styles.dayNameRight}>Sun</Text>
           </View>
         </View>
+        <View style={styles.separator} />
+
         <View style={styles.row}>
           <View style={styles.icon}>
             <Sun
@@ -41,6 +43,8 @@ export default function PickDateCalendar() {
             <Text style={styles.dayNameRight}>Sun</Text>
           </View>
         </View>
+        <View style={styles.separator} />
+
         <View style={styles.row}>
           <View style={styles.icon}>
             <BanIcon
@@ -55,6 +59,7 @@ export default function PickDateCalendar() {
             <Text style={styles.dayNameRight}></Text>
           </View>
         </View>
+        <View style={styles.separator} />
       </View>
       <View style={styles.calendarContainer}>
         <ExpandedCalendar />

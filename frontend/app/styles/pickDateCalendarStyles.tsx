@@ -20,6 +20,12 @@ export default function useStyles() {
       alignItems: "center",
       justifyContent: "center",
     },
+    separator: {
+      height: 1,
+      width: "100%",
+      backgroundColor: theme.color.lightGrey,
+    },
+
     content: {
       paddingHorizontal: 15,
     },
