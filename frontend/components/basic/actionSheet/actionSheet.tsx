@@ -58,6 +58,8 @@ const ActionSheet = ({
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: "transparent" }}
       backgroundStyle={{ backgroundColor: "transparent" }}
+      enableHandlePanningGesture={false}
+      enableOverDrag={false}
     >
       <BottomSheetView style={styles.modalContent}>
         {actionSheetItems.map((actionItem, index) => (
