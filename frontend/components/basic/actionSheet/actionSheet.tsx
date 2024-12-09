@@ -1,6 +1,12 @@
 // ActionSheet.tsx
 import React, { useCallback } from "react";
-import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableHighlight,
+  View,
+  ViewStyle,
+} from "react-native";
 import PropTypes from "prop-types";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -17,6 +23,8 @@ interface ActionSheetProps {
     id: string | number;
     label: string;
     onPress: () => void;
+    element?: React.ReactElement;
+    contentStyle?: ViewStyle;
   }>;
   onCancel?: () => void;
   actionTextColor?: string;
@@ -70,6 +78,7 @@ const ActionSheet = ({
               index === 0 && styles.firstItem,
               index === actionSheetItems.length - 2 && styles.lastRegularItem,
               index === actionSheetItems.length - 1 && styles.cancelItem,
+              actionItem.contentStyle,
             ]}
             underlayColor={"#f7f7f7"}
             onPress={() => {
@@ -77,21 +86,38 @@ const ActionSheet = ({
               bottomSheetRef.current?.close();
             }}
           >
-            <Text
-              allowFontScaling={false}
-              style={[
-                styles.actionSheetText,
-                actionTextColor && { color: actionTextColor },
-                index === actionSheetItems.length - 1 && styles.cancelText,
-              ]}
-            >
-              {actionItem.label}
-            </Text>
+            {actionItem.element ? (
+              actionItem.element
+            ) : (
+              <Text
+                allowFontScaling={false}
+                style={[
+                  styles.actionSheetText,
+                  actionTextColor && { color: actionTextColor },
+                  index === actionSheetItems.length - 1 && styles.cancelText,
+                ]}
+              >
+                {actionItem.label}
+              </Text>
+            )}
           </TouchableHighlight>
         ))}
       </BottomSheetView>
     </BottomSheet>
   );
+};
+
+const getConditionalStyles = (index: number, total: number): ViewStyle => {
+  if (index === 0) {
+    return styles.firstItem;
+  }
+  if (index === total - 2) {
+    return styles.lastRegularItem;
+  }
+  if (index === total - 1) {
+    return styles.cancelItem;
+  }
+  return {};
 };
 
 const styles = StyleSheet.create({
@@ -120,6 +146,16 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
+  customElementContainer: {
+    // Ensure custom elements have proper padding and alignment
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: BORDER_COLOR,
+    backgroundColor: WHITE,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+
   lastRegularItem: {
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,

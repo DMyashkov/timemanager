@@ -127,6 +127,7 @@ export default function TaskBottomSheet({
       id: 1,
       label: "Action Item 1",
       onPress: () => {},
+      element: <Text>Action Item 1</Text>,
     },
     {
       id: 2,
