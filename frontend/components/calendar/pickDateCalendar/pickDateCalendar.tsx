@@ -62,7 +62,6 @@ export default function PickDateCalendar({
             />
             <SysButton
               text="Done"
-              isRegular={true}
               onPress={() => {
                 bottomSheetRef.current?.close();
               }}
@@ -72,7 +71,6 @@ export default function PickDateCalendar({
           <View style={styles.titleView}>
             <Text style={styles.titleHeader}>Schedule</Text>
           </View>
-
         </View>
         <View style={[styles.separator, {}]} />
 
@@ -95,7 +93,7 @@ export default function PickDateCalendar({
           <View style={styles.row}>
             <View style={styles.icon}>
               <Sun
-                fill={theme.color.presets.yellow.dark}
+                fill={theme.color.presets.orange.medium}
                 height={ICON_SIZE}
                 width={ICON_SIZE}
               />
