@@ -63,6 +63,8 @@ export default function useStyles() {
     },
     leftPartHeader: {
       flexDirection: "row",
+      flex: 1,
+      justifyContent: "center",
       gap: 10,
     },
     goBackButton: {
