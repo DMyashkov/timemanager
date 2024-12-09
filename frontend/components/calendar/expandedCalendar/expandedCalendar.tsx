@@ -67,13 +67,15 @@ const ExpandedCalendar = forwardRef<ExpandedCalendarRef, { style?: object }>(
       );
 
       if (targetMonthIndex !== -1) {
-        setFocusedDate(new DateStruct(date));
+        setFocusedDate((prev) => {
+          setCurrentMonthIndex(targetMonthIndex);
+          return new DateStruct(date);
+        });
         flatListRef.current?.scrollToIndex({
           index: targetMonthIndex,
           animated: true,
           viewPosition: 0.5,
         });
-        setCurrentMonthIndex(targetMonthIndex);
       } else {
         console.warn("Date is outside the range of the generated months");
       }
@@ -192,7 +194,7 @@ function getDaysInMonth(year: number, month: number) {
   return new Date(year, month, 0).getDate();
 }
 
-function MonthView({
+const MonthView = React.memo(function MonthView({
   monthStart,
   focusedDate,
   setFocusedDate,
@@ -239,9 +241,9 @@ function MonthView({
   }
 
   return <View>{rows}</View>;
-}
+});
 
-function DayElement({
+const DayElement = React.memo(function DayElement({
   date,
   currentMonth,
   focusedDate,
@@ -321,4 +323,4 @@ function DayElement({
       </View>
     </TouchableOpacity>
   );
-}
+});
