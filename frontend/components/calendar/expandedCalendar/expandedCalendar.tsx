@@ -20,20 +20,17 @@ export default function ExpandedCalendar({ style = {} }: { style?: object }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
-  // Current date
   const today = DateStruct.fromDate(new Date());
 
-  // We store a large range of months around the current date
-  const CURRENT_MONTH_INDEX = 120;
+  // Start from today's month only
+  const CURRENT_MONTH_INDEX = 0;
 
   const [currentMonthIndex, setCurrentMonthIndex] =
     useState(CURRENT_MONTH_INDEX);
   const flatListRef = useRef<FlatList>(null);
 
-  const months = useMemo(
-    () => generateMonths(today, CURRENT_MONTH_INDEX),
-    [today],
-  );
+  // Generate next 24 months including current
+  const months = useMemo(() => generateMonths(today, 24), [today]);
 
   const [focusedDate, setFocusedDate] = useState<DateStruct>(
     new DateStruct(today),
@@ -135,13 +132,11 @@ export default function ExpandedCalendar({ style = {} }: { style?: object }) {
   );
 }
 
-// Generate a range of months around `today`
-function generateMonths(today: DateStruct, currentIndex: number) {
+// Generate months starting from today going forward `count` months
+function generateMonths(today: DateStruct, count: number) {
   const months = [];
-  const totalMonths = currentIndex * 2;
-  const startMonthDate = shiftMonth(today, -currentIndex);
-  for (let i = 0; i < totalMonths; i++) {
-    const monthDate = shiftMonth(startMonthDate, i);
+  for (let i = 0; i < count; i++) {
+    const monthDate = shiftMonth(today, i);
     months.push({ monthStart: monthDate });
   }
   return months;
@@ -156,13 +151,7 @@ function shiftMonth(date: DateStruct, shift: number): DateStruct {
     newYear += 1;
   }
 
-  while (newMonth < 1) {
-    newMonth += 12;
-    newYear -= 1;
-  }
-
   const daysInMonth = getDaysInMonth(newYear, newMonth);
-  // Adjust the day if it exceeds the number of days in that month
   const newDay = Math.min(date.day, daysInMonth);
 
   return new DateStruct(newYear, newMonth, newDay);
@@ -182,17 +171,13 @@ function MonthView({
   setFocusedDate: (date: DateStruct) => void;
 }) {
   const styles = useStyles();
-
   const firstOfMonth = new DateStruct(monthStart.year, monthStart.month, 1);
   const daysInMonth = getDaysInMonth(monthStart.year, monthStart.month);
 
-  // Monday=0,... Sunday=6
   const startDayOfWeek = firstOfMonth.getDayOfTheWeek();
-  // total days including previous month's days shown in the first row
   const totalDaysNeeded = daysInMonth + startDayOfWeek;
-  const rowsNeeded = Math.ceil(totalDaysNeeded / 7); // between 4 and 6 typically
+  const rowsNeeded = Math.ceil(totalDaysNeeded / 7);
 
-  // The first date displayed in the grid is `firstOfMonth - startDayOfWeek` days
   const monthGridStart = DateStruct.addDays(firstOfMonth, -startDayOfWeek);
 
   const totalDaysToShow = rowsNeeded * 7;
@@ -240,35 +225,40 @@ function DayElement({
   const { theme } = useTheme();
 
   const today = new Date();
-  const isToday =
-    date.day === today.getDate() &&
-    date.month === today.getMonth() + 1 &&
-    date.year === today.getFullYear();
+  const todayStruct = DateStruct.fromDate(today);
 
+  const isToday =
+    date.year === todayStruct.year &&
+    date.month === todayStruct.month &&
+    date.day === todayStruct.day;
+
+  const dateObj = new Date(date.year, date.month - 1, date.day);
+  const todayObj = new Date(
+    todayStruct.year,
+    todayStruct.month - 1,
+    todayStruct.day,
+  );
+
+  const isBeforeToday = dateObj < todayObj;
   const isFocused = focusedDate.equals(date);
   const isCurrentMonth = date.month === currentMonth;
 
-  const dateObj = new Date(date.year, date.month - 1, date.day);
-  const isBeforeToday =
-    dateObj < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const isAfterToday = !isToday && !isBeforeToday;
+  // Now, both today and any future day is selectable and active
+  // Past days (strictly before today) are inactive
+  let clickable = false;
+  let textColor: string = theme.color.darkGrey; // default for past days
 
-  let textColor: string;
-  if (isFocused) {
-    textColor = theme.color.white;
-  } else if (isAfterToday) {
-    textColor = theme.color.darkGrey;
-  } else {
-    textColor = theme.color.black;
+  if (isToday || dateObj > todayObj) {
+    clickable = true;
+    textColor = isFocused ? theme.color.white : theme.color.black;
   }
 
-  // Make days outside of the current month more transparent
+  // Make days outside of the current month slightly transparent
   const dayOpacity = isCurrentMonth ? 1 : 0.3;
 
   const onPress = () => {
-    const todayStruct = DateStruct.fromDate(new Date());
-    const selectedDate = new DateStruct(date);
-    if (selectedDate.isSameOrBefore(todayStruct)) {
+    if (clickable) {
+      const selectedDate = new DateStruct(date);
       setFocusedDate(selectedDate);
     }
   };
@@ -279,7 +269,8 @@ function DayElement({
         style={[
           styles.outerDateDay,
           {
-            backgroundColor: isFocused ? theme.color.red : "transparent",
+            backgroundColor:
+              isFocused && clickable ? theme.color.red : "transparent",
             opacity: dayOpacity,
           },
         ]}
@@ -289,7 +280,8 @@ function DayElement({
             styles.textDay,
             {
               color: textColor,
-              fontFamily: theme.font[isFocused ? "medium" : "regular"],
+              fontFamily:
+                theme.font[isFocused && clickable ? "medium" : "regular"],
             },
           ]}
         >
