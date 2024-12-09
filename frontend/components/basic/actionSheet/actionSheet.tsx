@@ -93,13 +93,10 @@ const ActionSheet = ({
 };
 
 const styles = StyleSheet.create({
-  handleIndicator: {
-    backgroundColor: "gray",
-  },
   modalContent: {
     backgroundColor: "transparent",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   actionSheetText: {
     fontSize: 18,
