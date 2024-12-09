@@ -72,6 +72,14 @@ export default function Layout() {
             }}
           />
           <Stack.Screen
+            name="pickDateCalendar"
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+          />
+
+          <Stack.Screen
             name="login"
             options={{
               headerShown: false,

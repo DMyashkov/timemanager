@@ -93,6 +93,7 @@ export default function useStyles() {
       margin: 1,
     },
     row: {
+      width: "100%",
       alignItems: "center",
       flexDirection: "row",
       gap: 12,
