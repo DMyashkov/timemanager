@@ -1,6 +1,12 @@
-import PropTypes from "prop-types";
-import React from "react";
+// ActionSheet.tsx
+import React, { useCallback } from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
+import PropTypes from "prop-types";
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
 
 const PRIMARY_COLOR = "rgb(0,98,255)";
 const WHITE = "#ffffff";
@@ -14,12 +20,14 @@ interface ActionSheetProps {
   }>;
   onCancel?: () => void;
   actionTextColor?: string;
+  bottomSheetRef: React.RefObject<BottomSheet>;
 }
 
 const ActionSheet = ({
-  actionItems = [], // Default value here
-  onCancel = () => {}, // Default value here
-  actionTextColor = "#000", // Default value here
+  actionItems = [],
+  onCancel = () => {},
+  actionTextColor = "#000",
+  bottomSheetRef,
 }: ActionSheetProps) => {
   const actionSheetItems = [
     ...actionItems,
@@ -29,80 +37,102 @@ const ActionSheet = ({
       onPress: onCancel,
     },
   ];
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.4}
+      />
+    ),
+    [],
+  );
+
   return (
-    <View style={styles.modalContent}>
-      {actionSheetItems.map((actionItem, index) => {
-        return (
+    <BottomSheet
+      ref={bottomSheetRef}
+      index={-1}
+      backdropComponent={renderBackdrop}
+      enableContentPanningGesture={true}
+      handleIndicatorStyle={{ backgroundColor: "transparent" }}
+      backgroundStyle={{ backgroundColor: "transparent" }}
+    >
+      <BottomSheetView style={styles.modalContent}>
+        {actionSheetItems.map((actionItem, index) => (
           <TouchableHighlight
+            key={actionItem.id}
             style={[
               styles.actionSheetView,
-              index === 0 && {
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-              },
-              index === actionSheetItems.length - 2 && {
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-              },
-              index === actionSheetItems.length - 1 && {
-                borderBottomWidth: 0,
-                backgroundColor: WHITE,
-                marginTop: 8,
-                borderTopLeftRadius: 12,
-                borderTopRightRadius: 12,
-                borderBottomLeftRadius: 12,
-                borderBottomRightRadius: 12,
-              },
+              index === 0 && styles.firstItem,
+              index === actionSheetItems.length - 2 && styles.lastRegularItem,
+              index === actionSheetItems.length - 1 && styles.cancelItem,
             ]}
             underlayColor={"#f7f7f7"}
-            key={index}
-            onPress={actionItem.onPress}
+            onPress={() => {
+              actionItem.onPress();
+              bottomSheetRef.current?.close();
+            }}
           >
             <Text
               allowFontScaling={false}
               style={[
                 styles.actionSheetText,
-                actionTextColor && {
-                  color: actionTextColor,
-                },
-                index === actionSheetItems.length - 1 && {
-                  color: "#fa1616",
-                },
+                actionTextColor && { color: actionTextColor },
+                index === actionSheetItems.length - 1 && styles.cancelText,
               ]}
             >
               {actionItem.label}
             </Text>
           </TouchableHighlight>
-        );
-      })}
-    </View>
+        ))}
+      </BottomSheetView>
+    </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
+  handleIndicator: {
+    backgroundColor: "gray",
+  },
   modalContent: {
+    backgroundColor: "transparent",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  actionSheetText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  cancelText: {
+    color: "#fa1616",
+  },
+  actionSheetView: {
+    backgroundColor: WHITE,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: BORDER_COLOR,
+  },
+  firstItem: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  lastRegularItem: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  cancelItem: {
+    borderBottomWidth: 0,
+    backgroundColor: WHITE,
+    marginTop: 8,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
-    marginLeft: 8,
-    marginRight: 8,
-    marginBottom: 20,
-  },
-  actionSheetText: {
-    fontSize: 18,
-    color: PRIMARY_COLOR,
-  },
-  actionSheetView: {
-    backgroundColor: WHITE,
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 16,
-    paddingBottom: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: BORDER_COLOR,
   },
 });
 
@@ -116,6 +146,7 @@ ActionSheet.propTypes = {
   ).isRequired,
   onCancel: PropTypes.func,
   actionTextColor: PropTypes.string,
+  bottomSheetRef: PropTypes.object.isRequired,
 };
 
 export default ActionSheet;

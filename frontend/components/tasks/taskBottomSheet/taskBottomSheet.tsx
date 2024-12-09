@@ -55,6 +55,12 @@ export default function TaskBottomSheet({
 }) {
   const handleSheetChanges = useCallback((index: number) => {}, []);
 
+  const actionSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
+
+  const openActionSheet = () => {
+    actionSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
+  };
+
   const styles = useStyles();
   const { theme } = useTheme();
 
@@ -138,179 +144,172 @@ export default function TaskBottomSheet({
       onPress: () => {},
     },
   ];
-  const [actionSheet, setActionSheet] = useState(false);
-  const closeActionSheet = () => setActionSheet(false);
 
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      onChange={handleSheetChanges}
-      enableDynamicSizing={false}
-      snapPoints={["50%", "90%"]}
-      enablePanDownToClose={true}
-      keyboardBehavior="extend"
-      keyboardBlurBehavior="restore"
-      enableContentPanningGesture={true}
-      handleIndicatorStyle={{ backgroundColor: "transparent" }}
-      backdropComponent={renderBackdrop}
-      index={-1}
-    >
-      <View style={styles.outer}>
-        <BottomSheetScrollView
-          style={styles.contentContainer}
-          contentContainerStyle={{
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-          }}
-        >
-          <BottomSheetView style={styles.titleContainer}>
-            <View style={styles.firstRow}>
-              <TouchableOpacity
-                onPress={() => {
-                  setCheckMark(!checkMark);
-                }}
-                activeOpacity={1}
-              >
-                {!checkMark ? (
-                  <View style={[styles.checkMark, colorCheckmarkStyles]} />
-                ) : (
-                  <Checkmark
-                    fill={theme.color.darkGrey}
-                    height={22.3}
-                    width={22.3}
-                  />
-                )}
-              </TouchableOpacity>
-              <BottomSheetTextInput
-                placeholder="Task Name"
-                style={[styles.titleInput]}
-                placeholderTextColor={theme.color.darkGrey}
-                selectionColor={theme.color.red}
-                keyboardType="default"
-                value={title}
-                onChangeText={setTitle}
-              />
-            </View>
-            <View style={styles.row}>
-              <View style={styles.iconOuter}>
-                <Paragraph
-                  fill={theme.color.darkerDarkGrey}
-                  height={20}
-                  width={20}
-                />
-              </View>
-              <View style={styles.wrapDescription}>
+    <>
+      <BottomSheet
+        ref={bottomSheetRef}
+        onChange={handleSheetChanges}
+        enableDynamicSizing={false}
+        snapPoints={["50%", "90%"]}
+        enablePanDownToClose={true}
+        keyboardBehavior="extend"
+        keyboardBlurBehavior="restore"
+        enableContentPanningGesture={true}
+        handleIndicatorStyle={{ backgroundColor: "transparent" }}
+        backdropComponent={renderBackdrop}
+        index={-1}
+      >
+        <View style={styles.outer}>
+          <BottomSheetScrollView
+            style={styles.contentContainer}
+            contentContainerStyle={{
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+            }}
+          >
+            <BottomSheetView style={styles.titleContainer}>
+              <View style={styles.firstRow}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setCheckMark(!checkMark);
+                  }}
+                  activeOpacity={1}
+                >
+                  {!checkMark ? (
+                    <View style={[styles.checkMark, colorCheckmarkStyles]} />
+                  ) : (
+                    <Checkmark
+                      fill={theme.color.darkGrey}
+                      height={22.3}
+                      width={22.3}
+                    />
+                  )}
+                </TouchableOpacity>
                 <BottomSheetTextInput
-                  placeholder="Description"
-                  style={styles.description}
+                  placeholder="Task Name"
+                  style={[styles.titleInput]}
                   placeholderTextColor={theme.color.darkGrey}
                   selectionColor={theme.color.red}
                   keyboardType="default"
-                  multiline={true}
-                  scrollEnabled={false}
-                  value={description}
-                  onChangeText={setDescription}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  value={title}
+                  onChangeText={setTitle}
                 />
               </View>
-            </View>
-            <View style={styles.separator} />
-            <View style={styles.row}>
-              <View style={styles.iconOuter}>
-                <CalendarIcon
-                  fill={theme.color.darkRed}
-                  height={20}
-                  width={20}
-                />
-              </View>
-              <Text style={styles.dateText}>27 Nov</Text>
-            </View>
-            <View style={styles.separator} />
-            <TouchableOpacity
-              style={styles.row}
-              onPress={() => setActionSheet(true)}
-            >
-              <View style={styles.iconOuter}>
-                {priority === priorityEnum.none ? (
-                  <FlagIconHollow
+              <View style={styles.row}>
+                <View style={styles.iconOuter}>
+                  <Paragraph
                     fill={theme.color.darkerDarkGrey}
                     height={20}
                     width={20}
                   />
-                ) : (
-                  <FlagIconFull
-                    fill={colorCheckmarkStyles.borderColor}
+                </View>
+                <View style={styles.wrapDescription}>
+                  <BottomSheetTextInput
+                    placeholder="Description"
+                    style={styles.description}
+                    placeholderTextColor={theme.color.darkGrey}
+                    selectionColor={theme.color.red}
+                    keyboardType="default"
+                    multiline={true}
+                    scrollEnabled={false}
+                    value={description}
+                    onChangeText={setDescription}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  />
+                </View>
+              </View>
+              <View style={styles.separator} />
+              <View style={styles.row}>
+                <View style={styles.iconOuter}>
+                  <CalendarIcon
+                    fill={theme.color.darkRed}
                     height={20}
                     width={20}
                   />
-                )}
+                </View>
+                <Text style={styles.dateText}>27 Nov</Text>
               </View>
-              <Text style={styles.dateText}>Priority 1</Text>
-            </TouchableOpacity>
-            <View style={styles.separator} />
-            <View style={styles.row}>
-              <View
-                style={[
-                  styles.iconOuter,
-                  {
-                    marginTop: 5,
-                  },
-                ]}
+              <View style={styles.separator} />
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => openActionSheet()}
               >
-                <WorkplaceIcon
-                  fill={
-                    theme.color.presets[dataIndex[tagId].item.colorPreset]
-                      .medium
-                  }
-                  height={24}
-                  width={24}
-                />
-              </View>
-              <View style={styles.tagContainer}>
-                {itemActivity && (
-                  <Tag
-                    text={itemActivity.title}
-                    desiredHeight={31}
-                    textSize={theme.fontSize.small}
-                    colorPallete={theme.color.presets[itemActivity.colorPreset]}
+                <View style={styles.iconOuter}>
+                  {priority === priorityEnum.none ? (
+                    <FlagIconHollow
+                      fill={theme.color.darkerDarkGrey}
+                      height={20}
+                      width={20}
+                    />
+                  ) : (
+                    <FlagIconFull
+                      fill={colorCheckmarkStyles.borderColor}
+                      height={20}
+                      width={20}
+                    />
+                  )}
+                </View>
+                <Text style={styles.dateText}>Priority 1</Text>
+              </TouchableOpacity>
+              <View style={styles.separator} />
+              <View style={styles.row}>
+                <View
+                  style={[
+                    styles.iconOuter,
+                    {
+                      marginTop: 5,
+                    },
+                  ]}
+                >
+                  <WorkplaceIcon
+                    fill={
+                      theme.color.presets[dataIndex[tagId].item.colorPreset]
+                        .medium
+                    }
+                    height={24}
+                    width={24}
                   />
-                )}
-                {itemProject && (
-                  <Tag
-                    text={itemProject.title}
-                    isProject={true}
-                    desiredHeight={31}
-                    textSize={theme.fontSize.small}
-                    colorPallete={theme.color.presets[itemProject.colorPreset]}
-                  />
-                )}
+                </View>
+                <View style={styles.tagContainer}>
+                  {itemActivity && (
+                    <Tag
+                      text={itemActivity.title}
+                      desiredHeight={31}
+                      textSize={theme.fontSize.small}
+                      colorPallete={
+                        theme.color.presets[itemActivity.colorPreset]
+                      }
+                    />
+                  )}
+                  {itemProject && (
+                    <Tag
+                      text={itemProject.title}
+                      isProject={true}
+                      desiredHeight={31}
+                      textSize={theme.fontSize.small}
+                      colorPallete={
+                        theme.color.presets[itemProject.colorPreset]
+                      }
+                    />
+                  )}
+                </View>
               </View>
-            </View>
-            <ButtonInsideFooterComponent
-              Icon={TwoArrows}
-              text="Change Activity / Project"
-              color={theme.color.darkGrey}
-              style={{
-                marginTop: 12,
-              }}
-            />
-            <View style={styles.bigSeparator} />
-          </BottomSheetView>
-        </BottomSheetScrollView>
-      </View>
-      <Modal
-        visible={actionSheet}
-        animationType="slide" // This enables the slide-in animation
-        transparent={true} // Ensures background is transparent
-        onRequestClose={closeActionSheet} // Handles back button press on Android
-        style={{
-          margin: 0,
-          justifyContent: "flex-end",
-        }}
-      >
-        <ActionSheet actionItems={actionItems} onCancel={closeActionSheet} />
-      </Modal>
-    </BottomSheet>
+              <ButtonInsideFooterComponent
+                Icon={TwoArrows}
+                text="Change Activity / Project"
+                color={theme.color.darkGrey}
+                style={{
+                  marginTop: 12,
+                }}
+              />
+              <View style={styles.bigSeparator} />
+            </BottomSheetView>
+          </BottomSheetScrollView>
+        </View>
+      </BottomSheet>
+      <ActionSheet bottomSheetRef={actionSheetRef} actionItems={actionItems} />
+    </>
   );
 }
 
