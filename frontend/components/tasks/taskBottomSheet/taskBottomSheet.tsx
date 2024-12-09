@@ -124,7 +124,11 @@ export default function TaskBottomSheet({
   const itemProject = isTagProject ? dataIndex[tagId].item : null;
 
   const [priorityLevel, setPriorityLevel] = useState(4);
-  const actionItems = actionItemsArray(setPriorityLevel);
+  const actionItems = actionItemsArray({
+    setPriority: (number: number) => {
+      setPriorityLevel(number);
+    },
+  });
 
   return (
     <>
@@ -213,10 +217,10 @@ export default function TaskBottomSheet({
               </View>
               <View style={styles.separator} />
               <TouchableOpacity
-                style={styles.row}
+                style={[styles.row]}
                 onPress={() => openActionSheet()}
               >
-                <View style={styles.iconOuter}>
+                <View style={[styles.iconOuter]}>
                   {priority === priorityEnum.none ? (
                     <FlagIconHollow
                       fill={theme.color.darkerDarkGrey}
@@ -281,7 +285,7 @@ export default function TaskBottomSheet({
                 text="Change Activity / Project"
                 color={theme.color.darkGrey}
                 style={{
-                  marginTop: 12,
+                  marginTop: -2,
                 }}
               />
               <View style={styles.bigSeparator} />

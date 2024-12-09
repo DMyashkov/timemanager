@@ -33,7 +33,7 @@ export default function useStyles() {
       fontFamily: theme.font.regular,
       color: theme.color.black,
       textAlignVertical: "top",
-      marginTop: -5 - HIT_SLOP_TEXT_INPUT / 2,
+      marginTop: -HIT_SLOP_TEXT_INPUT / 2,
       paddingTop: HIT_SLOP_TEXT_INPUT / 2,
       marginBottom: -HIT_SLOP_TEXT_INPUT,
       paddingBottom: HIT_SLOP_TEXT_INPUT,
@@ -82,7 +82,6 @@ export default function useStyles() {
       flexDirection: "row",
       gap: 7,
       alignItems: "center",
-      marginBottom: 20,
     },
     checkMark: {
       height: 23,
@@ -97,6 +96,7 @@ export default function useStyles() {
       alignItems: "center",
       flexDirection: "row",
       gap: 12,
+      paddingVertical: 13,
     },
     iconOuter: {
       width: 24,
@@ -111,8 +111,6 @@ export default function useStyles() {
       height: 1,
       width: "100%",
       backgroundColor: theme.color.lightGrey,
-      marginTop: 13,
-      marginBottom: 13,
     },
     dateText: {
       fontSize: theme.fontSize.mediumSmall,

@@ -9,7 +9,7 @@ import { Dispatch, SetStateAction, act } from "react";
 export const actionItemsArray = ({
   setPriority,
 }: {
-  setPriority: Dispatch<SetStateAction<number>>;
+  setPriority: (number: number) => void;
 }): Array<ActionSheetItem> => {
   const { theme } = useTheme(); // Must be inside the function to use hooks
 
