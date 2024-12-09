@@ -78,15 +78,6 @@ export default function ExpandedCalendar({ style = {} }: { style?: object }) {
           <Text style={styles.leftHeaderText}>
             {`${monthNames[focusedMonth.month - 1]} ${focusedMonth.year}`}
           </Text>
-          {/* {shouldGoBackBeVisible && ( */}
-          {/*   <TouchableOpacity */}
-          {/*     style={styles.goBackButton} */}
-          {/*     onPress={goBackToToday} */}
-          {/*     activeOpacity={1} */}
-          {/*   > */}
-          {/*     <Text style={styles.goBackText}>{today.day}</Text> */}
-          {/*   </TouchableOpacity> */}
-          {/* )} */}
         </View>
       </View>
 

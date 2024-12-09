@@ -6,7 +6,7 @@ export default function useStyles() {
 
   return StyleSheet.create({
     outer: {
-      gap: 5,
+      gap: 10,
       marginTop: 16,
     },
     week: {

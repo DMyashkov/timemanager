@@ -12,6 +12,8 @@ import BottomSheet, {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import { useCallback } from "react";
+import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
+import { router } from "expo-router";
 
 export default function PickDateCalendar({
   bottomSheetRef,
@@ -48,6 +50,32 @@ export default function PickDateCalendar({
       index={-1} // Bottom sheet is hidden initially
     >
       <BottomSheetView style={styles.container}>
+        <View style={[styles.headerButtonContainer]}>
+          <View style={styles.innerButtonsHeader}>
+            <SysButton
+              text="Cancel"
+              isRegular={true}
+              onPress={() => {
+                bottomSheetRef.current?.close();
+              }}
+              isRed={true}
+            />
+            <SysButton
+              text="Done"
+              isRegular={true}
+              onPress={() => {
+                bottomSheetRef.current?.close();
+              }}
+              isRed={true}
+            />
+          </View>
+          <View style={styles.titleView}>
+            <Text style={styles.titleHeader}>Schedule</Text>
+          </View>
+
+        </View>
+        <View style={[styles.separator, {}]} />
+
         <View style={styles.content}>
           <View style={styles.row}>
             <View style={styles.icon}>

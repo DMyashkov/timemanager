@@ -6,14 +6,16 @@ interface buttonProps {
   text: string;
   onPress?: () => void;
   isRed?: boolean;
+  isRegular?: boolean;
 }
 
 export default function SysButton({
   text,
   onPress = () => {},
   isRed = false,
+  isRegular = false,
 }: buttonProps) {
-  const styles = useStyles();
+  const styles = useStyles(isRegular);
   const { theme } = useTheme();
 
   return (
