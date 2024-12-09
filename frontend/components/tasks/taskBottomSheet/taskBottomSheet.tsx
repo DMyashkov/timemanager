@@ -31,6 +31,7 @@ import { dataIndex } from "@/constants/exampleData";
 import Tag from "@/components/tag/tagComponent";
 import { moduleType } from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
+import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
 
 export default function TaskBottomSheet({
   title = "asksak",
@@ -122,29 +123,7 @@ export default function TaskBottomSheet({
     : dataIndex[tagId].item;
   const itemProject = isTagProject ? dataIndex[tagId].item : null;
 
-  const actionItems = [
-    {
-      id: 1,
-      label: "Action Item 1",
-      onPress: () => {},
-      element: <Text>Action Item 1</Text>,
-    },
-    {
-      id: 2,
-      label: "Action Item 2",
-      onPress: () => {},
-    },
-    {
-      id: 3,
-      label: "Action Item 3",
-      onPress: () => {},
-    },
-    {
-      id: 4,
-      label: "Action Item 4",
-      onPress: () => {},
-    },
-  ];
+  const actionItems = actionItemsArray();
 
   return (
     <>
@@ -309,7 +288,14 @@ export default function TaskBottomSheet({
           </BottomSheetScrollView>
         </View>
       </BottomSheet>
-      <ActionSheet bottomSheetRef={actionSheetRef} actionItems={actionItems} />
+      <ActionSheet
+        bottomSheetRef={actionSheetRef}
+        actionItems={actionItems}
+        cancelTextStyle={{
+          fontFamily: theme.font.medium,
+          color: theme.color.black,
+        }}
+      />
     </>
   );
 }

@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 import {
   StyleSheet,
   Text,
+  TextStyle,
   TouchableHighlight,
   View,
   ViewStyle,
@@ -18,17 +19,20 @@ const PRIMARY_COLOR = "rgb(0,98,255)";
 const WHITE = "#ffffff";
 const BORDER_COLOR = "#DBDBDB";
 
-interface ActionSheetProps {
-  actionItems: Array<{
-    id: string | number;
-    label: string;
-    onPress: () => void;
-    element?: React.ReactElement;
-    contentStyle?: ViewStyle;
-  }>;
+export interface ActionSheetItem {
+  id: string | number;
+  label: string;
+  onPress: () => void;
+  element?: React.ReactElement;
+  contentStyle?: ViewStyle;
+}
+
+export interface ActionSheetProps {
+  actionItems: Array<ActionSheetItem>;
   onCancel?: () => void;
   actionTextColor?: string;
   bottomSheetRef: React.RefObject<BottomSheet>;
+  cancelTextStyle?: TextStyle;
 }
 
 const ActionSheet = ({
@@ -36,6 +40,7 @@ const ActionSheet = ({
   onCancel = () => {},
   actionTextColor = "#000",
   bottomSheetRef,
+  cancelTextStyle,
 }: ActionSheetProps) => {
   const actionSheetItems = [
     ...actionItems,
@@ -94,7 +99,10 @@ const ActionSheet = ({
                 style={[
                   styles.actionSheetText,
                   actionTextColor && { color: actionTextColor },
-                  index === actionSheetItems.length - 1 && styles.cancelText,
+                  index === actionSheetItems.length - 1 && [
+                    styles.cancelText,
+                    cancelTextStyle,
+                  ],
                 ]}
               >
                 {actionItem.label}
@@ -141,6 +149,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: BORDER_COLOR,
+    height: 54.5,
   },
   firstItem: {
     borderTopLeftRadius: 12,
