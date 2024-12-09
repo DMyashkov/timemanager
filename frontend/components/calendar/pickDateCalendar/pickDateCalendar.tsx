@@ -1,8 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ExpandedCalendar from "@/components/calendar/expandedCalendar/expandedCalendar";
+import ExpandedCalendar, {
+  ExpandedCalendarRef,
+} from "@/components/calendar/expandedCalendar/expandedCalendar";
 import CalendarIcon from "@assets/icons/calendar.svg";
 import Sun from "@assets/icons/sun.svg";
 import BanIcon from "@assets/icons/ban.svg";
@@ -11,9 +13,10 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { router } from "expo-router";
+import { DateStruct } from "@/utils/dateTimeSession";
 
 export default function PickDateCalendar({
   bottomSheetRef,
@@ -23,6 +26,10 @@ export default function PickDateCalendar({
   const styles = useStyles();
   const { theme } = useTheme();
   const ICON_SIZE = 22;
+  const calendarRef = useRef<ExpandedCalendarRef>(null);
+  const handlePickDate = (date: DateStruct) => {
+    calendarRef.current?.goToDate(date);
+  };
 
   // Custom backdrop with dimmed effect
   const renderBackdrop = useCallback(
@@ -40,6 +47,7 @@ export default function PickDateCalendar({
     ),
     [],
   );
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -75,7 +83,14 @@ export default function PickDateCalendar({
         <View style={[styles.separator, {}]} />
 
         <View style={styles.content}>
-          <View style={styles.row}>
+          <TouchableOpacity
+            onPress={() => handlePickDate(DateStruct.fromDate(new Date()))}
+            style={styles.row}
+            hitSlop={{
+              left: 15,
+              right: 15,
+            }}
+          >
             <View style={styles.icon}>
               <CalendarIcon
                 fill={theme.color.darkRed}
@@ -87,7 +102,7 @@ export default function PickDateCalendar({
               <Text style={styles.title}>Today</Text>
               <Text style={styles.dayNameRight}>Sun</Text>
             </View>
-          </View>
+          </TouchableOpacity>
           <View style={styles.separator} />
 
           <View style={styles.row}>
@@ -122,7 +137,7 @@ export default function PickDateCalendar({
           <View style={styles.separator} />
         </View>
         <View style={styles.calendarContainer}>
-          <ExpandedCalendar />
+          <ExpandedCalendar ref={calendarRef} />
         </View>
       </BottomSheetView>
     </BottomSheet>

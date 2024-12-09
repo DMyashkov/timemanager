@@ -1,6 +1,13 @@
 // expandedCalendar.tsx
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import {
   View,
   Text,
@@ -16,112 +23,145 @@ import { DateStruct } from "@utils/dateTimeSession";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
-export default function ExpandedCalendar({ style = {} }: { style?: object }) {
-  const styles = useStyles();
-  const { theme } = useTheme();
-
-  const today = DateStruct.fromDate(new Date());
-
-  // Start from today's month only
-  const CURRENT_MONTH_INDEX = 0;
-
-  const [currentMonthIndex, setCurrentMonthIndex] =
-    useState(CURRENT_MONTH_INDEX);
-  const flatListRef = useRef<FlatList>(null);
-
-  // Generate next 24 months including current
-  const months = useMemo(() => generateMonths(today, 24), [today]);
-
-  const [focusedDate, setFocusedDate] = useState<DateStruct>(
-    new DateStruct(today),
-  );
-  const focusedMonth = months[currentMonthIndex]?.monthStart || today;
-
-  const goBackToToday = () => {
-    setFocusedDate(new DateStruct(today));
-    flatListRef.current?.scrollToIndex({
-      index: CURRENT_MONTH_INDEX,
-      animated: true,
-      viewPosition: 0.5,
-    });
-  };
-
-  const shouldGoBackBeVisible = !focusedDate.equals(today);
-
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const newIndex = Math.round(offsetX / SCREEN_WIDTH);
-    if (newIndex !== currentMonthIndex) {
-      setCurrentMonthIndex(newIndex);
-    }
-  };
-
-  return (
-    <View style={[styles.outer, style]}>
-      <View style={styles.header}>
-        <View style={styles.leftPartHeader}>
-          <Text style={styles.leftHeaderText}>
-            {`${monthNames[focusedMonth.month - 1]} ${focusedMonth.year}`}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.week}>
-        {["M", "T", "W", "T", "F", "S", "S"].map((dayName, index) => (
-          <View key={`day-name-${dayName}-${index}`} style={styles.dayName}>
-            <Text style={styles.dayNameText}>{dayName}</Text>
-          </View>
-        ))}
-      </View>
-
-      <FlatList
-        ref={flatListRef}
-        data={months}
-        keyExtractor={(item) => item.monthStart.toString()}
-        horizontal
-        pagingEnabled={false}
-        snapToAlignment="center"
-        snapToInterval={SCREEN_WIDTH}
-        decelerationRate="fast"
-        showsHorizontalScrollIndicator={false}
-        initialScrollIndex={CURRENT_MONTH_INDEX}
-        removeClippedSubviews={true}
-        windowSize={2}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        getItemLayout={(data, index) => ({
-          length: SCREEN_WIDTH,
-          offset: SCREEN_WIDTH * index,
-          index,
-        })}
-        renderItem={({ item }) => (
-          <View style={{ width: SCREEN_WIDTH }}>
-            <MonthView
-              monthStart={item.monthStart}
-              focusedDate={focusedDate}
-              setFocusedDate={setFocusedDate}
-            />
-          </View>
-        )}
-      />
-    </View>
-  );
+export interface ExpandedCalendarRef {
+  goToDate: (date: DateStruct) => void;
 }
+
+const ExpandedCalendar = forwardRef<ExpandedCalendarRef, { style?: object }>(
+  ({ style = {} }: { style?: object }, ref) => {
+    const styles = useStyles();
+    const { theme } = useTheme();
+
+    const today = DateStruct.fromDate(new Date());
+
+    // Start from today's month only
+    const CURRENT_MONTH_INDEX = 0;
+
+    const [currentMonthIndex, setCurrentMonthIndex] =
+      useState(CURRENT_MONTH_INDEX);
+    const flatListRef = useRef<FlatList>(null);
+
+    // Generate next 24 months including current
+    const months = useMemo(() => generateMonths(today, 24), [today]);
+
+    const [focusedDate, setFocusedDate] = useState<DateStruct>(
+      new DateStruct(today),
+    );
+    const focusedMonth = months[currentMonthIndex]?.monthStart || today;
+
+    const goBackToToday = () => {
+      setFocusedDate(new DateStruct(today));
+      flatListRef.current?.scrollToIndex({
+        index: CURRENT_MONTH_INDEX,
+        animated: true,
+        viewPosition: 0.5,
+      });
+    };
+
+    const goToDate = (date: DateStruct) => {
+      console.log("goToDate", date);
+      const targetMonthIndex = months.findIndex(
+        (month) =>
+          month.monthStart.year === date.year &&
+          month.monthStart.month === date.month,
+      );
+
+      if (targetMonthIndex !== -1) {
+        setFocusedDate(new DateStruct(date));
+        flatListRef.current?.scrollToIndex({
+          index: targetMonthIndex,
+          animated: true,
+          viewPosition: 0.5,
+        });
+        setCurrentMonthIndex(targetMonthIndex);
+      } else {
+        console.warn("Date is outside the range of the generated months");
+      }
+    };
+
+    const shouldGoBackBeVisible = !focusedDate.equals(today);
+
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetX = event.nativeEvent.contentOffset.x;
+      const newIndex = Math.round(offsetX / SCREEN_WIDTH);
+      if (newIndex !== currentMonthIndex) {
+        setCurrentMonthIndex(newIndex);
+      }
+    };
+
+    useImperativeHandle(ref, () => ({
+      goToDate,
+    }));
+
+    return (
+      <View style={[styles.outer, style]}>
+        <View style={styles.header}>
+          <View style={styles.leftPartHeader}>
+            <Text style={styles.leftHeaderText}>
+              {`${monthNames[focusedMonth.month - 1]} ${focusedMonth.year}`}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.week}>
+          {["M", "T", "W", "T", "F", "S", "S"].map((dayName, index) => (
+            <View key={`day-name-${dayName}-${index}`} style={styles.dayName}>
+              <Text style={styles.dayNameText}>{dayName}</Text>
+            </View>
+          ))}
+        </View>
+
+        <FlatList
+          ref={flatListRef}
+          data={months}
+          keyExtractor={(item) => item.monthStart.toString()}
+          horizontal
+          pagingEnabled={false}
+          snapToAlignment="center"
+          snapToInterval={SCREEN_WIDTH}
+          decelerationRate="fast"
+          showsHorizontalScrollIndicator={false}
+          initialScrollIndex={CURRENT_MONTH_INDEX}
+          removeClippedSubviews={true}
+          windowSize={2}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          getItemLayout={(data, index) => ({
+            length: SCREEN_WIDTH,
+            offset: SCREEN_WIDTH * index,
+            index,
+          })}
+          renderItem={({ item }) => (
+            <View style={{ width: SCREEN_WIDTH }}>
+              <MonthView
+                monthStart={item.monthStart}
+                focusedDate={focusedDate}
+                setFocusedDate={setFocusedDate}
+              />
+            </View>
+          )}
+        />
+      </View>
+    );
+  },
+);
+
+export default ExpandedCalendar;
 
 // Generate months starting from today going forward `count` months
 function generateMonths(today: DateStruct, count: number) {
