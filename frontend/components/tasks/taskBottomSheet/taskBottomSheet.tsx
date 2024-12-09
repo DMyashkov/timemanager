@@ -16,6 +16,7 @@ import {
   Keyboard,
   TouchableOpacity,
   Modal,
+  Touchable,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
@@ -32,6 +33,7 @@ import Tag from "@/components/tag/tagComponent";
 import { moduleType } from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
+import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
 
 export default function TaskBottomSheet({
   title = "asksak",
@@ -62,6 +64,11 @@ export default function TaskBottomSheet({
     actionSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
+  const calendarSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
+  const openCalendarSheet = () => {
+    calendarSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
+  };
+
   const styles = useStyles();
   const { theme } = useTheme();
 
@@ -82,6 +89,7 @@ export default function TaskBottomSheet({
     ),
     [],
   );
+
   interface ColorCheckmarkStyles {
     backgroundColor: string;
     borderColor: string;
@@ -205,7 +213,12 @@ export default function TaskBottomSheet({
                 </View>
               </View>
               <View style={styles.separator} />
-              <View style={styles.row}>
+              <TouchableOpacity
+                style={styles.row}
+                onPress={() => {
+                  openCalendarSheet();
+                }}
+              >
                 <View style={styles.iconOuter}>
                   <CalendarIcon
                     fill={theme.color.darkRed}
@@ -214,7 +227,7 @@ export default function TaskBottomSheet({
                   />
                 </View>
                 <Text style={styles.dateText}>27 Nov</Text>
-              </View>
+              </TouchableOpacity>
               <View style={styles.separator} />
               <TouchableOpacity
                 style={[styles.row]}
@@ -301,6 +314,7 @@ export default function TaskBottomSheet({
           color: theme.color.black,
         }}
       />
+      <PickDateCalendar bottomSheetRef={calendarSheetRef} />
     </>
   );
 }
