@@ -17,7 +17,9 @@ export const actionItemsArray = ({
     {
       id: 1,
       label: "Priority 1",
-      onPress: () => {},
+      onPress: () => {
+        setPriority(1);
+      },
       element: (
         <ActionItemElementFlag
           Icon={FlagFull}
@@ -31,7 +33,9 @@ export const actionItemsArray = ({
     {
       id: 2,
       label: "Priority 2",
-      onPress: () => {},
+      onPress: () => {
+        setPriority(2);
+      },
       element: (
         <ActionItemElementFlag
           Icon={FlagFull}
@@ -44,7 +48,9 @@ export const actionItemsArray = ({
     {
       id: 3,
       label: "Priority 3",
-      onPress: () => {},
+      onPress: () => {
+        setPriority(3);
+      },
       element: (
         <ActionItemElementFlag
           Icon={FlagFull}
@@ -57,7 +63,9 @@ export const actionItemsArray = ({
     {
       id: 4,
       label: "Priority 4",
-      onPress: () => {},
+      onPress: () => {
+        setPriority(4);
+      },
       element: (
         <ActionItemElementFlag
           Icon={FlagHollow}
