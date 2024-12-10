@@ -1,4 +1,10 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 
@@ -8,9 +14,11 @@ import XMark from "@assets/icons/xmark.svg";
 export default function SearchBarCustom({
   searchText,
   setSearchText,
+  style,
 }: {
   searchText: string;
   setSearchText: (text: string) => void;
+  style?: ViewStyle;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -20,7 +28,7 @@ export default function SearchBarCustom({
   };
 
   return (
-    <View style={styles.searchBar}>
+    <View style={[styles.searchBar, style]}>
       <View style={styles.magnifyingGlassContainer}>
         <MagnifyingGlass
           height={16}
