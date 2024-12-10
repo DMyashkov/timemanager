@@ -19,6 +19,7 @@ import MagnifyingGlass from "@assets/icons/magnifying-glass.svg";
 import XMark from "@assets/icons/xmark.svg";
 import { useTheme } from "@context/ThemeContext";
 import { useEffect, useRef, useState } from "react";
+import SearchBarCustom from "../searchBar/searchBar";
 
 interface Button {
   id: string; // Added id for unique key
@@ -62,9 +63,6 @@ export default function Header({
     })),
   };
 
-  const handleClearInput = () => {
-    setSearchText(""); // Clear the input text
-  };
   useEffect(() => {
     // toggle options
     expandAnim.value = withTiming(isExpanded ? 1 : 0, { duration: 250 });
@@ -144,32 +142,10 @@ export default function Header({
           )}
 
           {showSearchBar && (
-            <View style={styles.searchBar}>
-              <View style={styles.magnifyingGlassContainer}>
-                <MagnifyingGlass
-                  height={16}
-                  width={16}
-                  fill={theme.color.searchBar.text}
-                />
-              </View>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Search"
-                placeholderTextColor={theme.color.searchBar.text}
-                value={searchText}
-                onChangeText={setSearchText}
-                numberOfLines={1} // Ensures it only takes one line
-              />
-              {searchText.length > 0 && (
-                <TouchableOpacity onPress={handleClearInput}>
-                  <XMark
-                    height={16}
-                    width={16}
-                    fill={theme.color.searchBar.text}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
+            <SearchBarCustom
+              searchText={searchText}
+              setSearchText={setSearchText}
+            />
           )}
         </SafeAreaView>
       </View>

@@ -1,4 +1,4 @@
-import Header from "@components/header/header";
+import Header from "@/components/header/headerBasic/header";
 import ActivityItem from "@components/module/activityItem/activityItem";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";

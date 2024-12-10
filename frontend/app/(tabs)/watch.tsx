@@ -8,7 +8,7 @@ import {
 import Switch from "@assets/icons/switch.svg";
 import Edit from "@assets/icons/edit.svg";
 
-import Header from "@components/header/header";
+import Header from "@/components/header/headerBasic/header";
 import Tomato from "@assets/icons/tomato.svg";
 import { useTheme } from "@context/ThemeContext";
 import ClearModeIcon from "@assets/icons/circle-check-regular.svg";

@@ -11,7 +11,7 @@ import TaskBottomSheetAdd from "@/components/tasks/addTask/addTaskBottomSheet";
 import TaskBottomSheet from "@/components/tasks/taskBottomSheet/taskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
-import Header from "@/components/header/header";
+import Header from "@/components/header/headerBasic/header";
 import Plus from "@/assets/icons/plus.svg";
 import { useTheme } from "@/context/ThemeContext";
 import TaskListComponent from "@/components/tasks/taskListComponent/taskListComponent";

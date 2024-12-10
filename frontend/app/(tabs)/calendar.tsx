@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import useStyles from "./styles/calendarStyles";
 import { useTheme } from "@context/ThemeContext";
-import Header from "@components/header/header";
+import Header from "@/components/header/headerBasic/header";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import SessionCalendar from "@components/calendar/sessionCalendar/sessionCalendar";
 import SessionList from "@components/calendar/sessionList/sessionList";

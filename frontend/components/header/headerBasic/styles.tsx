@@ -30,31 +30,10 @@ export default function useStyles() {
       paddingRight: 10,
       marginBottom: 7,
     },
-    searchBar: {
-      backgroundColor: theme.color.searchBar.background, // Use dynamic color from theme
-      height: 36,
-      width: "100%",
-      borderRadius: theme.borderRadius.large,
-      flexDirection: "row",
-      gap: 8,
-      alignItems: "center",
-      paddingLeft: 8,
-      paddingRight: 8,
-    },
     buttonContainer: {
       flexDirection: "row",
       gap: 10,
       alignItems: "center",
-    },
-    magnifyingGlassContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    textInput: {
-      fontFamily: theme.font.regular,
-      color: theme.color.black,
-      marginLeft: 0,
-      flex: 1,
     },
     optionsContainer: {
       height: 82,
