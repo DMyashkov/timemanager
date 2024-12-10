@@ -307,6 +307,7 @@ export default function TaskBottomSheet({
         </View>
       </BottomSheet>
       <ActionSheet
+        actionTextColor={theme.color.black}
         bottomSheetRef={actionSheetRef}
         actionItems={actionItems}
         cancelTextStyle={{

@@ -172,6 +172,7 @@ const styles = StyleSheet.create({
   cancelItem: {
     borderBottomWidth: 0,
     backgroundColor: WHITE,
+    
     marginTop: 8,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
