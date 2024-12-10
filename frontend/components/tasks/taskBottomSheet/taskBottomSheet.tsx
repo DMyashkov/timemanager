@@ -34,6 +34,7 @@ import { moduleType } from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
 import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
+import { router } from "expo-router";
 
 export default function TaskBottomSheet({
   title = "asksak",
@@ -300,6 +301,9 @@ export default function TaskBottomSheet({
                 style={{
                   marginTop: -2,
                 }}
+                onPress={() => {
+                  router.push("/pickActivity");
+                }}
               />
               <View style={styles.bigSeparator} />
             </BottomSheetView>
@@ -326,18 +330,23 @@ function ButtonInsideFooterComponent({
   color,
   marginBottomIcon = 0,
   style,
+  onPress,
 }: {
   Icon: React.FC<SvgProps>;
   text: string;
   color: string;
   marginBottomIcon?: number;
   style?: object;
+  onPress?: () => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   return (
-    <View style={[styles.changeActivityButton, style]}>
+    <TouchableOpacity
+      onPress={onPress}
+      style={[styles.changeActivityButton, style]}
+    >
       <Icon
         width={16}
         height={16}
@@ -356,6 +365,6 @@ function ButtonInsideFooterComponent({
       >
         {text}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }

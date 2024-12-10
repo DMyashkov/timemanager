@@ -19,7 +19,6 @@ export const THEME = {
       presets: {
         green: {
           veryLight: "#E0EBD6",
-
           light: "#97BB78A6",
           medium: "#97BB78",
           dark: "#688153",

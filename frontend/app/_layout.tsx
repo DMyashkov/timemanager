@@ -73,6 +73,42 @@ export default function Layout() {
           />
 
           <Stack.Screen
+            name="pickActivity"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+              headerLeft: () => (
+                <SysButton
+                  text="Cancel"
+                  onPress={() => {
+                    router.back();
+                  }}
+                  isRegular={true}
+                />
+              ),
+              headerTitle: (props) => (
+                <Text
+                  {...props}
+                  style={{
+                    fontSize: useTheme().theme.fontSize.medium,
+                    fontFamily: useTheme().theme.font.semibold,
+                  }}
+                >
+                  Change Activity
+                </Text>
+              ),
+              headerRight: () => (
+                <SysButton
+                  text="Choose"
+                  onPress={() => {
+                    router.back();
+                  }}
+                />
+              ),
+            }}
+          />
+
+          <Stack.Screen
             name="login"
             options={{
               headerShown: false,
