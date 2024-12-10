@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import SysButton from "../blueSystemButton/blueSystemButton";
+import SysButton from "../../basic/blueSystemButton/blueSystemButton";
 
 export default function HeaderModal({
   onPressLeft,

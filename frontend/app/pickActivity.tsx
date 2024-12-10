@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import useStyles from "./styles/pickActivityStyles";
 import { useTheme } from "@context/ThemeContext";
-import HeaderModal from "@/components/basic/headerModal/headerModal";
+import HeaderModal from "@/components/header/headerModal/headerModal";
 
 export default function PickActivity() {
   const styles = useStyles();
