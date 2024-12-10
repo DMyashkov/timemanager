@@ -20,16 +20,15 @@ import { DateStruct } from "@/utils/dateTimeSession";
 
 export default function PickDateCalendar({
   bottomSheetRef,
+  onPickDate,
 }: {
   bottomSheetRef: React.RefObject<BottomSheet>;
+  onPickDate: (date: DateStruct | null) => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
   const ICON_SIZE = 22;
   const calendarRef = useRef<ExpandedCalendarRef>(null);
-  const handlePickDate = (date: DateStruct) => {
-    calendarRef.current?.goToDate(date);
-  };
 
   // Custom backdrop with dimmed effect
   const renderBackdrop = useCallback(
@@ -48,6 +47,27 @@ export default function PickDateCalendar({
     [],
   );
 
+  const handleDone = () => {
+    // If you want to get the currently selected date from the calendar
+    const selectedDate = calendarRef.current?.getFocusedDate(); // Assuming the ExpandedCalendar has this method
+    if (selectedDate) {
+      onPickDate(selectedDate);
+    } else {
+      onPickDate(null); // If no date is selected, return null
+    }
+    bottomSheetRef.current?.close();
+  };
+
+  const handleCancel = () => {
+    onPickDate(null); // Notify parent of cancellation
+    bottomSheetRef.current?.close();
+  };
+
+  const handlePickDate = (date: DateStruct) => {
+    calendarRef.current?.goToDate(date);
+    onPickDate(date);
+  };
+
   return (
     <BottomSheet
       ref={bottomSheetRef}
@@ -64,14 +84,14 @@ export default function PickDateCalendar({
               text="Cancel"
               isRegular={true}
               onPress={() => {
-                bottomSheetRef.current?.close();
+                handleCancel();
               }}
               isRed={true}
             />
             <SysButton
               text="Done"
               onPress={() => {
-                bottomSheetRef.current?.close();
+                handleDone();
               }}
               isRed={true}
             />
@@ -85,7 +105,8 @@ export default function PickDateCalendar({
         <View style={styles.content}>
           <TouchableOpacity
             onPress={() => {
-              // handlePickDate(DateStruct.fromDate(new Date()));
+              const today = DateStruct.fromDate(new Date());
+              handlePickDate(today);
               bottomSheetRef.current?.close();
             }}
             style={styles.row}
@@ -110,7 +131,10 @@ export default function PickDateCalendar({
 
           <TouchableOpacity
             onPress={() => {
-              // handlePickDate(DateStruct.fromDate(new Date()));
+              const tomorrow = DateStruct.fromDate(
+                new Date(new Date().setDate(new Date().getDate() + 1)),
+              );
+              handlePickDate(tomorrow);
               bottomSheetRef.current?.close();
             }}
             style={styles.row}
@@ -135,6 +159,7 @@ export default function PickDateCalendar({
 
           <TouchableOpacity
             onPress={() => {
+              onPickDate(null); // Return null for "No Date"
               bottomSheetRef.current?.close();
             }}
             style={styles.row}

@@ -8,6 +8,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
+
 import {
   View,
   Text,
@@ -25,6 +26,7 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 
 export interface ExpandedCalendarRef {
   goToDate: (date: DateStruct) => void;
+  getFocusedDate: () => DateStruct; // Add this line
 }
 
 const ExpandedCalendar = forwardRef<ExpandedCalendarRef, { style?: object }>(
@@ -105,8 +107,11 @@ const ExpandedCalendar = forwardRef<ExpandedCalendarRef, { style?: object }>(
       }
     };
 
+    const getFocusedDate = () => focusedDate;
+
     useImperativeHandle(ref, () => ({
       goToDate,
+      getFocusedDate,
     }));
 
     return (
