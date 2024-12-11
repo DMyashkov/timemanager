@@ -11,6 +11,7 @@ import {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { router } from "expo-router";
 
 export default function PickActivity() {
   const styles = useStyles();
@@ -38,10 +39,13 @@ export default function PickActivity() {
       <HeaderModal
         title="Change Activity"
         leftText="Cancel"
-        rightText="Choose"
+        isThereRightButton={false}
         isThereSearchBar={true}
         searchText={searchText}
         setSearchText={setSearchText}
+        onPressLeft={() => {
+          router.back();
+        }}
       />
       <FocusProvider>
         <FlatList

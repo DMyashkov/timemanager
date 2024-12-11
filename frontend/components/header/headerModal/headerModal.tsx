@@ -20,8 +20,8 @@ export default function HeaderModal({
 }: {
   onPressLeft?: () => void;
   onPressRight?: () => void;
-  leftText: string;
-  rightText: string;
+  leftText?: string;
+  rightText?: string;
   isThereLeftButton?: boolean;
   isThereRightButton?: boolean;
   isLeftRed?: boolean;
@@ -38,7 +38,7 @@ export default function HeaderModal({
     <>
       <View style={styles.headerButtonContainer}>
         <View style={styles.innerButtonsHeader}>
-          {isThereLeftButton && (
+          {isThereLeftButton && leftText != null && (
             <SysButton
               text={leftText}
               isRegular={true}
@@ -48,13 +48,15 @@ export default function HeaderModal({
               isRed={isLeftRed}
             />
           )}
-          <SysButton
-            text={rightText}
-            onPress={() => {
-              if (onPressRight) onPressRight();
-            }}
-            isRed={isRightRed}
-          />
+          {isThereRightButton && rightText != null && (
+            <SysButton
+              text={rightText}
+              onPress={() => {
+                if (onPressRight) onPressRight();
+              }}
+              isRed={isRightRed}
+            />
+          )}
         </View>
         <View style={styles.titleView}>
           <Text style={styles.titleHeader}>{title}</Text>
