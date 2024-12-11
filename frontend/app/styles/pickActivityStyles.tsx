@@ -9,6 +9,10 @@ export default function useStyles() {
       flex: 1,
       backgroundColor: theme.color.white,
     },
+    listView: {
+      paddingTop: 15,
+      paddingLeft: 15,
+      paddingRight: 15,
+    },
   });
 }
-
