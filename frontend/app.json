@@ -1,6 +1,6 @@
 {
   "expo": {
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "name": "timemanager",
     "slug": "timemanager",
     "version": "1.0.0",

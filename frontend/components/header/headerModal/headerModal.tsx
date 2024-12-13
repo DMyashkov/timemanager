@@ -45,6 +45,7 @@ export default function HeaderModal({
               onPress={() => {
                 if (onPressLeft) onPressLeft();
               }}
+            
               isRed={isLeftRed}
             />
           )}

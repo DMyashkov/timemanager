@@ -45,6 +45,7 @@ export default function PickActivity() {
         setSearchText={setSearchText}
         onPressLeft={() => {
           router.back();
+          console.log("Cancel");
         }}
       />
       <FocusProvider>

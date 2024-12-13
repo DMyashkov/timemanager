@@ -58,13 +58,6 @@ export default function TasksScreen() {
         <TaskListComponent tasks={[]} />
         <TaskListComponent />
       </TouchableOpacity>
-      {/* <TaskBottomSheetAdd */}
-      {/*   bottomSheetRef={bottomSheetRef} */}
-      {/*   title={title} */}
-      {/*   setTitle={setTitle} */}
-      {/*   description={description} */}
-      {/*   setDescription={setDescription} */}
-      {/* /> */}
       <TaskBottomSheet
         bottomSheetRef={bottomSheetRef}
         title={title}

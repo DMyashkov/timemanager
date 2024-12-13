@@ -24,6 +24,7 @@ export default function useStyles() {
       flex: 1,
       flexDirection: "row",
       justifyContent: "space-between",
+      zIndex: 2,
     },
     titleView: {
       position: "absolute",

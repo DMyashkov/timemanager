@@ -19,7 +19,7 @@ export default function SysButton({
   const { theme } = useTheme();
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} style={{ zIndex: 1 }}>
       {!isRed ? (
         <Text style={styles.headerModalText}>{text}</Text>
       ) : (
