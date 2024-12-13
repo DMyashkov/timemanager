@@ -19,4 +19,12 @@ frontend/.DS_Store
 frontend/expo-env.d.ts
 # @end expo-cli
 
-**/__pycache__/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.out
+*.pid
+*.pidlock
+*.lock
