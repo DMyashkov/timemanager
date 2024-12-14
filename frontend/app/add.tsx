@@ -201,6 +201,8 @@ export default function AddScreen() {
   console.log("current", current);
   console.log("dataIndex", JSON.stringify(dataIndex, null, 2));
 
+  const handleDelete = async () => {};
+
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
@@ -231,6 +233,7 @@ export default function AddScreen() {
               handleCreate={handleCreate}
               dataIndex={dataIndex}
               current={current}
+              handleDelete={handleDelete}
             />
             <AddSegment
               selectedColorIndex={selectedColorIndex}
@@ -238,6 +241,7 @@ export default function AddScreen() {
               colorArray={colorArray}
               parent={parent}
               setParent={setParent}
+              handleDelete={handleDelete}
               isProject={true}
               style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
               handleCreate={handleCreate}
@@ -247,6 +251,7 @@ export default function AddScreen() {
           </SwitchWrapper>
         ) : (
           <AddSegment
+            handleDelete={handleDelete}
             selectedColorIndex={selectedColorIndex}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
@@ -272,6 +277,7 @@ interface ContentProps {
   isProject?: boolean;
   style?: object;
   handleCreate: (data: AddQuery) => void;
+  handleDelete: () => void;
   dataIndex: Record<string, DataIndexItem>;
   current: DataIndexItem | null;
 }
@@ -369,6 +375,7 @@ function ActivityAddContent({
   lapName,
   handleCreate,
   dataIndex,
+  handleDelete,
   current,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
@@ -430,7 +437,7 @@ function ActivityAddContent({
         isProject={false}
         dataIndex={dataIndex}
       />
-      {current == null && (
+      {current == null ? (
         <View style={styles.buttonProjectOuter}>
           <TouchableOpacity
             style={styles.button}
@@ -446,6 +453,17 @@ function ActivityAddContent({
             }}
           >
             <Text style={styles.buttonText}>Create</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.buttonProjectOuter}>
+          <TouchableOpacity
+            style={styles.buttonProject}
+            onPress={() => {
+              handleDelete();
+            }}
+          >
+            <Text style={styles.buttonTextProject}>Delete</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -464,6 +482,7 @@ function ProjectAddContent({
   setLapName,
   handleCreate,
   dataIndex,
+  handleDelete,
   current,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
@@ -474,7 +493,7 @@ function ProjectAddContent({
       <TextField
         placeholder="Project Name"
         defaultText={current ? current.item.title : "Project Name"}
-        value={moduleName}
+        startingText={current ? current.item.title : ""}
         setModuleName={setModuleName}
         rightHint={true}
       />
@@ -490,8 +509,8 @@ function ProjectAddContent({
       <TextField
         placeholder={current ? current.item.lapName : "Lap Name"}
         setModuleName={setLapName}
-        value={lapName}
         rightHint={true}
+        startingText={current ? current.item.lapName : ""}
         defaultText={current?.item.lapName || parent.item.lapName || "Lap"}
       />
       <PathPicker
@@ -502,7 +521,7 @@ function ProjectAddContent({
         moduleName={moduleName}
         dataIndex={dataIndex}
       />
-      {current == null && (
+      {current == null ? (
         <View style={styles.buttonProjectOuter}>
           <TouchableOpacity
             style={styles.button}
@@ -517,7 +536,18 @@ function ProjectAddContent({
               });
             }}
           >
-            <Text style={styles.buttonTextProject}>Create</Text>
+            <Text style={styles.buttonText}>Create</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.buttonProjectOuter}>
+          <TouchableOpacity
+            style={styles.buttonProject}
+            onPress={() => {
+              handleDelete();
+            }}
+          >
+            <Text style={styles.buttonTextProject}>Delete</Text>
           </TouchableOpacity>
         </View>
       )}
