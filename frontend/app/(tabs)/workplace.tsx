@@ -12,17 +12,23 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { getDataIndex, rebuildDataIndex } from "@/utils/api";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
+
+  // States for controlling UI
   const [addScreen, setAddScreen] = useState<boolean>(false);
-  const [data, setData] = useState(null); // Store the tree data
-  const [loading, setLoading] = useState<boolean>(true); // Indicate loading state
-  const [error, setError] = useState<string | null>(null); // Store any error message
+  const [dataIndex, setDataIndex] = useState(null); // DataIndex from backend
+  const [data, setData] = useState(null); // Tag tree data from backend
+  const [loading, setLoading] = useState<boolean>(true); // Indicates if data loading is in progress
+  const [error, setError] = useState<string | null>(null); // Error message if something goes wrong
 
   const addAnim = useSharedValue(0);
+
+  // Animate the plus icon on addScreen toggle
   useEffect(() => {
     addAnim.value = withTiming(Number(addScreen), { duration: 250 });
   }, [addAnim, addScreen]);
@@ -37,12 +43,48 @@ export default function WorkplaceScreen() {
     })),
   };
 
-  // 🛠️ **Fetch the tag tree from the backend**
+  // Fetch DataIndex first
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataIndexAndData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Attempt to get DataIndex
+        const indexResponse = await getDataIndex();
+        console.log(
+          "DataIndex loaded successfully:",
+          JSON.stringify(indexResponse.data, null, 2),
+        );
+        setDataIndex(indexResponse.data);
+      } catch (err) {
+        console.error("Error fetching DataIndex:", err);
+        setError("Failed to load DataIndex. Attempting to rebuild...");
+
+        // Attempt to rebuild if DataIndex doesn't exist
+        try {
+          const rebuildResponse = await rebuildDataIndex();
+          console.log("DataIndex rebuilt successfully:", rebuildResponse.data);
+
+          // After rebuilding, fetch DataIndex again
+          const indexAgainResponse = await getDataIndex();
+          console.log(
+            "DataIndex reloaded successfully:",
+            JSON.stringify(indexAgainResponse.data, null, 2),
+          );
+          setDataIndex(indexAgainResponse.data);
+        } catch (rebuildErr) {
+          console.error("Error rebuilding DataIndex:", rebuildErr);
+          setError("Failed to rebuild DataIndex. Please try again later.");
+          setLoading(false);
+          return; // Stop if we can't get the DataIndex
+        }
+      }
+
+      // Now fetch the tag tree data (the actual hierarchical data)
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const response = await axios.get(
+        const treeResponse = await axios.get(
           "http://127.0.0.1:8000/api/tags/tree/",
           {
             headers: {
@@ -53,24 +95,26 @@ export default function WorkplaceScreen() {
         );
         console.log(
           "Tree data loaded:",
-          JSON.stringify(response.data, null, 2),
+          JSON.stringify(treeResponse.data, null, 2),
         );
-        setData(response.data[0]); // Assume the first item is the root node
+        // Assume the first item is the root node
+        setData(treeResponse.data[0]);
         setLoading(false);
-      } catch (error) {
-        setError("Failed to load data");
-        console.error("Error fetching tree data:", error);
+      } catch (treeError) {
+        setError("Failed to load tree data");
+        console.error("Error fetching tree data:", treeError);
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchDataIndexAndData();
   }, []);
 
+  // Render different states based on loading/error/data presence
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <Text>Loading Data and DataIndex...</Text>
       </View>
     );
   }
@@ -83,10 +127,10 @@ export default function WorkplaceScreen() {
     );
   }
 
-  if (!data) {
+  if (!dataIndex || !data) {
     return (
       <View style={styles.noDataContainer}>
-        <Text>No data available</Text>
+        <Text>No Data or Data Index available</Text>
       </View>
     );
   }
@@ -119,13 +163,14 @@ export default function WorkplaceScreen() {
       />
       <FocusProvider>
         <FlatList
-          data={[{ key: "single-item" }]} // Array with one element
+          data={[{ key: "single-item" }]} // Just one item that renders the ListModule
           renderItem={() => (
             <ListModule
               addScreen={addScreen}
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
-              activityData={data} // Pass the fetched data as props
+              dataIndex={dataIndex} // Pass the loaded DataIndex
+              activityData={data} // Pass the fetched Tag tree data
             />
           )}
           keyExtractor={(item) => item.key}
@@ -146,15 +191,6 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     paddingLeft: 15,
     paddingRight: 15,
-  },
-  shadow: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    backgroundColor: "#000",
-    opacity: 0.5,
   },
   loadingContainer: {
     flex: 1,

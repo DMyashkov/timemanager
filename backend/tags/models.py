@@ -1,6 +1,15 @@
 from django.db import models
 
 
+class TagIndex(models.Model):
+    """Model to store the entire DataIndex."""
+    data_index = models.JSONField(default=dict)  # Store the entire DataIndex
+    updated_at = models.DateTimeField(auto_now=True)  # Track updates
+
+    def __str__(self):
+        return f"TagIndex (Last updated: {self.updated_at})"
+
+
 class Tag(models.Model):
     class TagType(models.TextChoices):
         ACTIVITY = 'activity', 'Activity'
