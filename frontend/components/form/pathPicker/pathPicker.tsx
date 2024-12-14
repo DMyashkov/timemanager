@@ -3,7 +3,6 @@ import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
-import { dataIndex } from "@/constants/exampleData";
 import Activity from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
 import type { DataIndexItem } from "@/constants/interfaces";
@@ -17,6 +16,7 @@ interface PathPickerProps {
   moduleColorPallete: ColorPresets;
   parent: DataIndexItem;
   setParent: (parent: DataIndexItem) => void;
+  dataIndex: Record<string, DataIndexItem>;
 }
 
 export default function PathPicker({
@@ -24,6 +24,7 @@ export default function PathPicker({
   moduleColorPallete,
   parent,
   setParent,
+  dataIndex,
   isProject = false,
 }: PathPickerProps) {
   const styles = useStyles();

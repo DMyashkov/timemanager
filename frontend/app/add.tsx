@@ -13,8 +13,7 @@ import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";
 import Picker from "@/components/form/picker/picker";
 import ColorPicker from "@/components/form/colorPicker/colorPicker";
-import { useState } from "react";
-import { dataIndex } from "@/constants/exampleData";
+import { useEffect, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
@@ -108,13 +107,44 @@ export default function AddScreen() {
     }
   };
 
-  const { parentId } = useLocalSearchParams();
-  console.log(parentId);
+  const { dataIndex: rawDataIndexParam, parentId } = useLocalSearchParams();
+  const [dataIndex, setDataIndex] = useState<Record<string, DataIndexItem>>({}); // 🛠️ Default to empty object
+  const dataIndexParam = Array.isArray(rawDataIndexParam)
+    ? rawDataIndexParam[0]
+    : rawDataIndexParam;
 
-  const [parent, setParent] = useState(
-    dataIndex[(parentId as string) || "activity-1-1-1-1-1"],
-  );
+  // 🛠️ Parse dataIndex only once on component load
+  useEffect(() => {
+    if (dataIndexParam) {
+      try {
+        const parsedDataIndex = JSON.parse(dataIndexParam);
+        setDataIndex(parsedDataIndex);
+      } catch (error) {
+        console.error("Failed to parse dataIndex:", error);
+      }
+    }
+  }, [dataIndexParam]);
+  console.log(parentId);
+  console.log(dataIndex);
+  console.log(dataIndex?.[parentId as string]);
+
+  const [parent, setParent] = useState<DataIndexItem | null>(null); // 🛠️ Set to null initially
+
+  useEffect(() => {
+    if (dataIndex && parentId) {
+      setParent(dataIndex[parentId as string] || null);
+    }
+  }, [dataIndex, parentId]);
+
   const PADDING_HORIZONTAL = 22;
+  if (!parent) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <TouchableWithoutFeedback
       onPress={Keyboard.dismiss}
@@ -142,6 +172,7 @@ export default function AddScreen() {
             setParent={setParent}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
+            dataIndex={dataIndex}
           />
           <AddSegment
             selectedColorIndex={selectedColorIndex}
@@ -152,6 +183,7 @@ export default function AddScreen() {
             isProject={true}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
+            dataIndex={dataIndex}
           />
         </SwitchWrapper>
       </View>
@@ -167,6 +199,7 @@ interface ContentProps {
   isProject?: boolean;
   style?: object;
   handleCreate: (data: AddQuery) => void;
+  dataIndex: Record<string, DataIndexItem>;
 }
 
 function AddSegment({
@@ -178,6 +211,7 @@ function AddSegment({
   isProject = false,
   style = {},
   handleCreate,
+  dataIndex,
 }: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [moduleNameState, setModuleNameState] = useState("");
@@ -214,14 +248,16 @@ function AddSegment({
             setModuleName={setModuleNameState}
             lapName={lapName}
             setLapName={setLapName}
+            dataIndex={dataIndex}
             handleCreate={handleCreate}
           />
         ) : (
           <ProjectAddContent
-            projectColor={dataIndex["activity-1-1-1-1-1"].item.colorPreset}
+            projectColor={dataIndex[parent.item.id].item.colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
+            dataIndex={dataIndex}
             setParent={setParent}
             moduleName={moduleName}
             setModuleName={setModuleNameState}
@@ -253,6 +289,7 @@ function ActivityAddContent({
   setLapName,
   lapName,
   handleCreate,
+  dataIndex,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [productivity, setProductivity] = useState<boolean>(true);
@@ -297,6 +334,7 @@ function ActivityAddContent({
         moduleColorPallete={colorArray[selectedColorIndex]}
         moduleName={moduleName}
         isProject={false}
+        dataIndex={dataIndex}
       />
       <View style={styles.buttonProjectOuter}>
         <TouchableOpacity
@@ -329,6 +367,7 @@ function ProjectAddContent({
   lapName,
   setLapName,
   handleCreate,
+  dataIndex,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
 
@@ -352,6 +391,7 @@ function ProjectAddContent({
         moduleColorPallete={projectColor}
         isProject={true}
         moduleName={moduleName}
+        dataIndex={dataIndex}
       />
       <View style={styles.buttonProjectOuter}>
         <TouchableOpacity

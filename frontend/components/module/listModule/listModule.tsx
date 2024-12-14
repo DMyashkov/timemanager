@@ -93,9 +93,6 @@ function ListModuleInner({
   level = 0,
   path = "/root",
   addScreen = false,
-  onClickAddButton = (parentId: string) => {
-    router.push({ pathname: "/add", params: { parentId } });
-  },
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
   expandAnimOfParent = useSharedValue(1),
@@ -119,8 +116,12 @@ function ListModuleInner({
   const hasChildren = !!activityData.children?.length;
 
   const handleAddClick = useCallback(() => {
-    onClickAddButton(activityData.id);
-  }, [activityData.id, onClickAddButton]);
+    const parentId = activityData.id;
+    router.push({
+      pathname: "/add",
+      params: { parentId, dataIndex: JSON.stringify(dataIndex) },
+    });
+  }, [activityData.id, dataIndex]);
 
   useEffect(() => {
     if (shouldBeVisible) {
@@ -351,7 +352,6 @@ function ListModuleInner({
                     }
                     path={`${path}/${activity.id}`}
                     addScreen={addScreen}
-                    onClickAddButton={onClickAddButton}
                     addAnim={addAnim}
                     onFocusAdditional={onFocusAdditional}
                     expandAnimOfParent={multipliedExpandAnim}
