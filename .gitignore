@@ -24,3 +24,4 @@ __pycache__/
 *.pidlock
 *.lock
 backend/.env
+.env

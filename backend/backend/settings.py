@@ -25,10 +25,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'authentication',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'authentication',
+    'tags',
 ]
 
 REST_FRAMEWORK = {
@@ -80,7 +81,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME', 'timemanager_db'),
         'USER': os.getenv('DB_USER', 'myuser'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'mypassword'),
-        'HOST': os.getenv('DB_HOST', 'postgres-db'),
+        'HOST': os.getenv('DB_HOST', 'db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
