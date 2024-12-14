@@ -15,22 +15,23 @@ import Header from "@/components/header/headerBasic/header";
 import Plus from "@/assets/icons/plus.svg";
 import { useTheme } from "@/context/ThemeContext";
 import TaskListComponent from "@/components/tasks/taskListComponent/taskListComponent";
+import AddTaskSheet from "@/components/tasks/addTask/addTaskBottomSheet";
 
 export default function TasksScreen() {
-  const bottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
-  const taskBottomSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
+  const taskSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
+  const addSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
   const styles = useStyles();
   const { theme } = useTheme();
 
   const [title, setTitle] = useState(""); // State for task title
   const [description, setDescription] = useState("");
 
-  const openBottomSheet = () => {
-    bottomSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
+  const openTaskBottomSheet = () => {
+    taskSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
-  const openTaskBottomSheet = () => {
-    taskBottomSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
+  const openAddBottomSheet = () => {
+    addSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
   return (
@@ -43,7 +44,7 @@ export default function TasksScreen() {
             iconElement: (
               <Plus height={25} width={25} fill={theme.color.black} />
             ),
-            onPress: openBottomSheet,
+            onPress: openAddBottomSheet,
           },
         ]}
         showSearchBar={true}
@@ -59,7 +60,7 @@ export default function TasksScreen() {
         <TaskListComponent />
       </TouchableOpacity>
       <TaskBottomSheet
-        bottomSheetRef={bottomSheetRef}
+        bottomSheetRef={taskSheetRef}
         title={title}
         setTitle={setTitle}
         description={description}
@@ -69,6 +70,7 @@ export default function TasksScreen() {
         priority={1}
         tagId="project-1"
       />
+      <AddTaskSheet bottomSheetRef={addSheetRef} />
     </GestureHandlerRootView>
   );
 }

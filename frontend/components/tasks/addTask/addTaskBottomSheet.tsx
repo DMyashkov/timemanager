@@ -17,19 +17,14 @@ import Calendar from "@assets/icons/calendar.svg";
 import Flag from "@assets/icons/flag.svg";
 
 export default function AddTaskSheet({
-  title = "",
-  setTitle = (s: string) => {},
-  description = "",
-  setDescription = (s: string) => {},
   bottomSheetRef,
 }: {
-  title: string;
-  setTitle: (s: string) => void;
-  description: string;
-  setDescription: (s: string) => void;
   bottomSheetRef: React.RefObject<BottomSheet>;
 }) {
   const taskNameInputRef = useRef<TextInput>(null); // Ref for Task Name input
+
+  const [title, setTitle] = useState(""); // State for task title
+  const [description, setDescription] = useState(""); // State for task description
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {

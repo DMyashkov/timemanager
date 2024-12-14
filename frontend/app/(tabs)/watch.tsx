@@ -55,13 +55,13 @@ export default function Watch() {
         title="Focus"
         additionalTitleStyles={{ color: theme.color.red }}
         buttons={[
-          {
-            id: "pomodoro",
-            iconElement: (
-              <Tomato height={28} width={28} fill={theme.color.red} />
-            ),
-            onPress: () => console.log("Pomodoro pressed"),
-          },
+          // {
+          //   id: "pomodoro",
+          //   iconElement: (
+          //     <Tomato height={28} width={28} fill={theme.color.red} />
+          //   ),
+          //   onPress: () => console.log("Pomodoro pressed"),
+          // },
           {
             id: "clearMode",
             iconElement: !fullMode ? (
