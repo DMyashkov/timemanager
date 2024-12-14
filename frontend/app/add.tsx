@@ -198,6 +198,8 @@ export default function AddScreen() {
       </View>
     );
   }
+  console.log("current", current);
+  console.log("dataIndex", JSON.stringify(dataIndex, null, 2));
 
   return (
     <TouchableWithoutFeedback
@@ -249,7 +251,7 @@ export default function AddScreen() {
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
-            isProject={!(current.item.type === moduleType.activity)}
+            isProject={current.item.type === moduleType.project}
             setParent={setParent}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
@@ -377,30 +379,42 @@ function ActivityAddContent({
     <>
       <TextField
         placeholder="Activity Name"
+        startingText={moduleName}
         setModuleName={setModuleName}
+        defaultText={current?.item.title || "Activity Name"}
         rightHint={true}
       />
       <Picker
-        buttons={[
-          {
-            text: "Productive",
-            onPress: () => {
-              setProductivity(true);
-            },
-          },
-          {
-            text: "Unproductive",
-            onPress: () => {
-              setProductivity(false);
-            },
-          },
-        ]}
+        buttons={
+          current == null
+            ? [
+                {
+                  text: "Productive",
+                  onPress: () => {
+                    setProductivity(true);
+                  },
+                },
+                {
+                  text: "Unproductive",
+                  onPress: () => {
+                    setProductivity(false);
+                  },
+                },
+              ]
+            : [
+                {
+                  text: productivity ? "Productive" : "Unproductive",
+                  onPress: () => {},
+                },
+              ]
+        }
       />
       <TextField
         placeholder="Lap Name"
         setModuleName={setLapName}
         rightHint={true}
-        defaultText={parent.item.lapName || "Lap"}
+        startingText={lapName}
+        defaultText={current?.item.lapName || parent.item.lapName || "Lap"}
       />
 
       <ColorPicker
@@ -416,23 +430,25 @@ function ActivityAddContent({
         isProject={false}
         dataIndex={dataIndex}
       />
-      <View style={styles.buttonProjectOuter}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            handleCreate({
-              type: moduleType.activity,
-              title: moduleName,
-              colorPreset: colorArray[selectedColorIndex],
-              lapName: lapName,
-              parentId: parent.item.id,
-              productive: productivity,
-            });
-          }}
-        >
-          <Text style={styles.buttonText}>Create</Text>
-        </TouchableOpacity>
-      </View>
+      {current == null && (
+        <View style={styles.buttonProjectOuter}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              handleCreate({
+                type: moduleType.activity,
+                title: moduleName,
+                colorPreset: colorArray[selectedColorIndex],
+                lapName: lapName,
+                parentId: parent.item.id,
+                productive: productivity,
+              });
+            }}
+          >
+            <Text style={styles.buttonText}>Create</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </>
   );
 }
@@ -451,20 +467,32 @@ function ProjectAddContent({
   current,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
+  const productivity = dataIndex[parent.item.id].item.productive;
 
   return (
     <>
       <TextField
         placeholder="Project Name"
+        defaultText={current ? current.item.title : "Project Name"}
+        value={moduleName}
         setModuleName={setModuleName}
         rightHint={true}
       />
+      <Picker
+        buttons={[
+          {
+            text: productivity ? "Productive" : "Unproductive",
+            onPress: () => {},
+          },
+        ]}
+      />
 
       <TextField
-        placeholder="Lap Name"
+        placeholder={current ? current.item.lapName : "Lap Name"}
         setModuleName={setLapName}
+        value={lapName}
         rightHint={true}
-        defaultText={parent.item.lapName || "Lap"}
+        defaultText={current?.item.lapName || parent.item.lapName || "Lap"}
       />
       <PathPicker
         parent={parent}
@@ -474,23 +502,25 @@ function ProjectAddContent({
         moduleName={moduleName}
         dataIndex={dataIndex}
       />
-      <View style={styles.buttonProjectOuter}>
-        <TouchableOpacity
-          style={styles.buttonProject}
-          onPress={() => {
-            handleCreate({
-              type: moduleType.project,
-              title: moduleName,
-              colorPreset: projectColor,
-              lapName: lapName,
-              parentId: parent.item.id,
-              productive: parent.item.productive,
-            });
-          }}
-        >
-          <Text style={styles.buttonTextProject}>Create</Text>
-        </TouchableOpacity>
-      </View>
+      {current == null && (
+        <View style={styles.buttonProjectOuter}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              handleCreate({
+                type: moduleType.project,
+                title: moduleName,
+                colorPreset: projectColor,
+                lapName: lapName,
+                parentId: parent.item.id,
+                productive: parent.item.productive,
+              });
+            }}
+          >
+            <Text style={styles.buttonTextProject}>Create</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </>
   );
 }

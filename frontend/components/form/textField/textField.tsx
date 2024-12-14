@@ -19,6 +19,7 @@ export default function TextField({
   defaultText = "",
   topHint = "",
   hideOption = false,
+  startingText = "",
 }: {
   placeholder?: string;
   setModuleName?: (text: string) => void;
@@ -27,10 +28,11 @@ export default function TextField({
   topHint?: string;
   hideOption?: boolean;
   autoFocus?: boolean;
+  startingText?: string;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(startingText);
   const onChangeText = (text: string) => {
     setText(text);
     setModuleName(text);
@@ -78,6 +80,7 @@ export default function TextField({
 
   const handleClearInput = () => {
     setText(""); // Clear the input text
+    setModuleName(defaultText); // Clear the module name
   };
 
   return (
