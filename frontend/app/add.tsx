@@ -316,6 +316,7 @@ function AddSegment({
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
   const [lapName, setLapName] = useState(current ? current.item.lapName : "");
+  console.log("isProject", isProject);
 
   return (
     <ScrollView

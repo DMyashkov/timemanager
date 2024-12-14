@@ -30,10 +30,7 @@ type ActivityData = {
   children?: ActivityData[];
 };
 
-enum moduleType {
-  activity = 0,
-  project = 1,
-}
+import { moduleType } from "@/constants/interfaces";
 
 type ActivityProps = {
   level?: number;
@@ -307,6 +304,9 @@ function ListModuleInner({
       },
     },
   ];
+
+  console.log(typeOfModule);
+  console.log(typeOfModule === moduleType.activity);
 
   return (
     <Animated.View style={[animStyles.listModule]}>
