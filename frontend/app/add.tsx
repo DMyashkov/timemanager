@@ -293,6 +293,7 @@ function AddSegment({
   isProject = false,
   style = {},
   handleCreate,
+  handleDelete,
   dataIndex,
   current,
 }: ContentProps & { selectedColorIndex: number }) {
@@ -336,6 +337,7 @@ function AddSegment({
             setLapName={setLapName}
             dataIndex={dataIndex}
             handleCreate={handleCreate}
+            handleDelete={handleDelete}
           />
         ) : (
           <ProjectAddContent
@@ -351,6 +353,7 @@ function AddSegment({
             lapName={lapName}
             setLapName={setLapName}
             handleCreate={handleCreate}
+            handleDelete={handleDelete}
           />
         )}
       </TouchableOpacity>
