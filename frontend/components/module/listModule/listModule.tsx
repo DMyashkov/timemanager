@@ -34,7 +34,6 @@ enum moduleType {
 }
 
 type ActivityProps = {
-  activityData?: ActivityData;
   level?: number;
   style?: object;
   path?: string;
@@ -46,6 +45,7 @@ type ActivityProps = {
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
   typeOfModule?: moduleType;
+  activityData: ActivityData;
 };
 
 export default function ListModule(props: ActivityProps) {
@@ -78,12 +78,16 @@ export default function ListModule(props: ActivityProps) {
   // }
 
   return (
-    <ListModuleInner {...props} setIsVisibleAnimZero={setIsVisibleAnimZero} />
+    <ListModuleInner
+      {...props}
+      setIsVisibleAnimZero={setIsVisibleAnimZero}
+      activityData={props.activityData}
+    />
   );
 }
 
 function ListModuleInner({
-  activityData = data,
+  activityData,
   level = 0,
   path = "/root",
   addScreen = false,

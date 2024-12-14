@@ -7,8 +7,13 @@ class RecursiveTagSerializer(serializers.Serializer):
     """Recursive serializer to handle infinite nesting of tags."""
 
     def to_representation(self, value):
-        serializer = self.parent.parent.__class__(value, context=self.context)
-        return serializer.data
+        try:
+            serializer = self.parent.parent.__class__(
+                value, context=self.context)
+            return serializer.data
+        except Exception as e:
+            print(f"Error in RecursiveTagSerializer: {e}")
+            return {}
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -22,11 +27,16 @@ class TagSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'type',
-            'color_preset',
+            'colorPreset',  # Use source for database field color_preset
             'productive',
-            'lap_name',
+            'lapName',  # Use source for database field lap_name
             'parent',
             'children',
-            'created_at',
-            'updated_at'
+            'createdAt',  # Use source for database field created_at
+            'updatedAt'  # Use source for database field updated_at
         ]
+
+    colorPreset = serializers.CharField(source='color_preset')
+    lapName = serializers.CharField(source='lap_name')
+    createdAt = serializers.DateTimeField(source='created_at')
+    updatedAt = serializers.DateTimeField(source='updated_at')
