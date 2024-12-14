@@ -34,6 +34,12 @@ interface AddQuery {
 }
 
 export default function AddScreen() {
+  const {
+    dataIndex: rawDataIndexParam,
+    parentId,
+    rawIsAddScreen,
+  } = useLocalSearchParams();
+  const isAddScreen = rawIsAddScreen === "true";
   const styles = useStyles();
   const { theme } = useTheme();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
@@ -107,7 +113,46 @@ export default function AddScreen() {
     }
   };
 
-  const { dataIndex: rawDataIndexParam, parentId } = useLocalSearchParams();
+  const handleUpdate = async (data: AddQuery) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const parentId = Number.parseInt(data.parentId, 10);
+
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/tags/${parentId}/`,
+        {
+          title: data.title,
+          type: data.type === moduleType.activity ? "activity" : "project",
+          parent: parentId,
+          color_preset: data.colorPreset,
+          lap_name: data.lapName,
+          productive: data.productive,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      console.log("Tag updated successfully:", response.data);
+      alert(`Tag Updated: ${response.data.title}`);
+    } catch (error) {
+      console.error("Error updating tag:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("API Error:", error.response?.data);
+        alert(`Error: ${JSON.stringify(error.response?.data)}`);
+      } else {
+        alert(`Error: ${error.message}`);
+      }
+    }
+  };
+
+  console.log("isAddScreen", isAddScreen);
+
   const [dataIndex, setDataIndex] = useState<Record<string, DataIndexItem>>({}); // 🛠️ Default to empty object
   const dataIndexParam = Array.isArray(rawDataIndexParam)
     ? rawDataIndexParam[0]
@@ -129,12 +174,24 @@ export default function AddScreen() {
   console.log(dataIndex?.[parentId as string]);
 
   const [parent, setParent] = useState<DataIndexItem | null>(null); // 🛠️ Set to null initially
+  const [current, setCurrent] = useState<DataIndexItem | null>(null);
+  const currentId = !isAddScreen ? parentId : null;
 
   useEffect(() => {
     if (dataIndex && parentId) {
-      setParent(dataIndex[parentId as string] || null);
+      if (isAddScreen) {
+        setParent(dataIndex[parentId as string] || null);
+        setCurrent(null);
+      } else {
+        const currentItem = dataIndex[parentId as string];
+
+        setParent(
+          dataIndex[currentItem?.path[currentItem.path.length - 1]] || null,
+        );
+        setCurrent(currentItem);
+      }
     }
-  }, [dataIndex, parentId]);
+  }, [dataIndex, parentId, isAddScreen]);
 
   const PADDING_HORIZONTAL = 22;
   if (!parent) {
@@ -173,6 +230,7 @@ export default function AddScreen() {
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
             dataIndex={dataIndex}
+            current={current}
           />
           <AddSegment
             selectedColorIndex={selectedColorIndex}
@@ -184,6 +242,8 @@ export default function AddScreen() {
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
             dataIndex={dataIndex}
+            isAddScreen={isAddScreen}
+            current={current}
           />
         </SwitchWrapper>
       </View>
@@ -200,6 +260,7 @@ interface ContentProps {
   style?: object;
   handleCreate: (data: AddQuery) => void;
   dataIndex: Record<string, DataIndexItem>;
+  current: DataIndexItem | null;
 }
 
 function AddSegment({
@@ -212,12 +273,15 @@ function AddSegment({
   style = {},
   handleCreate,
   dataIndex,
+  current,
 }: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
-  const [moduleNameState, setModuleNameState] = useState("");
+  const [moduleNameState, setModuleNameState] = useState(
+    current ? current.item.title : "",
+  );
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
-  const [lapName, setLapName] = useState("");
+  const [lapName, setLapName] = useState(current ? current.item.lapName : "");
 
   return (
     <ScrollView
@@ -239,6 +303,7 @@ function AddSegment({
       >
         {!isProject ? (
           <ActivityAddContent
+            current={current}
             selectedColorIndex={selectedColorIndex}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
@@ -253,6 +318,7 @@ function AddSegment({
           />
         ) : (
           <ProjectAddContent
+            current={current}
             projectColor={dataIndex[parent.item.id].item.colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
@@ -290,9 +356,12 @@ function ActivityAddContent({
   lapName,
   handleCreate,
   dataIndex,
+  current,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
-  const [productivity, setProductivity] = useState<boolean>(true);
+  const [productivity, setProductivity] = useState<boolean>(
+    current?.item.productive || true,
+  );
   return (
     <>
       <TextField
@@ -368,6 +437,7 @@ function ProjectAddContent({
   setLapName,
   handleCreate,
   dataIndex,
+  current,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
 

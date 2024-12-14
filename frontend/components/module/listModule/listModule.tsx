@@ -119,7 +119,11 @@ function ListModuleInner({
     const parentId = activityData.id;
     router.push({
       pathname: "/add",
-      params: { parentId, dataIndex: JSON.stringify(dataIndex) },
+      params: {
+        parentId,
+        dataIndex: JSON.stringify(dataIndex),
+        rawIsAddScreen: "true",
+      },
     });
   }, [activityData.id, dataIndex]);
 
@@ -275,8 +279,8 @@ function ListModuleInner({
     return expandAnim.value * expandAnimOfParent.value;
   });
 
-  console.log("activityData", JSON.stringify(activityData, null, 2));
-  console.log("exampleData", JSON.stringify(exampleData, null, 2));
+  // console.log("activityData", JSON.stringify(activityData, null, 2));
+  // console.log("exampleData", JSON.stringify(exampleData, null, 2));
 
   return (
     <Animated.View style={[animStyles.listModule]}>
