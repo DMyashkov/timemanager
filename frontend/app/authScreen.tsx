@@ -100,6 +100,16 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     console.log("Error:", error);
   }, [error]);
 
+  useEffect(() => {
+    const setAxiosToken = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+      }
+    };
+    setAxiosToken();
+  }, []);
+
   const handleForgotPassword = () => {
     // forgot password logic
   };

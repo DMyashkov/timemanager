@@ -22,6 +22,9 @@ import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { moduleType } from "@/constants/interfaces";
 import { useLocalSearchParams } from "expo-router";
 
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 interface AddQuery {
   type: moduleType;
   title: string;
@@ -68,12 +71,41 @@ export default function AddScreen() {
     ColorPresets.GREEN,
   ];
 
-  const handleCreate = (data: AddQuery) => {
-    if (data.lapName === "") {
-      data.lapName = dataIndex[data.parentId].item.lapName;
+  const handleCreate = async (data: AddQuery) => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      // Use the parent's lap name as default if data.lapName is empty
+      const lapName = data.lapName || "Default Lap";
+
+      // Convert the parentId to an integer (since it must be a PK)
+      const parentId = Number.parseInt(data.parentId, 10);
+
+      // Send the POST request to create a new tag
+      const response = await axios.post("http://127.0.0.1:8000/api/tags/", {
+        title: data.title,
+        type: data.type === moduleType.activity ? "activity" : "project",
+        parent: parentId, // Convert parentId to an integer
+        color_preset: data.colorPreset,
+        lap_name: lapName, // Ensure lap_name is not blank
+        productive: data.productive,
+      });
+
+      console.log("Tag created successfully:", response.data);
+      alert(`Tag Created: ${response.data.title}`);
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      if (axios.isAxiosError(error)) {
+        console.log("API Error:", error.response?.data);
+        alert(`Error: ${JSON.stringify(error.response?.data)}`);
+      } else {
+        alert(`Error: ${error.message}`);
+      }
     }
-    const jsonData = JSON.stringify(data, null, 2);
-    console.log(jsonData);
   };
 
   const { parentId } = useLocalSearchParams();
