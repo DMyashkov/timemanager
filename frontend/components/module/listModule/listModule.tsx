@@ -284,6 +284,30 @@ function ListModuleInner({
   // console.log("exampleData", JSON.stringify(exampleData, null, 2));
   const { theme } = useTheme();
 
+  const buttonsOnTopOfTag = [
+    {
+      text: "Start timer",
+      color: theme.color.veryLightGrey, // Use theme color as default
+      onPress: () => {
+        console.log("Start timer");
+      },
+    },
+    {
+      text: "Edit",
+      color: theme.color.mediumGrey,
+      onPress: () => {
+        router.push({
+          pathname: "/add",
+          params: {
+            parentId: activityData.id,
+            dataIndex: JSON.stringify(dataIndex),
+            rawIsAddScreen: "false",
+          },
+        });
+      },
+    },
+  ];
+
   return (
     <Animated.View style={[animStyles.listModule]}>
       {level !== 0 &&
@@ -308,22 +332,7 @@ function ListModuleInner({
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
             activityColor={dataIndex[activityData.id].item.colorPreset}
-            buttons={[
-              {
-                text: "Start timer",
-                color: theme.color.veryLightGrey, // Use theme color as default
-                onPress: () => {
-                  console.log("Start timer");
-                },
-              },
-              {
-                text: "Edit",
-                color: theme.color.mediumGrey,
-                onPress: () => {
-                  console.log("Edit");
-                },
-              },
-            ]}
+            buttons={buttonsOnTopOfTag}
           />
         ) : (
           <ProjectItem
@@ -344,22 +353,7 @@ function ListModuleInner({
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
             activityColor={dataIndex[activityData.id].item.colorPreset}
-            buttons={[
-              {
-                text: "Start timer",
-                color: theme.color.veryLightGrey, // Use theme color as default
-                onPress: () => {
-                  console.log("Start timer");
-                },
-              },
-              {
-                text: "Edit",
-                color: theme.color.mediumGrey,
-                onPress: () => {
-                  console.log("Edit");
-                },
-              },
-            ]}
+            buttons={buttonsOnTopOfTag}
           />
         ))}
       {typeOfModule === moduleType.activity && (
