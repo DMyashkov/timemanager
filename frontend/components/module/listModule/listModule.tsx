@@ -39,7 +39,7 @@ type ActivityProps = {
   style?: object;
   path?: string;
   addScreen?: boolean;
-  onClickAddButton?: () => void;
+  onClickAddButton?: (parentId: string) => void;
   addAnim?: SharedValue<number>;
   onFocusAdditional?: () => void;
   expandAnimOfParent?: SharedValue<number>;
@@ -87,8 +87,8 @@ function ListModuleInner({
   level = 0,
   path = "/root",
   addScreen = false,
-  onClickAddButton = () => {
-    router.push("/add");
+  onClickAddButton = (parentId: string) => {
+    router.push({ pathname: "/add", params: { parentId } });
   },
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
@@ -110,6 +110,10 @@ function ListModuleInner({
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
   const hasChildren = !!activityData.activities?.length;
+
+  const handleAddClick = useCallback(() => {
+    onClickAddButton(activityData.id);
+  }, [activityData.id, onClickAddButton]);
 
   useEffect(() => {
     if (shouldBeVisible) {
@@ -320,7 +324,7 @@ function ListModuleInner({
           </Animated.View>
           <View style={[styles.list]}>
             <AddItem
-              onClickAddButton={onClickAddButton}
+              onClickAddButton={handleAddClick}
               style={animStyles.addItem}
             />
             {isExpandAnimGreaterThanZero && (

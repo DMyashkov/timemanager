@@ -20,6 +20,7 @@ import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { moduleType } from "@/constants/interfaces";
+import { useLocalSearchParams } from "expo-router";
 
 interface AddQuery {
   type: moduleType;
@@ -75,7 +76,12 @@ export default function AddScreen() {
     console.log(jsonData);
   };
 
-  const [parent, setParent] = useState(dataIndex["activity-1-1-1-1-1"]);
+  const { parentId } = useLocalSearchParams();
+  console.log(parentId);
+
+  const [parent, setParent] = useState(
+    dataIndex[(parentId as string) || "activity-1-1-1-1-1"],
+  );
   const PADDING_HORIZONTAL = 22;
   return (
     <TouchableWithoutFeedback
