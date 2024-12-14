@@ -72,37 +72,21 @@ export default function Activity({
     return isExplicitlyExpanded ? 1 : expandAnimParam.value;
   });
 
-  const mergedButtons = useMemo(() => {
-    const defaultButtons: ButtonActivityInfo[] = [
-      {
-        text: "Start timer",
-        color: theme.color.veryLightGrey, // Use theme color as default
-        onPress: () => {},
-      },
-      {
-        text: "Edit",
-        color: theme.color.mediumGrey,
-        onPress: () => {},
-      },
-    ];
-
-    const allButtons = [...defaultButtons];
-
-    // Overwrite any default button with the one provided in `buttons` if present
-    buttons.forEach((button, index) => {
-      allButtons[index] = {
-        ...allButtons[index],
-        ...button, // override properties
-      };
-    });
-
-    // Add additional buttons (beyond the default two)
-    if (buttons.length > defaultButtons.length) {
-      allButtons.push(...buttons.slice(defaultButtons.length));
-    }
-
-    return allButtons;
-  }, [buttons, theme]); // Only track necessary dependencies
+  const defaultButtons: ButtonActivityInfo[] = [
+    {
+      text: "Start timer",
+      color: theme.color.veryLightGrey, // Use theme color as default
+      onPress: () => {},
+    },
+    {
+      text: "t",
+      color: theme.color.mediumGrey,
+      onPress: () => {},
+    },
+  ];
+  if (buttons.length === 0) {
+    buttons = defaultButtons;
+  }
 
   const animStyles = {
     chevron: useAnimatedStyle(() => ({
@@ -134,16 +118,18 @@ export default function Activity({
     >
       <View style={styles.activityInternal}>
         <View style={styles.buttonContainer}>
-          {mergedButtons.map((button) => (
-            <TouchableOpacity
-              style={[{ backgroundColor: button.color }, styles.button]}
-              key={button.text}
-              onPress={button.onPress}
-              activeOpacity={clickable ? 0.75 : 1}
-            >
-              <Text style={styles.buttonText}>{button.text}</Text>
-            </TouchableOpacity>
-          ))}
+          {buttons.map((button) => {
+            return (
+              <TouchableOpacity
+                style={[{ backgroundColor: button.color }, styles.button]}
+                key={button.text}
+                onPress={button.onPress}
+                activeOpacity={clickable ? 0.75 : 1}
+              >
+                <Text style={styles.buttonText}>{button.text}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         <TouchableOpacity
           style={styles.collapsedActivity}

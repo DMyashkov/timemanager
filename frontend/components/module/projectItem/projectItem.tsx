@@ -61,38 +61,21 @@ export default function Activity({
       : theme.color.presets.green;
 
   const styles = useStyles(activityColorPallete);
-  const mergedButtons = useMemo(() => {
-    const defaultButtons: ButtonActivityInfo[] = [
-      {
-        text: "Start timer",
-        color: theme.color.veryLightGrey, // Use theme color as default
-        onPress: () => {},
-      },
-      {
-        text: "Edit",
-        color: theme.color.mediumGrey,
-        onPress: () => {},
-      },
-    ];
-
-    const allButtons = [...defaultButtons];
-
-    // Overwrite any default button with the one provided in `buttons` if present
-    buttons.forEach((button, index) => {
-      allButtons[index] = {
-        ...allButtons[index],
-        ...button, // override properties
-      };
-    });
-
-    // Add additional buttons (beyond the default two)
-    if (buttons.length > defaultButtons.length) {
-      allButtons.push(...buttons.slice(defaultButtons.length));
-    }
-
-    return allButtons;
-  }, [buttons, theme]); // Only track necessary dependencies
-
+  const defaultButtons: ButtonActivityInfo[] = [
+    {
+      text: "Start timer",
+      color: theme.color.veryLightGrey, // Use theme color as default
+      onPress: () => {},
+    },
+    {
+      text: "Edit",
+      color: theme.color.mediumGrey,
+      onPress: () => {},
+    },
+  ];
+  if (buttons.length === 0) {
+    buttons = defaultButtons;
+  }
   const [isUnfocusStarted, setIsUnfocusStarted] = useState<boolean>(false);
 
   const animStyles = {
@@ -158,7 +141,7 @@ export default function Activity({
     <Animated.View style={[styles.activity, style, animStyles.activityItem]}>
       <View style={styles.activityInternal}>
         <View style={styles.buttonContainer}>
-          {mergedButtons.map((button) => (
+          {buttons.map((button) => (
             <TouchableOpacity
               style={[{ backgroundColor: button.color }, styles.button]}
               key={button.text}

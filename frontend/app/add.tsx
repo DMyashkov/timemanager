@@ -169,9 +169,6 @@ export default function AddScreen() {
       }
     }
   }, [dataIndexParam]);
-  console.log(parentId);
-  console.log(dataIndex);
-  console.log(dataIndex?.[parentId as string]);
 
   const [parent, setParent] = useState<DataIndexItem | null>(null); // 🛠️ Set to null initially
   const [current, setCurrent] = useState<DataIndexItem | null>(null);
@@ -208,44 +205,58 @@ export default function AddScreen() {
       style={[styles.addScreen]}
     >
       <View style={styles.innerAddScreen}>
-        <SwitchWrapper
-          buttons={[
-            {
-              text: "Activity",
-              onPress: () => {},
-            },
-            {
-              text: "Project",
-              onPress: () => {},
-            },
-          ]}
-          styleSwitch={styles.switchOuter}
-        >
+        {current == null ? (
+          <SwitchWrapper
+            buttons={[
+              {
+                text: "Activity",
+                onPress: () => {},
+              },
+              {
+                text: "Project",
+                onPress: () => {},
+              },
+            ]}
+            styleSwitch={styles.switchOuter}
+          >
+            <AddSegment
+              selectedColorIndex={selectedColorIndex}
+              setSelectedColorIndex={setSelectedColorIndex}
+              colorArray={colorArray}
+              parent={parent}
+              setParent={setParent}
+              style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+              handleCreate={handleCreate}
+              dataIndex={dataIndex}
+              current={current}
+            />
+            <AddSegment
+              selectedColorIndex={selectedColorIndex}
+              setSelectedColorIndex={setSelectedColorIndex}
+              colorArray={colorArray}
+              parent={parent}
+              setParent={setParent}
+              isProject={true}
+              style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+              handleCreate={handleCreate}
+              dataIndex={dataIndex}
+              current={current}
+            />
+          </SwitchWrapper>
+        ) : (
           <AddSegment
             selectedColorIndex={selectedColorIndex}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
+            isProject={!(current.item.type === moduleType.activity)}
             setParent={setParent}
             style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
             handleCreate={handleCreate}
             dataIndex={dataIndex}
             current={current}
           />
-          <AddSegment
-            selectedColorIndex={selectedColorIndex}
-            setSelectedColorIndex={setSelectedColorIndex}
-            colorArray={colorArray}
-            parent={parent}
-            setParent={setParent}
-            isProject={true}
-            style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-            handleCreate={handleCreate}
-            dataIndex={dataIndex}
-            isAddScreen={isAddScreen}
-            current={current}
-          />
-        </SwitchWrapper>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );

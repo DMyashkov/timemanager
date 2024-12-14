@@ -52,10 +52,6 @@ export default function WorkplaceScreen() {
       try {
         // Attempt to get DataIndex
         const indexResponse = await getDataIndex();
-        console.log(
-          "DataIndex loaded successfully:",
-          JSON.stringify(indexResponse.data, null, 2),
-        );
         setDataIndex(indexResponse.data);
       } catch (err) {
         console.error("Error fetching DataIndex:", err);
@@ -68,10 +64,6 @@ export default function WorkplaceScreen() {
 
           // After rebuilding, fetch DataIndex again
           const indexAgainResponse = await getDataIndex();
-          console.log(
-            "DataIndex reloaded successfully:",
-            JSON.stringify(indexAgainResponse.data, null, 2),
-          );
           setDataIndex(indexAgainResponse.data);
         } catch (rebuildErr) {
           console.error("Error rebuilding DataIndex:", rebuildErr);
@@ -92,10 +84,6 @@ export default function WorkplaceScreen() {
               Authorization: `Token ${token}`,
             },
           },
-        );
-        console.log(
-          "Tree data loaded:",
-          JSON.stringify(treeResponse.data, null, 2),
         );
         // Assume the first item is the root node
         setData(treeResponse.data[0]);

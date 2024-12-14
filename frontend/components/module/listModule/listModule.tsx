@@ -22,6 +22,7 @@ import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
 import { DataIndex } from "@/constants/interfaces";
 import exampleData from "@/constants/exampleData";
+import { useTheme } from "@context/ThemeContext";
 type ActivityData = {
   id: string;
   title: string;
@@ -281,6 +282,7 @@ function ListModuleInner({
 
   // console.log("activityData", JSON.stringify(activityData, null, 2));
   // console.log("exampleData", JSON.stringify(exampleData, null, 2));
+  const { theme } = useTheme();
 
   return (
     <Animated.View style={[animStyles.listModule]}>
@@ -306,6 +308,22 @@ function ListModuleInner({
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
             activityColor={dataIndex[activityData.id].item.colorPreset}
+            buttons={[
+              {
+                text: "Start timer",
+                color: theme.color.veryLightGrey, // Use theme color as default
+                onPress: () => {
+                  console.log("Start timer");
+                },
+              },
+              {
+                text: "Edit",
+                color: theme.color.mediumGrey,
+                onPress: () => {
+                  console.log("Edit");
+                },
+              },
+            ]}
           />
         ) : (
           <ProjectItem
@@ -326,6 +344,22 @@ function ListModuleInner({
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
             activityColor={dataIndex[activityData.id].item.colorPreset}
+            buttons={[
+              {
+                text: "Start timer",
+                color: theme.color.veryLightGrey, // Use theme color as default
+                onPress: () => {
+                  console.log("Start timer");
+                },
+              },
+              {
+                text: "Edit",
+                color: theme.color.mediumGrey,
+                onPress: () => {
+                  console.log("Edit");
+                },
+              },
+            ]}
           />
         ))}
       {typeOfModule === moduleType.activity && (
