@@ -44,6 +44,7 @@ export default function useStyles() {
       paddingHorizontal: PADDING_HORIZONTAL,
     },
     buttonProject: {
+      gap: 4,
       flexDirection: "row",
       height: 45,
       borderRadius: theme.borderRadius.large,

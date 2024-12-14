@@ -33,6 +33,8 @@ interface AddQuery {
   productive: boolean;
 }
 
+import TrashCan from "@assets/icons/trash-can.svg";
+
 export default function AddScreen() {
   const {
     dataIndex: rawDataIndexParam,
@@ -382,6 +384,7 @@ function ActivityAddContent({
   const [productivity, setProductivity] = useState<boolean>(
     current?.item.productive || true,
   );
+  const { theme } = useTheme();
   return (
     <>
       <TextField
@@ -463,6 +466,12 @@ function ActivityAddContent({
               handleDelete();
             }}
           >
+            <TrashCan
+              fill={theme.color.red}
+              width={20}
+              height={20}
+              style={{ marginBottom: 2 }}
+            />
             <Text style={styles.buttonTextProject}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -487,6 +496,7 @@ function ProjectAddContent({
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
   const productivity = dataIndex[parent.item.id].item.productive;
+  const { theme } = useTheme();
 
   return (
     <>
@@ -547,6 +557,13 @@ function ProjectAddContent({
               handleDelete();
             }}
           >
+            <TrashCan
+              fill={theme.color.red}
+              width={20}
+              height={20}
+              style={{ marginBottom: 2 }}
+            />
+
             <Text style={styles.buttonTextProject}>Delete</Text>
           </TouchableOpacity>
         </View>
