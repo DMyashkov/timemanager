@@ -17,10 +17,10 @@ import AddItem from "../addItem/addItem";
 import type { SharedValue } from "react-native-reanimated/lib/typescript/Animated";
 import { router, useLocalSearchParams } from "expo-router";
 
-import data, { dataIndex } from "../../../constants/exampleData";
 import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
+import { DataIndex } from "@/constants/interfaces";
 type ActivityData = {
   id: string;
   title: string;
@@ -46,6 +46,7 @@ type ActivityProps = {
   setIsVisibleAnimZero?: (value: boolean) => void;
   typeOfModule?: moduleType;
   activityData: ActivityData;
+  dataIndex: DataIndex;
 };
 
 export default function ListModule(props: ActivityProps) {
@@ -100,6 +101,7 @@ function ListModuleInner({
   isLastInList = true,
   setIsVisibleAnimZero = () => {},
   typeOfModule = moduleType.activity,
+  dataIndex,
 }: ActivityProps) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
@@ -350,6 +352,7 @@ function ListModuleInner({
                     onFocusAdditional={onFocusAdditional}
                     expandAnimOfParent={multipliedExpandAnim}
                     typeOfModule={activity.type}
+                    dataIndex={dataIndex}
                   />
                 )}
                 style={{ overflow: "visible" }}
