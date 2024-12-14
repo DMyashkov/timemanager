@@ -319,7 +319,7 @@ function AddSegment({
     >
       <TouchableOpacity
         activeOpacity={1}
-        style={styles.content}
+        style={[styles.content, { paddingTop: current == null ? 16 : 10 }]}
         onPress={Keyboard.dismiss}
       >
         {!isProject ? (
