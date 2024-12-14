@@ -19,7 +19,7 @@ import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { moduleType } from "@/constants/interfaces";
-import { useLocalSearchParams } from "expo-router";
+import { Stack, router, useLocalSearchParams } from "expo-router";
 
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -34,6 +34,7 @@ interface AddQuery {
 }
 
 import TrashCan from "@assets/icons/trash-can.svg";
+import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 
 export default function AddScreen() {
   const {
@@ -153,7 +154,7 @@ export default function AddScreen() {
     }
   };
 
-  console.log("isAddScreen", isAddScreen);
+  // console.log("isAddScreen", isAddScreen);
 
   const [dataIndex, setDataIndex] = useState<Record<string, DataIndexItem>>({}); // 🛠️ Default to empty object
   const dataIndexParam = Array.isArray(rawDataIndexParam)
@@ -200,74 +201,85 @@ export default function AddScreen() {
       </View>
     );
   }
-  console.log("current", current);
-  console.log("dataIndex", JSON.stringify(dataIndex, null, 2));
+  // console.log("current", current);
+  // console.log("dataIndex", JSON.stringify(dataIndex, null, 2));
 
   const handleDelete = async () => {};
+  const isProject = current?.item.type === moduleType.project;
 
   return (
-    <TouchableWithoutFeedback
-      onPress={Keyboard.dismiss}
-      style={[styles.addScreen]}
-    >
-      <View style={styles.innerAddScreen}>
-        {current == null ? (
-          <SwitchWrapper
-            buttons={[
-              {
-                text: "Activity",
-                onPress: () => {},
-              },
-              {
-                text: "Project",
-                onPress: () => {},
-              },
-            ]}
-            styleSwitch={styles.switchOuter}
-          >
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: isAddScreen
+            ? "Create Tag"
+            : `Edit ${isProject ? "Project" : "Activity"}`,
+        }}
+      />
+
+      <TouchableWithoutFeedback
+        onPress={Keyboard.dismiss}
+        style={[styles.addScreen]}
+      >
+        <View style={styles.innerAddScreen}>
+          {current == null ? (
+            <SwitchWrapper
+              buttons={[
+                {
+                  text: "Activity",
+                  onPress: () => {},
+                },
+                {
+                  text: "Project",
+                  onPress: () => {},
+                },
+              ]}
+              styleSwitch={styles.switchOuter}
+            >
+              <AddSegment
+                selectedColorIndex={selectedColorIndex}
+                setSelectedColorIndex={setSelectedColorIndex}
+                colorArray={colorArray}
+                parent={parent}
+                setParent={setParent}
+                style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+                handleCreate={handleCreate}
+                dataIndex={dataIndex}
+                current={current}
+                handleDelete={handleDelete}
+              />
+              <AddSegment
+                selectedColorIndex={selectedColorIndex}
+                setSelectedColorIndex={setSelectedColorIndex}
+                colorArray={colorArray}
+                parent={parent}
+                setParent={setParent}
+                handleDelete={handleDelete}
+                isProject={true}
+                style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
+                handleCreate={handleCreate}
+                dataIndex={dataIndex}
+                current={current}
+              />
+            </SwitchWrapper>
+          ) : (
             <AddSegment
+              handleDelete={handleDelete}
               selectedColorIndex={selectedColorIndex}
               setSelectedColorIndex={setSelectedColorIndex}
               colorArray={colorArray}
               parent={parent}
+              isProject={current.item.type === moduleType.project}
               setParent={setParent}
               style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
               handleCreate={handleCreate}
               dataIndex={dataIndex}
               current={current}
-              handleDelete={handleDelete}
             />
-            <AddSegment
-              selectedColorIndex={selectedColorIndex}
-              setSelectedColorIndex={setSelectedColorIndex}
-              colorArray={colorArray}
-              parent={parent}
-              setParent={setParent}
-              handleDelete={handleDelete}
-              isProject={true}
-              style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-              handleCreate={handleCreate}
-              dataIndex={dataIndex}
-              current={current}
-            />
-          </SwitchWrapper>
-        ) : (
-          <AddSegment
-            handleDelete={handleDelete}
-            selectedColorIndex={selectedColorIndex}
-            setSelectedColorIndex={setSelectedColorIndex}
-            colorArray={colorArray}
-            parent={parent}
-            isProject={current.item.type === moduleType.project}
-            setParent={setParent}
-            style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-            handleCreate={handleCreate}
-            dataIndex={dataIndex}
-            current={current}
-          />
-        )}
-      </View>
-    </TouchableWithoutFeedback>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    </>
   );
 }
 
@@ -385,7 +397,7 @@ function ActivityAddContent({
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [productivity, setProductivity] = useState<boolean>(
-    current?.item.productive || true,
+    current?.item.productive || dataIndex[parent.item.id].item.productive,
   );
   const { theme } = useTheme();
   return (
