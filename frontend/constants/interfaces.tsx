@@ -9,14 +9,14 @@ export type ActivityData = {
   id: string;
   title: string;
   type: moduleType;
-  activities?: ActivityData[];
+  children?: ActivityData[];
   colorPreset: ColorPresets;
   productive: boolean;
   lapName: string;
 };
 
 export type DataIndexItem = {
-  item: Omit<ActivityData, "activities">;
+  item: Omit<ActivityData, "children">;
   children: string[];
   path: string[];
 };
@@ -41,8 +41,8 @@ export interface SwitchProps {
 }
 
 export enum moduleType {
-  activity = 0,
-  project = 1,
+  activity = "activity",
+  project = "project",
 }
 
 export enum priorityEnum {

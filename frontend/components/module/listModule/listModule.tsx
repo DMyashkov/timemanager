@@ -21,11 +21,12 @@ import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
 import { DataIndex } from "@/constants/interfaces";
+import exampleData from "@/constants/exampleData";
 type ActivityData = {
   id: string;
   title: string;
   type: moduleType;
-  activities?: ActivityData[];
+  children?: ActivityData[];
 };
 
 enum moduleType {
@@ -115,7 +116,7 @@ function ListModuleInner({
   const shouldBeVisibleAnim = useSharedValue(0);
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(false);
-  const hasChildren = !!activityData.activities?.length;
+  const hasChildren = !!activityData.children?.length;
 
   const handleAddClick = useCallback(() => {
     onClickAddButton(activityData.id);
@@ -273,6 +274,9 @@ function ListModuleInner({
     return expandAnim.value * expandAnimOfParent.value;
   });
 
+  console.log("activityData", JSON.stringify(activityData, null, 2));
+  console.log("exampleData", JSON.stringify(exampleData, null, 2));
+
   return (
     <Animated.View style={[animStyles.listModule]}>
       {level !== 0 &&
@@ -291,7 +295,7 @@ function ListModuleInner({
               onFocusAdditional();
             }}
             isFocused={isFocused}
-            hasChildren={!!activityData.activities?.length}
+            hasChildren={!!activityData.children?.length}
             style={[styles.activityItem]}
             expandAnimParam={expandAnim}
             focusAnim={focusAnim}
@@ -335,7 +339,7 @@ function ListModuleInner({
             />
             {isExpandAnimGreaterThanZero && (
               <FlatList
-                data={activityData.activities}
+                data={activityData.children}
                 keyExtractor={(activity) => activity.id.toString()}
                 renderItem={({ item: activity }) => (
                   <ListModule
@@ -343,7 +347,7 @@ function ListModuleInner({
                     activityData={activity}
                     level={level + 1}
                     isLastInList={
-                      activity.id === activityData.activities?.slice(-1)[0].id
+                      activity.id === activityData.children?.slice(-1)[0].id
                     }
                     path={`${path}/${activity.id}`}
                     addScreen={addScreen}
