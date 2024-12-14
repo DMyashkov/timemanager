@@ -88,7 +88,7 @@ export default function AddScreen() {
       }
 
       // Use the parent's lap name as default if data.lapName is empty
-      const lapName = data.lapName || "Default Lap";
+      const lapName = data.lapName || "Lap";
 
       // Convert the parentId to an integer (since it must be a PK)
       const parentId = Number.parseInt(data.parentId, 10);
@@ -97,10 +97,12 @@ export default function AddScreen() {
       const response = await axios.post("http://127.0.0.1:8000/api/tags/", {
         title: data.title,
         type: data.type === moduleType.activity ? "activity" : "project",
-        parent: parentId, // Convert parentId to an integer
-        color_preset: data.colorPreset,
-        lap_name: lapName, // Ensure lap_name is not blank
+        parent: parentId,
+        colorPreset: data.colorPreset,
+        lapName: lapName,
         productive: data.productive,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
       console.log("Tag created successfully:", response.data);
