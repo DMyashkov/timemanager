@@ -142,6 +142,11 @@ export default function AddScreen() {
         return;
       }
 
+      if (!current) {
+        console.error("No current item found");
+        return;
+      }
+
       const parentId = Number.parseInt(data.parentId, 10);
 
       const response = await axios.put(
@@ -150,13 +155,14 @@ export default function AddScreen() {
           title: data.title,
           type: data.type === moduleType.activity ? "activity" : "project",
           parent: parentId,
-          color_preset: data.colorPreset,
-          lap_name: data.lapName,
+          colorPreset: data.colorPreset,
+          lapName: data.lapName,
           productive: data.productive,
+          updatedAt: new Date().toISOString(),
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        // {
+        //   headers: { Authorization: `Bearer ${token}` },
+        // },
       );
 
       console.log("Tag updated successfully:", response.data);

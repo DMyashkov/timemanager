@@ -32,11 +32,15 @@ class TagSerializer(serializers.ModelSerializer):
             'lapName',  # Use source for database field lap_name
             'parent',
             'children',
-            'createdAt',  # Use source for database field created_at
+            'createdAt',  # Use source for database field created
             'updatedAt'  # Use source for database field updated_at
         ]
+        extra_kwargs = {
+            # Writable for creation
+            'createdAt': {'read_only': False, 'required': False}
+        }
 
     colorPreset = serializers.CharField(source='color_preset')
     lapName = serializers.CharField(source='lap_name')
-    createdAt = serializers.DateTimeField(source='created_at')
+    createdAt = serializers.DateTimeField(source='created_at',  required=False)
     updatedAt = serializers.DateTimeField(source='updated_at')
