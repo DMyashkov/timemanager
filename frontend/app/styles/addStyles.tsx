@@ -48,7 +48,7 @@ export default function useStyles() {
       flexDirection: "row",
       height: 45,
       borderRadius: theme.borderRadius.large,
-      borderWidth: 3,
+      borderWidth: 2,
       borderColor: theme.color.red,
       justifyContent: "center",
       alignItems: "center",

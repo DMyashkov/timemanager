@@ -13,7 +13,7 @@ import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";
 import Picker from "@/components/form/picker/picker";
 import ColorPicker from "@/components/form/colorPicker/colorPicker";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
@@ -79,6 +79,22 @@ export default function AddScreen() {
     ColorPresets.GREEN,
   ];
 
+  // function useColorDictionary(
+  //   colorArray: ColorPresets[],
+  // ): Partial<Record<ColorPresets, number>> {
+  //   return useMemo(() => {
+  //     const colorDictionary: Partial<Record<ColorPresets, number>> = {};
+  //     for (let i = 0; i < colorArray.length; i++) {
+  //       if (!colorDictionary[colorArray[i]]) {
+  //         colorDictionary[colorArray[i]] = i;
+  //       }
+  //     }
+  //     return colorDictionary;
+  //   }, [colorArray]);
+  // }
+  //
+  // const colorDictionary = useColorDictionary(colorArray);
+  //
   const handleCreate = async (data: AddQuery) => {
     try {
       const token = await AsyncStorage.getItem("authToken");
@@ -195,6 +211,7 @@ export default function AddScreen() {
     }
   }, [dataIndex, parentId, isAddScreen]);
 
+  const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const PADDING_HORIZONTAL = 22;
   if (!parent) {
     return (
@@ -216,6 +233,16 @@ export default function AddScreen() {
           headerTitle: isAddScreen
             ? "Create Tag"
             : `Edit ${isProject ? "Project" : "Activity"}`,
+          headerRight: () => (
+            // !isAddScreen ? (
+            <SysButton
+              text="Save"
+              onPress={() => {
+                setSaveButtonPressed(true);
+              }}
+            />
+          ),
+          // ) : null,
         }}
       />
 
