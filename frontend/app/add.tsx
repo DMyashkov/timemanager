@@ -233,16 +233,15 @@ export default function AddScreen() {
           headerTitle: isAddScreen
             ? "Create Tag"
             : `Edit ${isProject ? "Project" : "Activity"}`,
-          headerRight: () => (
-            // !isAddScreen ? (
-            <SysButton
-              text="Save"
-              onPress={() => {
-                setSaveButtonPressed(true);
-              }}
-            />
-          ),
-          // ) : null,
+          headerRight: () =>
+            !isAddScreen ? (
+              <SysButton
+                text="Save"
+                onPress={() => {
+                  setSaveButtonPressed(true);
+                }}
+              />
+            ) : null,
         }}
       />
 
@@ -304,6 +303,9 @@ export default function AddScreen() {
               handleCreate={handleCreate}
               dataIndex={dataIndex}
               current={current}
+              handleUpdate={handleUpdate}
+              saveButtonPressed={saveButtonPressed}
+              setSaveButtonPressed={setSaveButtonPressed}
             />
           )}
         </View>
@@ -323,6 +325,9 @@ interface ContentProps {
   handleDelete: () => void;
   dataIndex: Record<string, DataIndexItem>;
   current: DataIndexItem | null;
+  handleUpdate?: (data: AddQuery) => void;
+  saveButtonPressed?: boolean;
+  setSaveButtonPressed?: (pressed: boolean) => void;
 }
 
 function AddSegment({
@@ -337,6 +342,9 @@ function AddSegment({
   handleDelete,
   dataIndex,
   current,
+  handleUpdate,
+  saveButtonPressed,
+  setSaveButtonPressed,
 }: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [moduleNameState, setModuleNameState] = useState(
@@ -380,6 +388,9 @@ function AddSegment({
             dataIndex={dataIndex}
             handleCreate={handleCreate}
             handleDelete={handleDelete}
+            handleUpdate={handleUpdate}
+            saveButtonPressed={saveButtonPressed}
+            setSaveButtonPressed={setSaveButtonPressed}
           />
         ) : (
           <ProjectAddContent
@@ -396,6 +407,9 @@ function AddSegment({
             setLapName={setLapName}
             handleCreate={handleCreate}
             handleDelete={handleDelete}
+            handleUpdate={handleUpdate}
+            saveButtonPressed={saveButtonPressed}
+            setSaveButtonPressed={setSaveButtonPressed}
           />
         )}
       </TouchableOpacity>
@@ -424,12 +438,44 @@ function ActivityAddContent({
   dataIndex,
   handleDelete,
   current,
+  handleUpdate,
+  saveButtonPressed,
+  setSaveButtonPressed,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [productivity, setProductivity] = useState<boolean>(
     current?.item.productive || dataIndex[parent.item.id].item.productive,
   );
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (
+      saveButtonPressed &&
+      setSaveButtonPressed !== undefined &&
+      handleUpdate !== undefined
+    ) {
+      handleUpdate({
+        type: moduleType.activity,
+        title: moduleName,
+        colorPreset: colorArray[selectedColorIndex],
+        lapName: lapName,
+        parentId: parent.item.id,
+        productive: productivity,
+      });
+      setSaveButtonPressed(false);
+    }
+  }, [
+    saveButtonPressed,
+    setSaveButtonPressed,
+    handleUpdate,
+    parent,
+    productivity,
+    selectedColorIndex,
+    lapName,
+    moduleName,
+    colorArray,
+  ]);
+
   return (
     <>
       <TextField
@@ -538,10 +584,40 @@ function ProjectAddContent({
   dataIndex,
   handleDelete,
   current,
+  handleUpdate,
+  saveButtonPressed,
+  setSaveButtonPressed,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
   const productivity = dataIndex[parent.item.id].item.productive;
   const { theme } = useTheme();
+
+  useEffect(() => {
+    if (
+      saveButtonPressed &&
+      setSaveButtonPressed !== undefined &&
+      handleUpdate !== undefined
+    ) {
+      handleUpdate({
+        type: moduleType.activity,
+        title: moduleName,
+        colorPreset: projectColor,
+        lapName: lapName,
+        parentId: parent.item.id,
+        productive: productivity,
+      });
+      setSaveButtonPressed(false);
+    }
+  }, [
+    saveButtonPressed,
+    setSaveButtonPressed,
+    handleUpdate,
+    parent,
+    productivity,
+    projectColor,
+    lapName,
+    moduleName,
+  ]);
 
   return (
     <>
