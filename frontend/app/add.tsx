@@ -15,7 +15,12 @@ import Picker from "@/components/form/picker/picker";
 import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useEffect, useMemo, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
-import { ColorPresets, type DataIndexItem } from "@/constants/interfaces";
+import {
+  ColorPresets,
+  TagPayload,
+  type DataIndexItem,
+  DataIndex,
+} from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { moduleType } from "@/constants/interfaces";
@@ -35,18 +40,15 @@ interface AddQuery {
 
 import TrashCan from "@assets/icons/trash-can.svg";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
+import { useTagContext } from "@/constants/tagContext";
 
 export default function AddScreen() {
-  const {
-    dataIndex: rawDataIndexParam,
-    parentId,
-    rawIsAddScreen,
-  } = useLocalSearchParams();
+  const { parentId, rawIsAddScreen } = useLocalSearchParams();
   const isAddScreen = rawIsAddScreen === "true";
   const styles = useStyles();
   const { theme } = useTheme();
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const colorArray = [
+  const colorArray: ColorPresets[] = [
     ColorPresets.ORANGE,
     ColorPresets.GREEN,
     ColorPresets.ORANGE,
@@ -79,127 +81,13 @@ export default function AddScreen() {
     ColorPresets.GREEN,
   ];
 
-  // function useColorDictionary(
-  //   colorArray: ColorPresets[],
-  // ): Partial<Record<ColorPresets, number>> {
-  //   return useMemo(() => {
-  //     const colorDictionary: Partial<Record<ColorPresets, number>> = {};
-  //     for (let i = 0; i < colorArray.length; i++) {
-  //       if (!colorDictionary[colorArray[i]]) {
-  //         colorDictionary[colorArray[i]] = i;
-  //       }
-  //     }
-  //     return colorDictionary;
-  //   }, [colorArray]);
-  // }
-  //
-  // const colorDictionary = useColorDictionary(colorArray);
-  //
-  const handleCreate = async (data: AddQuery) => {
-    try {
-      const token = await AsyncStorage.getItem("authToken");
-      if (!token) {
-        console.error("No token found");
-        return;
-      }
+  // Utilize TagContext
+  const { dataIndex, createTag, updateTag, deleteTag } = useTagContext();
+  console.log(dataIndex);
 
-      // Use the parent's lap name as default if data.lapName is empty
-      const lapName = data.lapName || "Lap";
-
-      // Convert the parentId to an integer (since it must be a PK)
-      const parentId = Number.parseInt(data.parentId, 10);
-
-      // Send the POST request to create a new tag
-      const response = await axios.post("http://127.0.0.1:8000/api/tags/", {
-        title: data.title,
-        type: data.type === moduleType.activity ? "activity" : "project",
-        parent: parentId,
-        colorPreset: data.colorPreset,
-        lapName: lapName,
-        productive: data.productive,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-
-      console.log("Tag created successfully:", response.data);
-      alert(`Tag Created: ${response.data.title}`);
-    } catch (error) {
-      console.error("Error creating tag:", error);
-      if (axios.isAxiosError(error)) {
-        console.log("API Error:", error.response?.data);
-        alert(`Error: ${JSON.stringify(error.response?.data)}`);
-      } else {
-        alert(`Error: ${error.message}`);
-      }
-    }
-  };
-
-  const handleUpdate = async (data: AddQuery) => {
-    try {
-      const token = await AsyncStorage.getItem("authToken");
-      if (!token) {
-        console.error("No token found");
-        return;
-      }
-
-      if (!current) {
-        console.error("No current item found");
-        return;
-      }
-
-      const parentId = Number.parseInt(data.parentId, 10);
-
-      const response = await axios.put(
-        `http://127.0.0.1:8000/api/tags/${parentId}/`,
-        {
-          title: data.title,
-          type: data.type === moduleType.activity ? "activity" : "project",
-          parent: parentId,
-          colorPreset: data.colorPreset,
-          lapName: data.lapName,
-          productive: data.productive,
-          updatedAt: new Date().toISOString(),
-        },
-        // {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // },
-      );
-
-      console.log("Tag updated successfully:", response.data);
-      alert(`Tag Updated: ${response.data.title}`);
-    } catch (error) {
-      console.error("Error updating tag:", error);
-      if (axios.isAxiosError(error)) {
-        console.log("API Error:", error.response?.data);
-        alert(`Error: ${JSON.stringify(error.response?.data)}`);
-      } else {
-        alert(`Error: ${error.message}`);
-      }
-    }
-  };
-
-  // console.log("isAddScreen", isAddScreen);
-
-  const [dataIndex, setDataIndex] = useState<Record<string, DataIndexItem>>({}); // 🛠️ Default to empty object
-  const dataIndexParam = Array.isArray(rawDataIndexParam)
-    ? rawDataIndexParam[0]
-    : rawDataIndexParam;
-
-  // 🛠️ Parse dataIndex only once on component load
-  useEffect(() => {
-    if (dataIndexParam) {
-      try {
-        const parsedDataIndex = JSON.parse(dataIndexParam);
-        setDataIndex(parsedDataIndex);
-      } catch (error) {
-        console.error("Failed to parse dataIndex:", error);
-      }
-    }
-  }, [dataIndexParam]);
-
-  const [parent, setParent] = useState<DataIndexItem | null>(null); // 🛠️ Set to null initially
+  // Initialize parent and current states as null
+  const [parent, setParent] = useState<DataIndexItem | null>(null);
   const [current, setCurrent] = useState<DataIndexItem | null>(null);
-  const currentId = !isAddScreen ? parentId : null;
 
   useEffect(() => {
     if (dataIndex && parentId) {
@@ -208,10 +96,8 @@ export default function AddScreen() {
         setCurrent(null);
       } else {
         const currentItem = dataIndex[parentId as string];
-
-        setParent(
-          dataIndex[currentItem?.path[currentItem.path.length - 1]] || null,
-        );
+        const parentPath = currentItem?.path[currentItem.path.length - 1];
+        setParent(parentPath ? dataIndex[parentPath] || null : null);
         setCurrent(currentItem);
       }
     }
@@ -219,17 +105,61 @@ export default function AddScreen() {
 
   const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const PADDING_HORIZONTAL = 22;
-  if (!parent) {
+
+  if (!parent || !dataIndex) {
     return (
       <View>
         <Text>Loading...</Text>
       </View>
     );
   }
-  // console.log("current", current);
-  // console.log("dataIndex", JSON.stringify(dataIndex, null, 2));
 
-  const handleDelete = async () => {};
+  // Implement handleDelete using TagContext's deleteTag
+  const handleDelete = async () => {
+    if (current) {
+      await deleteTag(current.item.id);
+      router.back(); // Navigate back after deletion
+    }
+  };
+
+  const handleCreate = async (data: AddQuery) => {
+    // Map AddQuery to TagPayload
+    const tagPayload = {
+      type: data.type,
+      title: data.title,
+      colorPreset: data.colorPreset,
+      lapName: data.lapName,
+      parent: data.parentId, // Assuming parentId is a string or null
+      productive: data.productive,
+    };
+
+    await createTag(tagPayload);
+  };
+
+  const handleUpdate = async (data: AddQuery) => {
+    if (current) {
+      // Map AddQuery to Partial<TagPayload>
+      const tagUpdates: Partial<TagPayload> = {
+        type: data.type,
+        title: data.title,
+        colorPreset: data.colorPreset,
+        lapName: data.lapName,
+        parent: data.parentId, // Assuming parentId is a string or null
+        productive: data.productive,
+      };
+
+      await updateTag(current.item.id, tagUpdates);
+    }
+  };
+
+  // Implement handleDelete using TagContext's deleteTag
+  // const handleDeleteAction = async () => {
+  //   if (current) {
+  //     await deleteTag(current.item.id);
+  //     router.back(); // Navigate back after deletion
+  //   }
+  // };
+
   const isProject = current?.item.type === moduleType.project;
 
   return (
@@ -329,7 +259,7 @@ interface ContentProps {
   style?: object;
   handleCreate: (data: AddQuery) => void;
   handleDelete: () => void;
-  dataIndex: Record<string, DataIndexItem>;
+  dataIndex: DataIndex;
   current: DataIndexItem | null;
   handleUpdate?: (data: AddQuery) => void;
   saveButtonPressed?: boolean;
@@ -359,7 +289,6 @@ function AddSegment({
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
   const [lapName, setLapName] = useState(current ? current.item.lapName : "");
-  console.log("isProject", isProject);
 
   return (
     <ScrollView

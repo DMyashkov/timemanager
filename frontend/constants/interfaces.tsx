@@ -69,3 +69,24 @@ export function getDaysInMonth(month: number, year: number): number {
   // Use Date object to calculate days in the given month
   return new Date(year, month, 0).getDate();
 }
+
+export interface TagPayload {
+  title: string;
+  type: moduleType; // "activity" | "project"
+  parent: string | null; // string ID
+  colorPreset: ColorPresets;
+  lapName: string;
+  productive: boolean;
+  createdAt?: string; // Optional for creation
+  updatedAt?: string; // Optional for creation or update
+}
+
+export interface TagTreeNode {
+  id: string;
+  title: string;
+  type: moduleType;
+  productive: boolean;
+  lapName: string;
+  colorPreset: ColorPresets;
+  children?: TagTreeNode[]; // Recursive children
+}

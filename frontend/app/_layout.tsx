@@ -7,6 +7,7 @@ import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { TagProvider } from "@/constants/TagContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -39,97 +40,99 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <Stack screenOptions={{}}>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="add"
-            options={{
-              presentation: "modal",
-              headerLeft: () => (
-                <SysButton
-                  text="Cancel"
-                  onPress={() => {
-                    router.back();
-                  }}
-                />
-              ),
-              headerTitle: (props) => (
-                <Text
-                  {...props}
-                  style={{
-                    fontSize: useTheme().theme.fontSize.medium,
-                    fontFamily: useTheme().theme.font.semibold,
-                  }}
-                >
-                  Create tag
-                </Text>
-              ),
-            }}
-          />
+        <TagProvider>
+          <Stack screenOptions={{}}>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="add"
+              options={{
+                presentation: "modal",
+                headerLeft: () => (
+                  <SysButton
+                    text="Cancel"
+                    onPress={() => {
+                      router.back();
+                    }}
+                  />
+                ),
+                headerTitle: (props) => (
+                  <Text
+                    {...props}
+                    style={{
+                      fontSize: useTheme().theme.fontSize.medium,
+                      fontFamily: useTheme().theme.font.semibold,
+                    }}
+                  >
+                    Create tag
+                  </Text>
+                ),
+              }}
+            />
 
-          <Stack.Screen
-            name="pickActivity"
-            options={{
-              presentation: "modal",
-              headerShown: false,
-              headerLeft: () => (
-                <SysButton
-                  text="Cancel"
-                  onPress={() => {
-                    router.back();
-                  }}
-                  isRegular={true}
-                />
-              ),
-              headerTitle: (props) => (
-                <Text
-                  {...props}
-                  style={{
-                    fontSize: useTheme().theme.fontSize.medium,
-                    fontFamily: useTheme().theme.font.semibold,
-                  }}
-                >
-                  Change Activity
-                </Text>
-              ),
-              headerRight: () => (
-                <SysButton
-                  text="Choose"
-                  onPress={() => {
-                    router.back();
-                  }}
-                />
-              ),
-            }}
-          />
+            <Stack.Screen
+              name="pickActivity"
+              options={{
+                presentation: "modal",
+                headerShown: false,
+                headerLeft: () => (
+                  <SysButton
+                    text="Cancel"
+                    onPress={() => {
+                      router.back();
+                    }}
+                    isRegular={true}
+                  />
+                ),
+                headerTitle: (props) => (
+                  <Text
+                    {...props}
+                    style={{
+                      fontSize: useTheme().theme.fontSize.medium,
+                      fontFamily: useTheme().theme.font.semibold,
+                    }}
+                  >
+                    Change Activity
+                  </Text>
+                ),
+                headerRight: () => (
+                  <SysButton
+                    text="Choose"
+                    onPress={() => {
+                      router.back();
+                    }}
+                  />
+                ),
+              }}
+            />
 
-          <Stack.Screen
-            name="login"
-            options={{
-              headerShown: false,
-              presentation: "modal",
-            }}
-          />
-          <Stack.Screen
-            name="signup"
-            options={{
-              headerShown: false,
-              presentation: "modal",
-            }}
-          />
+            <Stack.Screen
+              name="login"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="signup"
+              options={{
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
 
-          <Stack.Screen
-            name="authSelection"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
+            <Stack.Screen
+              name="authSelection"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </TagProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
