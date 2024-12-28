@@ -40,7 +40,7 @@ interface AddQuery {
 
 import TrashCan from "@assets/icons/trash-can.svg";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
-import { useTagContext } from "@/context/tagContext";
+import { useTagContext } from "@/context/TagContext";
 
 export default function AddScreen() {
   const { parentId, rawIsAddScreen } = useLocalSearchParams();

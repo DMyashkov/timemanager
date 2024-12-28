@@ -7,7 +7,7 @@ import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TagProvider } from "@/context/tagContext";
+import { TagProvider } from "@/context/TagContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
