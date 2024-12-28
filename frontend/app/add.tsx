@@ -40,7 +40,7 @@ interface AddQuery {
 
 import TrashCan from "@assets/icons/trash-can.svg";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
-import { useTagContext } from "@/constants/tagContext";
+import { useTagContext } from "@/context/tagContext";
 
 export default function AddScreen() {
   const { parentId, rawIsAddScreen } = useLocalSearchParams();
@@ -129,7 +129,7 @@ export default function AddScreen() {
       title: data.title,
       colorPreset: data.colorPreset,
       lapName: data.lapName,
-      parent: data.parentId, // Assuming parentId is a string or null
+      parent: data.parentId,
       productive: data.productive,
     };
 

@@ -76,6 +76,8 @@ export function TagProvider({ children }: TagProviderProps) {
     try {
       const config = await getAuthConfig();
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
+      console.log("Fetched dataIndex:", JSON.stringify(response.data, null, 2));
+
       setDataIndex(response.data);
     } catch (error) {
       console.error("Failed to refresh dataIndex:", error);
@@ -307,30 +309,37 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const createTagAction = useCallback(
     async (payload: TagPayload) => {
+      // Add createdAt timestamp
+      const enrichedPayload = {
+        ...payload,
+        createdAt: new Date().toISOString(), // Add createdAt
+      };
+
       // 1) Generate a temporary local ID
-      const tempId = `temp-${Date.now()}`; // Use a string to avoid conflicts
+      const tempId = `temp-${Date.now()}`;
 
       // 2) Optimistically create locally
-      localCreateTag(tempId, payload);
+      localCreateTag(tempId, enrichedPayload);
 
       // 3) Real API call
       try {
         const config = await getAuthConfig();
-        const response = await axios.post(`${baseURL}/tags/`, payload, config);
+        const response = await axios.post(
+          `${baseURL}/tags/`,
+          enrichedPayload,
+          config,
+        );
         const createdTag = response.data;
-        const realId = createdTag.id.toString(); // Ensure it's a string
+        const realId = createdTag.id.toString();
 
-        // Option B: Reconcile local temp ID with real ID
+        // Replace the temporary ID with the real one
         if (dataIndex) {
-          // Remove the temp one
           localDeleteTag(tempId);
-          // Create a new local entry with the actual ID
-          localCreateTag(realId, payload);
+          localCreateTag(realId, enrichedPayload);
         }
       } catch (error) {
         console.error("Error creating tag:", error);
-        // Revert local creation
-        localDeleteTag(tempId);
+        localDeleteTag(tempId); // Revert if failed
       }
     },
     [baseURL, getAuthConfig, dataIndex, localCreateTag, localDeleteTag],
@@ -338,13 +347,19 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const updateTagAction = useCallback(
     async (id: string, payload: Partial<TagPayload>) => {
-      // 1) Optimistic update
-      localUpdateTag(id, payload);
+      // Add updatedAt timestamp
+      const enrichedPayload = {
+        ...payload,
+        updatedAt: new Date().toISOString(), // Add updatedAt
+      };
+
+      // 1) Optimistically update locally
+      localUpdateTag(id, enrichedPayload);
 
       // 2) Real API call
       try {
         const config = await getAuthConfig();
-        await axios.put(`${baseURL}/tags/${id}/`, payload, config);
+        await axios.put(`${baseURL}/tags/${id}/`, enrichedPayload, config);
       } catch (error) {
         console.error("Error updating tag:", error);
         // Optionally, revert local changes or handle error
@@ -380,8 +395,19 @@ export function TagProvider({ children }: TagProviderProps) {
   // All dependencies are stable references due to useCallback
   useEffect(() => {
     const fetchData = async () => {
-      await refreshDataIndex();
-      await refreshTreeData();
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+          console.log("Auth token found, fetching data...");
+          await refreshDataIndex();
+          await refreshTreeData();
+        } else {
+          console.log("No auth token found, skipping data fetch.");
+        }
+      } catch (error) {
+        console.error("Error checking for auth token:", error);
+      }
     };
     void fetchData();
   }, [refreshDataIndex, refreshTreeData]);

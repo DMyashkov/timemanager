@@ -32,15 +32,25 @@ class TagSerializer(serializers.ModelSerializer):
             'lapName',  # Use source for database field lap_name
             'parent',
             'children',
-            'createdAt',  # Use source for database field created
-            'updatedAt'  # Use source for database field updated_at
+            'createdAt',  # Use source for database field created_at
+            'updatedAt',  # Use source for database field updated_at
         ]
         extra_kwargs = {
-            # Writable for creation
-            'createdAt': {'read_only': False, 'required': False}
+            'createdAt': {'required': False},
+            'updatedAt': {'required': False},
         }
 
     colorPreset = serializers.CharField(source='color_preset')
     lapName = serializers.CharField(source='lap_name')
-    createdAt = serializers.DateTimeField(source='created_at',  required=False)
-    updatedAt = serializers.DateTimeField(source='updated_at')
+    createdAt = serializers.DateTimeField(source='created_at', required=False)
+    updatedAt = serializers.DateTimeField(source='updated_at', required=False)
+
+    def validate(self, attrs):
+        # Ensure updatedAt is later than or equal to createdAt
+        created_at = attrs.get('created_at', None)
+        updated_at = attrs.get('updated_at', created_at)
+
+        if created_at and updated_at and updated_at < created_at:
+            raise serializers.ValidationError(
+                "updatedAt cannot be earlier than createdAt.")
+        return attrs

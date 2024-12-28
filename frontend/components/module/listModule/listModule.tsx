@@ -305,8 +305,8 @@ function ListModuleInner({
     },
   ];
 
-  console.log(typeOfModule);
-  console.log(typeOfModule === moduleType.activity);
+  // console.log(typeOfModule);
+  // console.log(typeOfModule === moduleType.activity);
 
   return (
     <Animated.View style={[animStyles.listModule]}>

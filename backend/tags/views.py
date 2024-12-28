@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -26,6 +27,19 @@ class TagViewSet(viewsets.ModelViewSet):
         tags = Tag.objects.filter(parent=None)
         serializer = TagSerializer(tags, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def perform_create(self, serializer):
+        # Set defaults if createdAt or updatedAt are not provided
+        created_at = serializer.validated_data.get(
+            'created_at', timezone.now())
+        updated_at = serializer.validated_data.get('updated_at', created_at)
+        serializer.save(created_at=created_at, updated_at=updated_at)
+
+    def perform_update(self, serializer):
+        # Default updatedAt to now if not provided
+        updated_at = serializer.validated_data.get(
+            'updated_at', timezone.now())
+        serializer.save(updated_at=updated_at)
 
 
 def generate_data_index():

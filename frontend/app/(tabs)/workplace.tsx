@@ -53,6 +53,7 @@ export default function WorkplaceScreen() {
         // Attempt to get DataIndex
         const indexResponse = await getDataIndex();
         setDataIndex(indexResponse.data);
+        console.log("DataIndex loaded successfully:", indexResponse.data);
       } catch (err) {
         console.error("Error fetching DataIndex:", err);
         setError("Failed to load DataIndex. Attempting to rebuild...");
@@ -65,6 +66,10 @@ export default function WorkplaceScreen() {
           // After rebuilding, fetch DataIndex again
           const indexAgainResponse = await getDataIndex();
           setDataIndex(indexAgainResponse.data);
+          console.log(
+            "DataIndex loaded successfully:",
+            indexAgainResponse.data,
+          );
         } catch (rebuildErr) {
           console.error("Error rebuilding DataIndex:", rebuildErr);
           setError("Failed to rebuild DataIndex. Please try again later.");
@@ -88,6 +93,7 @@ export default function WorkplaceScreen() {
         // Assume the first item is the root node
         setData(treeResponse.data[0]);
         setLoading(false);
+        console.log("Tag tree data loaded successfully:", treeResponse.data);
       } catch (treeError) {
         setError("Failed to load tree data");
         console.error("Error fetching tree data:", treeError);
