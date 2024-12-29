@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db.models.signals import (post_delete, post_save, pre_delete,
                                       pre_save)
 from django.dispatch import receiver
@@ -11,59 +12,46 @@ def get_data_index():
     return tag_index
 
 
+@receiver(post_save, sender=User)
+def create_root_activity_for_user(sender, instance, created, **kwargs):
+    """Ensure each new user has a root activity."""
+    if created:  # Only create for new users
+        if not Tag.objects.filter(parent=None, title="Root Activity", type=Tag.TagType.ACTIVITY).exists():
+            Tag.objects.create(
+                title="Root Activity",
+                description="This is the root activity for the user.",
+                type=Tag.TagType.ACTIVITY,
+                color_preset="green",
+                productive=True,
+                lap_name="Root Lap",
+            )
+
+
 @receiver(post_save, sender=Tag)
 def update_tag_index_on_save(sender, instance, created, **kwargs):
     """Update the data index when a Tag is created or updated."""
     tag_index = get_data_index()
     data_index = tag_index.data_index
 
-    if created:  # When a new tag is created
-        data_index[instance.id] = {
-            'item': {
-                'id': instance.id,
-                'title': instance.title,
-                'type': instance.type,
-                'productive': instance.productive,
-                'lapName': instance.lap_name,
-                'colorPreset': instance.color_preset,
-            },
-            'children': [],
-            'path': instance.get_full_path().split(" / ")
-        }
+    # Handle new tag or update existing tag
+    parent_path = []
+    if instance.parent_id:
+        parent_entry = data_index.get(instance.parent_id)
+        parent_path = parent_entry["path"] + \
+            [parent_entry["item"]["title"]] if parent_entry else []
 
-        # Add the new tag to its parent's children if it has a parent
-        if instance.parent_id:
-            parent_entry = data_index.get(instance.parent_id)
-            if parent_entry:
-                parent_entry['children'].append(instance.id)
-
-    else:  # Update an existing tag
-        if instance.id in data_index:
-            entry = data_index[instance.id]
-            entry['item'].update({
-                'title': instance.title,
-                'type': instance.type,
-                'productive': instance.productive,
-                'lapName': instance.lap_name,
-                'colorPreset': instance.color_preset,
-            })
-
-            # If the parent has changed, update the parent-child relationship
-            old_parent_id = entry['path'][-2] if len(
-                entry['path']) > 1 else None
-            new_parent_id = instance.parent_id
-
-            if old_parent_id != new_parent_id:
-                # Remove from old parent's children
-                if old_parent_id and old_parent_id in data_index:
-                    data_index[old_parent_id]['children'].remove(instance.id)
-
-                # Add to new parent's children
-                if new_parent_id and new_parent_id in data_index:
-                    data_index[new_parent_id]['children'].append(instance.id)
-
-            # Update the path to reflect any parent changes
-            entry['path'] = instance.get_full_path().split(" / ")
+    data_index[instance.id] = {
+        "item": {
+            "id": instance.id,
+            "title": instance.title,
+            "type": instance.type,
+            "lapName": instance.lap_name,
+            "productive": instance.productive,
+            "colorPreset": instance.color_preset,
+        },
+        "path": parent_path,  # Ancestors only
+        "children": [child.id for child in instance.children.all()],
+    }
 
     tag_index.data_index = data_index
     tag_index.save()

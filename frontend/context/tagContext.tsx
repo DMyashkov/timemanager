@@ -1,4 +1,4 @@
-// timemanager/frontend/constants/tagContext.tsx
+// timemanager/frontend/context/TagContext.tsx
 
 import React, {
   createContext,
@@ -48,10 +48,6 @@ export function TagProvider({ children }: TagProviderProps) {
 
   // ---------------- HELPER FUNCTIONS (useCallback) ----------------
 
-  /**
-   * Helper to get auth token from AsyncStorage and build axios config.
-   * Wrapped in useCallback so references remain stable.
-   */
   const getAuthConfig = useCallback(async () => {
     const token = await AsyncStorage.getItem("authToken");
     if (!token) {
@@ -61,40 +57,61 @@ export function TagProvider({ children }: TagProviderProps) {
     return {
       headers: {
         "Content-Type": "application/json",
-        // If your backend expects "Token <token>", keep it that way;
-        // otherwise use `Bearer <token>`.
         Authorization: `Token ${token}`,
       },
     };
   }, []);
 
-  /**
-   * Re-fetch the entire DataIndex from the server.
-   * Wrapped in useCallback for stable reference.
-   */
+  const generateDataIndex = useCallback((tree: TagTreeNode[]): DataIndex => {
+    const index: DataIndex = {};
+
+    const recursiveBuild = (node: TagTreeNode, path: string[] = []) => {
+      index[node.id] = {
+        item: {
+          id: node.id,
+          title: node.title,
+          type: node.type,
+          productive: node.productive,
+          lapName: node.lapName,
+          colorPreset: node.colorPreset,
+        },
+        children: node.children.map((child) => child.id),
+        path,
+      };
+
+      node.children.forEach((child) =>
+        recursiveBuild(child, [...path, node.title]),
+      );
+    };
+
+    tree.forEach((node) => recursiveBuild(node));
+    return index;
+  }, []);
+
+  const refreshTreeData = useCallback(async () => {
+    try {
+      const config = await getAuthConfig();
+      const treeResponse = await axios.get(`${baseURL}/tags/tree/`, config);
+
+      const tree = treeResponse.data; // Backend response structure
+      setTreeData(tree);
+
+      // Generate the local dataIndex based on the tree
+      const localIndex = generateDataIndex(tree);
+      setDataIndex(localIndex);
+    } catch (error) {
+      console.error("Failed to refresh tree data:", error);
+    }
+  }, [baseURL, getAuthConfig, generateDataIndex]);
+
   const refreshDataIndex = useCallback(async () => {
     try {
       const config = await getAuthConfig();
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
       console.log("Fetched dataIndex:", JSON.stringify(response.data, null, 2));
-
       setDataIndex(response.data);
     } catch (error) {
       console.error("Failed to refresh dataIndex:", error);
-    }
-  }, [baseURL, getAuthConfig]);
-
-  /**
-   * Re-fetch the entire tree from the server.
-   * Wrapped in useCallback for stable reference.
-   */
-  const refreshTreeData = useCallback(async () => {
-    try {
-      const config = await getAuthConfig();
-      const treeResponse = await axios.get(`${baseURL}/tags/tree/`, config);
-      setTreeData(treeResponse.data);
-    } catch (error) {
-      console.error("Failed to refresh tree data:", error);
     }
   }, [baseURL, getAuthConfig]);
 
@@ -106,7 +123,6 @@ export function TagProvider({ children }: TagProviderProps) {
       newId: string,
       payload: TagPayload,
     ): TagTreeNode[] => {
-      // If no parent => top-level
       if (!payload.parent) {
         return [
           ...treeNodes,
@@ -122,7 +138,6 @@ export function TagProvider({ children }: TagProviderProps) {
         ];
       }
 
-      // Else, recursively find the parent in the tree
       return treeNodes.map((node) => {
         if (node.id === payload.parent) {
           const newChild: TagTreeNode = {
@@ -187,7 +202,7 @@ export function TagProvider({ children }: TagProviderProps) {
   const deleteTagFromTree = useCallback(
     (treeNodes: TagTreeNode[], tagId: string): TagTreeNode[] => {
       return treeNodes
-        .filter((node) => node.id !== tagId) // Remove matching node
+        .filter((node) => node.id !== tagId)
         .map((node) => {
           if (node.children?.length) {
             return {
@@ -201,13 +216,12 @@ export function TagProvider({ children }: TagProviderProps) {
     [],
   );
 
-  // ---------------- LOCAL CRUD HELPERS (Optimistic) ----------------
+  // ---------------- LOCAL CRUD HELPERS ----------------
 
   const localCreateTag = useCallback(
     (newId: string, payload: TagPayload) => {
       if (!dataIndex) return;
 
-      // 1) Build local entry
       const newItem: DataIndexItem = {
         item: {
           id: newId,
@@ -218,25 +232,18 @@ export function TagProvider({ children }: TagProviderProps) {
           colorPreset: payload.colorPreset,
         },
         children: [],
-        // Build the path based on the parent's path
         path: payload.parent
           ? [...(dataIndex[payload.parent]?.path ?? []), payload.parent]
           : [],
       };
 
-      // 2) Insert new item into dataIndex
       const updatedIndex = { ...dataIndex, [newId]: newItem };
 
-      // 3) If there's a parent, add this ID to parent's children
-      if (payload.parent) {
-        const parentEntry = updatedIndex[payload.parent];
-        parentEntry?.children.push(newId);
+      if (payload.parent && updatedIndex[payload.parent]) {
+        updatedIndex[payload.parent].children.push(newId);
       }
 
-      // 4) Update local state
       setDataIndex(updatedIndex);
-
-      // 5) Insert into treeData
       setTreeData((prevTree) => insertTagIntoTree(prevTree, newId, payload));
     },
     [dataIndex, insertTagIntoTree],
@@ -246,82 +253,67 @@ export function TagProvider({ children }: TagProviderProps) {
     (tagId: string, updates: Partial<TagPayload>) => {
       if (!dataIndex || !dataIndex[tagId]) return;
 
-      // 1) Update in dataIndex
+      const existing = dataIndex[tagId];
       const updatedIndex = { ...dataIndex };
-      const existing = updatedIndex[tagId];
+
       updatedIndex[tagId] = {
         ...existing,
         item: {
           ...existing.item,
-          title: updates.title ?? existing.item.title,
-          type: updates.type ?? existing.item.type,
-          productive: updates.productive ?? existing.item.productive,
-          lapName: updates.lapName ?? existing.item.lapName,
-          colorPreset: updates.colorPreset ?? existing.item.colorPreset,
+          ...updates,
         },
-        // children, path remain unless you’re re-parenting
       };
-      setDataIndex(updatedIndex);
 
-      // 2) Update tree data
+      if (updates.parent && updates.parent !== existing.path.at(-1)) {
+        const newParentPath = updatedIndex[updates.parent]?.path || [];
+        updatedIndex[tagId].path = [...newParentPath, updates.parent];
+      }
+
+      setDataIndex(updatedIndex);
       setTreeData((prevTree) => updateTagInTree(prevTree, tagId, updates));
     },
     [dataIndex, updateTagInTree],
-  );
-
-  const removeTagAndChildren = useCallback(
-    (indexObj: DataIndex, tagId: string) => {
-      const children = indexObj[tagId]?.children ?? [];
-      for (const childId of children) {
-        removeTagAndChildren(indexObj, childId);
-      }
-
-      // Remove from parent
-      const parentId = indexObj[tagId]?.path.at(-1);
-      if (parentId && indexObj[parentId]) {
-        indexObj[parentId].children = indexObj[parentId].children.filter(
-          (c) => c !== tagId,
-        );
-      }
-
-      // Finally, delete from index
-      delete indexObj[tagId];
-    },
-    [],
   );
 
   const localDeleteTag = useCallback(
     (tagId: string) => {
       if (!dataIndex || !dataIndex[tagId]) return;
 
-      // 1) Remove from dataIndex
       const updatedIndex = { ...dataIndex };
-      removeTagAndChildren(updatedIndex, tagId);
-      setDataIndex(updatedIndex);
 
-      // 2) Remove from treeData
+      const removeChildren = (id: string) => {
+        const children = updatedIndex[id]?.children || [];
+        children.forEach((childId) => removeChildren(childId));
+        delete updatedIndex[id];
+      };
+
+      removeChildren(tagId);
+
+      const parentId = updatedIndex[tagId]?.path.at(-1);
+      if (parentId && updatedIndex[parentId]) {
+        updatedIndex[parentId].children = updatedIndex[
+          parentId
+        ].children.filter((childId) => childId !== tagId);
+      }
+
+      setDataIndex(updatedIndex);
       setTreeData((prevTree) => deleteTagFromTree(prevTree, tagId));
     },
-    [dataIndex, removeTagAndChildren, deleteTagFromTree],
+    [dataIndex, deleteTagFromTree],
   );
 
-  // ---------------- PUBLIC ACTIONS (CREATE, UPDATE, DELETE) ----------------
+  // ---------------- PUBLIC ACTIONS ----------------
 
   const createTagAction = useCallback(
     async (payload: TagPayload) => {
-      // Add createdAt timestamp
       const enrichedPayload = {
         ...payload,
-        createdAt: new Date().toISOString(), // Add createdAt
+        createdAt: new Date().toISOString(),
       };
 
-      // 1) Generate a temporary local ID
       const tempId = `temp-${Date.now()}`;
-
-      // 2) Optimistically create locally
       localCreateTag(tempId, enrichedPayload);
 
-      // 3) Real API call
       try {
         const config = await getAuthConfig();
         const response = await axios.post(
@@ -332,14 +324,13 @@ export function TagProvider({ children }: TagProviderProps) {
         const createdTag = response.data;
         const realId = createdTag.id.toString();
 
-        // Replace the temporary ID with the real one
         if (dataIndex) {
           localDeleteTag(tempId);
           localCreateTag(realId, enrichedPayload);
         }
       } catch (error) {
         console.error("Error creating tag:", error);
-        localDeleteTag(tempId); // Revert if failed
+        localDeleteTag(tempId);
       }
     },
     [baseURL, getAuthConfig, dataIndex, localCreateTag, localDeleteTag],
@@ -347,22 +338,18 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const updateTagAction = useCallback(
     async (id: string, payload: Partial<TagPayload>) => {
-      // Add updatedAt timestamp
       const enrichedPayload = {
         ...payload,
-        updatedAt: new Date().toISOString(), // Add updatedAt
+        updatedAt: new Date().toISOString(),
       };
 
-      // 1) Optimistically update locally
       localUpdateTag(id, enrichedPayload);
 
-      // 2) Real API call
       try {
         const config = await getAuthConfig();
         await axios.put(`${baseURL}/tags/${id}/`, enrichedPayload, config);
       } catch (error) {
         console.error("Error updating tag:", error);
-        // Optionally, revert local changes or handle error
       }
     },
     [baseURL, getAuthConfig, localUpdateTag],
@@ -370,20 +357,16 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const deleteTagAction = useCallback(
     async (id: string) => {
-      // 1) Cache old data for revert
       const oldDataIndex = dataIndex ? { ...dataIndex } : null;
       const oldTreeData = treeData ? [...treeData] : [];
 
-      // 2) Optimistically remove
       localDeleteTag(id);
 
-      // 3) Real API call
       try {
         const config = await getAuthConfig();
         await axios.delete(`${baseURL}/tags/${id}/`, config);
       } catch (error) {
         console.error("Error deleting tag:", error);
-        // Revert local deletion
         if (oldDataIndex) setDataIndex(oldDataIndex);
         if (oldTreeData) setTreeData(oldTreeData);
       }
@@ -391,8 +374,6 @@ export function TagProvider({ children }: TagProviderProps) {
     [baseURL, getAuthConfig, dataIndex, treeData, localDeleteTag],
   );
 
-  // ---------------- ON MOUNT, LOAD INITIAL DATA ----------------
-  // All dependencies are stable references due to useCallback
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -412,7 +393,6 @@ export function TagProvider({ children }: TagProviderProps) {
     void fetchData();
   }, [refreshDataIndex, refreshTreeData]);
 
-  // ---------------- PROVIDE THE CONTEXT ----------------
   const value: TagContextValue = {
     dataIndex,
     setDataIndex,
@@ -425,8 +405,6 @@ export function TagProvider({ children }: TagProviderProps) {
 
   return <TagContext.Provider value={value}>{children}</TagContext.Provider>;
 }
-
-// ---------------- CUSTOM HOOK FOR CONSUMERS ----------------
 
 export function useTagContext() {
   const context = useContext(TagContext);

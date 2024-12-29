@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -47,6 +48,22 @@ class Tag(models.Model):
             path.append(parent.title)
             parent = parent.parent
         return " / ".join(reversed(path))
+
+    def save(self, *args, **kwargs):
+        # Ensure there's always one root activity
+        if not self.parent and self.type == self.TagType.ACTIVITY:
+            existing_root = Tag.objects.filter(
+                parent=None, type=self.TagType.ACTIVITY
+            ).exclude(id=self.id).exists()
+            if existing_root:
+                raise ValidationError("There can only be one root activity.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Prevent deletion of the root activity
+        if not self.parent and self.type == self.TagType.ACTIVITY:
+            raise ValidationError("The root activity cannot be deleted.")
+        super().delete(*args, **kwargs)
 
 
 # Create your models here.
