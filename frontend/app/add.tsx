@@ -83,7 +83,6 @@ export default function AddScreen() {
 
   // Utilize TagContext
   const { dataIndex, createTag, updateTag, deleteTag } = useTagContext();
-  console.log(dataIndex);
 
   // Initialize parent and current states as null
   const [parent, setParent] = useState<DataIndexItem | null>(null);
@@ -464,7 +463,6 @@ function ActivityAddContent({
         moduleColorPallete={colorArray[selectedColorIndex]}
         moduleName={moduleName}
         isProject={false}
-        dataIndex={dataIndex}
       />
       {current == null ? (
         <View style={styles.buttonProjectOuter}>

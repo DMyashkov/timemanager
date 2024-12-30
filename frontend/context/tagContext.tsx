@@ -75,12 +75,12 @@ export function TagProvider({ children }: TagProviderProps) {
           lapName: node.lapName,
           colorPreset: node.colorPreset,
         },
-        children: node.children.map((child) => child.id),
-        path,
+        children: node.children ? node.children.map((child) => child.id) : [],
+        path, // Use IDs instead of titles
       };
 
-      node.children.forEach((child) =>
-        recursiveBuild(child, [...path, node.title]),
+      node.children?.forEach(
+        (child) => recursiveBuild(child, [...path, node.id]), // Append current node's ID to the path
       );
     };
 

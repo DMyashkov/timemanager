@@ -9,6 +9,8 @@ import type { DataIndexItem } from "@/constants/interfaces";
 import type { ColorPresets } from "@/constants/interfaces";
 
 import type { Color } from "@constants/interfaces";
+import { useTagContext } from "@/context/TagContext";
+import { useEffect } from "react";
 
 interface PathPickerProps {
   moduleName?: string;
@@ -16,7 +18,6 @@ interface PathPickerProps {
   moduleColorPallete: ColorPresets;
   parent: DataIndexItem;
   setParent: (parent: DataIndexItem) => void;
-  dataIndex: Record<string, DataIndexItem>;
 }
 
 export default function PathPicker({
@@ -24,11 +25,21 @@ export default function PathPicker({
   moduleColorPallete,
   parent,
   setParent,
-  dataIndex,
   isProject = false,
 }: PathPickerProps) {
   const styles = useStyles();
+
+  const { dataIndex } = useTagContext();
+  // useEffect(() => {
+  // if (dataIndex) {
+  console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
+  // }
+  // }, [dataIndex]);
+
   // const { theme } = useTheme();
+  if (!dataIndex) {
+    return <></>;
+  }
 
   return (
     <View style={styles.container}>
@@ -42,6 +53,7 @@ export default function PathPicker({
         {[...parent.path.slice(1, parent.path.length), parent.item.id].map(
           (id, _) => {
             const item = dataIndex[id as keyof typeof dataIndex];
+            console.log(id, item);
             const name = item.item.title;
             const color = item.item.colorPreset;
             return (
