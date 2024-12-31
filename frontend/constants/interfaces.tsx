@@ -81,12 +81,12 @@ export interface TagPayload {
   updatedAt?: string; // Optional for creation or update
 }
 
-export interface TagTreeNode {
-  id: string;
-  title: string;
-  type: moduleType;
-  productive: boolean;
-  lapName: string;
-  colorPreset: ColorPresets;
-  children?: TagTreeNode[]; // Recursive children
-}
+// export interface ActivityData {
+//   id: string;
+//   title: string;
+//   type: moduleType;
+//   productive: boolean;
+//   lapName: string;
+//   colorPreset: ColorPresets;
+//   children?: ActivityData[]; // Recursive children
+// }

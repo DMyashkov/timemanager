@@ -10,10 +10,8 @@ import React, {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
-  ColorPresets,
   DataIndexItem,
-  moduleType,
-  TagTreeNode,
+  ActivityData,
   TagPayload,
   DataIndex,
 } from "@/constants/interfaces"; // Import all necessary types
@@ -23,8 +21,8 @@ interface TagContextValue {
   dataIndex: DataIndex | null;
   setDataIndex: React.Dispatch<React.SetStateAction<DataIndex | null>>;
 
-  treeData: TagTreeNode[];
-  setTreeData: React.Dispatch<React.SetStateAction<TagTreeNode[]>>;
+  treeData: ActivityData | null;
+  setTreeData: React.Dispatch<React.SetStateAction<ActivityData | null>>;
 
   createTag: (payload: TagPayload) => Promise<void>;
   updateTag: (id: string, payload: Partial<TagPayload>) => Promise<void>;
@@ -43,8 +41,8 @@ interface TagProviderProps {
 
 export function TagProvider({ children }: TagProviderProps) {
   const [dataIndex, setDataIndex] = useState<DataIndex | null>(null);
-  const [treeData, setTreeData] = useState<TagTreeNode[]>([]);
-  const baseURL = "http://127.0.0.1:8000/api"; // Usually stable (doesn't change)
+  const [treeData, setTreeData] = useState<ActivityData | null>(null);
+  const baseURL = "http://127.0.0.1:8000/api";
 
   // ---------------- HELPER FUNCTIONS (useCallback) ----------------
 
@@ -53,6 +51,7 @@ export function TagProvider({ children }: TagProviderProps) {
     if (!token) {
       throw new Error("No auth token found");
     }
+    console.log("Auth token found:", token);
 
     return {
       headers: {
@@ -62,10 +61,20 @@ export function TagProvider({ children }: TagProviderProps) {
     };
   }, []);
 
-  const generateDataIndex = useCallback((tree: TagTreeNode[]): DataIndex => {
+  const generateDataIndex = useCallback((tree: ActivityData[]): DataIndex => {
     const index: DataIndex = {};
 
-    const recursiveBuild = (node: TagTreeNode, path: string[] = []) => {
+    console.log(
+      "Generating dataIndex from tree:",
+      JSON.stringify(tree, null, 2),
+    );
+
+    const recursiveBuild = (node: ActivityData, path: string[] = []) => {
+      if (!node || !node.id) {
+        console.warn("Encountered invalid node:", node);
+        return;
+      }
+
       index[node.id] = {
         item: {
           id: node.id,
@@ -75,16 +84,26 @@ export function TagProvider({ children }: TagProviderProps) {
           lapName: node.lapName,
           colorPreset: node.colorPreset,
         },
-        children: node.children ? node.children.map((child) => child.id) : [],
-        path, // Use IDs instead of titles
+        children: node.children?.map((child) => child.id) || [],
+        path,
       };
 
-      node.children?.forEach(
-        (child) => recursiveBuild(child, [...path, node.id]), // Append current node's ID to the path
-      );
+      console.log(`Processed node ${node.id}:`, JSON.stringify(index[node.id]));
+
+      for (const child of node.children || []) {
+        recursiveBuild(child, [...path, node.id]);
+      }
     };
 
-    tree.forEach((node) => recursiveBuild(node));
+    try {
+      for (const rootNode of tree) {
+        recursiveBuild(rootNode);
+      }
+      console.log("Final dataIndex:", JSON.stringify(index, null, 2));
+    } catch (error) {
+      console.error("Error generating dataIndex:", error);
+    }
+
     return index;
   }, []);
 
@@ -93,16 +112,25 @@ export function TagProvider({ children }: TagProviderProps) {
       const config = await getAuthConfig();
       const treeResponse = await axios.get(`${baseURL}/tags/tree/`, config);
 
-      const tree = treeResponse.data; // Backend response structure
+      // Ensure the API response is what you expect
+      console.log("API Response:", JSON.stringify(treeResponse.data, null, 2));
+
+      // Extract the first element if it's an array
+      const tree: ActivityData = Array.isArray(treeResponse.data)
+        ? treeResponse.data[0]
+        : treeResponse.data;
+
+      // Log the extracted root node for debugging
+      console.log("Extracted root node:", JSON.stringify(tree, null, 2));
+
       setTreeData(tree);
 
-      // Generate the local dataIndex based on the tree
-      const localIndex = generateDataIndex(tree);
+      const localIndex = generateDataIndex([tree]); // Pass it as a single element array
       setDataIndex(localIndex);
     } catch (error) {
       console.error("Failed to refresh tree data:", error);
     }
-  }, [baseURL, getAuthConfig, generateDataIndex]);
+  }, [getAuthConfig, generateDataIndex]);
 
   const refreshDataIndex = useCallback(async () => {
     try {
@@ -113,105 +141,110 @@ export function TagProvider({ children }: TagProviderProps) {
     } catch (error) {
       console.error("Failed to refresh dataIndex:", error);
     }
-  }, [baseURL, getAuthConfig]);
+  }, [getAuthConfig]);
 
   // ---------------- TREE MANIPULATION FUNCTIONS ----------------
 
   const insertTagIntoTree = useCallback(
     (
-      treeNodes: TagTreeNode[],
+      treeNode: ActivityData,
       newId: string,
       payload: TagPayload,
-    ): TagTreeNode[] => {
+    ): ActivityData => {
       if (!payload.parent) {
-        return [
-          ...treeNodes,
-          {
-            id: newId,
-            title: payload.title,
-            type: payload.type,
-            productive: payload.productive,
-            lapName: payload.lapName,
-            colorPreset: payload.colorPreset,
-            children: [],
-          },
-        ];
+        return {
+          ...treeNode,
+          children: [
+            ...(treeNode.children || []),
+            {
+              id: newId,
+              title: payload.title,
+              type: payload.type,
+              productive: payload.productive,
+              lapName: payload.lapName,
+              colorPreset: payload.colorPreset,
+              children: [],
+            },
+          ],
+        };
       }
 
-      return treeNodes.map((node) => {
-        if (node.id === payload.parent) {
-          const newChild: TagTreeNode = {
-            id: newId,
-            title: payload.title,
-            type: payload.type,
-            productive: payload.productive,
-            lapName: payload.lapName,
-            colorPreset: payload.colorPreset,
-            children: [],
-          };
-          const children = node.children
-            ? [...node.children, newChild]
-            : [newChild];
-          return { ...node, children };
-        }
+      return {
+        ...treeNode,
+        children: (treeNode.children || []).map((node) => {
+          if (node.id === payload.parent) {
+            const newChild: ActivityData = {
+              id: newId,
+              title: payload.title,
+              type: payload.type,
+              productive: payload.productive,
+              lapName: payload.lapName,
+              colorPreset: payload.colorPreset,
+              children: [],
+            };
+            return {
+              ...node,
+              children: node.children
+                ? [...node.children, newChild]
+                : [newChild],
+            };
+          }
 
-        if (node.children?.length) {
-          return {
-            ...node,
-            children: insertTagIntoTree(node.children, newId, payload),
-          };
-        }
+          if (node.children?.length) {
+            return insertTagIntoTree(node, newId, payload);
+          }
 
-        return node;
-      });
+          return node;
+        }),
+      };
     },
     [],
   );
 
   const updateTagInTree = useCallback(
     (
-      treeNodes: TagTreeNode[],
+      treeNode: ActivityData,
       tagId: string,
       updates: Partial<TagPayload>,
-    ): TagTreeNode[] => {
-      return treeNodes.map((node) => {
-        if (node.id === tagId) {
-          return {
-            ...node,
-            title: updates.title ?? node.title,
-            type: updates.type ?? node.type,
-            productive: updates.productive ?? node.productive,
-            lapName: updates.lapName ?? node.lapName,
-            colorPreset: updates.colorPreset ?? node.colorPreset,
-          };
-        }
+    ): ActivityData => {
+      return {
+        ...treeNode,
+        children: (treeNode.children || []).map((node) => {
+          if (node.id === tagId) {
+            return {
+              ...node,
+              title: updates.title ?? node.title,
+              type: updates.type ?? node.type,
+              productive: updates.productive ?? node.productive,
+              lapName: updates.lapName ?? node.lapName,
+              colorPreset: updates.colorPreset ?? node.colorPreset,
+            };
+          }
 
-        if (node.children?.length) {
-          return {
-            ...node,
-            children: updateTagInTree(node.children, tagId, updates),
-          };
-        }
+          if (node.children?.length) {
+            return updateTagInTree(node, tagId, updates);
+          }
 
-        return node;
-      });
+          return node;
+        }),
+      };
     },
     [],
   );
 
   const deleteTagFromTree = useCallback(
-    (treeNodes: TagTreeNode[], tagId: string): TagTreeNode[] => {
-      return treeNodes
-        .filter((node) => node.id !== tagId)
-        .map((node) => {
-          if (node.children?.length) {
-            return {
-              ...node,
-              children: deleteTagFromTree(node.children, tagId),
-            };
-          }
-          return node;
-        });
+    (treeNode: ActivityData, tagId: string): ActivityData => {
+      return {
+        ...treeNode,
+        children: (treeNode.children || [])
+          .filter((node) => node.id !== tagId)
+          .map((node) => {
+            if (node.children?.length) {
+              return deleteTagFromTree(node, tagId);
+            }
+            return node;
+          }),
+      };
     },
     [],
   );
@@ -220,7 +253,7 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const localCreateTag = useCallback(
     (newId: string, payload: TagPayload) => {
-      if (!dataIndex) return;
+      if (!dataIndex || !treeData) return;
 
       const newItem: DataIndexItem = {
         item: {
@@ -244,14 +277,16 @@ export function TagProvider({ children }: TagProviderProps) {
       }
 
       setDataIndex(updatedIndex);
-      setTreeData((prevTree) => insertTagIntoTree(prevTree, newId, payload));
+      setTreeData((prevTree) =>
+        prevTree ? insertTagIntoTree(prevTree, newId, payload) : null,
+      );
     },
-    [dataIndex, insertTagIntoTree],
+    [dataIndex, treeData, insertTagIntoTree],
   );
 
   const localUpdateTag = useCallback(
     (tagId: string, updates: Partial<TagPayload>) => {
-      if (!dataIndex || !dataIndex[tagId]) return;
+      if (!dataIndex || !treeData || !dataIndex[tagId]) return;
 
       const existing = dataIndex[tagId];
       const updatedIndex = { ...dataIndex };
@@ -270,20 +305,24 @@ export function TagProvider({ children }: TagProviderProps) {
       }
 
       setDataIndex(updatedIndex);
-      setTreeData((prevTree) => updateTagInTree(prevTree, tagId, updates));
+      setTreeData((prevTree) =>
+        prevTree ? updateTagInTree(prevTree, tagId, updates) : null,
+      );
     },
-    [dataIndex, updateTagInTree],
+    [dataIndex, treeData, updateTagInTree],
   );
 
   const localDeleteTag = useCallback(
     (tagId: string) => {
-      if (!dataIndex || !dataIndex[tagId]) return;
+      if (!dataIndex || !treeData || !dataIndex[tagId]) return;
 
       const updatedIndex = { ...dataIndex };
 
       const removeChildren = (id: string) => {
         const children = updatedIndex[id]?.children || [];
-        children.forEach((childId) => removeChildren(childId));
+        for (const childId of children) {
+          removeChildren(childId);
+        }
         delete updatedIndex[id];
       };
 
@@ -297,9 +336,11 @@ export function TagProvider({ children }: TagProviderProps) {
       }
 
       setDataIndex(updatedIndex);
-      setTreeData((prevTree) => deleteTagFromTree(prevTree, tagId));
+      setTreeData((prevTree) =>
+        prevTree ? deleteTagFromTree(prevTree, tagId) : null,
+      );
     },
-    [dataIndex, deleteTagFromTree],
+    [dataIndex, treeData, deleteTagFromTree],
   );
 
   // ---------------- PUBLIC ACTIONS ----------------
@@ -324,7 +365,7 @@ export function TagProvider({ children }: TagProviderProps) {
         const createdTag = response.data;
         const realId = createdTag.id.toString();
 
-        if (dataIndex) {
+        if (dataIndex && treeData) {
           localDeleteTag(tempId);
           localCreateTag(realId, enrichedPayload);
         }
@@ -333,7 +374,7 @@ export function TagProvider({ children }: TagProviderProps) {
         localDeleteTag(tempId);
       }
     },
-    [baseURL, getAuthConfig, dataIndex, localCreateTag, localDeleteTag],
+    [getAuthConfig, dataIndex, treeData, localCreateTag, localDeleteTag],
   );
 
   const updateTagAction = useCallback(
@@ -352,13 +393,13 @@ export function TagProvider({ children }: TagProviderProps) {
         console.error("Error updating tag:", error);
       }
     },
-    [baseURL, getAuthConfig, localUpdateTag],
+    [getAuthConfig, localUpdateTag],
   );
 
   const deleteTagAction = useCallback(
     async (id: string) => {
       const oldDataIndex = dataIndex ? { ...dataIndex } : null;
-      const oldTreeData = treeData ? [...treeData] : [];
+      const oldTreeData = treeData ? { ...treeData } : null;
 
       localDeleteTag(id);
 
@@ -371,7 +412,7 @@ export function TagProvider({ children }: TagProviderProps) {
         if (oldTreeData) setTreeData(oldTreeData);
       }
     },
-    [baseURL, getAuthConfig, dataIndex, treeData, localDeleteTag],
+    [getAuthConfig, dataIndex, treeData, localDeleteTag],
   );
 
   useEffect(() => {
