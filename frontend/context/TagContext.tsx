@@ -1,6 +1,6 @@
 // timemanager/frontend/context/TagContext.tsx
 
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -13,13 +13,13 @@ import type {
   DataIndexItem,
   ActivityData,
   TagPayload,
-  DataIndex,
+  DataIndexLocal,
 } from "@/constants/interfaces"; // Import all necessary types
 
 // The interface for the context value
 interface TagContextValue {
-  dataIndex: DataIndex | null;
-  setDataIndex: React.Dispatch<React.SetStateAction<DataIndex | null>>;
+  dataIndex: DataIndexLocal | null;
+  setDataIndex: React.Dispatch<React.SetStateAction<DataIndexLocal | null>>;
 
   treeData: ActivityData | null;
   setTreeData: React.Dispatch<React.SetStateAction<ActivityData | null>>;
@@ -40,7 +40,7 @@ interface TagProviderProps {
 }
 
 export function TagProvider({ children }: TagProviderProps) {
-  const [dataIndex, setDataIndex] = useState<DataIndex | null>(null);
+  const [dataIndex, setDataIndex] = useState<DataIndexLocal | null>(null);
   const [treeData, setTreeData] = useState<ActivityData | null>(null);
   const baseURL = "http://127.0.0.1:8000/api";
 
@@ -61,51 +61,55 @@ export function TagProvider({ children }: TagProviderProps) {
     };
   }, []);
 
-  const generateDataIndex = useCallback((tree: ActivityData[]): DataIndex => {
-    const index: DataIndex = {};
+  const generateDataIndex = useCallback(
+    (tree: ActivityData[]): DataIndexLocal => {
+      const newIndex: DataIndexLocal = new Map<number, DataIndexItem>();
 
-    console.log(
-      "Generating dataIndex from tree:",
-      JSON.stringify(tree, null, 2),
-    );
+      console.log(
+        "Generating dataIndex from tree:",
+        JSON.stringify(tree, null, 2),
+      );
 
-    const recursiveBuild = (node: ActivityData, path: string[] = []) => {
-      if (!node || !node.id) {
-        console.warn("Encountered invalid node:", node);
-        return;
-      }
+      const recursiveBuild = (node: ActivityData, path: number[] = []) => {
+        if (!node || !node.id) {
+          console.warn("Encountered invalid node:", node);
+          return;
+        }
 
-      index[node.id] = {
-        item: {
-          id: node.id,
-          title: node.title,
-          type: node.type,
-          productive: node.productive,
-          lapName: node.lapName,
-          colorPreset: node.colorPreset,
-        },
-        children: node.children?.map((child) => child.id) || [],
-        path,
+        newIndex.set(node.id, {
+          item: {
+            id: node.id,
+            title: node.title,
+            type: node.type,
+            productive: node.productive,
+            lapName: node.lapName,
+            colorPreset: node.colorPreset,
+          },
+          children: node.children?.map((child) => child.id) || [],
+          path,
+        });
+
+        for (const child of node.children || []) {
+          recursiveBuild(child, [...path, node.id]);
+        }
       };
 
-      console.log(`Processed node ${node.id}:`, JSON.stringify(index[node.id]));
-
-      for (const child of node.children || []) {
-        recursiveBuild(child, [...path, node.id]);
+      try {
+        for (const rootNode of tree) {
+          recursiveBuild(rootNode);
+        }
+        console.log(
+          "Final generated dataIndex:",
+          JSON.stringify(newIndex, null, 2),
+        );
+      } catch (error) {
+        console.error("Error generating dataIndex:", error);
       }
-    };
 
-    try {
-      for (const rootNode of tree) {
-        recursiveBuild(rootNode);
-      }
-      console.log("Final dataIndex:", JSON.stringify(index, null, 2));
-    } catch (error) {
-      console.error("Error generating dataIndex:", error);
-    }
-
-    return index;
-  }, []);
+      return newIndex;
+    },
+    [],
+  );
 
   const refreshTreeData = useCallback(async () => {
     try {

@@ -6,7 +6,7 @@ export interface Color {
 }
 
 export type ActivityData = {
-  id: string;
+  id: number;
   title: string;
   type: moduleType;
   children?: ActivityData[];
@@ -17,13 +17,11 @@ export type ActivityData = {
 
 export type DataIndexItem = {
   item: Omit<ActivityData, "children">;
-  children: string[];
-  path: string[];
+  children: number[];
+  path: number[];
 };
 
-export type DataIndex = {
-  [key: string]: DataIndexItem;
-};
+export type DataIndexLocal = Map<number, DataIndexItem>;
 
 export enum ColorPresets {
   GREEN = "green",
