@@ -158,7 +158,6 @@ export function TagProvider({ children }: TagProviderProps) {
   }, [getAuthConfig]);
 
   // ---------------- TREE MANIPULATION FUNCTIONS ----------------
-  // TODO - fix all other functions to work with map
 
   const insertTagIntoTree = useCallback(
     (
