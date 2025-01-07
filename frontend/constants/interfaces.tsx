@@ -71,7 +71,7 @@ export function getDaysInMonth(month: number, year: number): number {
 export interface TagPayload {
   title: string;
   type: moduleType; // "activity" | "project"
-  parent: string | null; // string ID
+  parent: number | null; // string ID
   colorPreset: ColorPresets;
   lapName: string;
   productive: boolean;

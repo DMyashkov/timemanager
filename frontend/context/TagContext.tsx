@@ -25,8 +25,8 @@ interface TagContextValue {
   setTreeData: React.Dispatch<React.SetStateAction<ActivityData | null>>;
 
   createTag: (payload: TagPayload) => Promise<void>;
-  updateTag: (id: string, payload: Partial<TagPayload>) => Promise<void>;
-  deleteTag: (id: string) => Promise<void>;
+  updateTag: (id: number, payload: Partial<TagPayload>) => Promise<void>;
+  deleteTag: (id: number) => Promise<void>;
 }
 
 // ---------------- CREATE THE CONTEXT ----------------
@@ -141,18 +141,23 @@ export function TagProvider({ children }: TagProviderProps) {
       const config = await getAuthConfig();
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
       console.log("Fetched dataIndex:", JSON.stringify(response.data, null, 2));
-      setDataIndex(response.data);
+      const dataIndex = new Map<number, DataIndexItem>();
+      for (const item of response.data) {
+        dataIndex.set(item.item.id, item);
+      }
+      setDataIndex(dataIndex);
     } catch (error) {
       console.error("Failed to refresh dataIndex:", error);
     }
   }, [getAuthConfig]);
 
   // ---------------- TREE MANIPULATION FUNCTIONS ----------------
+  // TODO - fix all other functions to work with map
 
   const insertTagIntoTree = useCallback(
     (
       treeNode: ActivityData,
-      newId: string,
+      newId: number,
       payload: TagPayload,
     ): ActivityData => {
       if (!payload.parent) {
@@ -208,7 +213,7 @@ export function TagProvider({ children }: TagProviderProps) {
   const updateTagInTree = useCallback(
     (
       treeNode: ActivityData,
-      tagId: string,
+      tagId: number,
       updates: Partial<TagPayload>,
     ): ActivityData => {
       return {
@@ -237,7 +242,7 @@ export function TagProvider({ children }: TagProviderProps) {
   );
 
   const deleteTagFromTree = useCallback(
-    (treeNode: ActivityData, tagId: string): ActivityData => {
+    (treeNode: ActivityData, tagId: number): ActivityData => {
       return {
         ...treeNode,
         children: (treeNode.children || [])
@@ -256,7 +261,7 @@ export function TagProvider({ children }: TagProviderProps) {
   // ---------------- LOCAL CRUD HELPERS ----------------
 
   const localCreateTag = useCallback(
-    (newId: string, payload: TagPayload) => {
+    (newId: number, payload: TagPayload) => {
       if (!dataIndex || !treeData) return;
 
       const newItem: DataIndexItem = {
@@ -270,14 +275,20 @@ export function TagProvider({ children }: TagProviderProps) {
         },
         children: [],
         path: payload.parent
-          ? [...(dataIndex[payload.parent]?.path ?? []), payload.parent]
+          ? [...(dataIndex.get(payload.parent)?.path ?? []), payload.parent]
           : [],
       };
 
-      const updatedIndex = { ...dataIndex, [newId]: newItem };
+      // const updatedIndex = { ...dataIndex, [newId]: newItem };
+      const updatedIndex = new Map(dataIndex);
+      updatedIndex.set(newId, newItem);
 
-      if (payload.parent && updatedIndex[payload.parent]) {
-        updatedIndex[payload.parent].children.push(newId);
+      if (payload.parent && updatedIndex.has(payload.parent)) {
+        const parentItem = updatedIndex.get(payload.parent);
+        if (parentItem) {
+          parentItem.children.push(newId);
+          updatedIndex.set(payload.parent, { ...parentItem });
+        }
       }
 
       setDataIndex(updatedIndex);
@@ -289,13 +300,14 @@ export function TagProvider({ children }: TagProviderProps) {
   );
 
   const localUpdateTag = useCallback(
-    (tagId: string, updates: Partial<TagPayload>) => {
-      if (!dataIndex || !treeData || !dataIndex[tagId]) return;
+    (tagId: number, updates: Partial<TagPayload>) => {
+      if (!dataIndex || !treeData || !dataIndex.has(tagId)) return;
 
-      const existing = dataIndex[tagId];
-      const updatedIndex = { ...dataIndex };
+      const existing = dataIndex.get(tagId);
+      if (!existing) return;
 
-      updatedIndex[tagId] = {
+      const updatedIndex = new Map(dataIndex);
+      const updatedItem = {
         ...existing,
         item: {
           ...existing.item,
@@ -304,9 +316,11 @@ export function TagProvider({ children }: TagProviderProps) {
       };
 
       if (updates.parent && updates.parent !== existing.path.at(-1)) {
-        const newParentPath = updatedIndex[updates.parent]?.path || [];
-        updatedIndex[tagId].path = [...newParentPath, updates.parent];
+        const newParentPath = updatedIndex.get(updates.parent)?.path || [];
+        updatedItem.path = [...newParentPath, updates.parent];
       }
+
+      updatedIndex.set(tagId, updatedItem);
 
       setDataIndex(updatedIndex);
       setTreeData((prevTree) =>
@@ -317,26 +331,34 @@ export function TagProvider({ children }: TagProviderProps) {
   );
 
   const localDeleteTag = useCallback(
-    (tagId: string) => {
-      if (!dataIndex || !treeData || !dataIndex[tagId]) return;
+    (tagId: number) => {
+      if (!dataIndex || !treeData || !dataIndex.has(tagId)) return;
 
-      const updatedIndex = { ...dataIndex };
+      // Create a shallow copy of the Map to maintain immutability
+      const updatedIndex = new Map(dataIndex);
 
-      const removeChildren = (id: string) => {
-        const children = updatedIndex[id]?.children || [];
+      // Recursive function to remove a tag and its children
+      const removeChildren = (id: number) => {
+        const children = updatedIndex.get(id)?.children || [];
         for (const childId of children) {
           removeChildren(childId);
         }
-        delete updatedIndex[id];
+        updatedIndex.delete(id);
       };
 
+      // Remove the tag and its children
       removeChildren(tagId);
 
-      const parentId = updatedIndex[tagId]?.path.at(-1);
-      if (parentId && updatedIndex[parentId]) {
-        updatedIndex[parentId].children = updatedIndex[
-          parentId
-        ].children.filter((childId) => childId !== tagId);
+      // Update the parent's children, if applicable
+      const parentId = dataIndex.get(tagId)?.path.at(-1);
+      if (parentId !== undefined && updatedIndex.has(parentId)) {
+        const parentItem = updatedIndex.get(parentId);
+        if (parentItem) {
+          parentItem.children = parentItem.children.filter(
+            (childId) => childId !== tagId,
+          );
+          updatedIndex.set(parentId, { ...parentItem });
+        }
       }
 
       setDataIndex(updatedIndex);
@@ -356,7 +378,7 @@ export function TagProvider({ children }: TagProviderProps) {
         createdAt: new Date().toISOString(),
       };
 
-      const tempId = `temp-${Date.now()}`;
+      const tempId = Date.now();
       localCreateTag(tempId, enrichedPayload);
 
       try {
@@ -382,7 +404,7 @@ export function TagProvider({ children }: TagProviderProps) {
   );
 
   const updateTagAction = useCallback(
-    async (id: string, payload: Partial<TagPayload>) => {
+    async (id: number, payload: Partial<TagPayload>) => {
       const enrichedPayload = {
         ...payload,
         updatedAt: new Date().toISOString(),
@@ -401,7 +423,7 @@ export function TagProvider({ children }: TagProviderProps) {
   );
 
   const deleteTagAction = useCallback(
-    async (id: string) => {
+    async (id: number) => {
       const oldDataIndex = dataIndex ? { ...dataIndex } : null;
       const oldTreeData = treeData ? { ...treeData } : null;
 
@@ -424,7 +446,7 @@ export function TagProvider({ children }: TagProviderProps) {
       try {
         const token = await AsyncStorage.getItem("authToken");
         if (token) {
-          axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+          axios.defaults.headers.common.Authorization = `Token ${token}`;
           console.log("Auth token found, fetching data...");
           await refreshDataIndex();
           await refreshTreeData();
