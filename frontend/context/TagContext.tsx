@@ -62,8 +62,8 @@ export function TagProvider({ children }: TagProviderProps) {
   }, []);
 
   const generateDataIndex = useCallback(
-    (tree: ActivityData[]): DataIndexLocal => {
-      const newIndex: DataIndexLocal = new Map<number, DataIndexItem>();
+    (tree: ActivityData[]): Map<number, DataIndexItem> => {
+      const newIndex = new Map<number, DataIndexItem>();
 
       console.log(
         "Generating dataIndex from tree:",
@@ -76,6 +76,7 @@ export function TagProvider({ children }: TagProviderProps) {
           return;
         }
 
+        // Add the current node to the Map
         newIndex.set(node.id, {
           item: {
             id: node.id,
@@ -89,18 +90,20 @@ export function TagProvider({ children }: TagProviderProps) {
           path,
         });
 
+        // Recur for each child node
         for (const child of node.children || []) {
           recursiveBuild(child, [...path, node.id]);
         }
       };
 
       try {
+        // Iterate over all root nodes in the tree
         for (const rootNode of tree) {
           recursiveBuild(rootNode);
         }
         console.log(
           "Final generated dataIndex:",
-          JSON.stringify(newIndex, null, 2),
+          Array.from(newIndex.entries()),
         );
       } catch (error) {
         console.error("Error generating dataIndex:", error);
@@ -140,11 +143,14 @@ export function TagProvider({ children }: TagProviderProps) {
     try {
       const config = await getAuthConfig();
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
+
       console.log("Fetched dataIndex:", JSON.stringify(response.data, null, 2));
-      const dataIndex = new Map<number, DataIndexItem>();
-      for (const item of response.data) {
-        dataIndex.set(item.item.id, item);
-      }
+
+      // Create a new Map and populate it with the fetched data
+      const dataIndex = new Map<number, DataIndexItem>(
+        response.data.map((item: DataIndexItem) => [item.item.id, item]),
+      );
+
       setDataIndex(dataIndex);
     } catch (error) {
       console.error("Failed to refresh dataIndex:", error);
