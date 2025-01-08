@@ -119,8 +119,12 @@ export function TagProvider({ children }: TagProviderProps) {
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
 
       // Create a new Map and populate it with the fetched data
+      console.log("Data index response:", response.data);
       const dataIndex = new Map<number, DataIndexItem>(
-        response.data.map((item: DataIndexItem) => [item.item.id, item]),
+        Object.values(response.data).map((item) => {
+          const dataItem = item as DataIndexItem; // Assert the type
+          return [dataItem.item.id, dataItem];
+        }),
       );
 
       setDataIndex(dataIndex);
