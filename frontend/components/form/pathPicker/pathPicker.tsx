@@ -5,7 +5,7 @@ import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import Activity from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
-import type { DataIndexItem } from "@/constants/interfaces";
+import type { DataIndexItem, DataIndexLocal } from "@/constants/interfaces";
 import type { ColorPresets } from "@/constants/interfaces";
 
 import type { Color } from "@constants/interfaces";
@@ -18,6 +18,7 @@ interface PathPickerProps {
   moduleColorPallete: ColorPresets;
   parent: DataIndexItem;
   setParent: (parent: DataIndexItem) => void;
+  dataIndex: DataIndexLocal;
 }
 
 export default function PathPicker({
@@ -26,10 +27,10 @@ export default function PathPicker({
   parent,
   setParent,
   isProject = false,
+  dataIndex,
 }: PathPickerProps) {
   const styles = useStyles();
 
-  const { dataIndex } = useTagContext();
   // useEffect(() => {
   // if (dataIndex) {
   // console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
@@ -52,7 +53,11 @@ export default function PathPicker({
       <View style={styles.pathContainer}>
         {[...parent.path.slice(1, parent.path.length), parent.item.id].map(
           (id, _) => {
-            const item = dataIndex[id as keyof typeof dataIndex];
+            const item = dataIndex.get(id);
+            if (!item) {
+              console.error("Item not found in dataIndex");
+              return <></>;
+            }
             console.log(id, item);
             const name = item.item.title;
             const color = item.item.colorPreset;

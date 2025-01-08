@@ -17,9 +17,9 @@ import { useEffect, useMemo, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import {
   ColorPresets,
-  TagPayload,
+  type TagPayload,
   type DataIndexItem,
-  DataIndex,
+  type DataIndexLocal,
 } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
@@ -34,7 +34,7 @@ interface AddQuery {
   title: string;
   colorPreset: ColorPresets;
   lapName: string;
-  parentId: string;
+  parentId: number;
   productive: boolean;
 }
 
@@ -43,7 +43,11 @@ import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { useTagContext } from "@/context/TagContext";
 
 export default function AddScreen() {
-  const { parentId, rawIsAddScreen } = useLocalSearchParams();
+  const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
+  console.log("parentIdString:", parentIdString);
+  const parentId = parentIdString
+    ? Number.parseInt(parentIdString as string)
+    : null;
   const isAddScreen = rawIsAddScreen === "true";
   const styles = useStyles();
   const { theme } = useTheme();
@@ -91,12 +95,12 @@ export default function AddScreen() {
   useEffect(() => {
     if (dataIndex && parentId) {
       if (isAddScreen) {
-        setParent(dataIndex[parentId as string] || null);
+        setParent(dataIndex.get(parentId) || null);
         setCurrent(null);
       } else {
-        const currentItem = dataIndex[parentId as string];
+        const currentItem = dataIndex.get(parentId) || null;
         const parentPath = currentItem?.path[currentItem.path.length - 1];
-        setParent(parentPath ? dataIndex[parentPath] || null : null);
+        setParent(parentPath ? dataIndex.get(parentPath) || null : null);
         setCurrent(currentItem);
       }
     }
@@ -104,6 +108,9 @@ export default function AddScreen() {
 
   const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const PADDING_HORIZONTAL = 22;
+
+  console.log("Parent:", parent);
+  console.log("id:", parentId);
 
   if (!parent || !dataIndex) {
     return (
@@ -258,7 +265,7 @@ interface ContentProps {
   style?: object;
   handleCreate: (data: AddQuery) => void;
   handleDelete: () => void;
-  dataIndex: DataIndex;
+  dataIndex: DataIndexLocal;
   current: DataIndexItem | null;
   handleUpdate?: (data: AddQuery) => void;
   saveButtonPressed?: boolean;
@@ -288,6 +295,12 @@ function AddSegment({
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
   const [lapName, setLapName] = useState(current ? current.item.lapName : "");
+
+  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+
+  if (!dataIndexItem) {
+    return null;
+  }
 
   return (
     <ScrollView
@@ -329,7 +342,7 @@ function AddSegment({
         ) : (
           <ProjectAddContent
             current={current}
-            projectColor={dataIndex[parent.item.id].item.colorPreset}
+            projectColor={dataIndexItem.item.colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
@@ -377,8 +390,12 @@ function ActivityAddContent({
   setSaveButtonPressed,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
+  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+  if (!dataIndexItem) {
+    return null;
+  }
   const [productivity, setProductivity] = useState<boolean>(
-    current?.item.productive || dataIndex[parent.item.id].item.productive,
+    current?.item.productive || dataIndexItem?.item.productive,
   );
   const { theme } = useTheme();
 
@@ -463,6 +480,7 @@ function ActivityAddContent({
         moduleColorPallete={colorArray[selectedColorIndex]}
         moduleName={moduleName}
         isProject={false}
+        dataIndex={dataIndex}
       />
       {current == null ? (
         <View style={styles.buttonProjectOuter}>
@@ -522,7 +540,13 @@ function ProjectAddContent({
   setSaveButtonPressed,
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
-  const productivity = dataIndex[parent.item.id].item.productive;
+
+  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+  if (!dataIndexItem) {
+    return null;
+  }
+
+  const productivity = dataIndexItem.item.productive;
   const { theme } = useTheme();
 
   useEffect(() => {
