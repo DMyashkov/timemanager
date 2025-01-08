@@ -302,9 +302,6 @@ function ListModuleInner({
 
   // console.log(typeOfModule);
   // console.log(typeOfModule === moduleType.activity);
-  console.log("LOOKING", typeof activityData.id);
-  console.log("ID", activityData.id);
-  console.log("DATA INDEX", dataIndex.get(activityData.id));
   const currentData = dataIndex.get(activityData.id);
   if (dataIndex === undefined || currentData === undefined) {
     return null;

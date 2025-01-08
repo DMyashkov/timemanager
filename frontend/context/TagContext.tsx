@@ -55,7 +55,7 @@ export function TagProvider({ children }: TagProviderProps) {
       if (!token) {
         throw new Error("No auth token found");
       }
-      console.log("Auth token loaded:", token);
+      // console.log("Auth token loaded:", token);
 
       const config = {
         headers: {
@@ -72,12 +72,12 @@ export function TagProvider({ children }: TagProviderProps) {
   }, []);
 
   const getAuthConfig = useCallback(async () => {
-    console.log("Auth config state:", authConfig);
+    // console.log("Auth config state:", authConfig);
     if (authConfig) {
       return authConfig; // Return cached config
     }
 
-    console.log("No cached auth config found. Loading token...", authConfig);
+    // console.log("No cached auth config found. Loading token...", authConfig);
 
     // If no cached config, load it
     const newConfig = await loadAuthToken();
@@ -88,7 +88,7 @@ export function TagProvider({ children }: TagProviderProps) {
     try {
       const config = await getAuthConfig();
 
-      console.log("TREE AUTH CONFIG:", JSON.stringify(config, null, 2));
+      // console.log("TREE AUTH CONFIG:", JSON.stringify(config, null, 2));
       if (!config.headers.Authorization) {
         console.error("No Authorization header set. Aborting request.");
         return;
@@ -114,12 +114,10 @@ export function TagProvider({ children }: TagProviderProps) {
         console.error("No Authorization header set. Aborting request.");
         return;
       }
-      console.log("Data index AUTH CONFIG:", JSON.stringify(config, null, 2));
 
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
 
       // Create a new Map and populate it with the fetched data
-      console.log("Data index response:", response.data);
       const dataIndex = new Map<number, DataIndexItem>(
         Object.values(response.data).map((item) => {
           const dataItem = item as DataIndexItem; // Assert the type
@@ -427,11 +425,11 @@ export function TagProvider({ children }: TagProviderProps) {
       try {
         const authConfig = await getAuthConfig();
         if (authConfig) {
-          console.log("Auth token found, fetching data...");
+          // console.log("Auth token found, fetching data...");
           await refreshDataIndex();
           await refreshTreeData();
         } else {
-          console.log("No auth token found, skipping data fetch.");
+          // console.log("No auth token found, skipping data fetch.");
         }
       } catch (error) {
         console.error("Error checking for auth token:", error);
