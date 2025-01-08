@@ -20,17 +20,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
-import { DataIndex } from "@/constants/interfaces";
+import { DataIndexLocal } from "@/constants/interfaces";
 import exampleData from "@/constants/exampleData";
 import { useTheme } from "@context/ThemeContext";
-type ActivityData = {
-  id: string;
-  title: string;
-  type: moduleType;
-  children?: ActivityData[];
-};
 
 import { moduleType } from "@/constants/interfaces";
+import type { ActivityData } from "@/constants/interfaces";
 
 type ActivityProps = {
   level?: number;
@@ -45,7 +40,7 @@ type ActivityProps = {
   setIsVisibleAnimZero?: (value: boolean) => void;
   typeOfModule?: moduleType;
   activityData: ActivityData;
-  dataIndex: DataIndex;
+  dataIndex: DataIndexLocal;
 };
 
 export default function ListModule(props: ActivityProps) {
@@ -307,6 +302,13 @@ function ListModuleInner({
 
   // console.log(typeOfModule);
   // console.log(typeOfModule === moduleType.activity);
+  console.log("LOOKING", typeof activityData.id);
+  console.log("ID", activityData.id);
+  console.log("DATA INDEX", dataIndex.get(activityData.id));
+  const currentData = dataIndex.get(activityData.id);
+  if (dataIndex === undefined || currentData === undefined) {
+    return null;
+  }
 
   return (
     <Animated.View style={[animStyles.listModule]}>
@@ -331,7 +333,7 @@ function ListModuleInner({
             expandAnimParam={expandAnim}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={dataIndex[activityData.id].item.colorPreset}
+            activityColor={currentData.item.colorPreset}
             buttons={buttonsOnTopOfTag}
           />
         ) : (
@@ -352,7 +354,7 @@ function ListModuleInner({
             style={[styles.activityItem]}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={dataIndex[activityData.id].item.colorPreset}
+            activityColor={currentData.item.colorPreset}
             buttons={buttonsOnTopOfTag}
           />
         ))}

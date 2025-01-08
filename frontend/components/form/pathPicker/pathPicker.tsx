@@ -32,7 +32,7 @@ export default function PathPicker({
   const { dataIndex } = useTagContext();
   // useEffect(() => {
   // if (dataIndex) {
-  console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
+  // console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
   // }
   // }, [dataIndex]);
 

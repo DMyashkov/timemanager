@@ -42,109 +42,81 @@ interface TagProviderProps {
 export function TagProvider({ children }: TagProviderProps) {
   const [dataIndex, setDataIndex] = useState<DataIndexLocal | null>(null);
   const [treeData, setTreeData] = useState<ActivityData | null>(null);
+  const [authConfig, setAuthConfig] = useState<{
+    headers: Record<string, string>;
+  } | null>(null); // Cache auth config
   const baseURL = "http://127.0.0.1:8000/api";
 
   // ---------------- HELPER FUNCTIONS (useCallback) ----------------
 
-  const getAuthConfig = useCallback(async () => {
-    const token = await AsyncStorage.getItem("authToken");
-    if (!token) {
-      throw new Error("No auth token found");
-    }
-    console.log("Auth token found:", token);
+  const loadAuthToken = useCallback(async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No auth token found");
+      }
+      console.log("Auth token loaded:", token);
 
-    return {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-    };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      };
+      setAuthConfig(config);
+      return config; // Return the config
+    } catch (error) {
+      console.error("Failed to load auth token:", error);
+      throw new Error("Failed to load auth token");
+    }
   }, []);
 
-  const generateDataIndex = useCallback(
-    (tree: ActivityData[]): Map<number, DataIndexItem> => {
-      const newIndex = new Map<number, DataIndexItem>();
+  const getAuthConfig = useCallback(async () => {
+    console.log("Auth config state:", authConfig);
+    if (authConfig) {
+      return authConfig; // Return cached config
+    }
 
-      console.log(
-        "Generating dataIndex from tree:",
-        JSON.stringify(tree, null, 2),
-      );
+    console.log("No cached auth config found. Loading token...", authConfig);
 
-      const recursiveBuild = (node: ActivityData, path: number[] = []) => {
-        if (!node || !node.id) {
-          console.warn("Encountered invalid node:", node);
-          return;
-        }
-
-        // Add the current node to the Map
-        newIndex.set(node.id, {
-          item: {
-            id: node.id,
-            title: node.title,
-            type: node.type,
-            productive: node.productive,
-            lapName: node.lapName,
-            colorPreset: node.colorPreset,
-          },
-          children: node.children?.map((child) => child.id) || [],
-          path,
-        });
-
-        // Recur for each child node
-        for (const child of node.children || []) {
-          recursiveBuild(child, [...path, node.id]);
-        }
-      };
-
-      try {
-        // Iterate over all root nodes in the tree
-        for (const rootNode of tree) {
-          recursiveBuild(rootNode);
-        }
-        console.log(
-          "Final generated dataIndex:",
-          Array.from(newIndex.entries()),
-        );
-      } catch (error) {
-        console.error("Error generating dataIndex:", error);
-      }
-
-      return newIndex;
-    },
-    [],
-  );
+    // If no cached config, load it
+    const newConfig = await loadAuthToken();
+    return newConfig;
+  }, [authConfig, loadAuthToken]);
 
   const refreshTreeData = useCallback(async () => {
     try {
       const config = await getAuthConfig();
-      const treeResponse = await axios.get(`${baseURL}/tags/tree/`, config);
 
-      // Ensure the API response is what you expect
-      console.log("API Response:", JSON.stringify(treeResponse.data, null, 2));
+      console.log("TREE AUTH CONFIG:", JSON.stringify(config, null, 2));
+      if (!config.headers.Authorization) {
+        console.error("No Authorization header set. Aborting request.");
+        return;
+      }
+
+      const treeResponse = await axios.get(`${baseURL}/tags/tree/`, config);
 
       // Extract the first element if it's an array
       const tree: ActivityData = Array.isArray(treeResponse.data)
         ? treeResponse.data[0]
         : treeResponse.data;
 
-      // Log the extracted root node for debugging
-      console.log("Extracted root node:", JSON.stringify(tree, null, 2));
-
       setTreeData(tree);
-
-      const localIndex = generateDataIndex([tree]); // Pass it as a single element array
-      setDataIndex(localIndex);
     } catch (error) {
       console.error("Failed to refresh tree data:", error);
     }
-  }, [getAuthConfig, generateDataIndex]);
+  }, [getAuthConfig]);
 
   const refreshDataIndex = useCallback(async () => {
     try {
       const config = await getAuthConfig();
-      const response = await axios.get(`${baseURL}/tags/data_index/`, config);
+      if (!config.headers.Authorization) {
+        console.error("No Authorization header set. Aborting request.");
+        return;
+      }
+      console.log("Data index AUTH CONFIG:", JSON.stringify(config, null, 2));
 
-      console.log("Fetched dataIndex:", JSON.stringify(response.data, null, 2));
+      const response = await axios.get(`${baseURL}/tags/data_index/`, config);
 
       // Create a new Map and populate it with the fetched data
       const dataIndex = new Map<number, DataIndexItem>(
@@ -449,9 +421,8 @@ export function TagProvider({ children }: TagProviderProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-        if (token) {
-          axios.defaults.headers.common.Authorization = `Token ${token}`;
+        const authConfig = await getAuthConfig();
+        if (authConfig) {
           console.log("Auth token found, fetching data...");
           await refreshDataIndex();
           await refreshTreeData();
@@ -463,7 +434,7 @@ export function TagProvider({ children }: TagProviderProps) {
       }
     };
     void fetchData();
-  }, [refreshDataIndex, refreshTreeData]);
+  }, [refreshDataIndex, refreshTreeData, getAuthConfig]);
 
   const value: TagContextValue = {
     dataIndex,

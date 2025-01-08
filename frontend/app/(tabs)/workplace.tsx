@@ -51,8 +51,6 @@ export default function WorkplaceScreen() {
     );
   }
   // pretty print data
-  console.log("Pretty Printed data:", JSON.stringify(treeData, null, 2));
-  console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
 
   return (
     <View style={styles.workplaceScreen}>
