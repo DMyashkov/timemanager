@@ -44,7 +44,6 @@ import { useTagContext } from "@/context/TagContext";
 
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
-  console.log("parentIdString:", parentIdString);
   const parentId = parentIdString
     ? Number.parseInt(parentIdString as string)
     : null;
@@ -109,9 +108,6 @@ export default function AddScreen() {
   const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const PADDING_HORIZONTAL = 22;
 
-  console.log("Parent:", parent);
-  console.log("id:", parentId);
-
   if (!parent || !dataIndex) {
     return (
       <View>
@@ -134,7 +130,7 @@ export default function AddScreen() {
       type: data.type,
       title: data.title,
       colorPreset: data.colorPreset,
-      lapName: data.lapName,
+      lapName: data.lapName ? data.lapName : "Lap",
       parent: data.parentId,
       productive: data.productive,
     };

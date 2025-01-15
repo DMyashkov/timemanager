@@ -41,6 +41,7 @@ interface TagProviderProps {
 
 export function TagProvider({ children }: TagProviderProps) {
   const [dataIndex, setDataIndex] = useState<DataIndexLocal | null>(null);
+
   const [treeData, setTreeData] = useState<ActivityData | null>(null);
   const [authConfig, setAuthConfig] = useState<{
     headers: Record<string, string>;
