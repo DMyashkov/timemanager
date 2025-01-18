@@ -27,13 +27,13 @@ class TagSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'type',
-            'colorPreset',  # Use source for database field color_preset
+            'colorPreset',  
             'productive',
-            'lapName',  # Use source for database field lap_name
+            'lapName', 
             'parent',
             'children',
-            'createdAt',  # Use source for database field created_at
-            'updatedAt',  # Use source for database field updated_at
+            'createdAt',
+            'updatedAt', 
         ]
         extra_kwargs = {
             'createdAt': {'required': False},

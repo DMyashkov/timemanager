@@ -307,8 +307,6 @@ function ListModuleInner({
     return null;
   }
 
-  console.log("currentId", activityData.id);
-
   return (
     <Animated.View style={[animStyles.listModule]}>
       {level !== 0 &&

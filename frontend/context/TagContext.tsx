@@ -223,6 +223,7 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const deleteTagFromTree = useCallback(
     (treeNode: ActivityData, tagId: number): ActivityData => {
+      dataIndex?.delete(tagId);
       return {
         ...treeNode,
         children: (treeNode.children || [])
@@ -235,7 +236,7 @@ export function TagProvider({ children }: TagProviderProps) {
           }),
       };
     },
-    [],
+    [dataIndex],
   );
 
   // ---------------- LOCAL CRUD HELPERS ----------------
@@ -316,16 +317,23 @@ export function TagProvider({ children }: TagProviderProps) {
 
       // Create a shallow copy of the Map to maintain immutability
       const updatedIndex = new Map(dataIndex);
+      const updatedTree = deleteTagFromTree(treeData, tagId);
 
-      // Recursive function to remove a tag and its children
+      // console.log("ZEROOOOOOO STEP index:", updatedIndex);
+      // console.log("NOT ZERO STEP index: ", dataIndex);
+
       const removeChildren = (id: number) => {
         const children = updatedIndex.get(id)?.children || [];
+
         for (const childId of children) {
           removeChildren(childId);
         }
+
         updatedIndex.delete(id);
       };
 
+      // console.log("Deleting tag:", tagId);
+      // console.log("FIRST STEP updated index:", updatedIndex);
       // Remove the tag and its children
       removeChildren(tagId);
 
@@ -337,14 +345,16 @@ export function TagProvider({ children }: TagProviderProps) {
           parentItem.children = parentItem.children.filter(
             (childId) => childId !== tagId,
           );
+          console.log("Parent item:", parentItem);
           updatedIndex.set(parentId, { ...parentItem });
         }
       }
 
+      console.log("Updated index:", updatedIndex);
+      console.log("Updated tree:", JSON.stringify(updatedTree, null, 2));
+
       setDataIndex(updatedIndex);
-      setTreeData((prevTree) =>
-        prevTree ? deleteTagFromTree(prevTree, tagId) : null,
-      );
+      setTreeData(updatedTree);
     },
     [dataIndex, treeData, deleteTagFromTree],
   );
@@ -404,8 +414,8 @@ export function TagProvider({ children }: TagProviderProps) {
 
   const deleteTagAction = useCallback(
     async (id: number) => {
-      const oldDataIndex = dataIndex ? { ...dataIndex } : null;
-      const oldTreeData = treeData ? { ...treeData } : null;
+      const oldDataIndex = dataIndex;
+      const oldTreeData = treeData;
 
       localDeleteTag(id);
 
