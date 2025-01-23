@@ -5,23 +5,18 @@ export interface Color {
   dark: string;
 }
 
-export type ActivityData = {
+export type TagData = {
   id: number;
   title: string;
   type: moduleType;
-  children?: ActivityData[];
   colorPreset: ColorPresets;
   productive: boolean;
   lapName: string;
-};
-
-export type DataIndexItem = {
-  item: Omit<ActivityData, "children">;
   children: number[];
   path: number[];
 };
 
-export type DataIndexLocal = Map<number, DataIndexItem>;
+export type DataIndexLocal = Map<number, TagData>;
 
 export enum ColorPresets {
   GREEN = "green",
@@ -68,16 +63,16 @@ export function getDaysInMonth(month: number, year: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-export interface TagPayload {
-  title: string;
-  type: moduleType; // "activity" | "project"
-  parent: number | null; // string ID
-  colorPreset: ColorPresets;
-  lapName: string;
-  productive: boolean;
-  createdAt?: string; // Optional for creation
-  updatedAt?: string; // Optional for creation or update
-}
+// export interface TagPayload {
+//   title: string;
+//   type: moduleType; // "activity" | "project"
+//   parent: number | null; // string ID
+//   colorPreset: ColorPresets;
+//   lapName: string;
+//   productive: boolean;
+//   createdAt?: string; // Optional for creation
+//   updatedAt?: string; // Optional for creation or update
+// }
 
 // export interface ActivityData {
 //   id: string;

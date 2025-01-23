@@ -18,7 +18,7 @@ import PathPicker from "@/components/form/pathPicker/pathPicker";
 import {
   ColorPresets,
   type TagPayload,
-  type DataIndexItem,
+  type TagData,
   type DataIndexLocal,
 } from "@/constants/interfaces";
 import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
@@ -88,8 +88,8 @@ export default function AddScreen() {
   const { dataIndex, createTag, updateTag, deleteTag } = useTagContext();
 
   // Initialize parent and current states as null
-  const [parent, setParent] = useState<DataIndexItem | null>(null);
-  const [current, setCurrent] = useState<DataIndexItem | null>(null);
+  const [parent, setParent] = useState<TagData | null>(null);
+  const [current, setCurrent] = useState<TagData | null>(null);
 
   useEffect(() => {
     if (dataIndex && parentId) {
@@ -255,14 +255,14 @@ export default function AddScreen() {
 interface ContentProps {
   setSelectedColorIndex: (index: number) => void;
   colorArray: ColorPresets[];
-  parent: DataIndexItem;
-  setParent: (parent: DataIndexItem) => void;
+  parent: TagData;
+  setParent: (parent: TagData) => void;
   isProject?: boolean;
   style?: object;
   handleCreate: (data: AddQuery) => void;
   handleDelete: () => void;
   dataIndex: DataIndexLocal;
-  current: DataIndexItem | null;
+  current: TagData | null;
   handleUpdate?: (data: AddQuery) => void;
   saveButtonPressed?: boolean;
   setSaveButtonPressed?: (pressed: boolean) => void;

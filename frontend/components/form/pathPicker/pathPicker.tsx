@@ -5,7 +5,7 @@ import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import Activity from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
-import type { DataIndexItem, DataIndexLocal } from "@/constants/interfaces";
+import type { TagData, DataIndexLocal } from "@/constants/interfaces";
 import type { ColorPresets } from "@/constants/interfaces";
 
 import type { Color } from "@constants/interfaces";
@@ -16,8 +16,8 @@ interface PathPickerProps {
   moduleName?: string;
   isProject?: boolean;
   moduleColorPallete: ColorPresets;
-  parent: DataIndexItem;
-  setParent: (parent: DataIndexItem) => void;
+  parent: TagData;
+  setParent: (parent: TagData) => void;
   dataIndex: DataIndexLocal;
 }
 

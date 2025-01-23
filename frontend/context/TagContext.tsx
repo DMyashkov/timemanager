@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
-  DataIndexItem,
+  TagData,
   ActivityData,
   TagPayload,
   DataIndexLocal,
@@ -119,9 +119,9 @@ export function TagProvider({ children }: TagProviderProps) {
       const response = await axios.get(`${baseURL}/tags/data_index/`, config);
 
       // Create a new Map and populate it with the fetched data
-      const dataIndex = new Map<number, DataIndexItem>(
+      const dataIndex = new Map<number, TagData>(
         Object.values(response.data).map((item) => {
-          const dataItem = item as DataIndexItem; // Assert the type
+          const dataItem = item as TagData; // Assert the type
           return [dataItem.item.id, dataItem];
         }),
       );
@@ -245,7 +245,7 @@ export function TagProvider({ children }: TagProviderProps) {
     (newId: number, payload: TagPayload) => {
       if (!dataIndex || !treeData) return;
 
-      const newItem: DataIndexItem = {
+      const newItem: TagData = {
         item: {
           id: newId,
           title: payload.title,

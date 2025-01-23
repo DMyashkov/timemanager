@@ -38,7 +38,7 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "src/**/*"
-, "components/module/activityItem/activityItem"  ],
+, "components/module/activityItem/activityItem", "database/database.ts"  ],
       "exclude": ["node_modules"] // Optional, but should not exclude your file
 
 }
