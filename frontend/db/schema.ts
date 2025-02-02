@@ -1,0 +1,15 @@
+import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const dataIndex = sqliteTable("dataIndex", {
+  id: int("id").primaryKey({ autoIncrement: true }),
+  title: text("title"),
+  type: text("type"),
+  productive: int("productive"),
+  lapName: text("lapName"),
+  colorPreset: text("colorPreset"),
+  parent: int("parent"),
+  path: text("path"),
+  children: text("children"),
+  synced: int("synced").default(0),
+  deleted: int("deleted").default(0),
+});
