@@ -130,12 +130,12 @@ const getTag = async (id: number): Promise<TagData | null> => {
 // Update an existing DataIndexItem
 const updateTag = async (id: number, updates: Partial<TagData>) => {
   const db = await openDatabase();
-  const { title, type, productive, lapName, colorPreset, path, children } =
+  const { title, type, productive, lapName, colorPreset, parent, children } =
     updates;
   await db.transaction((tx) => {
     tx.executeSql(
       `UPDATE dataIndex
-       SET title = ?, type = ?, productive = ?, lapName = ?, colorPreset = ?, path = ?, children = ?, synced = 0
+       SET title = ?, type = ?, productive = ?, lapName = ?, colorPreset = ?, parent = ?, children = ?, synced = 0
        WHERE id = ?;`,
       [
         title,
@@ -143,7 +143,7 @@ const updateTag = async (id: number, updates: Partial<TagData>) => {
         productive ? 1 : 0,
         lapName,
         colorPreset,
-        JSON.stringify(path),
+        parent,
         JSON.stringify(children),
         id,
       ],
