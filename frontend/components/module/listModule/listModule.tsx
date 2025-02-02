@@ -20,12 +20,12 @@ import { router, useLocalSearchParams } from "expo-router";
 import Project from "../projectItem/projectItem";
 import ProjectItem from "../projectItem/projectItem";
 import { useNavigation } from "expo-router";
-import { DataIndexLocal } from "@/constants/interfaces";
 import exampleData from "@/constants/exampleData";
 import { useTheme } from "@context/ThemeContext";
 
 import { moduleType } from "@/constants/interfaces";
-import type { ActivityData } from "@/constants/interfaces";
+import type { TagData } from "@/constants/interfaces";
+import type { DataIndexLocal } from "@/constants/interfaces";
 
 type ActivityProps = {
   level?: number;
@@ -39,7 +39,7 @@ type ActivityProps = {
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
   typeOfModule?: moduleType;
-  activityData: ActivityData;
+  activityData: TagData;
   dataIndex: DataIndexLocal;
 };
 
@@ -330,7 +330,7 @@ function ListModuleInner({
             expandAnimParam={expandAnim}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={currentData.item.colorPreset}
+            activityColor={currentData.colorPreset}
             buttons={buttonsOnTopOfTag}
           />
         ) : (
@@ -351,7 +351,7 @@ function ListModuleInner({
             style={[styles.activityItem]}
             focusAnim={focusAnim}
             visibleAnim={visibleAnim}
-            activityColor={currentData.item.colorPreset}
+            activityColor={currentData.colorPreset}
             buttons={buttonsOnTopOfTag}
           />
         ))}
@@ -372,24 +372,28 @@ function ListModuleInner({
             {isExpandAnimGreaterThanZero && (
               <FlatList
                 data={activityData.children}
-                keyExtractor={(activity) => activity.id.toString()}
-                renderItem={({ item: activity }) => (
-                  <ListModule
-                    // key={activity.id}
-                    activityData={activity}
-                    level={level + 1}
-                    isLastInList={
-                      activity.id === activityData.children?.slice(-1)[0].id
-                    }
-                    path={`${path}/${activity.id}`}
-                    addScreen={addScreen}
-                    addAnim={addAnim}
-                    onFocusAdditional={onFocusAdditional}
-                    expandAnimOfParent={multipliedExpandAnim}
-                    typeOfModule={activity.type}
-                    dataIndex={dataIndex}
-                  />
-                )}
+                keyExtractor={(activity) => activity.toString()}
+                renderItem={({ item: activityId }) => {
+                  const activityItem = dataIndex.get(activityId);
+                  if (activityItem === undefined) {
+                    return null;
+                  }
+                  return (
+                    <ListModule
+                      // key={activity.id}
+                      activityData={activityItem}
+                      level={level + 1}
+                      isLastInList={activityId === activityData.parent}
+                      path={`${path}/${activityId}`}
+                      addScreen={addScreen}
+                      addAnim={addAnim}
+                      onFocusAdditional={onFocusAdditional}
+                      expandAnimOfParent={multipliedExpandAnim}
+                      typeOfModule={activityData.type}
+                      dataIndex={dataIndex}
+                    />
+                  );
+                }}
                 style={{ overflow: "visible" }}
               />
             )}

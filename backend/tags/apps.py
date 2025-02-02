@@ -13,10 +13,10 @@ class TagsConfig(AppConfig):
         from tags.models import Tag
         if not Tag.objects.filter(parent=None, type=Tag.TagType.ACTIVITY).exists():
             Tag.objects.create(
-                title="Root Activity",
-                description="This is the root activity.",
+                title="#ROOT#",
+                description="",
                 type=Tag.TagType.ACTIVITY,
                 color_preset="green",
                 productive=True,
-                lap_name="Root Lap",
+                lap_name="Lap",
             )

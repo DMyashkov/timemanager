@@ -1,14 +1,6 @@
+# models.py
 from django.core.exceptions import ValidationError
 from django.db import models
-
-
-class TagIndex(models.Model):
-    """Model to store the entire DataIndex."""
-    data_index = models.JSONField(default=dict)  # Store the entire DataIndex
-    updated_at = models.DateTimeField(auto_now=True)  # Track updates
-
-    def __str__(self):
-        return f"TagIndex (Last updated: {self.updated_at})"
 
 
 class Tag(models.Model):
@@ -32,38 +24,23 @@ class Tag(models.Model):
         null=True
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=False, default=None, null=True)
-    updated_at = models.DateTimeField(
-        auto_now_add=False, default=None, null=True)
+    # Optionally store path and children if you really want to match the frontend shape
+    path = models.JSONField(default=list, blank=True, null=True)
+    # or: path = models.TextField(blank=True, null=True)
+    # if you prefer to store a stringified version
 
-    def __str__(self):
-        return f'{self.title} ({self.type})'
-
-    def get_full_path(self):
-        """Recursively fetch the full path for the tag"""
-        path = [self.title]
-        parent = self.parent
-        while parent:
-            path.append(parent.title)
-            parent = parent.parent
-        return " / ".join(reversed(path))
+    children_ids = models.JSONField(default=list, blank=True, null=True)
+    # or: children_ids = models.TextField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        # Ensure there's always one root activity
         if not self.parent and self.type == self.TagType.ACTIVITY:
             existing_root = Tag.objects.filter(
                 parent=None, type=self.TagType.ACTIVITY
             ).exclude(id=self.id).exists()
             if existing_root:
                 raise ValidationError("There can only be one root activity.")
+
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        # Prevent deletion of the root activity
-        if not self.parent and self.type == self.TagType.ACTIVITY:
-            raise ValidationError("The root activity cannot be deleted.")
-        super().delete(*args, **kwargs)
-
-
-# Create your models here.
+    def __str__(self):
+        return f'{self.title} ({self.type})'

@@ -13,7 +13,7 @@ export type TagData = {
   productive: boolean;
   lapName: string;
   children: number[];
-  path: number[];
+  parent: number | null;
 };
 
 export type DataIndexLocal = Map<number, TagData>;
@@ -21,7 +21,6 @@ export type DataIndexLocal = Map<number, TagData>;
 export enum ColorPresets {
   GREEN = "green",
   ORANGE = "orange",
-  // Add more presets here as needed
 }
 
 export interface SwitchButton {
@@ -63,23 +62,3 @@ export function getDaysInMonth(month: number, year: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-// export interface TagPayload {
-//   title: string;
-//   type: moduleType; // "activity" | "project"
-//   parent: number | null; // string ID
-//   colorPreset: ColorPresets;
-//   lapName: string;
-//   productive: boolean;
-//   createdAt?: string; // Optional for creation
-//   updatedAt?: string; // Optional for creation or update
-// }
-
-// export interface ActivityData {
-//   id: string;
-//   title: string;
-//   type: moduleType;
-//   productive: boolean;
-//   lapName: string;
-//   colorPreset: ColorPresets;
-//   children?: ActivityData[]; // Recursive children
-// }
