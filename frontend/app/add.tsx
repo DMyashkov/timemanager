@@ -17,7 +17,6 @@ import { useEffect, useMemo, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import {
   ColorPresets,
-  type TagPayload,
   type TagData,
   type DataIndexLocal,
 } from "@/constants/interfaces";
@@ -98,7 +97,7 @@ export default function AddScreen() {
         setCurrent(null);
       } else {
         const currentItem = dataIndex.get(parentId) || null;
-        const parentPath = currentItem?.path[currentItem.path.length - 1];
+        const parentPath = currentItem?.parent;
         setParent(parentPath ? dataIndex.get(parentPath) || null : null);
         setCurrent(currentItem);
       }
@@ -119,7 +118,7 @@ export default function AddScreen() {
   // Implement handleDelete using TagContext's deleteTag
   const handleDelete = async () => {
     if (current) {
-      await deleteTag(current.item.id);
+      await deleteTag(current.id);
       router.back(); // Navigate back after deletion
     }
   };
@@ -141,7 +140,7 @@ export default function AddScreen() {
   const handleUpdate = async (data: AddQuery) => {
     if (current) {
       // Map AddQuery to Partial<TagPayload>
-      const tagUpdates: Partial<TagPayload> = {
+      const tagUpdates: Partial<TagData> = {
         type: data.type,
         title: data.title,
         colorPreset: data.colorPreset,
@@ -150,7 +149,7 @@ export default function AddScreen() {
         productive: data.productive,
       };
 
-      await updateTag(current.item.id, tagUpdates);
+      await updateTag(current.id, tagUpdates);
     }
   };
 
@@ -162,7 +161,7 @@ export default function AddScreen() {
   //   }
   // };
 
-  const isProject = current?.item.type === moduleType.project;
+  const isProject = current?.type === moduleType.project;
 
   return (
     <>
@@ -235,7 +234,7 @@ export default function AddScreen() {
               setSelectedColorIndex={setSelectedColorIndex}
               colorArray={colorArray}
               parent={parent}
-              isProject={current.item.type === moduleType.project}
+              isProject={current.type === moduleType.project}
               setParent={setParent}
               style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
               handleCreate={handleCreate}
@@ -286,13 +285,13 @@ function AddSegment({
 }: ContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
   const [moduleNameState, setModuleNameState] = useState(
-    current ? current.item.title : "",
+    current ? current.title : "",
   );
   const moduleName =
     moduleNameState || (isProject ? "New Project" : "New Activity");
-  const [lapName, setLapName] = useState(current ? current.item.lapName : "");
+  const [lapName, setLapName] = useState(current ? current.lapName : "");
 
-  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+  const dataIndexItem = dataIndex.get(parent.id) || null;
 
   if (!dataIndexItem) {
     return null;
@@ -338,7 +337,7 @@ function AddSegment({
         ) : (
           <ProjectAddContent
             current={current}
-            projectColor={dataIndexItem.item.colorPreset}
+            projectColor={dataIndexItem.colorPreset}
             setSelectedColorIndex={setSelectedColorIndex}
             colorArray={colorArray}
             parent={parent}
@@ -386,12 +385,12 @@ function ActivityAddContent({
   setSaveButtonPressed,
 }: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
   const styles = useStyles();
-  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+  const dataIndexItem = dataIndex.get(parent.id) || null;
   if (!dataIndexItem) {
     return null;
   }
   const [productivity, setProductivity] = useState<boolean>(
-    current?.item.productive || dataIndexItem?.item.productive,
+    current?.productive || dataIndexItem?.productive,
   );
   const { theme } = useTheme();
 
@@ -406,7 +405,7 @@ function ActivityAddContent({
         title: moduleName,
         colorPreset: colorArray[selectedColorIndex],
         lapName: lapName,
-        parentId: parent.item.id,
+        parentId: parent.id,
         productive: productivity,
       });
       setSaveButtonPressed(false);
@@ -429,7 +428,7 @@ function ActivityAddContent({
         placeholder="Activity Name"
         startingText={moduleName}
         setModuleName={setModuleName}
-        defaultText={current?.item.title || "Activity Name"}
+        defaultText={current?.title || "Activity Name"}
         rightHint={true}
       />
       <Picker
@@ -462,7 +461,7 @@ function ActivityAddContent({
         setModuleName={setLapName}
         rightHint={true}
         startingText={lapName}
-        defaultText={current?.item.lapName || parent.item.lapName || "Lap"}
+        defaultText={current?.lapName || parent.lapName || "Lap"}
       />
 
       <ColorPicker
@@ -488,7 +487,7 @@ function ActivityAddContent({
                 title: moduleName,
                 colorPreset: colorArray[selectedColorIndex],
                 lapName: lapName,
-                parentId: parent.item.id,
+                parentId: parent.id,
                 productive: productivity,
               });
             }}
@@ -537,12 +536,12 @@ function ProjectAddContent({
 }: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
   const styles = useStyles();
 
-  const dataIndexItem = dataIndex.get(parent.item.id) || null;
+  const dataIndexItem = dataIndex.get(parent.id) || null;
   if (!dataIndexItem) {
     return null;
   }
 
-  const productivity = dataIndexItem.item.productive;
+  const productivity = dataIndexItem.productive;
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -556,7 +555,7 @@ function ProjectAddContent({
         title: moduleName,
         colorPreset: projectColor,
         lapName: lapName,
-        parentId: parent.item.id,
+        parentId: parent.id,
         productive: productivity,
       });
       setSaveButtonPressed(false);
@@ -576,8 +575,8 @@ function ProjectAddContent({
     <>
       <TextField
         placeholder="Project Name"
-        defaultText={current ? current.item.title : "Project Name"}
-        startingText={current ? current.item.title : ""}
+        defaultText={current ? current.title : "Project Name"}
+        startingText={current ? current.title : ""}
         setModuleName={setModuleName}
         rightHint={true}
       />
@@ -591,11 +590,11 @@ function ProjectAddContent({
       />
 
       <TextField
-        placeholder={current ? current.item.lapName : "Lap Name"}
+        placeholder={current ? current.lapName : "Lap Name"}
         setModuleName={setLapName}
         rightHint={true}
-        startingText={current ? current.item.lapName : ""}
-        defaultText={current?.item.lapName || parent.item.lapName || "Lap"}
+        startingText={current ? current.lapName : ""}
+        defaultText={current?.lapName || parent.lapName || "Lap"}
       />
       <PathPicker
         parent={parent}
@@ -615,8 +614,8 @@ function ProjectAddContent({
                 title: moduleName,
                 colorPreset: projectColor,
                 lapName: lapName,
-                parentId: parent.item.id,
-                productive: parent.item.productive,
+                parentId: parent.id,
+                productive: parent.productive,
               });
             }}
           >
