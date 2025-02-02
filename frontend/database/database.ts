@@ -94,37 +94,32 @@ export const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
 const getTag = async (id: number): Promise<TagData | null> => {
   const db = await openDatabase();
 
-  return new Promise((resolve, reject) => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM dataIndex WHERE id = ?;",
-        [id],
-        (_tx, results) => {
-          if (results.rows.length > 0) {
-            const row = results.rows.item(0);
-            if (row.deleted === 1) {
-              resolve(null); // Tag is deleted
-            }
-            resolve({
-              id: row.id,
-              title: row.title,
-              type: row.type,
-              productive: row.productive === 1,
-              lapName: row.lapName,
-              colorPreset: row.colorPreset,
-              parent: row.parent,
-              children: JSON.parse(row.children || "[]"),
-            });
-          } else {
-            resolve(null); // No tag found
-          }
-        },
-        (_tx, error) => {
-          reject(error); // Handle SQL errors
-        },
-      );
-    });
-  });
+  try {
+    const [results] = await db.executeSql(
+      "SELECT * FROM dataIndex WHERE id = ? LIMIT 1;",
+      [id],
+    );
+
+    if (results.rows.length > 0) {
+      const row = results.rows.item(0);
+      if (row.deleted === 1) return null; // Tag is marked as deleted
+
+      return {
+        id: row.id,
+        title: row.title,
+        type: row.type,
+        productive: row.productive === 1,
+        lapName: row.lapName,
+        colorPreset: row.colorPreset,
+        parent: row.parent,
+        children: JSON.parse(row.children || "[]"),
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching tag:", error);
+    throw error;
+  }
 };
 
 // Update an existing DataIndexItem
