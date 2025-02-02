@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
+import { useMemo } from "react";
 import useStyles from "./styles";
-import { useTheme } from "@context/ThemeContext";
 import ActivityItem from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
 import type { TagData, DataIndexLocal } from "@/constants/interfaces";
@@ -29,18 +29,20 @@ export default function PathPicker({
     return <></>;
   }
 
-  // Construct path by traversing parent references
-  const pathIds: number[] = [];
-  let currentParent: TagData | undefined = parent;
+  // Memoize pathIds to prevent unnecessary recalculations
+  const pathIds = useMemo(() => {
+    const ids: number[] = [];
+    let currentParent: TagData | undefined = parent;
 
-  while (currentParent) {
-    pathIds.push(currentParent.id);
-    currentParent = currentParent.parent
-      ? dataIndex.get(currentParent.parent)
-      : undefined;
-  }
+    while (currentParent) {
+      ids.push(currentParent.id);
+      currentParent = currentParent.parent
+        ? dataIndex.get(currentParent.parent)
+        : undefined;
+    }
 
-  pathIds.reverse(); // Ensure correct order from root to the current node
+    return ids.reverse(); // Reverse once after computing all parents
+  }, [parent, dataIndex]);
 
   return (
     <View style={styles.container}>
