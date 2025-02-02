@@ -1,12 +1,12 @@
 import {
-  type DataIndex,
+  type DataIndexLocal,
   ColorPresets,
-  type ActivityData,
+  type TagData,
   moduleType,
 } from "@constants/interfaces";
 
-const data2: ActivityData = {
-  id: "root",
+const data2: TagData = {
+  id: 0,
   title: "Root",
   type: moduleType.activity,
   productive: true,

@@ -1,16 +1,10 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import { interpolate } from "react-native-reanimated";
 import ActivityItem from "@/components/module/activityItem/activityItem";
-import Activity from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
 import type { TagData, DataIndexLocal } from "@/constants/interfaces";
 import type { ColorPresets } from "@/constants/interfaces";
-
-import type { Color } from "@constants/interfaces";
-import { useTagContext } from "@/context/TagContext";
-import { useEffect } from "react";
 
 interface PathPickerProps {
   moduleName?: string;
@@ -31,16 +25,22 @@ export default function PathPicker({
 }: PathPickerProps) {
   const styles = useStyles();
 
-  // useEffect(() => {
-  // if (dataIndex) {
-  // console.log("Pretty Printed dataIndex:", JSON.stringify(dataIndex, null, 2));
-  // }
-  // }, [dataIndex]);
-
-  // const { theme } = useTheme();
   if (!dataIndex) {
     return <></>;
   }
+
+  // Construct path by traversing parent references
+  const pathIds: number[] = [];
+  let currentParent: TagData | undefined = parent;
+
+  while (currentParent) {
+    pathIds.push(currentParent.id);
+    currentParent = currentParent.parent
+      ? dataIndex.get(currentParent.parent)
+      : undefined;
+  }
+
+  pathIds.reverse(); // Ensure correct order from root to the current node
 
   return (
     <View style={styles.container}>
@@ -51,27 +51,22 @@ export default function PathPicker({
         </TouchableOpacity>
       </View>
       <View style={styles.pathContainer}>
-        {[...parent.path.slice(1, parent.path.length), parent.item.id].map(
-          (id, _) => {
-            const item = dataIndex.get(id);
-            if (!item) {
-              console.error("Item not found in dataIndex");
-              return <></>;
-            }
-            console.log(id, item);
-            const name = item.item.title;
-            const color = item.item.colorPreset;
-            return (
-              <ActivityItem
-                isExplicitlyExpanded={true}
-                key={id}
-                activityName={name}
-                activityColor={color}
-                clickable={false}
-              />
-            );
-          },
-        )}
+        {pathIds.map((id) => {
+          const item = dataIndex.get(id);
+          if (!item) {
+            console.error("Item not found in dataIndex");
+            return <></>;
+          }
+          return (
+            <ActivityItem
+              isExplicitlyExpanded={true}
+              key={id}
+              activityName={item.title}
+              activityColor={item.colorPreset}
+              clickable={false}
+            />
+          );
+        })}
         {!isProject ? (
           <ActivityItem
             activityName={moduleName}
