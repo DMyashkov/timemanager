@@ -1,14 +1,13 @@
 // timemanager/frontend/database/database.ts
 
 import SQLite from "react-native-sqlite-storage";
+import { createContext, useContext, useEffect } from "react";
 
 // Enable debug mode during development
 SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
-// Define the structure of your DataIndexItem
 import type { TagData } from "@/constants/interfaces";
-import { resolvePlugin } from "@babel/core";
 
 const DATABASE_NAME = "TimeManager.db";
 
@@ -41,8 +40,8 @@ export const initializeDatabase = async () => {
         colorPreset TEXT,
         parent INTEGER,
         path TEXT,
-        children TEXT
-        synced INTEGER DEFAULT 0
+        children TEXT,
+        synced INTEGER DEFAULT 0,
         deleted INTEGER DEFAULT 0
       );`,
     );
@@ -68,7 +67,7 @@ export const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
     db.transaction(async (tx) => {
       tx.executeSql(
         `INSERT INTO dataIndex (title, type, productive, lapName, colorPreset, parent, children) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+       VALUES (?, ?, ?, ?, ?, ?, ?);`,
         [
           title,
           type,
@@ -278,4 +277,50 @@ const cleanupDeletedRows = async () => {
       );
     });
   });
+};
+
+interface TagContextProps {
+  createTag: (item: Omit<TagData, "id">) => Promise<number>;
+  getTag: (id: number) => Promise<TagData | null>;
+  updateTag: (id: number, updates: Partial<TagData>) => Promise<void>;
+  deleteTag: (id: number) => Promise<void>;
+  syncUnsyncedRows: () => Promise<void>;
+  cleanupDeletedRows: () => Promise<void>;
+}
+
+export const TagContext = createContext<TagContextProps | null>(null);
+
+// Context Provider
+export const TagProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  useEffect(() => {
+    (async () => {
+      await initializeDatabase();
+    })();
+  }, []);
+
+  return (
+    <TagContext.Provider
+      value={{
+        createTag: insertTag,
+        getTag,
+        updateTag,
+        deleteTag,
+        syncUnsyncedRows,
+        cleanupDeletedRows,
+      }}
+    >
+      {children}
+    </TagContext.Provider>
+  );
+};
+
+// Hook to use the context
+export const useTagContext = () => {
+  const context = useContext(TagContext);
+  if (!context) {
+    throw new Error("useTagContext must be used within a TagProvider");
+  }
+  return context;
 };
