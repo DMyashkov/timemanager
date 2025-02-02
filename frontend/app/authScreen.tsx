@@ -48,7 +48,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       await saveToken(token);
 
       // Set the token globally for future authenticated requests
-      axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+      axios.defaults.headers.common.Authorization = `Token ${token}`;
 
       router.replace("/watch");
     } catch (err) {
@@ -80,7 +80,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       await saveToken(token);
 
       // Set the token globally for future authenticated requests
-      axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+      axios.defaults.headers.common.Authorization = `Token ${token}`;
 
       router.push("/watch");
     } catch (err) {
@@ -104,7 +104,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     const setAxiosToken = async () => {
       const token = await AsyncStorage.getItem("authToken");
       if (token) {
-        axios.defaults.headers.common["Authorization"] = `Token ${token}`;
+        axios.defaults.headers.common.Authorization = `Token ${token}`;
       }
     };
     setAxiosToken();

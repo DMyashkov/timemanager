@@ -53,15 +53,21 @@ export const initializeDatabase = async () => {
 
 export const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
   const db = await openDatabase();
-  const { title, type, productive, lapName, colorPreset, path, children } =
-    item;
-  const pathString = JSON.stringify(item.path);
+  const {
+    title,
+    type,
+    productive,
+    lapName,
+    colorPreset,
+    parent: parentId,
+    children,
+  } = item;
   const childrenString = JSON.stringify(children); // Serialize children array
 
   return new Promise((resolve, reject) => {
     db.transaction(async (tx) => {
       tx.executeSql(
-        `INSERT INTO dataIndex (title, type, productive, lapName, colorPreset, parent, path, children) 
+        `INSERT INTO dataIndex (title, type, productive, lapName, colorPreset, parent, children) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
         [
           title,
@@ -69,8 +75,7 @@ export const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
           productive ? 1 : 0,
           lapName,
           colorPreset,
-          null,
-          pathString,
+          parentId,
           childrenString,
         ],
         (_tx, result) => {
@@ -107,7 +112,7 @@ const getTag = async (id: number): Promise<TagData | null> => {
               productive: row.productive === 1,
               lapName: row.lapName,
               colorPreset: row.colorPreset,
-              path: JSON.parse(row.path || "[]"),
+              parent: row.parent,
               children: JSON.parse(row.children || "[]"),
             });
           } else {
