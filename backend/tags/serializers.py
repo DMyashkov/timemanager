@@ -32,8 +32,3 @@ class TagSyncSerializer(serializers.Serializer):
     deleted = serializers.BooleanField(default=False)
     # Add other fields as required
 
-
-# Validate payload in the view
-payload_serializer = TagSyncSerializer(data=request.data, many=True)
-payload_serializer.is_valid(raise_exception=True)
-payload = payload_serializer.validated_data

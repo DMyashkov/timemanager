@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { and, eq } from "drizzle-orm";
 import { dataIndex } from "@/db/schema";
 import type { ColorPresets, TagData } from "@/constants/interfaces";
+import axios from "axios";
 
 // Open the SQLite database using Expo SQLite and Drizzle
 const expoDb = openDatabaseSync("TimeManager.db");
@@ -14,13 +15,43 @@ export const initializeDatabase = async () => {
   console.log("Database initialized");
 };
 
+const generateTemporaryId = (): number =>
+  -Math.floor(1000000000 + Math.random() * 9000000000);
+
+const ensureUniqueTemporaryId = async (): Promise<number> => {
+  let tempId = 0;
+  let exists = true;
+
+  while (exists) {
+    tempId = generateTemporaryId();
+    const existing = await db
+      .select({ id: dataIndex.id })
+      .from(dataIndex)
+      .where(eq(dataIndex.id, tempId))
+      .limit(1);
+    exists = existing.length > 0;
+  }
+
+  return tempId;
+};
+
 // Insert a new tag
 export const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
   const { title, type, productive, lapName, colorPreset, parent, children } =
     item;
+
+  if (parent === null) {
+    throw new Error("Parent ID is required");
+  }
+
+  const newId = await ensureUniqueTemporaryId();
+
+  updateTag(parent, { children: [...children, newId] });
+
   const result = await db
     .insert(dataIndex)
     .values({
+      id: newId,
       title,
       type,
       productive: productive ? 1 : 0,
@@ -57,34 +88,90 @@ export const getTag = async (id: number): Promise<TagData | null> => {
   return null;
 };
 
-// Update an existing tag
 export const updateTag = async (id: number, updates: Partial<TagData>) => {
-  const { title, type, productive, lapName, colorPreset, parent, children } =
-    updates;
-  await db
-    .update(dataIndex)
-    .set({
-      title,
-      type,
-      productive: productive ? 1 : 0,
-      lapName,
-      colorPreset,
-      parent,
-      children: JSON.stringify(children),
-      synced: 0,
-    })
-    .where(eq(dataIndex.id, id));
+  // Fetch the existing tag
+  const existingTag = await db
+    .select()
+    .from(dataIndex)
+    .where(eq(dataIndex.id, id))
+    .limit(1);
+
+  if (existingTag.length === 0) {
+    throw new Error(`Tag with id ${id} not found`);
+  }
+
+  const currentTag = existingTag[0];
+
+  // Merge updates with the existing tag data
+  const updatedTag = {
+    title: updates.title ?? currentTag.title,
+    type: updates.type ?? currentTag.type,
+    productive:
+      updates.productive !== undefined
+        ? updates.productive
+          ? 1
+          : 0
+        : currentTag.productive,
+    lapName: updates.lapName ?? currentTag.lapName,
+    colorPreset: updates.colorPreset ?? currentTag.colorPreset,
+    parent: updates.parent ?? currentTag.parent,
+    children:
+      updates.children !== undefined
+        ? JSON.stringify(updates.children)
+        : currentTag.children,
+    synced: 0, // Mark as needing sync
+  };
+
+  // Perform the update
+  await db.update(dataIndex).set(updatedTag).where(eq(dataIndex.id, id));
 };
 
 // Delete a tag
 export const deleteTag = async (id: number): Promise<void> => {
-  const children = await db
+  // Fetch the tag to get the parent ID before deleting
+  const tag = await db
+    .select({ parent: dataIndex.parent, children: dataIndex.children })
+    .from(dataIndex)
+    .where(eq(dataIndex.id, id))
+    .limit(1);
+
+  if (tag.length === 0) {
+    throw new Error(`Tag with id ${id} not found`);
+  }
+
+  const { parent, children } = tag[0];
+
+  // Recursively delete child tags
+  const childTags = await db
     .select({ id: dataIndex.id })
     .from(dataIndex)
     .where(eq(dataIndex.parent, id));
-  for (const child of children) {
+
+  for (const child of childTags) {
     await deleteTag(child.id);
   }
+
+  // Remove the ID from the parent's children array if parent exists
+  if (parent !== null) {
+    const parentTag = await db
+      .select({ children: dataIndex.children })
+      .from(dataIndex)
+      .where(eq(dataIndex.id, parent))
+      .limit(1);
+
+    if (parentTag.length > 0) {
+      const updatedChildren = JSON.parse(parentTag[0].children || "[]").filter(
+        (childId: number) => childId !== id,
+      );
+
+      await db
+        .update(dataIndex)
+        .set({ children: JSON.stringify(updatedChildren), synced: 0 })
+        .where(eq(dataIndex.id, parent));
+    }
+  }
+
+  // Mark the tag as deleted
   await db
     .update(dataIndex)
     .set({ deleted: 1, synced: 0 })
@@ -130,7 +217,43 @@ interface TagContextProps {
   deleteTag: (id: number) => Promise<void>;
   syncUnsyncedRows: () => Promise<void>;
   cleanupDeletedRows: () => Promise<void>;
+  fetchAndStoreTags: (token: string) => Promise<void>;
 }
+
+export const fetchAndStoreTags = async (token: string) => {
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+
+    if (response.status === 200) {
+      const tags: TagData[] = response.data;
+
+      // Clear local database first
+      await db.delete(dataIndex).execute();
+
+      // Insert fetched tags into SQLite
+      for (const tag of tags) {
+        console.log("Inserting tag:", tag);
+        await insertTag({
+          title: tag.title,
+          type: tag.type,
+          productive: tag.productive,
+          lapName: tag.lapName,
+          colorPreset: tag.colorPreset,
+          parent: tag.parent,
+          children: tag.children,
+        });
+      }
+
+      console.log("Local database populated successfully.");
+    } else {
+      console.error("Failed to fetch tags:", response.statusText);
+    }
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+  }
+};
 
 export const TagContext = createContext<TagContextProps | null>(null);
 
@@ -153,6 +276,7 @@ export const TagProvider: React.FC<{ children: React.ReactNode }> = ({
         deleteTag,
         syncUnsyncedRows,
         cleanupDeletedRows,
+        fetchAndStoreTags,
       }}
     >
       {children}

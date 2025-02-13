@@ -13,6 +13,7 @@ import TextField from "@/components/form/textField/textField";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchAndStoreTags } from "@/context/TagContext";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -50,6 +51,8 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
+      await fetchAndStoreTags(token);
+
       router.replace("/watch");
     } catch (err) {
       setLoading(false);
@@ -81,6 +84,8 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
       // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
+
+      await fetchAndStoreTags(token);
 
       router.push("/watch");
     } catch (err) {

@@ -13,20 +13,16 @@ import Switch from "@components/basic/switch/switch";
 import TextField from "@/components/form/textField/textField";
 import Picker from "@/components/form/picker/picker";
 import ColorPicker from "@/components/form/colorPicker/colorPicker";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
-import {
-  ColorPresets,
-  type TagData,
-  type DataIndexLocal,
-} from "@/constants/interfaces";
-import { AdditionalProps } from "react-native-svg/lib/typescript/xml";
-import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
+import { ColorPresets, type TagData } from "@/constants/interfaces";
 import { moduleType } from "@/constants/interfaces";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import TrashCan from "@assets/icons/trash-can.svg";
+import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
+import { useTagContext } from "@/context/TagContext";
+import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 
 interface AddQuery {
   type: moduleType;
@@ -37,85 +33,88 @@ interface AddQuery {
   productive: boolean;
 }
 
-import TrashCan from "@assets/icons/trash-can.svg";
-import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
-import { useTagContext } from "@/context/TagContext";
-
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
   const parentId = parentIdString
-    ? Number.parseInt(parentIdString as string)
+    ? Number.parseInt(parentIdString as string, 10)
     : null;
   const isAddScreen = rawIsAddScreen === "true";
+
   const styles = useStyles();
   const { theme } = useTheme();
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const colorArray: ColorPresets[] = [
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-  ];
 
-  // Utilize TagContext
-  const { dataIndex, createTag, updateTag, deleteTag } = useTagContext();
+  // TagContext methods
+  const { createTag, updateTag, deleteTag, getTag } = useTagContext();
 
-  // Initialize parent and current states as null
+  // State for the parent tag and the current tag
   const [parent, setParent] = useState<TagData | null>(null);
   const [current, setCurrent] = useState<TagData | null>(null);
 
+  // We fetch either a "parent" for the new Tag or the "current" tag if editing
   useEffect(() => {
-    if (dataIndex && parentId) {
+    if (!parentId) {
+      // If there's no parentId and this is a new creation at "root" level,
+      // you can either set `parent` to null or handle it differently.
+      setParent(null);
+      setCurrent(null);
+      return;
+    }
+
+    // Wrap your fetch logic in an async function
+    const fetchData = async () => {
       if (isAddScreen) {
-        setParent(dataIndex.get(parentId) || null);
+        // "Add" mode: we only care about the parent
+        const parentTag = await getTag(parentId);
+        setParent(parentTag);
         setCurrent(null);
       } else {
-        const currentItem = dataIndex.get(parentId) || null;
-        const parentPath = currentItem?.parent;
-        setParent(parentPath ? dataIndex.get(parentPath) || null : null);
-        setCurrent(currentItem);
+        // "Edit" mode: the parentId is actually the tag we're editing
+        const currentTag = await getTag(parentId);
+        setCurrent(currentTag);
+
+        if (currentTag?.parent) {
+          // If the current tag has a parent, fetch it
+          const parentTag = await getTag(currentTag.parent);
+          setParent(parentTag);
+        } else {
+          setParent(null);
+        }
       }
-    }
-  }, [dataIndex, parentId, isAddScreen]);
+    };
 
-  const [saveButtonPressed, setSaveButtonPressed] = useState(false);
-  const PADDING_HORIZONTAL = 22;
+    void fetchData();
+  }, [parentId, isAddScreen, getTag]);
 
-  if (!parent || !dataIndex) {
+  // Loading state if we're still waiting on parent or current (when needed)
+  // For example: if in Edit mode, we need `current` to be non-null before rendering.
+  if (!isAddScreen && !current) {
     return (
-      <View>
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
         <Text>Loading...</Text>
       </View>
     );
   }
 
-  // Implement handleDelete using TagContext's deleteTag
+  // For adding, we only need `parent` if you strictly require a parent in your logic.
+  // If you require a parent, do something similar:
+  if (isAddScreen && parentId && !parent) {
+    // We do have a parentId but no parent fetched yet
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Color array for color picker
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const colorArray: ColorPresets[] = [
+    ColorPresets.ORANGE,
+    ColorPresets.GREEN,
+    // ... add as many as needed
+  ];
+
+  // Handler for deletion
   const handleDelete = async () => {
     if (current) {
       await deleteTag(current.id);
@@ -123,44 +122,38 @@ export default function AddScreen() {
     }
   };
 
+  // Handler for creation
   const handleCreate = async (data: AddQuery) => {
-    // Map AddQuery to TagPayload
+    // Build the payload
     const tagPayload = {
       type: data.type,
       title: data.title,
       colorPreset: data.colorPreset,
-      lapName: data.lapName ? data.lapName : "Lap",
+      lapName: data.lapName || "Lap",
+      parent: data.parentId,
+      productive: data.productive,
+      children: [], // default
+    };
+    await createTag(tagPayload);
+    router.back();
+  };
+
+  // Handler for update
+  const handleUpdate = async (data: AddQuery) => {
+    if (!current) return;
+    const updates = {
+      type: data.type,
+      title: data.title,
+      colorPreset: data.colorPreset,
+      lapName: data.lapName,
       parent: data.parentId,
       productive: data.productive,
     };
-
-    await createTag(tagPayload);
+    await updateTag(current.id, updates);
+    router.back();
   };
 
-  const handleUpdate = async (data: AddQuery) => {
-    if (current) {
-      // Map AddQuery to Partial<TagPayload>
-      const tagUpdates: Partial<TagData> = {
-        type: data.type,
-        title: data.title,
-        colorPreset: data.colorPreset,
-        lapName: data.lapName,
-        parent: data.parentId, // Assuming parentId is a string or null
-        productive: data.productive,
-      };
-
-      await updateTag(current.id, tagUpdates);
-    }
-  };
-
-  // Implement handleDelete using TagContext's deleteTag
-  // const handleDeleteAction = async () => {
-  //   if (current) {
-  //     await deleteTag(current.item.id);
-  //     router.back(); // Navigate back after deletion
-  //   }
-  // };
-
+  // Decide if we are editing a project or an activity
   const isProject = current?.type === moduleType.project;
 
   return (
@@ -175,277 +168,252 @@ export default function AddScreen() {
               <SysButton
                 text="Save"
                 onPress={() => {
-                  setSaveButtonPressed(true);
+                  // We'll trigger a "save" inside the child form
+                  // You can also manage that via a ref or a shared piece of state.
+                  // For simplicity, we pass a flag down:
+                  // setSaveButtonPressed(true);
                 }}
               />
             ) : null,
         }}
       />
-
-      <TouchableWithoutFeedback
-        onPress={Keyboard.dismiss}
-        style={[styles.addScreen]}
-      >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.innerAddScreen}>
-          {current == null ? (
-            <SwitchWrapper
-              buttons={[
-                {
-                  text: "Activity",
-                  onPress: () => {},
-                },
-                {
-                  text: "Project",
-                  onPress: () => {},
-                },
-              ]}
-              styleSwitch={styles.switchOuter}
-            >
-              <AddSegment
-                selectedColorIndex={selectedColorIndex}
-                setSelectedColorIndex={setSelectedColorIndex}
-                colorArray={colorArray}
-                parent={parent}
-                setParent={setParent}
-                style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-                handleCreate={handleCreate}
-                dataIndex={dataIndex}
-                current={current}
-                handleDelete={handleDelete}
-              />
-              <AddSegment
-                selectedColorIndex={selectedColorIndex}
-                setSelectedColorIndex={setSelectedColorIndex}
-                colorArray={colorArray}
-                parent={parent}
-                setParent={setParent}
-                handleDelete={handleDelete}
-                isProject={true}
-                style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-                handleCreate={handleCreate}
-                dataIndex={dataIndex}
-                current={current}
-              />
-            </SwitchWrapper>
-          ) : (
-            <AddSegment
-              handleDelete={handleDelete}
-              selectedColorIndex={selectedColorIndex}
-              setSelectedColorIndex={setSelectedColorIndex}
-              colorArray={colorArray}
-              parent={parent}
-              isProject={current.type === moduleType.project}
-              setParent={setParent}
-              style={{ paddingHorizontal: PADDING_HORIZONTAL, flex: 1 }}
-              handleCreate={handleCreate}
-              dataIndex={dataIndex}
-              current={current}
-              handleUpdate={handleUpdate}
-              saveButtonPressed={saveButtonPressed}
-              setSaveButtonPressed={setSaveButtonPressed}
-            />
-          )}
+          {/* We use a "saveButtonPressed" state so the child can detect and handle saving */}
+          <ContentWrapper
+            parent={parent}
+            current={current}
+            isAddScreen={isAddScreen}
+            colorArray={colorArray}
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            handleCreate={handleCreate}
+            handleUpdate={handleUpdate}
+            handleDelete={handleDelete}
+          />
         </View>
       </TouchableWithoutFeedback>
     </>
   );
 }
 
-interface ContentProps {
-  setSelectedColorIndex: (index: number) => void;
-  colorArray: ColorPresets[];
-  parent: TagData;
-  setParent: (parent: TagData) => void;
-  isProject?: boolean;
-  style?: object;
-  handleCreate: (data: AddQuery) => void;
-  handleDelete: () => void;
-  dataIndex: DataIndexLocal;
+// Simple toggle to let child know to "save"
+function ContentWrapper({
+  parent,
+  current,
+  isAddScreen,
+  colorArray,
+  selectedColorIndex,
+  setSelectedColorIndex,
+  handleCreate,
+  handleUpdate,
+  handleDelete,
+}: {
+  parent: TagData | null;
   current: TagData | null;
-  handleUpdate?: (data: AddQuery) => void;
-  saveButtonPressed?: boolean;
-  setSaveButtonPressed?: (pressed: boolean) => void;
-}
-
-function AddSegment({
-  selectedColorIndex,
-  setSelectedColorIndex,
-  colorArray,
-  parent,
-  setParent,
-  isProject = false,
-  style = {},
-  handleCreate,
-  handleDelete,
-  dataIndex,
-  current,
-  handleUpdate,
-  saveButtonPressed,
-  setSaveButtonPressed,
-}: ContentProps & { selectedColorIndex: number }) {
+  isAddScreen: boolean;
+  colorArray: ColorPresets[];
+  selectedColorIndex: number;
+  setSelectedColorIndex: (index: number) => void;
+  handleCreate: (data: AddQuery) => void;
+  handleUpdate: (data: AddQuery) => void;
+  handleDelete: () => void;
+}) {
+  const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const styles = useStyles();
-  const [moduleNameState, setModuleNameState] = useState(
-    current ? current.title : "",
-  );
-  const moduleName =
-    moduleNameState || (isProject ? "New Project" : "New Activity");
-  const [lapName, setLapName] = useState(current ? current.lapName : "");
 
-  const dataIndexItem = dataIndex.get(parent.id) || null;
-
-  if (!dataIndexItem) {
-    return null;
-  }
-
-  return (
-    <ScrollView
-      showsHorizontalScrollIndicator={false}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-      style={[
-        {
-          marginHorizontal: -styles.innerAddScreen.paddingHorizontal,
-          paddingHorizontal: styles.innerAddScreen.paddingHorizontal,
-        },
-        style,
-      ]}
-    >
-      <TouchableOpacity
-        activeOpacity={1}
-        style={[styles.content, { paddingTop: current == null ? 16 : 10 }]}
-        onPress={Keyboard.dismiss}
+  if (isAddScreen) {
+    // We are creating a NEW tag under `parent`
+    // Could be an Activity or a Project
+    return (
+      <SwitchWrapper
+        buttons={[
+          {
+            text: "Activity",
+            onPress: () => {},
+          },
+          {
+            text: "Project",
+            onPress: () => {},
+          },
+        ]}
+        styleSwitch={styles.switchOuter}
       >
-        {!isProject ? (
-          <ActivityAddContent
-            current={current}
-            selectedColorIndex={selectedColorIndex}
-            setSelectedColorIndex={setSelectedColorIndex}
-            colorArray={colorArray}
-            parent={parent}
-            setParent={setParent}
-            moduleName={moduleName}
-            setModuleName={setModuleNameState}
-            lapName={lapName}
-            setLapName={setLapName}
-            dataIndex={dataIndex}
-            handleCreate={handleCreate}
-            handleDelete={handleDelete}
-            handleUpdate={handleUpdate}
-            saveButtonPressed={saveButtonPressed}
-            setSaveButtonPressed={setSaveButtonPressed}
-          />
-        ) : (
-          <ProjectAddContent
-            current={current}
-            projectColor={dataIndexItem.colorPreset}
-            setSelectedColorIndex={setSelectedColorIndex}
-            colorArray={colorArray}
-            parent={parent}
-            dataIndex={dataIndex}
-            setParent={setParent}
-            moduleName={moduleName}
-            setModuleName={setModuleNameState}
-            lapName={lapName}
-            setLapName={setLapName}
-            handleCreate={handleCreate}
-            handleDelete={handleDelete}
-            handleUpdate={handleUpdate}
-            saveButtonPressed={saveButtonPressed}
-            setSaveButtonPressed={setSaveButtonPressed}
-          />
-        )}
-      </TouchableOpacity>
-    </ScrollView>
-  );
-}
-
-interface AdditionalContentProps {
-  moduleName: string;
-  setModuleName: (name: string) => void;
-  lapName: string;
-  setLapName: (name: string) => void;
-}
-
-function ActivityAddContent({
-  selectedColorIndex,
-  setSelectedColorIndex,
-  colorArray,
-  parent,
-  setParent,
-  moduleName,
-  setModuleName,
-  setLapName,
-  lapName,
-  handleCreate,
-  dataIndex,
-  handleDelete,
-  current,
-  handleUpdate,
-  saveButtonPressed,
-  setSaveButtonPressed,
-}: ContentProps & AdditionalContentProps & { selectedColorIndex: number }) {
-  const styles = useStyles();
-  const dataIndexItem = dataIndex.get(parent.id) || null;
-  if (!dataIndexItem) {
-    return null;
+        {/* Activity AddSegment */}
+        <AddSegment
+          parent={parent}
+          current={null}
+          isProject={false}
+          colorArray={colorArray}
+          selectedColorIndex={selectedColorIndex}
+          setSelectedColorIndex={setSelectedColorIndex}
+          handleCreate={handleCreate}
+          handleUpdate={handleUpdate}
+          handleDelete={handleDelete}
+          saveButtonPressed={saveButtonPressed}
+          setSaveButtonPressed={setSaveButtonPressed}
+        />
+        {/* Project AddSegment */}
+        <AddSegment
+          parent={parent}
+          current={null}
+          isProject={true}
+          colorArray={colorArray}
+          selectedColorIndex={selectedColorIndex}
+          setSelectedColorIndex={setSelectedColorIndex}
+          handleCreate={handleCreate}
+          handleUpdate={handleUpdate}
+          handleDelete={handleDelete}
+          saveButtonPressed={saveButtonPressed}
+          setSaveButtonPressed={setSaveButtonPressed}
+        />
+      </SwitchWrapper>
+    );
   }
-  const [productivity, setProductivity] = useState<boolean>(
-    current?.productive || dataIndexItem?.productive,
+  // We are EDITING the tag `current`
+  if (!current) {
+    return <Text>No current tag found</Text>;
+  }
+  return (
+    <AddSegment
+      parent={parent}
+      current={current}
+      isProject={current.type === moduleType.project}
+      colorArray={colorArray}
+      selectedColorIndex={selectedColorIndex}
+      setSelectedColorIndex={setSelectedColorIndex}
+      handleCreate={handleCreate}
+      handleUpdate={handleUpdate}
+      handleDelete={handleDelete}
+      saveButtonPressed={saveButtonPressed}
+      setSaveButtonPressed={setSaveButtonPressed}
+    />
   );
+}
+
+interface AddSegmentProps {
+  parent: TagData | null;
+  current: TagData | null;
+  isProject: boolean;
+  colorArray: ColorPresets[];
+  selectedColorIndex: number;
+  setSelectedColorIndex: (i: number) => void;
+  handleCreate: (data: AddQuery) => void;
+  handleUpdate: (data: AddQuery) => void;
+  handleDelete: () => void;
+  saveButtonPressed: boolean;
+  setSaveButtonPressed: (b: boolean) => void;
+}
+
+/**
+ * A single form segment that can handle either an Activity or Project,
+ * depending on `isProject`.
+ */
+function AddSegment(props: AddSegmentProps) {
+  const {
+    parent,
+    current,
+    isProject,
+    colorArray,
+    selectedColorIndex,
+    setSelectedColorIndex,
+    handleCreate,
+    handleUpdate,
+    handleDelete,
+    saveButtonPressed,
+    setSaveButtonPressed,
+  } = props;
+
+  const styles = useStyles();
   const { theme } = useTheme();
 
+  // State for name and lapName
+  const [moduleName, setModuleName] = useState(current?.title ?? "");
+  const [lapName, setLapName] = useState(current?.lapName ?? "Lap");
+
+  // For activity vs project, we store "productive"
+  // If editing, default to current.productive
+  // If creating, default to parent's productivity or `false` if no parent
+  const [productivity, setProductivity] = useState<boolean>(
+    current?.productive ?? parent?.productive ?? false,
+  );
+
   useEffect(() => {
-    if (
-      saveButtonPressed &&
-      setSaveButtonPressed !== undefined &&
-      handleUpdate !== undefined
-    ) {
-      handleUpdate({
-        type: moduleType.activity,
-        title: moduleName,
-        colorPreset: colorArray[selectedColorIndex],
-        lapName: lapName,
-        parentId: parent.id,
-        productive: productivity,
-      });
+    // If the "Save" button was pressed in the header, handle the update
+    if (saveButtonPressed) {
+      if (current) {
+        // Editing: handleUpdate
+        const queryData: AddQuery = {
+          type: isProject ? moduleType.project : moduleType.activity,
+          title: moduleName,
+          colorPreset: colorArray[selectedColorIndex],
+          lapName,
+          parentId: parent?.id ?? 0, // or 0 if no parent
+          productive: productivity,
+        };
+        handleUpdate(queryData);
+      }
       setSaveButtonPressed(false);
     }
   }, [
     saveButtonPressed,
     setSaveButtonPressed,
-    handleUpdate,
-    parent,
-    productivity,
-    selectedColorIndex,
-    lapName,
+    current,
+    isProject,
     moduleName,
+    lapName,
+    selectedColorIndex,
+    productivity,
+    parent,
     colorArray,
+    handleUpdate,
   ]);
 
+  // The "create" button is local to the segment for new items
+  const onCreatePress = () => {
+    const queryData: AddQuery = {
+      type: isProject ? moduleType.project : moduleType.activity,
+      title: moduleName,
+      colorPreset: colorArray[selectedColorIndex],
+      lapName,
+      parentId: parent?.id ?? 0,
+      productive: productivity,
+    };
+    handleCreate(queryData);
+  };
+
+  // If there's no parent, handle it as needed
+  // Could also skip. For example, if "root" is allowed, parent can be `null`.
+  // if (parent === null && current === null) {
+  //   return <Text>Loading...</Text>;
+  // }
+
   return (
-    <>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ padding: 16 }}
+    >
+      {/* Name input */}
       <TextField
-        placeholder="Activity Name"
+        placeholder={isProject ? "Project Name" : "Activity Name"}
         startingText={moduleName}
+        defaultText={moduleName}
         setModuleName={setModuleName}
-        defaultText={current?.title || "Activity Name"}
-        rightHint={true}
       />
+
+      {/* Productivity picker */}
       <Picker
         buttons={
           current == null
             ? [
                 {
                   text: "Productive",
-                  onPress: () => {
-                    setProductivity(true);
-                  },
+                  onPress: () => setProductivity(true),
                 },
                 {
                   text: "Unproductive",
-                  onPress: () => {
-                    setProductivity(false);
-                  },
+                  onPress: () => setProductivity(false),
                 },
               ]
             : [
@@ -456,191 +424,67 @@ function ActivityAddContent({
               ]
         }
       />
+
+      {/* Lap Name */}
       <TextField
         placeholder="Lap Name"
-        setModuleName={setLapName}
-        rightHint={true}
         startingText={lapName}
-        defaultText={current?.lapName || parent.lapName || "Lap"}
-      />
-
-      <ColorPicker
-        colorPresets={colorArray}
-        selectedColorIndex={selectedColorIndex}
-        setSelectedColorIndex={setSelectedColorIndex}
-      />
-      <PathPicker
-        parent={parent}
-        setParent={setParent}
-        moduleColorPallete={colorArray[selectedColorIndex]}
-        moduleName={moduleName}
-        isProject={false}
-        dataIndex={dataIndex}
-      />
-      {current == null ? (
-        <View style={styles.buttonProjectOuter}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              handleCreate({
-                type: moduleType.activity,
-                title: moduleName,
-                colorPreset: colorArray[selectedColorIndex],
-                lapName: lapName,
-                parentId: parent.id,
-                productive: productivity,
-              });
-            }}
-          >
-            <Text style={styles.buttonText}>Create</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.buttonProjectOuter}>
-          <TouchableOpacity
-            style={styles.buttonProject}
-            onPress={() => {
-              handleDelete();
-            }}
-          >
-            <TrashCan
-              fill={theme.color.red}
-              width={20}
-              height={20}
-              style={{ marginBottom: 2 }}
-            />
-            <Text style={styles.buttonTextProject}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </>
-  );
-}
-
-function ProjectAddContent({
-  projectColor,
-  colorArray,
-  parent,
-  setParent,
-  moduleName,
-  setModuleName,
-  lapName,
-  setLapName,
-  handleCreate,
-  dataIndex,
-  handleDelete,
-  current,
-  handleUpdate,
-  saveButtonPressed,
-  setSaveButtonPressed,
-}: ContentProps & AdditionalContentProps & { projectColor: ColorPresets }) {
-  const styles = useStyles();
-
-  const dataIndexItem = dataIndex.get(parent.id) || null;
-  if (!dataIndexItem) {
-    return null;
-  }
-
-  const productivity = dataIndexItem.productive;
-  const { theme } = useTheme();
-
-  useEffect(() => {
-    if (
-      saveButtonPressed &&
-      setSaveButtonPressed !== undefined &&
-      handleUpdate !== undefined
-    ) {
-      handleUpdate({
-        type: moduleType.activity,
-        title: moduleName,
-        colorPreset: projectColor,
-        lapName: lapName,
-        parentId: parent.id,
-        productive: productivity,
-      });
-      setSaveButtonPressed(false);
-    }
-  }, [
-    saveButtonPressed,
-    setSaveButtonPressed,
-    handleUpdate,
-    parent,
-    productivity,
-    projectColor,
-    lapName,
-    moduleName,
-  ]);
-
-  return (
-    <>
-      <TextField
-        placeholder="Project Name"
-        defaultText={current ? current.title : "Project Name"}
-        startingText={current ? current.title : ""}
-        setModuleName={setModuleName}
-        rightHint={true}
-      />
-      <Picker
-        buttons={[
-          {
-            text: productivity ? "Productive" : "Unproductive",
-            onPress: () => {},
-          },
-        ]}
-      />
-
-      <TextField
-        placeholder={current ? current.lapName : "Lap Name"}
+        defaultText={lapName}
         setModuleName={setLapName}
-        rightHint={true}
-        startingText={current ? current.lapName : ""}
-        defaultText={current?.lapName || parent.lapName || "Lap"}
+        rightHint
       />
-      <PathPicker
-        parent={parent}
-        setParent={setParent}
-        moduleColorPallete={projectColor}
-        isProject={true}
-        moduleName={moduleName}
-        dataIndex={dataIndex}
-      />
+
+      {/* For an Activity, show ColorPicker. For Project, it could be optional or the same. */}
+      {isProject ? (
+        // Projects might or might not use the color picker in your code;
+        // if you do want them to pick color, you can use the same ColorPicker:
+        <Text style={{ fontWeight: "bold", marginTop: 16 }}>
+          (Optional) Color Picker
+        </Text>
+      ) : (
+        <ColorPicker
+          colorPresets={colorArray}
+          selectedColorIndex={selectedColorIndex}
+          setSelectedColorIndex={setSelectedColorIndex}
+        />
+      )}
+
+      {/* PathPicker: If your PathPicker requires a TagData parent,
+          make sure it can handle parent === null */}
+      {parent && (
+        <PathPicker
+          parent={parent}
+          setParent={() => {
+            // If you allow changing the parent, you'd call getTag(...) again or something.
+            // This is left as an exercise, depending on how your PathPicker is implemented.
+          }}
+          moduleColorPallete={colorArray[selectedColorIndex]}
+          moduleName={moduleName}
+          isProject={isProject}
+        />
+      )}
+
+      {/* For new creation */}
       {current == null ? (
         <View style={styles.buttonProjectOuter}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              handleCreate({
-                type: moduleType.project,
-                title: moduleName,
-                colorPreset: projectColor,
-                lapName: lapName,
-                parentId: parent.id,
-                productive: parent.productive,
-              });
-            }}
-          >
+          <TouchableOpacity style={styles.button} onPress={onCreatePress}>
             <Text style={styles.buttonText}>Create</Text>
           </TouchableOpacity>
         </View>
       ) : (
+        // For editing (show a delete button)
         <View style={styles.buttonProjectOuter}>
-          <TouchableOpacity
-            style={styles.buttonProject}
-            onPress={() => {
-              handleDelete();
-            }}
-          >
+          <TouchableOpacity style={styles.buttonProject} onPress={handleDelete}>
             <TrashCan
               fill={theme.color.red}
               width={20}
               height={20}
               style={{ marginBottom: 2 }}
             />
-
             <Text style={styles.buttonTextProject}>Delete</Text>
           </TouchableOpacity>
         </View>
       )}
-    </>
+    </ScrollView>
   );
 }
