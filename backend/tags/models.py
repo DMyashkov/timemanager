@@ -25,7 +25,7 @@ class Tag(models.Model):
     children = models.JSONField(default=list, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.parent and self.module_type == self.TagType.ACTIVITY:
+        if not self.parent:
             raise ValidationError("There can only be one root activity.")
 
         super().save(*args, **kwargs)

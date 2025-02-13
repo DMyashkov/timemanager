@@ -10,9 +10,6 @@ from .models import Tag
 def create_root_activity_for_user(sender, instance, created, **kwargs):
     """Only if you want every user to have a new Root Activity upon signup."""
     if created:
-        # If you do want user-specific root, you'd store a user ForeignKey in Tag
-        # That means you'd also add `user = ForeignKey(User, ...)` to Tag model
-        # Example:
         if not Tag.objects.filter(parent=None, title="Root Activity", type=Tag.TagType.ACTIVITY).exists():
             Tag.objects.create(
                 title="Root Activity",
@@ -21,5 +18,4 @@ def create_root_activity_for_user(sender, instance, created, **kwargs):
                 color_preset="green",
                 productive=True,
                 lap_name="Root Lap",
-                # user=instance, # if you add a user field
             )

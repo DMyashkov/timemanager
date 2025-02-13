@@ -34,6 +34,7 @@ class SyncTagsView(APIView):
         for tag_data in payload:
             tag_id = tag_data.get("id")
             is_deleted = tag_data.get("deleted")
+            tag_data.pop("deleted", None)
 
             if is_deleted:
                 # Soft delete: Mark the tag as deleted
