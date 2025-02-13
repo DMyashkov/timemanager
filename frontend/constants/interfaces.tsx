@@ -61,4 +61,3 @@ export function getDaysInMonth(month: number, year: number): number {
   // Use Date object to calculate days in the given month
   return new Date(year, month, 0).getDate();
 }
-

@@ -1,77 +1,62 @@
-from django.db.models.query import QuerySet
-from rest_framework import status, viewsets
+from django.utils.functional import empty
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Tag
-from .serializers import TagSerializer, TagSyncSerializer
-
-
-class TagViewSet(viewsets.ModelViewSet):
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self) -> QuerySet[Tag]:  # type: ignore
-        """
-        Return all Tags, excluding soft-deleted items.
-       """
-        return Tag.objects.filter(deleted=False)
-
-    def destroy(self, request, *args, **kwargs):
-        """
-        Perform a soft delete by marking the instance as deleted.
-        """
-        instance = self.get_object()
-        instance.deleted = True
-        instance.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+from .serializers import TagSyncSerializer
 
 
 class SyncTagsView(APIView):
     """
-    Expects a payload like:
-    [
-      {
-        "id": 123,   // or null for new
-        "title": "...",
-        "deleted": 0 or 1,
-        ...
-      },
-      ...
-    ]
+    Syncs multiple tags from the frontend to the backend.
     """
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        for tag_data in request.data:
+            tag_data.pop("synced", None)
+
+        # Validate the incoming payload
         payload_serializer = TagSyncSerializer(data=request.data, many=True)
         if not payload_serializer.is_valid():
             return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         payload = list(payload_serializer.validated_data) if isinstance(
             payload_serializer.validated_data, list) else []
 
+        print(type(payload_serializer.validated_data),
+              payload_serializer.validated_data)
+
         synced_ids = []
         for tag_data in payload:
-            tag_id = tag_data.get("id", None)
+            tag_id = tag_data.get("id")
+            is_deleted = tag_data.get("deleted")
 
-            if tag_id is None or tag_id < 0:
-                serializer = TagSerializer(data=tag_data)
-                serializer.is_valid(raise_exception=True)
-                new_tag = serializer.save()
+            if is_deleted:
+                # Soft delete: Mark the tag as deleted
+                Tag.objects.filter(id=tag_id).delete()
+                continue
+
+            if tag_id < 0:
+                # Create a new tag
+                new_tag = Tag.objects.create(**tag_data)
                 synced_ids.append({"temp_id": tag_id, "new_id": new_tag.id})
             else:
+                # Update an existing tag
                 try:
                     tag_instance = Tag.objects.get(id=tag_id)
-                    serializer = TagSerializer(
-                        tag_instance, data=tag_data, partial=True)
-                    serializer.is_valid(raise_exception=True)
-                    serializer.save()
+                    for key, value in tag_data.items():
+                        setattr(tag_instance, key, value)
+                    tag_instance.save()
                     synced_ids.append({"existing_id": tag_id})
                 except Tag.DoesNotExist:
-                    serializer = TagSerializer(data=tag_data)
-                    serializer.is_valid(raise_exception=True)
-                    new_tag = serializer.save()
+                    # If the tag doesn't exist, create a new one
+                    new_tag = Tag.objects.create(**tag_data)
                     synced_ids.append(
                         {"temp_id": tag_id, "new_id": new_tag.id})
-        return Response({"synced": synced_ids})
+
+        # Return synced tag IDs
+        return Response({"synced": synced_ids}, status=status.HTTP_200_OK)

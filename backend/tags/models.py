@@ -1,4 +1,3 @@
-# models.py
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -24,18 +23,13 @@ class Tag(models.Model):
         null=True
     )
 
-    # Optionally store path and children if you really want to match the frontend shape
     path = models.JSONField(default=list, blank=True, null=True)
-    # or: path = models.TextField(blank=True, null=True)
-    # if you prefer to store a stringified version
-
-    children_ids = models.JSONField(default=list, blank=True, null=True)
-    # or: children_ids = models.TextField(blank=True, null=True)
+    children = models.JSONField(default=list, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.parent and self.type == self.TagType.ACTIVITY:
             existing_root = Tag.objects.filter(
-                parent=None, type=self.TagType.ACTIVITY
+                parent=None, type=self.TagType.ACTIVITY, deleted=False
             ).exclude(id=self.id).exists()
             if existing_root:
                 raise ValidationError("There can only be one root activity.")
