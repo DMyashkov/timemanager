@@ -9,11 +9,10 @@ class Tag(models.Model):
 
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)
-    type = models.CharField(max_length=20, choices=TagType.choices)
-    color_preset = models.CharField(max_length=50, default='green')
+    module_type = models.CharField(max_length=20, choices=TagType.choices)
+    color_preset = models.CharField(max_length=50)
     productive = models.BooleanField(default=True)
-    lap_name = models.CharField(max_length=100, default='Lap')
+    lap_name = models.CharField(max_length=100)
 
     parent = models.ForeignKey(
         'self',
@@ -23,18 +22,13 @@ class Tag(models.Model):
         null=True
     )
 
-    path = models.JSONField(default=list, blank=True, null=True)
     children = models.JSONField(default=list, blank=True, null=True)
 
     def save(self, *args, **kwargs):
-        if not self.parent and self.type == self.TagType.ACTIVITY:
-            existing_root = Tag.objects.filter(
-                parent=None, type=self.TagType.ACTIVITY, deleted=False
-            ).exclude(id=self.id).exists()
-            if existing_root:
-                raise ValidationError("There can only be one root activity.")
+        if not self.parent and self.module_type == self.TagType.ACTIVITY:
+            raise ValidationError("There can only be one root activity.")
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.title} ({self.type})'
+        return f'{self.title} ({self.module_type})'

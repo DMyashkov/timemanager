@@ -11,12 +11,11 @@ class TagSyncSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
-            'type',
+            'module_type',
             'color_preset',
             'productive',
             'lap_name',
             'parent',
-            'path',
             'children',
             'deleted',
         ]
