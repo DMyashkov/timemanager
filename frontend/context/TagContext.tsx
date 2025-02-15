@@ -283,6 +283,31 @@ export const fetchAndStoreTags = async (token: string) => {
         });
       }
 
+      const rootActivity = await db
+        .select()
+        .from(dataIndex)
+        .where(and(eq(dataIndex.id, 0), eq(dataIndex.title, "Root Activity")))
+        .limit(1);
+
+      if (rootActivity.length === 0) {
+        await db.insert(dataIndex).values({
+          id: 0,
+          title: "ROOT",
+          type: "activity",
+          productive: 1,
+          lapName: "Lap",
+          colorPreset: "green",
+          parent: null,
+          children: "[]",
+          synced: 0,
+          deleted: 0,
+        });
+
+        console.log("Root Activity created successfully.");
+      } else {
+        console.log("Root Activity already exists for user.");
+      }
+
       console.log("Local database populated successfully.");
     } else {
       console.error("Failed to fetch tags:", response.statusText);

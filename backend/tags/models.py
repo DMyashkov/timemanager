@@ -17,18 +17,11 @@ class Tag(models.Model):
     parent = models.ForeignKey(
         'self',
         on_delete=models.CASCADE,
-        related_name='children',
         blank=True,
         null=True
     )
 
     children = models.JSONField(default=list, blank=True, null=True)
-
-    def save(self, *args, **kwargs):
-        if not self.parent:
-            raise ValidationError("There can only be one root activity.")
-
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.title} ({self.module_type})'

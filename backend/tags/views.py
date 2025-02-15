@@ -37,16 +37,13 @@ class SyncTagsView(APIView):
             tag_data.pop("deleted", None)
 
             if is_deleted:
-                # Soft delete: Mark the tag as deleted
                 Tag.objects.filter(id=tag_id).delete()
                 continue
 
-            if tag_id < 0:
-                # Create a new tag
+            if tag_id < 0 or (tag_id is 0 and not Tag.objects.filter(id=0).exists()):
                 new_tag = Tag.objects.create(**tag_data)
                 synced_ids.append({"temp_id": tag_id, "new_id": new_tag.id})
             else:
-                # Update an existing tag
                 try:
                     tag_instance = Tag.objects.get(id=tag_id)
                     for key, value in tag_data.items():
@@ -54,7 +51,6 @@ class SyncTagsView(APIView):
                     tag_instance.save()
                     synced_ids.append({"existing_id": tag_id})
                 except Tag.DoesNotExist:
-                    # If the tag doesn't exist, create a new one
                     new_tag = Tag.objects.create(**tag_data)
                     synced_ids.append(
                         {"temp_id": tag_id, "new_id": new_tag.id})

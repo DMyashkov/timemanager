@@ -10,11 +10,11 @@ from .models import Tag
 def create_root_activity_for_user(sender, instance, created, **kwargs):
     """Only if you want every user to have a new Root Activity upon signup."""
     if created:
-        if not Tag.objects.filter(parent=None, title="Root Activity", type=Tag.TagType.ACTIVITY).exists():
+        if not Tag.objects.filter(parent=None, title="Root Activity", module_type=Tag.TagType.ACTIVITY).exists():
             Tag.objects.create(
                 title="Root Activity",
                 description="This is the root activity for the user.",
-                type=Tag.TagType.ACTIVITY,
+                module_type=Tag.TagType.ACTIVITY,
                 color_preset="green",
                 productive=True,
                 lap_name="Root Lap",

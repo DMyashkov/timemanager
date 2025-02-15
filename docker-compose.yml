@@ -11,22 +11,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #   container_name: react-native-frontend
-  #   ports:
-  #     - "8081:8081"
-  #     - "19000:19000" # Expo app communication
-  #     - "19001:19001" # Expo push notifications
-  #     - "19002:19002" # Web interface to view the QR code
-  #   volumes:
-  #     - ./frontend:/app
-  #   command: npm start
-  #   env_file:
-  #     - .env
+      db:
+        condition: service_healthy # Waits for PostgreSQL to be ready
 
   db:
     image: postgres:14
@@ -39,6 +25,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d timemanager_db"]
+      interval: 5s
+      retries: 5
+      start_period: 10s # Allow some time for DB to start
 
 volumes:
   postgres_data:

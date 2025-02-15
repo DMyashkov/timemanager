@@ -3,7 +3,7 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const dataIndex = sqliteTable("dataIndex", {
   id: int("id").primaryKey({ autoIncrement: true }),
   title: text("title"),
-  type: text("type"),
+  type: text("module_type"),
   productive: int("productive"),
   lapName: text("lap_name"),
   colorPreset: text("color_preset"),
