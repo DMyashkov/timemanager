@@ -40,7 +40,7 @@ class SyncTagsView(APIView):
                 Tag.objects.filter(id=tag_id).delete()
                 continue
 
-            if tag_id < 0 or (tag_id is 0 and not Tag.objects.filter(id=0).exists()):
+            if tag_id < 0 or (tag_id == 0 and not Tag.objects.filter(id=0).exists()):
                 new_tag = Tag.objects.create(**tag_data)
                 synced_ids.append({"temp_id": tag_id, "new_id": new_tag.id})
             else:

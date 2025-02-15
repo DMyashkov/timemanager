@@ -48,7 +48,6 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       const token = response.data.token;
       await saveToken(token);
 
-      // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
       await fetchAndStoreTags(token);
