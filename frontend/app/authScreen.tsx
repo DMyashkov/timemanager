@@ -33,35 +33,51 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       console.error("Error saving token:", e);
     }
   };
+  const API_URL = "http://172.0.0.1:8000/api"; // Works on iOS Simulator
 
   const handleLogin = async () => {
     setLoading(true);
     setError("");
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/login/", {
-        email: email,
-        password: password,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/login/",
+        {
+          email: email,
+          password: password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
       setLoading(false);
-      console.log("Login successful:", response.data);
-
-      const token = response.data.token;
-      await saveToken(token);
-
-      axios.defaults.headers.common.Authorization = `Token ${token}`;
-
-      await fetchAndStoreTags(token);
-
-      router.replace("/watch");
+      // console.log("Login successful:", response.data);
+      //
+      // const token = response.data.token;
+      // await saveToken(token);
+      //
+      // axios.defaults.headers.common.Authorization = `Token ${token}`;
+      //
+      // router.replace("/watch");
     } catch (err) {
       setLoading(false);
 
       if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.error || "An error occurred");
-        console.log("Login error:", err.response.data);
+        console.error("Login error response:", err.response.data);
+        console.error("Login error status:", err.response.status);
+        console.error("Login error headers:", err.response.headers);
+        setError(
+          err.response.data.error ||
+            err.response.data.message ||
+            JSON.stringify(err.response.data) ||
+            "An error occurred",
+        );
       } else if (err instanceof Error) {
+        console.error("Login error:", err);
         setError(err.message);
       } else {
+        console.error("Unknown login error:", err);
         setError("An unknown error occurred");
       }
     }
@@ -71,10 +87,12 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     setLoading(true);
     setError("");
     try {
+      console.log("Signing up with email:", email, "and password", password);
       const response = await axios.post("http://127.0.0.1:8000/api/register/", {
         email: email,
         password: password,
       });
+
       setLoading(false);
       console.log("Sign-up successful:", response.data);
 
@@ -84,7 +102,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
-      await fetchAndStoreTags(token);
+      // await fetchAndStoreTags(token);
 
       router.push("/watch");
     } catch (err) {
@@ -99,10 +117,6 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       }
     }
   };
-
-  useEffect(() => {
-    console.log("Error:", error);
-  }, [error]);
 
   useEffect(() => {
     const setAxiosToken = async () => {

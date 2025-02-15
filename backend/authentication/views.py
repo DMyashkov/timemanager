@@ -59,7 +59,7 @@ def register_page(request):
         return Response({"error": "Email already taken"}, status=status.HTTP_400_BAD_REQUEST)
 
     # Create user
-    user = CustomUser.objects.create_user(
+    user = CustomUser.objects.create_user(  # type: ignore
         email=email,
         password=password,
     )

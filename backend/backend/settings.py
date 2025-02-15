@@ -37,7 +37,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 }
 
@@ -134,7 +134,7 @@ MEDIA_URL = '/media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = os.getenv(
-    'CORS_ALLOWED_ORIGINS', 'http://localhost:19006,http://localhost:8000,http://127.0.0.1:8081').split(',')
+    'CORS_ALLOWED_ORIGINS', 'http://localhost:19006,http://localhost:8000,http://127.0.0.1:8081,http://127.0.0.1:8000').split(',')
 CORS_ALLOW_CREDENTIALS = os.getenv(
     'CORS_ALLOW_CREDENTIALS', 'True').lower() == 'true'
 

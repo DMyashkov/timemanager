@@ -1,6 +1,6 @@
 from django.utils.functional import empty
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -13,7 +13,7 @@ class SyncTagsView(APIView):
     Syncs multiple tags from the frontend to the backend.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         for tag_data in request.data:
