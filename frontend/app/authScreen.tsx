@@ -52,21 +52,26 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
         },
       );
       setLoading(false);
-      // console.log("Login successful:", response.data);
-      //
-      // const token = response.data.token;
-      // await saveToken(token);
-      //
-      // axios.defaults.headers.common.Authorization = `Token ${token}`;
-      //
-      // router.replace("/watch");
+      console.log("Login successful:", response.data);
+
+      const token = response.data.token;
+      await saveToken(token);
+
+      axios.defaults.headers.common.Authorization = `Token ${token}`;
+
+      await fetchAndStoreTags(token);
+
+      router.replace("/watch");
     } catch (err) {
       setLoading(false);
 
       if (axios.isAxiosError(err) && err.response) {
         console.error("Login error response:", err.response.data);
         console.error("Login error status:", err.response.status);
-        console.error("Login error headers:", err.response.headers);
+        console.error(
+          "Login error headers:",
+          JSON.stringify(err.response.headers, null, 2),
+        );
         setError(
           err.response.data.error ||
             err.response.data.message ||
@@ -102,9 +107,9 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
-      // await fetchAndStoreTags(token);
+      await fetchAndStoreTags(token);
 
-      router.push("/watch");
+      router.replace("/watch");
     } catch (err) {
       setLoading(false);
 
