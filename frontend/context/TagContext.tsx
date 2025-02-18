@@ -263,11 +263,17 @@ export const fetchAndStoreTags = async (token: string) => {
       headers: { Authorization: `Token ${token}` },
     });
 
+    console.log("Fetched tags:", response.data);
+    console.log("Response status:", response.status);
+
     if (response.status === 200) {
       const tags: TagData[] = response.data;
+      console.log("Tags fetched successfully.");
 
       // Clear local database first
       await db.delete(dataIndex).execute();
+
+      console.log("Local database cleared successfully.");
 
       // Insert fetched tags into SQLite
       for (const tag of tags) {
@@ -283,11 +289,15 @@ export const fetchAndStoreTags = async (token: string) => {
         });
       }
 
+      console.log("Tags inserted into local database successfully.");
+
       const rootActivity = await db
         .select()
         .from(dataIndex)
         .where(and(eq(dataIndex.id, 0), eq(dataIndex.title, "Root Activity")))
         .limit(1);
+
+      console.log("Root Activity:", rootActivity);
 
       if (rootActivity.length === 0) {
         await db.insert(dataIndex).values({
@@ -354,3 +364,6 @@ export const useTagContext = () => {
   }
   return context;
 };
+function createClient(arg0: { url: string }) {
+  throw new Error("Function not implemented.");
+}

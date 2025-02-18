@@ -13,3 +13,7 @@ export const dataIndex = sqliteTable("dataIndex", {
   synced: int("synced").default(0),
   deleted: int("deleted").default(0),
 });
+
+export const schema = {
+  dataIndex,
+};

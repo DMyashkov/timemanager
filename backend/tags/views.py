@@ -1,11 +1,21 @@
 from django.utils.functional import empty
 from rest_framework import status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Tag
 from .serializers import TagSyncSerializer
+
+
+class ListTagsView(ListAPIView):
+    """
+    Returns all tags.
+    """
+    queryset = Tag.objects.all()
+    serializer_class = TagSyncSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class SyncTagsView(APIView):
