@@ -2,7 +2,7 @@ import { View, Text, FlatList } from "react-native";
 import useStyles from "./styles/pickActivityStyles";
 import { useTheme } from "@context/ThemeContext";
 import HeaderModal from "@/components/header/headerModal/headerModal";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FocusProvider } from "@/context/FocusContext";
 import ListModule from "@/components/module/listModule/listModule";
 import {
@@ -12,10 +12,14 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { router } from "expo-router";
+import { getTableConfig } from "drizzle-orm/mysql-core";
+import { useTagContext } from "@/context/TagContext";
+import type { TagData } from "@/constants/interfaces";
 
 export default function PickActivity() {
   const styles = useStyles();
   const { theme } = useTheme();
+  const { getTag } = useTagContext();
   const [searchText, setSearchText] = useState("");
 
   const [addScreen, setAddScreen] = useState<boolean>(false);
@@ -33,6 +37,27 @@ export default function PickActivity() {
       ],
     })),
   };
+
+  const [rootTag, setRootTag] = useState<TagData | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const root = await getTag(0);
+        if (root) {
+          setRootTag(root);
+        } else {
+          console.error("Root node (id=0) not found");
+        }
+      } catch (error) {
+        console.error("Error fetching root node:", error);
+      }
+    })();
+  }, [getTag]);
+
+  if (!rootTag) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -56,6 +81,7 @@ export default function PickActivity() {
               addScreen={addScreen}
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
+              activityData={rootTag}
             />
           )}
           keyExtractor={(item) => item.key}

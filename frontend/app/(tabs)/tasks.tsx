@@ -57,7 +57,6 @@ export default function TasksScreen() {
         activeOpacity={1}
       >
         <TaskListComponent tasks={[]} />
-        <TaskListComponent />
       </TouchableOpacity>
       <TaskBottomSheet
         bottomSheetRef={taskSheetRef}
