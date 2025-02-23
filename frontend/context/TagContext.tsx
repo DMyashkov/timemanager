@@ -236,7 +236,9 @@ const cleanupDeletedRows = async () => {
 };
 
 interface TagContextProps {
-  createTag: (item: Omit<TagData, "id">) => Promise<number>;
+  createTag: (
+    item: Omit<TagData, "id" | "synced" | "deleted">,
+  ) => Promise<number>;
   getTag: (id: number) => Promise<TagData | null>;
   updateTag: (id: number, updates: Partial<TagData>) => Promise<void>;
   deleteTag: (id: number) => Promise<void>;

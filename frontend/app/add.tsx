@@ -24,15 +24,6 @@ import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { useTagContext } from "@/context/TagContext";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 
-interface AddQuery {
-  type: moduleTypeEnum;
-  title: string;
-  colorPreset: ColorPresets;
-  lapName: string;
-  parentId: number;
-  productive: boolean;
-}
-
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
   const parentId = parentIdString
@@ -123,30 +114,34 @@ export default function AddScreen() {
   };
 
   // Handler for creation
-  const handleCreate = async (data: AddQuery) => {
+  const handleCreate = async (
+    data: Omit<TagData, "id" | "synced" | "deleted">,
+  ) => {
     // Build the payload
     const tagPayload = {
-      type: data.type,
+      moduleType: data.moduleType,
       title: data.title,
       colorPreset: data.colorPreset,
       lapName: data.lapName || "Lap",
-      parent: data.parentId,
+      parent: data.parent,
       productive: data.productive,
-      children: [], // default
+      children: [],
     };
     await createTag(tagPayload);
     router.back();
   };
 
   // Handler for update
-  const handleUpdate = async (data: AddQuery) => {
+  const handleUpdate = async (
+    data: Omit<TagData, "id" | "synced" | "deleted">,
+  ) => {
     if (!current) return;
     const updates = {
-      type: data.type,
+      moduleType: data.moduleType,
       title: data.title,
       colorPreset: data.colorPreset,
       lapName: data.lapName,
-      parent: data.parentId,
+      parent: data.parent,
       productive: data.productive,
     };
     await updateTag(current.id, updates);
@@ -215,8 +210,8 @@ function ContentWrapper({
   colorArray: ColorPresets[];
   selectedColorIndex: number;
   setSelectedColorIndex: (index: number) => void;
-  handleCreate: (data: AddQuery) => void;
-  handleUpdate: (data: AddQuery) => void;
+  handleCreate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
+  handleUpdate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
   handleDelete: () => void;
 }) {
   const [saveButtonPressed, setSaveButtonPressed] = useState(false);
@@ -298,8 +293,8 @@ interface AddSegmentProps {
   colorArray: ColorPresets[];
   selectedColorIndex: number;
   setSelectedColorIndex: (i: number) => void;
-  handleCreate: (data: AddQuery) => void;
-  handleUpdate: (data: AddQuery) => void;
+  handleCreate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
+  handleUpdate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
   handleDelete: () => void;
   saveButtonPressed: boolean;
   setSaveButtonPressed: (b: boolean) => void;
@@ -343,13 +338,16 @@ function AddSegment(props: AddSegmentProps) {
     if (saveButtonPressed) {
       if (current) {
         // Editing: handleUpdate
-        const queryData: AddQuery = {
-          type: isProject ? moduleTypeEnum.project : moduleTypeEnum.activity,
+        const queryData: Omit<TagData, "id" | "synced" | "deleted"> = {
+          moduleType: isProject
+            ? moduleTypeEnum.project
+            : moduleTypeEnum.activity,
           title: moduleName,
           colorPreset: colorArray[selectedColorIndex],
           lapName,
-          parentId: parent?.id ?? 0, // or 0 if no parent
+          parent: parent?.id ?? 0, // or 0 if no parent
           productive: productivity,
+          children: [],
         };
         handleUpdate(queryData);
       }
@@ -371,13 +369,14 @@ function AddSegment(props: AddSegmentProps) {
 
   // The "create" button is local to the segment for new items
   const onCreatePress = () => {
-    const queryData: AddQuery = {
-      type: isProject ? moduleTypeEnum.project : moduleTypeEnum.activity,
+    const queryData: Omit<TagData, "id" | "synced" | "deleted"> = {
+      moduleType: isProject ? moduleTypeEnum.project : moduleTypeEnum.activity,
       title: moduleName,
       colorPreset: colorArray[selectedColorIndex],
       lapName,
-      parentId: parent?.id ?? 0,
+      parent: parent?.id ?? 0,
       productive: productivity,
+      children: [],
     };
     handleCreate(queryData);
   };
