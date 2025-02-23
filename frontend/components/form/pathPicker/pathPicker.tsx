@@ -26,6 +26,7 @@ export default function PathPicker({
 
   // We'll store the *entire path* (from root -> parent -> parent's parent -> etc.)
   const [path, setPath] = useState<TagData[]>([]);
+  console.log("PathPicker parent:", parent);
 
   useEffect(() => {
     // Use an async IIFE or a separate function to fetch the chain of parents
@@ -90,14 +91,14 @@ export default function PathPicker({
         {/* Finally, render the new or edited module at the end of the path */}
         {isProject ? (
           <ProjectItem
-            activityName={moduleName}
+            activityName={moduleName || "New Project"}
             activityColor={moduleColorPallete}
             clickable={false}
           />
         ) : (
           <ActivityItem
             isExplicitlyExpanded
-            activityName={moduleName}
+            activityName={moduleName || "New Activity"}
             activityColor={moduleColorPallete}
             clickable={false}
           />

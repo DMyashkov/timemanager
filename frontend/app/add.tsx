@@ -456,18 +456,18 @@ function AddSegment(props: AddSegmentProps) {
 
       {/* PathPicker: If your PathPicker requires a TagData parent,
           make sure it can handle parent === null */}
-      {parent && (
-        <PathPicker
-          parent={parent}
-          setParent={() => {
-            // If you allow changing the parent, you'd call getTag(...) again or something.
-            // This is left as an exercise, depending on how your PathPicker is implemented.
-          }}
-          moduleColorPallete={colorArray[selectedColorIndex]}
-          moduleName={moduleName}
-          isProject={isProject}
-        />
-      )}
+      {/* {parent && ( */}
+      <PathPicker
+        parent={parent}
+        setParent={() => {
+          // If you allow changing the parent, you'd call getTag(...) again or something.
+          // This is left as an exercise, depending on how your PathPicker is implemented.
+        }}
+        moduleColorPallete={colorArray[selectedColorIndex]}
+        moduleName={moduleName}
+        isProject={isProject}
+      />
+      {/* )} */}
 
       {/* For new creation */}
       {current == null ? (
