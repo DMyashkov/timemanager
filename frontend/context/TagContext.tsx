@@ -2,7 +2,11 @@ import { createContext, useContext, useEffect } from "react";
 import { openDatabaseSync } from "expo-sqlite/next";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { and, eq } from "drizzle-orm";
-import type { ColorPresets, TagData } from "@/constants/interfaces";
+import {
+  moduleTypeEnum,
+  type ColorPresets,
+  type TagData,
+} from "@/constants/interfaces";
 import { tags } from "@/db/schema";
 import axios from "axios";
 
@@ -242,73 +246,71 @@ interface TagContextProps {
 }
 
 const fetchAndStoreTags = async (token: string) => {
-  // try {
-  //   const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
-  //     headers: { Authorization: `Token ${token}` },
-  //   });
-  //
-  //   console.log("Fetched tags:", response.data);
-  //   console.log("Response status:", response.status);
-  //
-  //   if (response.status === 200) {
-  //     const fetchedTags: TagData[] = response.data;
-  //     console.log("Tags fetched successfully.");
-  //
-  //     // Clear local database first
-  //     await db.delete(tags).execute();
-  //
-  //     console.log("Local database cleared successfully.");
-  //
-  //     // Insert fetched tags into SQLite
-  //     for (const tag of fetchedTags) {
-  //       console.log("Inserting tag:", tag);
-  //       await insertTag({
-  //         title: tag.title,
-  //         moduleType: tag.moduleType,
-  //         productive: tag.productive,
-  //         lapName: tag.lapName,
-  //         colorPreset: tag.colorPreset,
-  //         parent: tag.parent,
-  //         children: tag.children,
-  //       });
-  //     }
-  //
-  //     console.log("Tags inserted into local database successfully.");
-  //
-  //     const rootActivity = await db
-  //       .select()
-  //       .from(tags)
-  //       .where(and(eq(tags.id, 0), eq(tags.title, "Root Activity")))
-  //       .limit(1);
-  //
-  //     console.log("Root Activity:", rootActivity);
-  //
-  //     if (rootActivity.length === 0) {
-  //       await db.insert(tags).values({
-  //         id: 0,
-  //         title: "ROOT",
-  //         moduleType: "activity",
-  //         productive: 1,
-  //         lapName: "Lap",
-  //         colorPreset: "green",
-  //         parent: null,
-  //         children: "[]",
-  //         synced: 0,
-  //         deleted: 0,
-  //       });
-  //
-  //       console.log("Root Activity created successfully.");
-  //     } else {
-  //       console.log("Root Activity already exists for user.");
-  //     }
-  //
-  //     console.log("Local database populated successfully.");
-  //   } else {
-  //     console.error("Failed to fetch tags:", response.statusText);
-  //   }
-  // } catch (error) {
-  //   console.error("Error fetching tags:", error);
-  // }
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
+      headers: { Authorization: `Token ${token}` },
+    });
+
+    console.log("Fetched tags:", response.data);
+    console.log("Response status:", response.status);
+
+    if (response.status === 200) {
+      const fetchedTags: TagData[] = response.data;
+      console.log("Tags fetched successfully.");
+
+      // Clear local database first
+      await db.delete(tags).execute();
+
+      console.log("Local database cleared successfully.");
+
+      // Insert fetched tags into SQLite
+      for (const tag of fetchedTags) {
+        console.log("Inserting tag:", tag);
+        await insertTag({
+          title: tag.title,
+          moduleType: tag.moduleType,
+          productive: tag.productive,
+          lapName: tag.lapName,
+          colorPreset: tag.colorPreset,
+          parent: tag.parent,
+          children: tag.children,
+        });
+      }
+
+      console.log("Tags inserted into local database successfully.");
+
+      const rootActivity = await db
+        .select()
+        .from(tags)
+        .where(and(eq(tags.id, 0), eq(tags.title, "Root Activity")))
+        .limit(1);
+
+      console.log("Root Activity:", rootActivity);
+
+      if (rootActivity.length === 0) {
+        await db.insert(tags).values({
+          id: 0,
+          title: "ROOT",
+          moduleType: "activity",
+          productive: 1,
+          lapName: "Lap",
+          colorPreset: "green",
+          parent: null,
+          children: "[]",
+        });
+
+        console.log("Root Activity created successfully.");
+      } else {
+        console.log("Root Activity already exists for user.");
+      }
+
+      console.log("Local database populated successfully.");
+    } else {
+      console.error("Failed to fetch tags:", response.statusText);
+    }
+  } catch (error) {
+    console.error("Error fetching tags:", error);
+  }
 };
 
 export const TagContext = createContext<TagContextProps | null>(null);

@@ -1,7 +1,3 @@
-enum moduleTypeEnum {
-  activity = 0,
-  project = 1,
-}
 
 type ActivityData = {
   id: string;
