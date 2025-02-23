@@ -8,7 +8,7 @@ export interface Color {
 export type TagData = {
   id: number;
   title: string;
-  type: moduleType;
+  moduleType: moduleTypeEnum;
   colorPreset: ColorPresets;
   productive: boolean;
   lapName: string;
@@ -32,7 +32,7 @@ export interface SwitchProps {
   buttons: SwitchButton[];
 }
 
-export enum moduleType {
+export enum moduleTypeEnum {
   activity = "activity",
   project = "project",
 }

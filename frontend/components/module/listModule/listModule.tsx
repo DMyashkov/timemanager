@@ -15,7 +15,7 @@ import { useFocus } from "@/context/FocusContext";
 import AddItem from "../addItem/addItem";
 import { router } from "expo-router";
 import ProjectItem from "../projectItem/projectItem";
-import { moduleType, type TagData } from "@/constants/interfaces";
+import { moduleTypeEnum, type TagData } from "@/constants/interfaces";
 import { useTheme } from "@context/ThemeContext";
 
 // IMPORTANT: Import your TagContext for getTag, if needed.
@@ -32,7 +32,7 @@ interface ListModuleProps {
   expandAnimOfParent?: Animated.SharedValue<number>;
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
-  typeOfModule?: moduleType;
+  typeOfModule?: moduleTypeEnum;
   activityData: TagData; // We rely fully on this TagData for rendering
 }
 
@@ -85,7 +85,7 @@ function ListModuleInner({
   expandAnimOfParent = useSharedValue(1),
   isLastInList = true,
   setIsVisibleAnimZero = () => {},
-  typeOfModule = moduleType.activity,
+  typeOfModule = moduleTypeEnum.activity,
 }: ListModuleProps) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
@@ -311,7 +311,7 @@ function ListModuleInner({
   }, [activityData.children, getTag]);
 
   // **Decide** which component to render (ActivityItem or ProjectItem)
-  const isActivity = typeOfModule === moduleType.activity;
+  const isActivity = typeOfModule === moduleTypeEnum.activity;
 
   return (
     <Animated.View style={[animStyles.listModule]}>
@@ -395,7 +395,7 @@ function ListModuleInner({
                       expandAnimOfParent={useDerivedValue(
                         () => expandAnim.value * expandAnimOfParent.value,
                       )}
-                      typeOfModule={childTag.type} // child can be an Activity or Project
+                      typeOfModule={childTag.moduleType} // child can be an Activity or Project
                     />
                   );
                 }}

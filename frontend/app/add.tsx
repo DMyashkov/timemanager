@@ -16,7 +16,7 @@ import ColorPicker from "@/components/form/colorPicker/colorPicker";
 import { useEffect, useState } from "react";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { ColorPresets, type TagData } from "@/constants/interfaces";
-import { moduleType } from "@/constants/interfaces";
+import { moduleTypeEnum } from "@/constants/interfaces";
 import { Stack, router, useLocalSearchParams } from "expo-router";
 
 import TrashCan from "@assets/icons/trash-can.svg";
@@ -25,7 +25,7 @@ import { useTagContext } from "@/context/TagContext";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 
 interface AddQuery {
-  type: moduleType;
+  type: moduleTypeEnum;
   title: string;
   colorPreset: ColorPresets;
   lapName: string;
@@ -154,7 +154,7 @@ export default function AddScreen() {
   };
 
   // Decide if we are editing a project or an activity
-  const isProject = current?.type === moduleType.project;
+  const isProject = current?.moduleType === moduleTypeEnum.project;
 
   return (
     <>
@@ -278,7 +278,7 @@ function ContentWrapper({
     <AddSegment
       parent={parent}
       current={current}
-      isProject={current.type === moduleType.project}
+      isProject={current.moduleType === moduleTypeEnum.project}
       colorArray={colorArray}
       selectedColorIndex={selectedColorIndex}
       setSelectedColorIndex={setSelectedColorIndex}
@@ -344,7 +344,7 @@ function AddSegment(props: AddSegmentProps) {
       if (current) {
         // Editing: handleUpdate
         const queryData: AddQuery = {
-          type: isProject ? moduleType.project : moduleType.activity,
+          type: isProject ? moduleTypeEnum.project : moduleTypeEnum.activity,
           title: moduleName,
           colorPreset: colorArray[selectedColorIndex],
           lapName,
@@ -372,7 +372,7 @@ function AddSegment(props: AddSegmentProps) {
   // The "create" button is local to the segment for new items
   const onCreatePress = () => {
     const queryData: AddQuery = {
-      type: isProject ? moduleType.project : moduleType.activity,
+      type: isProject ? moduleTypeEnum.project : moduleTypeEnum.activity,
       title: moduleName,
       colorPreset: colorArray[selectedColorIndex],
       lapName,

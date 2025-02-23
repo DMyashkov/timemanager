@@ -1,4 +1,4 @@
-enum moduleType {
+enum moduleTypeEnum {
   activity = 0,
   project = 1,
 }
@@ -6,14 +6,14 @@ enum moduleType {
 type ActivityData = {
   id: string;
   title: string;
-  type: moduleType;
+  type: moduleTypeEnum;
   activities?: ActivityData[];
 };
 
 const data: ActivityData = {
   id: "root",
   title: "Root",
-  type: moduleType.activity,
+  type: moduleTypeEnum.activity,
   activities: [
     // {
     //   id: "project-1",
@@ -23,50 +23,50 @@ const data: ActivityData = {
     {
       id: "activity-1",
       title: "Activity 1",
-      type: moduleType.activity,
+      type: moduleTypeEnum.activity,
       activities: [
         {
           id: "activity-1-1",
           title: "Activity 1.1",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           activities: [
             {
               id: "activity-1-1-1",
               title: "Activity 1.1.1",
 
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               activities: [
                 {
                   id: "activity-1-1-1-1",
                   title: "Activity 1.1.1.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                   activities: [
                     {
                       id: "activity-1-1-1-1-1",
                       title: "Activity 1.1.1.1.1",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                     {
                       id: "activity-1-1-1-1-2",
                       title: "Activity 1.1.1.1.2",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                   ],
                 },
                 {
                   id: "activity-1-1-1-2",
                   title: "Activity 1.1.1.2",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                   activities: [
                     {
                       id: "activity-1-1-1-2-1",
                       title: "Activity 1.1.1.2.1",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                     {
                       id: "activity-1-1-1-2-2",
                       title: "Activity 1.1.1.2.2",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                   ],
                 },
@@ -75,17 +75,17 @@ const data: ActivityData = {
             {
               id: "activity-1-1-2",
               title: "Activity 1.1.2",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               activities: [
                 {
                   id: "activity-1-1-2-1",
                   title: "Activity 1.1.2.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                   activities: [
                     {
                       id: "activity-1-1-2-1-1",
                       title: "Activity 1.1.2.1.1",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                   ],
                 },
@@ -96,32 +96,32 @@ const data: ActivityData = {
         {
           id: "activity-1-2",
           title: "Activity 1.2",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           activities: [
             {
               id: "activity-1-2-1",
               title: "Activity 1.2.1",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
             },
             {
               id: "activity-1-2-2",
               title: "Activity 1.2.2",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               activities: [
                 {
                   id: "activity-1-2-2-1",
                   title: "Activity 1.2.2.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                   activities: [
                     {
                       id: "activity-1-2-2-1-1",
                       title: "Activity 1.2.2.1.1",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                     {
                       id: "activity-1-2-2-1-2",
                       title: "Activity 1.2.2.1.2",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                     },
                   ],
                 },
@@ -134,22 +134,22 @@ const data: ActivityData = {
     {
       id: "activity-2",
       title: "Activity 2",
-      type: moduleType.activity,
+      type: moduleTypeEnum.activity,
       activities: [
         {
           id: "activity-2-1",
           title: "Activity 2.1",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           activities: [
             {
               id: "activity-2-1-1",
               title: "Activity 2.1.1",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               activities: [
                 {
                   id: "activity-2-1-1-1",
                   title: "Activity 2.1.1.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                 },
               ],
             },
@@ -158,29 +158,29 @@ const data: ActivityData = {
         {
           id: "activity-2-2",
           title: "Activity 2.2",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           activities: [
             {
               id: "activity-2-2-1",
               title: "Activity 2.2.1",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               activities: [
                 {
                   id: "activity-2-2-1-1",
                   title: "Activity 2.2.1.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                 },
                 {
                   id: "activity-2-2-1-2",
                   title: "Activity 2.2.1.2",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                 },
               ],
             },
             {
               id: "activity-2-2-2",
               title: "Activity 2.2.2",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
             },
           ],
         },
@@ -189,22 +189,22 @@ const data: ActivityData = {
     {
       id: "activity-3",
       title: "Activity 3",
-      type: moduleType.activity,
+      type: moduleTypeEnum.activity,
       activities: [
         {
           id: "activity-3-1",
           title: "Activity 3.1",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
         },
         {
           id: "activity-3-2",
           title: "Activity 3.2",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           activities: [
             {
               id: "activity-3-2-1",
               title: "Activity 3.2.1",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
             },
           ],
         },

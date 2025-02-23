@@ -2,12 +2,17 @@ import { Stack, router } from "expo-router";
 import * as Font from "expo-font";
 import { FONTS } from "@/constants/fonts";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
-import { Text } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TagProvider } from "@/context/TagContext";
+import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
+import { type ExpoSQLiteDatabase, drizzle } from "drizzle-orm/expo-sqlite";
+import migrations from "@/drizzle/migrations";
+
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -18,8 +23,41 @@ const loadFonts = () => {
   });
 };
 
+export const DATABASE_NAME = "tags";
+import { tags } from "@/db/schema";
+
 export default function Layout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const expoDb = openDatabaseSync(DATABASE_NAME);
+  const db = drizzle(expoDb);
+  const { success, error } = useMigrations(db, migrations);
+
+  useEffect(() => {
+    if (success) {
+      console.log("Database migrated successfully");
+      // (async () => {
+      //   try {
+      //     await db.insert(tags).values({
+      //       title: "Root",
+      //       moduleType: "root",
+      //       productive: 0,
+      //       lapName: "Root",
+      //       colorPreset: "green",
+      //       parent: null,
+      //       children: JSON.stringify([]),
+      //     });
+      //   } catch (e) {
+      //     console.error("Failed to insert root tag", e);
+      //   }
+      // })();
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      console.error("Database migration failed", error);
+    }
+  }, [error]);
 
   useEffect(() => {
     async function prepare() {
@@ -38,102 +76,110 @@ export default function Layout() {
   if (!fontsLoaded) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <TagProvider>
-          <Stack screenOptions={{}}>
-            <Stack.Screen
-              name="(tabs)"
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="add"
-              options={{
-                presentation: "modal",
-                headerLeft: () => (
-                  <SysButton
-                    text="Cancel"
-                    onPress={() => {
-                      router.back();
-                    }}
-                  />
-                ),
-                headerTitle: (props) => (
-                  <Text
-                    {...props}
-                    style={{
-                      fontSize: useTheme().theme.fontSize.medium,
-                      fontFamily: useTheme().theme.font.semibold,
-                    }}
-                  >
-                    Create tag
-                  </Text>
-                ),
-              }}
-            />
+    <Suspense fallback={<ActivityIndicator size="large" />}>
+      <SQLiteProvider
+        databaseName={DATABASE_NAME}
+        options={{ enableChangeListener: true }}
+        useSuspense
+      >
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <ThemeProvider>
+            <TagProvider>
+              <Stack screenOptions={{}}>
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="add"
+                  options={{
+                    presentation: "modal",
+                    headerLeft: () => (
+                      <SysButton
+                        text="Cancel"
+                        onPress={() => {
+                          router.back();
+                        }}
+                      />
+                    ),
+                    headerTitle: (props) => (
+                      <Text
+                        {...props}
+                        style={{
+                          fontSize: useTheme().theme.fontSize.medium,
+                          fontFamily: useTheme().theme.font.semibold,
+                        }}
+                      >
+                        Create tag
+                      </Text>
+                    ),
+                  }}
+                />
 
-            <Stack.Screen
-              name="pickActivity"
-              options={{
-                presentation: "modal",
-                headerShown: false,
-                headerLeft: () => (
-                  <SysButton
-                    text="Cancel"
-                    onPress={() => {
-                      router.back();
-                    }}
-                    isRegular={true}
-                  />
-                ),
-                headerTitle: (props) => (
-                  <Text
-                    {...props}
-                    style={{
-                      fontSize: useTheme().theme.fontSize.medium,
-                      fontFamily: useTheme().theme.font.semibold,
-                    }}
-                  >
-                    Change Activity
-                  </Text>
-                ),
-                headerRight: () => (
-                  <SysButton
-                    text="Choose"
-                    onPress={() => {
-                      router.back();
-                    }}
-                  />
-                ),
-              }}
-            />
+                <Stack.Screen
+                  name="pickActivity"
+                  options={{
+                    presentation: "modal",
+                    headerShown: false,
+                    headerLeft: () => (
+                      <SysButton
+                        text="Cancel"
+                        onPress={() => {
+                          router.back();
+                        }}
+                        isRegular={true}
+                      />
+                    ),
+                    headerTitle: (props) => (
+                      <Text
+                        {...props}
+                        style={{
+                          fontSize: useTheme().theme.fontSize.medium,
+                          fontFamily: useTheme().theme.font.semibold,
+                        }}
+                      >
+                        Change Activity
+                      </Text>
+                    ),
+                    headerRight: () => (
+                      <SysButton
+                        text="Choose"
+                        onPress={() => {
+                          router.back();
+                        }}
+                      />
+                    ),
+                  }}
+                />
 
-            <Stack.Screen
-              name="login"
-              options={{
-                headerShown: false,
-                presentation: "modal",
-              }}
-            />
-            <Stack.Screen
-              name="signup"
-              options={{
-                headerShown: false,
-                presentation: "modal",
-              }}
-            />
+                <Stack.Screen
+                  name="login"
+                  options={{
+                    headerShown: false,
+                    presentation: "modal",
+                  }}
+                />
+                <Stack.Screen
+                  name="signup"
+                  options={{
+                    headerShown: false,
+                    presentation: "modal",
+                  }}
+                />
 
-            <Stack.Screen
-              name="authSelection"
-              options={{
-                headerShown: false,
-              }}
-            />
-          </Stack>
-        </TagProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+                <Stack.Screen
+                  name="authSelection"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack>
+            </TagProvider>
+          </ThemeProvider>
+        </GestureHandlerRootView>
+      </SQLiteProvider>
+    </Suspense>
   );
 }

@@ -8,7 +8,7 @@ import { dataIndex } from "@/constants/exampleData";
 import { IntervalType, Time } from "@/utils/dateTimeSession";
 import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 import At from "@assets/icons/at.svg";
-import { moduleType } from "@/constants/interfaces";
+import { moduleTypeEnum } from "@/constants/interfaces";
 import ArrowRotateLeft from "@assets/icons/arrow-rotate-left.svg";
 import TagIcon from "@assets/icons/tag.svg";
 
@@ -113,7 +113,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             (interval) => interval.type === IntervalType.BREAK,
           );
 
-          const isProject = tagItem?.type === moduleType.project;
+          const isProject = tagItem?.type === moduleTypeEnum.project;
           const parentId = dataIndex[tagId].path.at(-1);
           const parentTagItem = parentId ? dataIndex[parentId]?.item : null;
           const itemProject = isProject ? tagItem : null;

@@ -1,7 +1,7 @@
 import React from "react";
 import Tag from "@components/tag/tagComponent";
 import { dataIndex } from "@constants/exampleData";
-import { moduleType } from "@interfaces";
+import { moduleTypeEnum } from "@interfaces";
 import { useTheme } from "@context/ThemeContext";
 
 export const TagsFromId = ({
@@ -14,7 +14,7 @@ export const TagsFromId = ({
   fontSize?: number;
 }) => {
   const { theme } = useTheme();
-  const isTagProject = dataIndex[tagId].item.type === moduleType.project;
+  const isTagProject = dataIndex[tagId].item.type === moduleTypeEnum.project;
 
   const parentId = dataIndex[tagId].path.at(-1);
   const itemActivity = isTagProject

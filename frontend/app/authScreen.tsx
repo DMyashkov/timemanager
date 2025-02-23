@@ -13,7 +13,7 @@ import TextField from "@/components/form/textField/textField";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { fetchAndStoreTags } from "@/context/TagContext";
+import { useTagContext } from "@/context/TagContext";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -25,6 +25,8 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const { fetchAndStoreTags } = useTagContext();
 
   const saveToken = async (token: string) => {
     try {

@@ -30,7 +30,7 @@ import WorkplaceIcon from "@assets/icons/workplace.svg";
 import { priorityEnum } from "@/constants/interfaces";
 import { dataIndex } from "@/constants/exampleData";
 import Tag from "@/components/tag/tagComponent";
-import { moduleType } from "@/constants/interfaces";
+import { moduleTypeEnum } from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
 import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
@@ -122,7 +122,7 @@ export default function TaskBottomSheet({
         backgroundColor: theme.color.warmGrey,
       };
   }
-  const isTagProject = dataIndex[tagId].item.type === moduleType.project;
+  const isTagProject = dataIndex[tagId].item.type === moduleTypeEnum.project;
 
   const parentId = dataIndex[tagId].path.at(-1);
   const itemActivity = isTagProject

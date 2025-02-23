@@ -2,13 +2,13 @@ import {
   type DataIndexLocal,
   ColorPresets,
   type TagData,
-  moduleType,
+  moduleTypeEnum,
 } from "@constants/interfaces";
 
 const data2: TagData = {
   id: 0,
   title: "Root",
-  type: moduleType.activity,
+  moduleType: moduleTypeEnum.activity,
   productive: true,
   lapName: "Lap",
   colorPreset: ColorPresets.GREEN,
@@ -17,7 +17,7 @@ const data2: TagData = {
     {
       id: "activity-1",
       title: "Activity 1",
-      type: moduleType.activity,
+      type: moduleTypeEnum.activity,
       colorPreset: ColorPresets.ORANGE,
       productive: true,
       lapName: "Exercise",
@@ -26,7 +26,7 @@ const data2: TagData = {
         {
           id: "project-1",
           title: "Project 1",
-          type: moduleType.project,
+          type: moduleTypeEnum.project,
           colorPreset: ColorPresets.ORANGE,
           productive: true,
           lapName: "Exercise",
@@ -34,7 +34,7 @@ const data2: TagData = {
         {
           id: "activity-1-1",
           title: "Activity 1.1",
-          type: moduleType.activity,
+          type: moduleTypeEnum.activity,
           colorPreset: ColorPresets.GREEN,
           productive: true,
           lapName: "Lap",
@@ -43,7 +43,7 @@ const data2: TagData = {
             {
               id: "activity-1-1-1",
               title: "Activity 1.1.1",
-              type: moduleType.activity,
+              type: moduleTypeEnum.activity,
               productive: true,
               lapName: "Lap",
               colorPreset: ColorPresets.GREEN,
@@ -52,7 +52,7 @@ const data2: TagData = {
                 {
                   id: "activity-1-1-1-1",
                   title: "Activity 1.1.1.1",
-                  type: moduleType.activity,
+                  type: moduleTypeEnum.activity,
                   productive: true,
                   colorPreset: ColorPresets.GREEN,
 
@@ -61,7 +61,7 @@ const data2: TagData = {
                     {
                       id: "activity-1-1-1-1-1",
                       title: "Activity 1.1.1.1.1",
-                      type: moduleType.activity,
+                      type: moduleTypeEnum.activity,
                       productive: true,
                       colorPreset: ColorPresets.ORANGE,
                       lapName: "Exercise",
@@ -77,7 +77,7 @@ const data2: TagData = {
     {
       id: "activity-2",
       title: "Activity 2",
-      type: moduleType.activity,
+      type: moduleTypeEnum.activity,
       colorPreset: ColorPresets.GREEN,
       productive: true,
       lapName: "Lap",
