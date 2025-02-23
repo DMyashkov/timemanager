@@ -235,33 +235,45 @@ function ContentWrapper({
         styleSwitch={styles.switchOuter}
       >
         {/* Activity AddSegment */}
-        <AddSegment
-          parent={parent}
-          current={null}
-          isProject={false}
-          colorArray={colorArray}
-          selectedColorIndex={selectedColorIndex}
-          setSelectedColorIndex={setSelectedColorIndex}
-          handleCreate={handleCreate}
-          handleUpdate={handleUpdate}
-          handleDelete={handleDelete}
-          saveButtonPressed={saveButtonPressed}
-          setSaveButtonPressed={setSaveButtonPressed}
-        />
+        <View
+          style={{
+            flex: 1,
+          }}
+        >
+          <AddSegment
+            parent={parent}
+            current={null}
+            isProject={false}
+            colorArray={colorArray}
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            handleCreate={handleCreate}
+            handleUpdate={handleUpdate}
+            handleDelete={handleDelete}
+            saveButtonPressed={saveButtonPressed}
+            setSaveButtonPressed={setSaveButtonPressed}
+          />
+        </View>
         {/* Project AddSegment */}
-        <AddSegment
-          parent={parent}
-          current={null}
-          isProject={true}
-          colorArray={colorArray}
-          selectedColorIndex={selectedColorIndex}
-          setSelectedColorIndex={setSelectedColorIndex}
-          handleCreate={handleCreate}
-          handleUpdate={handleUpdate}
-          handleDelete={handleDelete}
-          saveButtonPressed={saveButtonPressed}
-          setSaveButtonPressed={setSaveButtonPressed}
-        />
+        <View
+          style={{
+            flex: 1,
+          }}
+        >
+          <AddSegment
+            parent={parent}
+            current={null}
+            isProject={true}
+            colorArray={colorArray}
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            handleCreate={handleCreate}
+            handleUpdate={handleUpdate}
+            handleDelete={handleDelete}
+            saveButtonPressed={saveButtonPressed}
+            setSaveButtonPressed={setSaveButtonPressed}
+          />
+        </View>
       </SwitchWrapper>
     );
   }
@@ -391,7 +403,7 @@ function AddSegment(props: AddSegmentProps) {
     <ScrollView
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ padding: 16 }}
+      contentContainerStyle={{ padding: 16, gap: 15 }}
     >
       {/* Name input */}
       <TextField
@@ -434,13 +446,7 @@ function AddSegment(props: AddSegmentProps) {
       />
 
       {/* For an Activity, show ColorPicker. For Project, it could be optional or the same. */}
-      {isProject ? (
-        // Projects might or might not use the color picker in your code;
-        // if you do want them to pick color, you can use the same ColorPicker:
-        <Text style={{ fontWeight: "bold", marginTop: 16 }}>
-          (Optional) Color Picker
-        </Text>
-      ) : (
+      {isProject ? null : ( // if you do want them to pick color, you can use the same ColorPicker: // Projects might or might not use the color picker in your code;
         <ColorPicker
           colorPresets={colorArray}
           selectedColorIndex={selectedColorIndex}
