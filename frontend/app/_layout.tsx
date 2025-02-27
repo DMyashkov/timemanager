@@ -9,7 +9,11 @@ import { ActivityIndicator, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TagProvider } from "@/context/TagContext";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
-import { type ExpoSQLiteDatabase, drizzle } from "drizzle-orm/expo-sqlite";
+import {
+  type ExpoSQLiteDatabase,
+  drizzle,
+  useLiveQuery,
+} from "drizzle-orm/expo-sqlite";
 import migrations from "@/drizzle/migrations";
 
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
@@ -23,33 +27,22 @@ const loadFonts = () => {
   });
 };
 
+import { schema } from "@/db/schema";
+
 export const DATABASE_NAME = "tags";
 import { tags } from "@/db/schema";
 
 export default function Layout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const expoDb = openDatabaseSync(DATABASE_NAME);
+  const expoDb = openDatabaseSync(DATABASE_NAME, {
+    enableChangeListener: true,
+  });
   const db = drizzle(expoDb);
   const { success, error } = useMigrations(db, migrations);
 
   useEffect(() => {
     if (success) {
       console.log("Database migrated successfully");
-      // (async () => {
-      //   try {
-      //     await db.insert(tags).values({
-      //       title: "Root",
-      //       moduleType: "root",
-      //       productive: 0,
-      //       lapName: "Root",
-      //       colorPreset: "green",
-      //       parent: null,
-      //       children: JSON.stringify([]),
-      //     });
-      //   } catch (e) {
-      //     console.error("Failed to insert root tag", e);
-      //   }
-      // })();
     }
   }, [success]);
 
