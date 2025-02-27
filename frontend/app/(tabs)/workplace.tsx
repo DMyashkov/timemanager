@@ -14,6 +14,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTagContext } from "@/context/TagContext";
 import type { TagData } from "@/constants/interfaces";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useSQLiteContext } from "expo-sqlite";
+import { schema } from "@/db/schema";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
@@ -24,6 +28,18 @@ export default function WorkplaceScreen() {
   // State and animation for the add screen toggle
   const [addScreen, setAddScreen] = useState(false);
   const addAnim = useSharedValue(0);
+
+  const db = useSQLiteContext();
+  const drizzleDb = drizzle(db, { schema: schema });
+  // useDrizzleStudio(db);
+
+  const { data } = useLiveQuery(drizzleDb.select().from(schema.tags));
+  const [renderValue, rerender] = useState(0);
+
+  useEffect(() => {
+    console.log(data);
+    rerender((prev) => prev + 1);
+  }, [data]);
 
   // Fetch the root node (id = 0) when the component mounts
   useEffect(() => {

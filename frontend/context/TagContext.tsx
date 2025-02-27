@@ -37,7 +37,9 @@ const ensureUniqueTemporaryId = async (): Promise<number> => {
   return tempId;
 };
 
-const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
+const insertTag = async (
+  item: Omit<TagData, "id" | "synced" | "deleted">,
+): Promise<number> => {
   const {
     title,
     moduleType,
@@ -69,6 +71,9 @@ const insertTag = async (item: Omit<TagData, "id">): Promise<number> => {
       children: JSON.stringify(children),
     })
     .returning({ insertId: tags.id });
+
+  console.log("Whole table after insert:", await db.select().from(tags));
+
   return result[0].insertId;
 };
 
