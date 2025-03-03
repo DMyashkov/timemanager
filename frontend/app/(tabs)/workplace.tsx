@@ -29,11 +29,11 @@ export default function WorkplaceScreen() {
   const [addScreen, setAddScreen] = useState(false);
   const addAnim = useSharedValue(0);
 
-  const db = useSQLiteContext();
-  const drizzleDb = drizzle(db, { schema: schema });
-  // useDrizzleStudio(db);
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
+  useDrizzleStudio(db);
 
-  const { data } = useLiveQuery(drizzleDb.select().from(tags));
+  const { data } = useLiveQuery(db.select().from(tags));
   const [renderValue, rerender] = useState(0);
   console.log("Data", data);
 
@@ -43,7 +43,7 @@ export default function WorkplaceScreen() {
     rerender((prev) => prev + 1);
     (async () => {
       try {
-        const root = await getTag(0);
+        const root = await getTag(db, 0);
         if (root) {
           setRootNode(root);
         } else {
@@ -55,13 +55,13 @@ export default function WorkplaceScreen() {
         setLoading(false);
       }
     })();
-  }, [data, getTag]);
+  }, [db, data, getTag]);
 
   // Fetch the root node (id = 0) when the component mounts
   useEffect(() => {
     (async () => {
       try {
-        const root = await getTag(0); // Fetch the root node from SQLite
+        const root = await getTag(db, 0); // Fetch the root node from SQLite
         if (root) {
           setRootNode(root);
         } else {
@@ -73,7 +73,7 @@ export default function WorkplaceScreen() {
         setLoading(false);
       }
     })();
-  }, [getTag]);
+  }, [db, getTag]);
 
   // Animate the plus icon on `addScreen` toggle
   useEffect(() => {

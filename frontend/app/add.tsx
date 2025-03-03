@@ -23,6 +23,9 @@ import TrashCan from "@assets/icons/trash-can.svg";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { useTagContext } from "@/context/TagContext";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
 
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
@@ -41,6 +44,9 @@ export default function AddScreen() {
   const [parent, setParent] = useState<TagData | null>(null);
   const [current, setCurrent] = useState<TagData | null>(null);
 
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
+
   // We fetch either a "parent" for the new Tag or the "current" tag if editing
   useEffect(() => {
     if (!parentId) {
@@ -55,17 +61,17 @@ export default function AddScreen() {
     const fetchData = async () => {
       if (isAddScreen) {
         // "Add" mode: we only care about the parent
-        const parentTag = await getTag(parentId);
+        const parentTag = await getTag(db, parentId);
         setParent(parentTag);
         setCurrent(null);
       } else {
         // "Edit" mode: the parentId is actually the tag we're editing
-        const currentTag = await getTag(parentId);
+        const currentTag = await getTag(db, parentId);
         setCurrent(currentTag);
 
         if (currentTag?.parent) {
           // If the current tag has a parent, fetch it
-          const parentTag = await getTag(currentTag.parent);
+          const parentTag = await getTag(db, currentTag.parent);
           setParent(parentTag);
         } else {
           setParent(null);
@@ -108,7 +114,7 @@ export default function AddScreen() {
   // Handler for deletion
   const handleDelete = async () => {
     if (current) {
-      await deleteTag(current.id);
+      await deleteTag(db, current.id);
       router.back(); // Navigate back after deletion
     }
   };
@@ -127,7 +133,7 @@ export default function AddScreen() {
       productive: data.productive,
       children: [],
     };
-    await createTag(tagPayload);
+    await createTag(db, tagPayload);
     router.back();
   };
 
@@ -144,7 +150,7 @@ export default function AddScreen() {
       parent: data.parent,
       productive: data.productive,
     };
-    await updateTag(current.id, updates);
+    await updateTag(db, current.id, updates);
     router.back();
   };
 

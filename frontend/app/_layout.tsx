@@ -40,6 +40,11 @@ export default function Layout() {
   const db = drizzle(expoDb);
   const { success, error } = useMigrations(db, migrations);
 
+  const { data } = useLiveQuery(db.select().from(schema.tags));
+  useEffect(() => {
+    console.log("Data", data);
+  }, [data]);
+
   useEffect(() => {
     if (success) {
       console.log("Database migrated successfully");

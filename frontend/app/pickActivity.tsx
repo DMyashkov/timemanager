@@ -15,6 +15,9 @@ import { router } from "expo-router";
 import { getTableConfig } from "drizzle-orm/mysql-core";
 import { useTagContext } from "@/context/TagContext";
 import type { TagData } from "@/constants/interfaces";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
 
 export default function PickActivity() {
   const styles = useStyles();
@@ -37,13 +40,15 @@ export default function PickActivity() {
       ],
     })),
   };
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
 
   const [rootTag, setRootTag] = useState<TagData | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const root = await getTag(0);
+        const root = await getTag(db, 0);
         if (root) {
           setRootTag(root);
         } else {
@@ -53,7 +58,7 @@ export default function PickActivity() {
         console.error("Error fetching root node:", error);
       }
     })();
-  }, [getTag]);
+  }, [getTag, db]);
 
   if (!rootTag) {
     return <Text>Loading...</Text>;

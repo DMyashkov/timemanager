@@ -14,6 +14,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTagContext } from "@/context/TagContext";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -36,6 +39,9 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     }
   };
   const API_URL = "http://172.0.0.1:8000/api"; // Works on iOS Simulator
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
 
   const handleLogin = async () => {
     setLoading(true);
@@ -61,7 +67,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
-      await fetchAndStoreTags(token);
+      await fetchAndStoreTags(db, token);
 
       router.replace("/watch");
     } catch (err) {
@@ -109,7 +115,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
-      await fetchAndStoreTags(token);
+      await fetchAndStoreTags(db, token);
 
       router.replace("/watch");
     } catch (err) {

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "name": "timemanager",
     "slug": "timemanager",
     "version": "1.0.0",
@@ -20,7 +20,7 @@
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-router", "expo-font"],
+    "plugins": ["expo-router", "expo-font", "expo-sqlite"],
     "experiments": {
       "typedRoutes": true
     }

@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect } from "react";
-import { openDatabaseSync } from "expo-sqlite/next";
-import { drizzle } from "drizzle-orm/expo-sqlite";
+import { openDatabaseSync } from "expo-sqlite";
+import type { ExpoSQLiteDatabase, drizzle } from "drizzle-orm/expo-sqlite";
 import { and, eq } from "drizzle-orm";
 import {
   moduleTypeEnum,
@@ -9,9 +9,7 @@ import {
 } from "@/constants/interfaces";
 import { tags } from "@/db/schema";
 import axios from "axios";
-
-const expoDb = openDatabaseSync("tags");
-const db = drizzle(expoDb);
+import type { schema } from "@/db/schema";
 
 const initializeDatabase = async () => {
   console.log("Database initialized");
@@ -20,7 +18,9 @@ const initializeDatabase = async () => {
 const generateTemporaryId = (): number =>
   -Math.floor(1000000000 + Math.random() * 9000000000);
 
-const ensureUniqueTemporaryId = async (): Promise<number> => {
+const ensureUniqueTemporaryId = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+): Promise<number> => {
   let tempId = 0;
   let exists = true;
 
@@ -38,6 +38,7 @@ const ensureUniqueTemporaryId = async (): Promise<number> => {
 };
 
 const insertTag = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
   item: Omit<TagData, "id" | "synced" | "deleted">,
 ): Promise<number> => {
   const {
@@ -54,9 +55,9 @@ const insertTag = async (
     throw new Error("Parent ID is required");
   }
 
-  const newId = await ensureUniqueTemporaryId();
+  const newId = await ensureUniqueTemporaryId(db);
 
-  updateTag(parent, { children: [...children, newId] });
+  await updateTag(db, parent, { children: [...children, newId] });
 
   const result = await db
     .insert(tags)
@@ -77,7 +78,10 @@ const insertTag = async (
   return result[0].insertId;
 };
 
-const getTag = async (id: number): Promise<TagData | null> => {
+const getTag = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+  id: number,
+): Promise<TagData | null> => {
   const result = await db.select().from(tags).where(eq(tags.id, id)).limit(1);
   if (result.length > 0) {
     const row = result[0];
@@ -99,7 +103,11 @@ const getTag = async (id: number): Promise<TagData | null> => {
   return null;
 };
 
-const updateTag = async (id: number, updates: Partial<TagData>) => {
+const updateTag = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+  id: number,
+  updates: Partial<TagData>,
+) => {
   // Fetch the existing tag
   const existingTag = await db
     .select()
@@ -167,7 +175,10 @@ const updateTag = async (id: number, updates: Partial<TagData>) => {
 };
 
 // Delete a tag
-const deleteTag = async (id: number): Promise<void> => {
+const deleteTag = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+  id: number,
+): Promise<void> => {
   // Fetch the tag to get the parent ID before deleting
   const tag = await db
     .select({ parent: tags.parent, children: tags.children })
@@ -187,7 +198,7 @@ const deleteTag = async (id: number): Promise<void> => {
     .where(eq(tags.parent, id));
 
   for (const child of childTags) {
-    await deleteTag(child.id);
+    await deleteTag(db, child.id);
   }
 
   if (parent !== null) {
@@ -214,7 +225,7 @@ const deleteTag = async (id: number): Promise<void> => {
   console.log(`Tag with id ${id} deleted successfully`);
 };
 
-const syncUnsyncedRows = async () => {
+const syncUnsyncedRows = async (db: ExpoSQLiteDatabase<typeof schema>) => {
   const rows = await db.select().from(tags).where(eq(tags.synced, 0));
   try {
     const response = await fetch("https://your-backend-url.com/sync", {
@@ -235,25 +246,44 @@ const syncUnsyncedRows = async () => {
 };
 
 // Cleanup deleted rows that have been synced
-const cleanupDeletedRows = async () => {
+const cleanupDeletedRows = async (db: ExpoSQLiteDatabase<typeof schema>) => {
   await db.delete(tags).where(and(eq(tags.deleted, 1), eq(tags.synced, 1)));
   console.log("Deleted rows cleaned up");
 };
 
 interface TagContextProps {
   createTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
     item: Omit<TagData, "id" | "synced" | "deleted">,
   ) => Promise<number>;
-  getTag: (id: number) => Promise<TagData | null>;
-  updateTag: (id: number, updates: Partial<TagData>) => Promise<void>;
-  deleteTag: (id: number) => Promise<void>;
-  syncUnsyncedRows: () => Promise<void>;
-  cleanupDeletedRows: () => Promise<void>;
-  fetchAndStoreTags: (token: string) => Promise<void>;
+  getTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+  ) => Promise<TagData | null>;
+  updateTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+    updates: Partial<TagData>,
+  ) => Promise<void>;
+  deleteTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+  ) => Promise<void>;
+  syncUnsyncedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
+  cleanupDeletedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
+  fetchAndStoreTags: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    token: string,
+  ) => Promise<void>;
 }
 
-const fetchAndStoreTags = async (token: string) => {
+const fetchAndStoreTags = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+  token: string,
+) => {
   try {
+    console.log("Auth token:", token);
+
     const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
       headers: { Authorization: `Token ${token}` },
     });
@@ -273,7 +303,7 @@ const fetchAndStoreTags = async (token: string) => {
       // Insert fetched tags into SQLite
       for (const tag of fetchedTags) {
         console.log("Inserting tag:", tag);
-        await insertTag({
+        await insertTag(db, {
           title: tag.title,
           moduleType: tag.moduleType,
           productive: tag.productive,
