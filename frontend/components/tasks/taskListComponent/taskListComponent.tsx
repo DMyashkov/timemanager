@@ -3,7 +3,7 @@ import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Task from "@components/tasks/task/task";
 
-import type { TaskProps } from "@constants/interfaces";
+import type { TaskData } from "@constants/interfaces";
 
 export default function TaskListComponent({
   overdueOption = false,
@@ -12,7 +12,7 @@ export default function TaskListComponent({
 }: {
   overdueOption?: boolean;
   date?: Date;
-  tasks: TaskProps[];
+  tasks: TaskData[];
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -51,16 +51,16 @@ export default function TaskListComponent({
         title="Take a pic"
         description="Take a picture of the sunset"
         date={new Date(new Date().setDate(new Date().getDate() - 1))}
-        projectName="Homework 1"
-        activityName="Photography"
+        projectId="Homework 1"
+        activityId="Photography"
         priority={1}
       />
       <Task
         title="Take a pic"
         description="Take a picture of the sunset"
         date={new Date(new Date().setDate(new Date().getDate() - 1))}
-        projectName="Homework 1"
-        activityName="Photography"
+        projectId="Homework 1"
+        activityId="Photography"
         priority={1}
       />
 

@@ -11,10 +11,6 @@ import { tags } from "@/db/schema";
 import axios from "axios";
 import type { schema } from "@/db/schema";
 
-const initializeDatabase = async () => {
-  console.log("Database initialized");
-};
-
 const generateTemporaryId = (): number =>
   -Math.floor(1000000000 + Math.random() * 9000000000);
 
@@ -371,12 +367,6 @@ export const TagContext = createContext<TagContextProps | null>(null);
 export const TagProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  useEffect(() => {
-    (async () => {
-      await initializeDatabase();
-    })();
-  }, []);
-
   return (
     <TagContext.Provider
       value={{
