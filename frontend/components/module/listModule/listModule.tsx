@@ -389,9 +389,8 @@ function ListModuleInner({
                       moduleID={childID}
                       level={level + 1}
                       isLastInList={
-                        // childID ===
-                        // activityData.children[activityData.children.length - 1]
-                        false
+                        childID ===
+                        activityData.children[activityData.children.length - 1]
                       } // or your own logic
                       path={`${path}/${childID}`}
                       addAnim={addAnim}
