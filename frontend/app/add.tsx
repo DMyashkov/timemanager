@@ -86,6 +86,7 @@ export default function AddScreen() {
       </View>
     );
   }
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
   // For adding, we only need `parent` if you strictly require a parent in your logic.
   // If you require a parent, do something similar:
@@ -99,12 +100,7 @@ export default function AddScreen() {
   }
 
   // Color array for color picker
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const colorArray: ColorPresets[] = [
-    ColorPresets.ORANGE,
-    ColorPresets.GREEN,
-    // ... add as many as needed
-  ];
+  const colorArray: ColorPresets[] = [ColorPresets.ORANGE, ColorPresets.GREEN];
 
   // Handler for deletion
   const handleDelete = async () => {
