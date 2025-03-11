@@ -393,7 +393,3 @@ export const useTagContext = () => {
   }
   return context;
 };
-
-function createClient(arg0: { url: string }) {
-  throw new Error("Function not implemented.");
-}
