@@ -139,13 +139,19 @@ export default function TaskBottomSheet({
     },
   });
 
+  // ##TASK## See why that is the case 
+  if (!bottomSheetRef.current) {
+    return null;
+  }
+
   return (
     <>
       <BottomSheet
         ref={bottomSheetRef}
         onChange={handleSheetChanges}
         enableDynamicSizing={false}
-        snapPoints={["50%", "90%"]}
+        // snapPoints={["50%", "90%"]}
+        snapPoints={[1000]}
         enablePanDownToClose={true}
         keyboardBehavior="extend"
         keyboardBlurBehavior="restore"
@@ -263,8 +269,9 @@ export default function TaskBottomSheet({
                 >
                   <WorkplaceIcon
                     fill={
-                      theme.color.presets[dataIndex[tagId].item.colorPreset]
-                        .medium
+                      // theme.color.presets[dataIndex[tagId].item.colorPreset]
+                      //   .medium
+                      theme.color.presets.green
                     }
                     height={24}
                     width={24}
@@ -277,7 +284,8 @@ export default function TaskBottomSheet({
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
                       colorPallete={
-                        theme.color.presets[itemActivity.colorPreset]
+                        // theme.color.presets[itemActivity.colorPreset]
+                        theme.color.presets.green
                       }
                     />
                   )}
@@ -288,7 +296,8 @@ export default function TaskBottomSheet({
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
                       colorPallete={
-                        theme.color.presets[itemProject.colorPreset]
+                        // theme.color.presets[itemProject.colorPreset]
+                        theme.color.presets.green
                       }
                     />
                   )}
@@ -319,7 +328,10 @@ export default function TaskBottomSheet({
           color: theme.color.black,
         }}
       />
-      <PickDateCalendar bottomSheetRef={calendarSheetRef} />
+      <PickDateCalendar
+        bottomSheetRef={calendarSheetRef}
+        onPickDate={() => {}}
+      />
     </>
   );
 }

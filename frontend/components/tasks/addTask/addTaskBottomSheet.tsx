@@ -70,9 +70,6 @@ export default function AddTaskSheet({
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: "transparent" }}
       backdropComponent={renderBackdrop}
-      // backdropComponent={() => (
-      //   <View style={{ flex: 1, opacity: 0.1 }}></View>
-      // )}
       index={-1}
     >
       <View style={styles.outer}>
