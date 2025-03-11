@@ -20,20 +20,22 @@ import { useTheme } from "@context/ThemeContext";
 
 // IMPORTANT: Import your TagContext for getTag, if needed.
 import { useTagContext } from "@/context/TagContext";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { schema, tags } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 interface ListModuleProps {
   level?: number;
   style?: object;
   path?: string;
-  addScreen?: boolean;
   onClickAddButton?: (parentId: string) => void;
   addAnim?: Animated.SharedValue<number>;
   onFocusAdditional?: () => void;
   expandAnimOfParent?: Animated.SharedValue<number>;
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
-  typeOfModule?: moduleTypeEnum;
-  activityData: TagData; // We rely fully on this TagData for rendering
+  moduleID: number; // We rely fully on this TagData for rendering
 }
 
 export default function ListModule(props: ListModuleProps) {
@@ -54,44 +56,63 @@ export default function ListModule(props: ListModuleProps) {
     }
   }, [shouldBeVisible]);
 
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
+
   useEffect(() => {
     if (isVisibleAnimZero && !isPartOfFocusGroup) {
       setExistState(false);
     }
   }, [isVisibleAnimZero, isPartOfFocusGroup]);
 
+  const { data: moduleData } = useLiveQuery(
+    db.select().from(tags).where(eq(tags.id, props.moduleID)),
+  );
+
+  const [moduleNode, setModuleNode] = useState<TagData | null>(null);
+
+  const { parseTag } = useTagContext();
+
+  useEffect(() => {
+    try {
+      if (moduleData) {
+        console.log("moduleData", moduleData);
+        setModuleNode(parseTag(moduleData));
+      }
+    } catch (error) {
+      console.error("Error fetching root node:", error);
+    }
+  }, [parseTag, moduleData]);
+
   // If not "existing" in the visible list, render nothing
-  if (!existState) {
+  if (!existState || !moduleNode) {
     return null;
   }
 
   // Otherwise, render the internal logic
   return (
     <ListModuleInner
-      {...props}
+      {...{ ...props, moduleID: undefined }} // Removes moduleID from props
       setIsVisibleAnimZero={setIsVisibleAnimZero}
-      activityData={props.activityData}
+      moduleData={moduleNode}
     />
   );
 }
 
 function ListModuleInner({
-  activityData,
   level = 0,
   path = "/root",
-  addScreen = false,
   addAnim = useSharedValue(0),
   onFocusAdditional = () => {},
   expandAnimOfParent = useSharedValue(1),
   isLastInList = true,
   setIsVisibleAnimZero = () => {},
-  typeOfModule = moduleTypeEnum.activity,
-}: ListModuleProps) {
+  moduleData: activityData, // New required field
+}: Omit<ListModuleProps, "moduleID"> & { moduleData: TagData }) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
   const styles = useStyles();
   const { theme } = useTheme();
-  const { getTag } = useTagContext(); // If you need to fetch child data
 
   const isFocused = path === focusedPath;
   const isRoot = path === "/root";
@@ -286,32 +307,11 @@ function ListModuleInner({
 
   // --- FETCH CHILD TAGS HERE, if needed ---
   // If your children are mere IDs in `activityData.children`, you can fetch them:
-  const [childrenData, setChildrenData] = useState<TagData[]>([]);
+  const isActivity = activityData.moduleType === moduleTypeEnum.activity;
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchChildren = async () => {
-      if (!activityData.children || activityData.children.length === 0) {
-        setChildrenData([]);
-        return;
-      }
-      const results: TagData[] = [];
-      for (const childId of activityData.children) {
-        const childTag = await getTag(childId);
-        if (childTag) results.push(childTag);
-      }
-      if (isMounted) {
-        setChildrenData(results);
-      }
-    };
-    fetchChildren();
-    return () => {
-      isMounted = false;
-    };
-  }, [activityData.children, getTag]);
-
-  // **Decide** which component to render (ActivityItem or ProjectItem)
-  const isActivity = typeOfModule === moduleTypeEnum.activity;
+  const expandAnimOfParentOfChild = useDerivedValue(
+    () => expandAnim.value * expandAnimOfParent.value,
+  );
 
   return (
     <Animated.View style={[animStyles.listModule]}>
@@ -380,22 +380,23 @@ function ListModuleInner({
 
             {isExpandAnimGreaterThanZero && (
               <FlatList
-                data={childrenData}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item: childTag }) => {
+                data={activityData.children}
+                keyExtractor={(item) => item.toString()}
+                renderItem={({ item: childID }) => {
                   // For each child, recursively render ListModule
                   return (
                     <ListModule
-                      activityData={childTag}
+                      moduleID={childID}
                       level={level + 1}
-                      isLastInList={childTag.id === activityData.parent} // or your own logic
-                      path={`${path}/${childTag.id}`}
+                      isLastInList={
+                        // childID ===
+                        // activityData.children[activityData.children.length - 1]
+                        false
+                      } // or your own logic
+                      path={`${path}/${childID}`}
                       addAnim={addAnim}
                       onFocusAdditional={onFocusAdditional}
-                      expandAnimOfParent={useDerivedValue(
-                        () => expandAnim.value * expandAnimOfParent.value,
-                      )}
-                      typeOfModule={childTag.moduleType} // child can be an Activity or Project
+                      expandAnimOfParent={expandAnimOfParentOfChild}
                     />
                   );
                 }}

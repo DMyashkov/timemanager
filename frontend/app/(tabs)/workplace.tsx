@@ -18,12 +18,10 @@ import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useSQLiteContext } from "expo-sqlite";
 import { schema, tags } from "@/db/schema";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import { eq } from "drizzle-orm";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
-  const { getTag } = useTagContext(); // Use context function to fetch tag
-  const [rootNode, setRootNode] = useState<TagData | null>(null);
-  const [loading, setLoading] = useState(true);
 
   // State and animation for the add screen toggle
   const [addScreen, setAddScreen] = useState(false);
@@ -34,46 +32,14 @@ export default function WorkplaceScreen() {
   useDrizzleStudio(db);
 
   const { data } = useLiveQuery(db.select().from(tags));
-  const [renderValue, rerender] = useState(0);
-  console.log("Data", data);
-
+  console.log("data", data);
+  const [_, rerender] = useState(0);
   useEffect(() => {
-    console.log("Data changed");
-    console.log(data);
-    rerender((prev) => prev + 1);
-    (async () => {
-      try {
-        const root = await getTag(db, 0);
-        if (root) {
-          setRootNode(root);
-        } else {
-          console.error("Root node (id=0) not found");
-        }
-      } catch (error) {
-        console.error("Error fetching root node:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [db, data, getTag]);
-
-  // Fetch the root node (id = 0) when the component mounts
-  useEffect(() => {
-    (async () => {
-      try {
-        const root = await getTag(db, 0); // Fetch the root node from SQLite
-        if (root) {
-          setRootNode(root);
-        } else {
-          console.error("Root node (id=0) not found");
-        }
-      } catch (error) {
-        console.error("Error fetching root node:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [db, getTag]);
+    if (data) {
+      console.log("data", data);
+      rerender((prev) => prev + 1);
+    }
+  }, [data]);
 
   // Animate the plus icon on `addScreen` toggle
   useEffect(() => {
@@ -88,24 +54,6 @@ export default function WorkplaceScreen() {
       ],
     })),
   };
-
-  // Show loading screen while fetching root node
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  // Show error if no root node was found
-  if (!rootNode) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text>Error: Root node (id=0) not found.</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.workplaceScreen}>
@@ -134,14 +82,13 @@ export default function WorkplaceScreen() {
 
       <FocusProvider>
         <FlatList
-          data={[rootNode]} // Single-item array
+          data={[{ id: 0 }]} // Ensure item has an `id` field
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
+          renderItem={() => (
             <ListModule
-              addScreen={addScreen}
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
-              activityData={item} // Pass the root node into ListModule
+              moduleID={0} // Root node
             />
           )}
           style={styles.listView}

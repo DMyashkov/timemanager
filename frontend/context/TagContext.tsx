@@ -78,29 +78,33 @@ const insertTag = async (
   return result[0].insertId;
 };
 
+const parseTag = (result: (typeof tags.$inferSelect)[]): TagData | null => {
+  if (result.length === 0) return null;
+
+  const row = result[0];
+  if (row.deleted === 1) return null;
+
+  return {
+    id: row.id,
+    title: row.title ?? "",
+    moduleType:
+      row.moduleType === "activity"
+        ? moduleTypeEnum.activity
+        : moduleTypeEnum.project,
+    productive: row.productive === 1,
+    lapName: row.lapName ?? "Lap",
+    colorPreset: row.colorPreset as ColorPresets,
+    parent: row.parent,
+    children: JSON.parse(row.children || "[]"),
+  };
+};
+
 const getTag = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   id: number,
 ): Promise<TagData | null> => {
   const result = await db.select().from(tags).where(eq(tags.id, id)).limit(1);
-  if (result.length > 0) {
-    const row = result[0];
-    if (row.deleted === 1) return null;
-    return {
-      id: row.id,
-      title: row.title ?? "",
-      moduleType:
-        row.moduleType === "activity"
-          ? moduleTypeEnum.activity
-          : moduleTypeEnum.project,
-      productive: row.productive === 1,
-      lapName: row.lapName ?? "Lap",
-      colorPreset: row.colorPreset as ColorPresets,
-      parent: row.parent,
-      children: JSON.parse(row.children || "[]"),
-    };
-  }
-  return null;
+  return parseTag(result);
 };
 
 const updateTag = async (
@@ -260,6 +264,7 @@ interface TagContextProps {
     db: ExpoSQLiteDatabase<typeof schema>,
     id: number,
   ) => Promise<TagData | null>;
+  parseTag: (result: (typeof tags.$inferSelect)[]) => TagData | null;
   updateTag: (
     db: ExpoSQLiteDatabase<typeof schema>,
     id: number,
@@ -367,6 +372,7 @@ export const TagProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         createTag: insertTag,
         getTag,
+        parseTag,
         updateTag,
         deleteTag,
         syncUnsyncedRows,
