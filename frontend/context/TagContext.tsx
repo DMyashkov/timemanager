@@ -57,7 +57,17 @@ const insertTag = async (
 
   const newId = await ensureUniqueTemporaryId(db);
 
-  await updateTag(db, parent, { children: [...children, newId] });
+  const parentTag = await db
+    .select()
+    .from(tags)
+    .where(eq(tags.id, parent))
+    .get();
+  const currentChildren: number[] = parentTag?.children
+    ? JSON.parse(parentTag.children)
+    : [];
+  await updateTag(db, parent, {
+    children: [...currentChildren, newId],
+  });
 
   const result = await db
     .insert(tags)
