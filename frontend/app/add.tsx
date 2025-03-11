@@ -18,27 +18,26 @@ import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { ColorPresets, type TagData } from "@/constants/interfaces";
 import { moduleTypeEnum } from "@/constants/interfaces";
 import { Stack, router, useLocalSearchParams } from "expo-router";
+import { eq } from "drizzle-orm";
 
 import TrashCan from "@assets/icons/trash-can.svg";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { useTagContext } from "@/context/TagContext";
 import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { useSQLiteContext } from "expo-sqlite";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { schema } from "@/db/schema";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { schema, tags } from "@/db/schema";
 
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
-  const parentId = parentIdString
-    ? Number.parseInt(parentIdString as string, 10)
-    : null;
+  const parentId = Number.parseInt(parentIdString as string, 10);
   const isAddScreen = rawIsAddScreen === "true";
 
   const styles = useStyles();
   const { theme } = useTheme();
 
   // TagContext methods
-  const { createTag, updateTag, deleteTag, getTag } = useTagContext();
+  const { createTag, updateTag, deleteTag, getTag, parseTag } = useTagContext();
 
   // State for the parent tag and the current tag
   const [parent, setParent] = useState<TagData | null>(null);
@@ -47,40 +46,36 @@ export default function AddScreen() {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
 
-  // We fetch either a "parent" for the new Tag or the "current" tag if editing
+  const { data: parentIdData } = useLiveQuery(
+    db.select().from(tags).where(eq(tags.id, parentId)),
+  );
+
+  const { data: parentOfParentIdData } =
+    isAddScreen || !current || !current.parent
+      ? { data: null }
+      : useLiveQuery(db.select().from(tags).where(eq(tags.id, current.parent)));
+
   useEffect(() => {
-    if (!parentId) {
-      // If there's no parentId and this is a new creation at "root" level,
-      // you can either set `parent` to null or handle it differently.
-      setParent(null);
-      setCurrent(null);
-      return;
-    }
-
-    // Wrap your fetch logic in an async function
-    const fetchData = async () => {
-      if (isAddScreen) {
-        // "Add" mode: we only care about the parent
-        const parentTag = await getTag(db, parentId);
-        setParent(parentTag);
-        setCurrent(null);
-      } else {
-        // "Edit" mode: the parentId is actually the tag we're editing
-        const currentTag = await getTag(db, parentId);
-        setCurrent(currentTag);
-
-        if (currentTag?.parent) {
-          // If the current tag has a parent, fetch it
-          const parentTag = await getTag(db, currentTag.parent);
-          setParent(parentTag);
+    try {
+      if (parentIdData) {
+        const parentTag = parentIdData;
+        if (isAddScreen) {
+          setParent(parseTag(parentTag));
         } else {
-          setParent(null);
+          setCurrent(parseTag(parentTag));
         }
       }
-    };
+    } catch (e) {}
+  }, [parentIdData, parseTag, isAddScreen]);
 
-    void fetchData();
-  }, [parentId, isAddScreen, getTag]);
+  useEffect(() => {
+    try {
+      if (parentOfParentIdData) {
+        const parentTag = parentOfParentIdData;
+        setParent(parseTag(parentTag));
+      }
+    } catch (e) {}
+  }, [parentOfParentIdData, parseTag]);
 
   // Loading state if we're still waiting on parent or current (when needed)
   // For example: if in Edit mode, we need `current` to be non-null before rendering.
