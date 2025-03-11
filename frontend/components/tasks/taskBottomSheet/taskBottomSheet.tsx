@@ -139,7 +139,7 @@ export default function TaskBottomSheet({
     },
   });
 
-  // ##TASK## See why that is the case 
+  // ##TASK## See why that is the case
   if (!bottomSheetRef.current) {
     return null;
   }
