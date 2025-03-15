@@ -50,10 +50,15 @@ export default function AddScreen() {
     db.select().from(tags).where(eq(tags.id, parentId)),
   );
 
-  const { data: parentOfParentIdData } =
-    isAddScreen || !current || !current.parent
-      ? { data: null }
-      : useLiveQuery(db.select().from(tags).where(eq(tags.id, current.parent)));
+  const { data: parentOfParentIdDataRaw } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, current ? (current.parent ?? -1) : -1)),
+  );
+
+  const parentOfParentIdData =
+    isAddScreen || !current || !current.parent ? null : parentOfParentIdDataRaw;
 
   useEffect(() => {
     try {
@@ -77,27 +82,9 @@ export default function AddScreen() {
     } catch (e) {}
   }, [parentOfParentIdData, parseTag]);
 
-  // Loading state if we're still waiting on parent or current (when needed)
-  // For example: if in Edit mode, we need `current` to be non-null before rendering.
-  if (!isAddScreen && !current) {
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
 
-  // For adding, we only need `parent` if you strictly require a parent in your logic.
-  // If you require a parent, do something similar:
-  if (isAddScreen && parentId && !parent) {
-    // We do have a parentId but no parent fetched yet
-    return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
+  const [saveButtonPressed, setSaveButtonPressed] = useState(false);
 
   // Color array for color picker
   const colorArray: ColorPresets[] = [ColorPresets.ORANGE, ColorPresets.GREEN];
@@ -148,6 +135,17 @@ export default function AddScreen() {
   // Decide if we are editing a project or an activity
   const isProject = current?.moduleType === moduleTypeEnum.project;
 
+  // For adding, we only need `parent` if you strictly require a parent in your logic.
+  // If you require a parent, do something similar:
+  if (isAddScreen && parentId && !parent) {
+    // We do have a parentId but no parent fetched yet
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <>
       <Stack.Screen
@@ -160,10 +158,7 @@ export default function AddScreen() {
               <SysButton
                 text="Save"
                 onPress={() => {
-                  // We'll trigger a "save" inside the child form
-                  // You can also manage that via a ref or a shared piece of state.
-                  // For simplicity, we pass a flag down:
-                  // setSaveButtonPressed(true);
+                  setSaveButtonPressed(true);
                 }}
               />
             ) : null,
@@ -182,6 +177,8 @@ export default function AddScreen() {
             handleCreate={handleCreate}
             handleUpdate={handleUpdate}
             handleDelete={handleDelete}
+            saveButtonPressed={saveButtonPressed}
+            setSaveButtonPressed={setSaveButtonPressed}
           />
         </View>
       </TouchableWithoutFeedback>
@@ -200,6 +197,8 @@ function ContentWrapper({
   handleCreate,
   handleUpdate,
   handleDelete,
+  saveButtonPressed,
+  setSaveButtonPressed,
 }: {
   parent: TagData | null;
   current: TagData | null;
@@ -210,8 +209,9 @@ function ContentWrapper({
   handleCreate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
   handleUpdate: (data: Omit<TagData, "id" | "synced" | "deleted">) => void;
   handleDelete: () => void;
+  saveButtonPressed: boolean;
+  setSaveButtonPressed: (b: boolean) => void;
 }) {
-  const [saveButtonPressed, setSaveButtonPressed] = useState(false);
   const styles = useStyles();
 
   if (isAddScreen) {
@@ -345,6 +345,7 @@ function AddSegment(props: AddSegmentProps) {
   useEffect(() => {
     // If the "Save" button was pressed in the header, handle the update
     if (saveButtonPressed) {
+      console.log("Save button pressed");
       if (current) {
         // Editing: handleUpdate
         const queryData: Omit<TagData, "id" | "synced" | "deleted"> = {
