@@ -62,7 +62,7 @@ export default function Layout() {
       });
 
       // Sync when the app moves to the background
-const handleAppStateChange = (nextAppState: string) => {
+      const handleAppStateChange = (nextAppState: string) => {
         if (nextAppState === "background") {
           syncUnsyncedRows(db, authToken).catch(console.error);
         }

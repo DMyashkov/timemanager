@@ -212,12 +212,12 @@ export const syncUnsyncedRows = async (
   token: string,
 ) => {
   let rows = await db.select().from(tags).where(eq(tags.synced, 0));
-  console.log("Unsynced rows found: ", rows);
+  // console.log("Unsynced rows found: ", rows);
 
-  console.log("Sending rows for sync: ", rows);
+  // console.log("Sending rows for sync: ", rows);
 
   if (rows.length === 0) {
-    console.log("No unsynced rows found");
+    console.log("Tried to sync rows but no unsynced rows found");
     return;
   }
 
