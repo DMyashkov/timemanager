@@ -11,28 +11,6 @@ import { tags } from "@/db/schema";
 import axios from "axios";
 import type { schema } from "@/db/schema";
 
-const generateTemporaryId = (): number =>
-  -Math.floor(1000000000 + Math.random() * 9000000000);
-
-const ensureUniqueTemporaryId = async (
-  db: ExpoSQLiteDatabase<typeof schema>,
-): Promise<number> => {
-  let tempId = 0;
-  let exists = true;
-
-  while (exists) {
-    tempId = generateTemporaryId();
-    const existing = await db
-      .select({ id: tags.id })
-      .from(tags)
-      .where(eq(tags.id, tempId))
-      .limit(1);
-    exists = existing.length > 0;
-  }
-
-  return tempId;
-};
-
 const insertTag = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: Omit<TagData, "id" | "synced" | "deleted">,
@@ -51,24 +29,14 @@ const insertTag = async (
     throw new Error("Parent ID is required");
   }
 
-  const newId = await ensureUniqueTemporaryId(db);
-
-  const parentTag = await db
-    .select()
-    .from(tags)
-    .where(eq(tags.id, parent))
-    .get();
+  const parentTag = db.select().from(tags).where(eq(tags.id, parent)).get();
   const currentChildren: number[] = parentTag?.children
     ? JSON.parse(parentTag.children)
     : [];
-  await updateTag(db, parent, {
-    children: [...currentChildren, newId],
-  });
 
   const result = await db
     .insert(tags)
     .values({
-      id: newId,
       title,
       moduleType,
       productive: productive ? 1 : 0,
@@ -78,6 +46,10 @@ const insertTag = async (
       children: JSON.stringify(children),
     })
     .returning({ insertId: tags.id });
+
+  await updateTag(db, parent, {
+    children: [...currentChildren, result[0].insertId],
+  });
 
   console.log("Whole table after insert:", await db.select().from(tags));
 
@@ -235,23 +207,69 @@ const deleteTag = async (
   console.log(`Tag with id ${id} deleted successfully`);
 };
 
-const syncUnsyncedRows = async (db: ExpoSQLiteDatabase<typeof schema>) => {
-  const rows = await db.select().from(tags).where(eq(tags.synced, 0));
+export const syncUnsyncedRows = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+  token: string,
+) => {
+  let rows = await db.select().from(tags).where(eq(tags.synced, 0));
+  console.log("Unsynced rows found: ", rows);
+
+  console.log("Sending rows for sync: ", rows);
+
+  if (rows.length === 0) {
+    console.log("No unsynced rows found");
+    return;
+  }
+
   try {
-    const response = await fetch("https://your-backend-url.com/sync", {
+    const response = await fetch("http://127.0.0.1:8000/api/tags/sync/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
       body: JSON.stringify(rows),
     });
+
     if (response.ok) {
       await db.update(tags).set({ synced: 1 }).where(eq(tags.synced, 0));
       console.log("All unsynced rows marked as synced");
+      await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
     }
   } catch (error) {
     console.error("Sync error:", error);
-    throw error;
+    console.log("Attempting to sync all data from frontend...");
+
+    try {
+      // Fetch all rows instead of just the unsynced ones
+      rows = await db.select().from(tags);
+      console.log("Syncing all rows:", rows);
+
+      const fullSyncResponse = await fetch(
+        "http://127.0.0.1:8000/api/tags/sync/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(rows),
+        },
+      );
+
+      if (fullSyncResponse.ok) {
+        await db.update(tags).set({ synced: 1 });
+        console.log("All data successfully synced after retry.");
+        await cleanupDeletedRows(db);
+      } else {
+        throw new Error("Full data sync failed");
+      }
+    } catch (fullSyncError) {
+      console.error("Full sync error:", fullSyncError);
+      throw fullSyncError;
+    }
   }
 };
 
@@ -280,7 +298,10 @@ interface TagContextProps {
     db: ExpoSQLiteDatabase<typeof schema>,
     id: number,
   ) => Promise<void>;
-  syncUnsyncedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
+  syncUnsyncedRows: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    token: string,
+  ) => Promise<void>;
   cleanupDeletedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
   fetchAndStoreTags: (
     db: ExpoSQLiteDatabase<typeof schema>,

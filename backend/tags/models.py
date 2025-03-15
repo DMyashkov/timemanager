@@ -14,12 +14,7 @@ class Tag(models.Model):
     productive = models.BooleanField(default=True)
     lap_name = models.CharField(max_length=100)
 
-    parent = models.ForeignKey(
-        'self',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
+    parent = models.IntegerField(default=None, blank=True, null=True)
 
     children = models.JSONField(default=list, blank=True, null=True)
 

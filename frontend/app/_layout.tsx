@@ -1,3 +1,4 @@
+import NetInfo from "@react-native-community/netinfo";
 import { Stack, router } from "expo-router";
 import * as Font from "expo-font";
 import { FONTS } from "@/constants/fonts";
@@ -5,18 +6,19 @@ import * as SplashScreen from "expo-splash-screen";
 import { Suspense, useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
-import { ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator, AppState, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { TagProvider } from "@/context/TagContext";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
 import {
-  type ExpoSQLiteDatabase,
+  ExpoSQLiteDatabase,
   drizzle,
   useLiveQuery,
 } from "drizzle-orm/expo-sqlite";
 import migrations from "@/drizzle/migrations";
 
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { syncUnsyncedRows } from "@/context/TagContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -31,14 +33,61 @@ import { schema } from "@/db/schema";
 
 export const DATABASE_NAME = "tags";
 import { tags } from "@/db/schema";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Layout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const expoDb = openDatabaseSync(DATABASE_NAME, {
     enableChangeListener: true,
   });
-  const db = drizzle(expoDb);
+  const db = drizzle(expoDb, { schema });
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const { success, error } = useMigrations(db, migrations);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      setAuthToken(token);
+    };
+    fetchToken();
+  }, []);
+
+  useEffect(() => {
+    if (authToken) {
+      // Sync when the device goes online
+      const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+        if (state.isConnected) {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        }
+      });
+
+      // Sync when the app moves to the background
+const handleAppStateChange = (nextAppState: string) => {
+        if (nextAppState === "background") {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        }
+      };
+      const appStateSubscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
+      );
+
+      // Sync periodically (every 5 minutes)
+      const interval = setInterval(
+        () => {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        },
+        5 * 60 * 1000,
+      );
+
+      // Cleanup function
+      return () => {
+        unsubscribeNetInfo();
+        appStateSubscription.remove();
+        clearInterval(interval);
+      };
+    }
+  }, [authToken]);
 
   useEffect(() => {
     if (success) {

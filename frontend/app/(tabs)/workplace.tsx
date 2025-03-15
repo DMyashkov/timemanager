@@ -32,11 +32,11 @@ export default function WorkplaceScreen() {
   useDrizzleStudio(db);
 
   const { data } = useLiveQuery(db.select().from(tags));
-  console.log("data", data);
+  // console.log("data", data);
   const [_, rerender] = useState(0);
   useEffect(() => {
     if (data) {
-      console.log("data", data);
+      // console.log("data", data);
       rerender((prev) => prev + 1);
     }
   }, [data]);

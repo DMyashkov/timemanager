@@ -76,7 +76,7 @@ export default function ListModule(props: ListModuleProps) {
   useEffect(() => {
     try {
       if (moduleData) {
-        console.log("moduleData", moduleData);
+        // console.log("moduleData", moduleData);
         setModuleNode(parseTag(moduleData));
       }
     } catch (error) {
