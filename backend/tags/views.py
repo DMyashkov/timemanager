@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Tag
-from .serializers import TagSyncSerializer
+from .serializers import TagSyncSerializer, TagSyncWithDeletedSerializer
 
 
 class ListTagsView(ListAPIView):
@@ -28,7 +28,8 @@ class SyncTagsView(APIView):
         print(json.dumps(request.data, indent=4, sort_keys=True))
 
         # Validate the incoming payload
-        payload_serializer = TagSyncSerializer(data=request.data, many=True)
+        payload_serializer = TagSyncWithDeletedSerializer(
+            data=request.data, many=True)
         if not payload_serializer.is_valid():
             # print("Serializer ERRRRRROOOORS:", payload_serializer.errors)
             return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -4,7 +4,6 @@ from .models import Tag
 
 
 class TagSyncSerializer(serializers.ModelSerializer):
-    deleted = serializers.BooleanField()
     id = serializers.IntegerField()
 
     class Meta:
@@ -18,7 +17,6 @@ class TagSyncSerializer(serializers.ModelSerializer):
             'lap_name',
             'parent',
             'children',
-            'deleted',
         ]
 
     def to_internal_value(self, data):
@@ -28,14 +26,12 @@ class TagSyncSerializer(serializers.ModelSerializer):
         converted_data = {
             "id": data.get("id"),
             "title": data.get("title"),
-            # Convert camelCase to snake_case
             "module_type": data.get("moduleType"),
             "color_preset": data.get("colorPreset"),
             "productive": data.get("productive"),
             "lap_name": data.get("lapName"),
             "parent": data.get("parent"),
             "children": data.get("children"),
-            "deleted": data.get("deleted"),
         }
         return super().to_internal_value(converted_data)
 
@@ -47,12 +43,17 @@ class TagSyncSerializer(serializers.ModelSerializer):
         return {
             "id": representation["id"],
             "title": representation["title"],
-            # Convert snake_case to camelCase
             "moduleType": representation["module_type"],
             "colorPreset": representation["color_preset"],
             "productive": representation["productive"],
             "lapName": representation["lap_name"],
             "parent": representation["parent"],
             "children": representation["children"],
-            "deleted": representation["deleted"],
         }
+
+
+class TagSyncWithDeletedSerializer(TagSyncSerializer):
+    deleted = serializers.BooleanField(required=False, default=False)
+
+    class Meta(TagSyncSerializer.Meta):
+        fields = TagSyncSerializer.Meta.fields + ['deleted']
