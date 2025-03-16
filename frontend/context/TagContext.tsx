@@ -342,54 +342,22 @@ const fetchAndStoreTags = async (
       headers: { Authorization: `Token ${token}` },
     });
 
+    console.log("Fetched tags:", response.data);
+    console.log("Response status:", response.status);
+
     if (response.status === 200) {
-      let fetchedTags: TagData[] = response.data;
+      const fetchedTags: TagData[] = response.data;
       console.log("Tags fetched successfully.");
 
       // Clear local database first
       await db.delete(tags).execute();
+
       console.log("Local database cleared successfully.");
 
-      // Fix malformed children fields
-      fetchedTags = fetchedTags.map((tag) => ({
-        ...tag,
-        children: parseChildren(tag.children),
-      }));
-
-      // Find the actual root tag
-      const rootTag = fetchedTags.find((tag) => tag.parent === null);
-      if (!rootTag) {
-        throw new Error("No root tag found in fetched data!");
-      }
-
-      console.log("Detected root tag:", rootTag);
-
-      // Ensure all references to `parent: 0` are replaced with the actual root ID
-      fetchedTags = fetchedTags.map((tag) => ({
-        ...tag,
-        parent: tag.parent === 0 ? rootTag.id : tag.parent,
-      }));
-
-      // Build graph (adjacency list)
-      const tagMap = new Map<number | null, TagData[]>();
+      // Insert fetched tags into SQLite
       for (const tag of fetchedTags) {
-        if (!tagMap.has(tag.parent)) {
-          tagMap.set(tag.parent, []);
-        }
-        tagMap.get(tag.parent)!.push(tag);
-      }
-
-      console.log("Tag graph constructed successfully.");
-
-      // Insert in BFS order
-      const insertedTags = new Set<number>();
-      const queue: TagData[] = [rootTag];
-
-      while (queue.length > 0) {
-        const tag = queue.shift()!; // Process first tag in queue
-
         console.log("Inserting tag:", tag);
-        const insertedId = await insertTag(db, {
+        await insertTag(db, {
           title: tag.title,
           moduleType: tag.moduleType,
           productive: tag.productive,
@@ -398,39 +366,42 @@ const fetchAndStoreTags = async (
           parent: tag.parent,
           children: tag.children,
         });
-
-        insertedTags.add(insertedId);
-
-        // Add children to the queue
-        if (tagMap.has(tag.id)) {
-          for (const child of tagMap.get(tag.id)!) {
-            if (!insertedTags.has(child.id)) {
-              queue.push(child);
-            }
-          }
-        }
       }
 
-      console.log("Tags inserted into the local database successfully.");
+      console.log("Tags inserted into local database successfully.");
+
+      const rootActivity = await db
+        .select()
+        .from(tags)
+        .where(and(eq(tags.id, 0), eq(tags.title, "Root Activity")))
+        .limit(1);
+
+      console.log("Root Activity:", rootActivity);
+
+      if (rootActivity.length === 0) {
+        await db.insert(tags).values({
+          id: 0,
+          title: "ROOT",
+          moduleType: "activity",
+          productive: 1,
+          lapName: "Lap",
+          colorPreset: "green",
+          parent: null,
+          children: "[]",
+        });
+
+        console.log("Root Activity created successfully.");
+      } else {
+        console.log("Root Activity already exists for user.");
+      }
+
+      console.log("Local database populated successfully.");
     } else {
       console.error("Failed to fetch tags:", response.statusText);
     }
   } catch (error) {
     console.error("Error fetching tags:", error);
   }
-};
-
-// Fix children parsing issues
-const parseChildren = (children: any): number[] => {
-  if (typeof children === "string") {
-    try {
-      return JSON.parse(children.replace(/^"|"$/g, "").replace(/\\"/g, '"'));
-    } catch (e) {
-      console.error("Error parsing children:", children, e);
-      return [];
-    }
-  }
-  return Array.isArray(children) ? children : [];
 };
 
 export const TagContext = createContext<TagContextProps | null>(null);
