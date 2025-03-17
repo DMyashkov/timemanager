@@ -85,7 +85,7 @@ export default function ListModule(props: ListModuleProps) {
   }, [parseTag, moduleData]);
 
   // If not "existing" in the visible list, render nothing
-  if (!existState || !moduleNode) {
+  if (!existState || !moduleNode || moduleNode.deleted) {
     return null;
   }
 

@@ -14,6 +14,8 @@ export type TagData = {
   lapName: string;
   children: number[];
   parent: number | null;
+  deleted: number;
+  synced: number;
 };
 
 export type DataIndexLocal = Map<number, TagData>;

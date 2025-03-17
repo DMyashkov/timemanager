@@ -64,9 +64,6 @@ class TagSyncWithDeletedSerializer(TagSyncSerializer):
         """
         converted_data = super().to_internal_value(data)
 
-        # Ensure `deleted` retains its value if present, otherwise default to -1
         converted_data["deleted"] = data.get("deleted", -1)  # 🔥 FIX HERE
 
         return converted_data
-
-

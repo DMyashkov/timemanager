@@ -14,7 +14,7 @@ import type { schema } from "@/db/schema";
 interface TagContextProps {
   createTag: (
     db: ExpoSQLiteDatabase<typeof schema>,
-    item: Omit<TagData, "deleted"> & { id?: number; synced?: number },
+    item: TagData & { id?: number; synced?: number; deleted?: number },
   ) => Promise<number>;
   getTag: (
     db: ExpoSQLiteDatabase<typeof schema>,
@@ -42,7 +42,7 @@ interface TagContextProps {
 }
 const insertTag = async (
   db: ExpoSQLiteDatabase<typeof schema>,
-  item: Omit<TagData, "deleted"> & { id?: number; synced?: number },
+  item: TagData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
   const {
     id,
@@ -134,6 +134,8 @@ const parseTag = (result: (typeof tags.$inferSelect)[]): TagData | null => {
     colorPreset: row.colorPreset as ColorPresets,
     parent: row.parent,
     children: JSON.parse(row.children || "[]"),
+    deleted: row.deleted ?? 0,
+    synced: row.synced ?? 0,
   };
 };
 
@@ -369,21 +371,22 @@ const fetchAndStoreTags = async (
       const visited = new Set<number>(); // Track inserted tags
 
       for (const tag of fetchedTags) {
-        if (!tagMap.has(tag.parent)) {
-          tagMap.set(tag.parent, []);
-        }
-        tagMap.get(tag.parent).push(tag);
+        const parentTags = tagMap.get(tag.parent) ?? [];
+        parentTags.push(tag);
+        tagMap.set(tag.parent, parentTags);
       }
 
       console.log("Tags grouped by parent:", tagMap);
 
       // BFS insertion using a queue
-      const queue: TagData[] = tagMap.get(null) || []; // Start with root-level tags
+      const queue: TagData[] = tagMap.get(null) ?? []; // Start with root-level tags
 
       while (queue.length > 0) {
-        const tag = queue.shift()!; // Remove first element
+        const tag: TagData | undefined = queue.shift(); // Remove first element
+        if (!tag) continue;
 
         // Skip if already inserted
+
         if (visited.has(tag.id)) continue;
         visited.add(tag.id);
 
@@ -391,8 +394,6 @@ const fetchAndStoreTags = async (
         const childrenArray =
           tagMap.get(tag.id)?.map((child) => child.id) || [];
         const childrenString = JSON.stringify(childrenArray);
-
-        console.log("Inserting tag:", { ...tag, children: childrenString });
 
         await insertTag(db, {
           id: tag.id, // Ensure ID is preserved
@@ -402,13 +403,14 @@ const fetchAndStoreTags = async (
           lapName: tag.lapName,
           colorPreset: tag.colorPreset,
           parent: tag.parent,
-          children: childrenArray, // Store properly formatted children array
-          synced: 1, // Mark as synced
-        });
+          children: childrenArray,
+          synced: 1,
+        } as TagData);
 
         // Add children to queue
-        if (tagMap.has(tag.id)) {
-          queue.push(...tagMap.get(tag.id)!);
+        const childrenTags = tagMap.get(tag.id) ?? [];
+        if (childrenTags.length > 0) {
+          queue.push(...childrenTags);
         }
       }
 
@@ -478,4 +480,4 @@ export const useTagContext = () => {
     throw new Error("useTagContext must be used within a TagProvider");
   }
   return context;
-};
+}
