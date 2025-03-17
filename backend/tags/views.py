@@ -63,3 +63,18 @@ class SyncTagsView(APIView):
                 Tag.objects.create(**tag_data)
 
         return Response({"message": "Tags synced successfully"}, status=status.HTTP_200_OK)
+
+
+class DeleteAllTagsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        """
+        Deletes all tags for the authenticated user.
+        """
+        deleted_count, _ = Tag.objects.all().delete()  # Delete all records
+
+        return Response(
+            {"message": f"Deleted {deleted_count} tags successfully."},
+            status=status.HTTP_200_OK
+        )

@@ -17,6 +17,7 @@ import { useTagContext } from "@/context/TagContext";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -42,6 +43,10 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
+  const { isLoggedIn, setIsLoggedIn } = useAuthContext();
+  useEffect(() => {
+    console.log("isLoggedIn authScreen.tsx", isLoggedIn);
+  }, [isLoggedIn]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -69,6 +74,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
       await fetchAndStoreTags(db, token);
 
+      setIsLoggedIn(true);
       router.replace("/watch");
     } catch (err) {
       setLoading(false);
@@ -116,6 +122,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
       await fetchAndStoreTags(db, token);
+      setIsLoggedIn(true);
 
       router.replace("/watch");
     } catch (err) {

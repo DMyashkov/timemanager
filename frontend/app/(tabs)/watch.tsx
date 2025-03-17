@@ -22,12 +22,18 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function Watch() {
   const additionalStyleConstants = {
     switchIconSize: 14,
     editIconSize: 15,
   };
+  const { isLoggedIn } = useAuthContext();
+  useEffect(() => {
+    console.log("isLoggedIn _layout.tsx", isLoggedIn);
+  }, [isLoggedIn]);
+
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
   const styles = useStyles();

@@ -11,11 +11,41 @@ import { tags } from "@/db/schema";
 import axios from "axios";
 import type { schema } from "@/db/schema";
 
+interface TagContextProps {
+  createTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    item: Omit<TagData, "deleted"> & { id?: number; synced?: number },
+  ) => Promise<number>;
+  getTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+  ) => Promise<TagData | null>;
+  parseTag: (result: (typeof tags.$inferSelect)[]) => TagData | null;
+  updateTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+    updates: Partial<TagData>,
+  ) => Promise<void>;
+  deleteTag: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    id: number,
+  ) => Promise<void>;
+  syncUnsyncedRows: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    token: string,
+  ) => Promise<void>;
+  cleanupDeletedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
+  fetchAndStoreTags: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+    token: string,
+  ) => Promise<void>;
+}
 const insertTag = async (
   db: ExpoSQLiteDatabase<typeof schema>,
-  item: Omit<TagData, "id" | "synced" | "deleted">,
+  item: Omit<TagData, "deleted"> & { id?: number; synced?: number },
 ): Promise<number> => {
   const {
+    id,
     title,
     moduleType,
     productive,
@@ -23,7 +53,9 @@ const insertTag = async (
     colorPreset,
     parent,
     children,
+    synced,
   } = item;
+  console.log("Tag ", title, " has a synced value of ", synced);
 
   // ✅ Allow parent to be null (for root-level tags)
   if (parent !== null) {
@@ -40,6 +72,7 @@ const insertTag = async (
     const result = await db
       .insert(tags)
       .values({
+        id,
         title,
         moduleType,
         productive: productive ? 1 : 0,
@@ -47,13 +80,16 @@ const insertTag = async (
         colorPreset,
         parent,
         children: JSON.stringify(children),
+        synced,
       })
       .returning({ insertId: tags.id });
 
     // Update parent to include new child
-    await updateTag(db, parent, {
-      children: [...currentChildren, result[0].insertId],
-    });
+    if (!currentChildren.includes(result[0].insertId)) {
+      await updateTag(db, parent, {
+        children: [...currentChildren, result[0].insertId],
+      });
+    }
 
     console.log("Whole table after insert:", await db.select().from(tags));
 
@@ -63,6 +99,7 @@ const insertTag = async (
   const result = await db
     .insert(tags)
     .values({
+      id,
       title,
       moduleType,
       productive: productive ? 1 : 0,
@@ -70,6 +107,7 @@ const insertTag = async (
       colorPreset,
       parent: null,
       children: JSON.stringify(children),
+      synced,
     })
     .returning({ insertId: tags.id });
 
@@ -233,7 +271,7 @@ export const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ) => {
-  let rows = await db.select().from(tags).where(eq(tags.synced, 0));
+  const rows = await db.select().from(tags).where(eq(tags.synced, 0));
   // console.log("Unsynced rows found: ", rows);
 
   // console.log("Sending rows for sync: ", rows);
@@ -262,36 +300,36 @@ export const syncUnsyncedRows = async (
     }
   } catch (error) {
     console.error("Sync error:", error);
-    console.log("Attempting to sync all data from frontend...");
+    // console.log("Attempting to sync all data from frontend...");
 
-    try {
-      // Fetch all rows instead of just the unsynced ones
-      rows = await db.select().from(tags);
-      console.log("Syncing all rows:", rows);
-
-      const fullSyncResponse = await fetch(
-        "http://127.0.0.1:8000/api/tags/sync/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify(rows),
-        },
-      );
-
-      if (fullSyncResponse.ok) {
-        await db.update(tags).set({ synced: 1 });
-        console.log("All data successfully synced after retry.");
-        await cleanupDeletedRows(db);
-      } else {
-        throw new Error("Full data sync failed");
-      }
-    } catch (fullSyncError) {
-      console.error("Full sync error:", fullSyncError);
-      throw fullSyncError;
-    }
+    // try {
+    //   // Fetch all rows instead of just the unsynced ones
+    //   rows = await db.select().from(tags);
+    //   console.log("Syncing all rows:", rows);
+    //
+    //   const fullSyncResponse = await fetch(
+    //     "http://127.0.0.1:8000/api/tags/sync/",
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //         Authorization: `Token ${token}`,
+    //       },
+    //       body: JSON.stringify(rows),
+    //     },
+    //   );
+    //
+    //   if (fullSyncResponse.ok) {
+    //     await db.update(tags).set({ synced: 1 });
+    //     console.log("All data successfully synced after retry.");
+    //     await cleanupDeletedRows(db);
+    //   } else {
+    //     throw new Error("Full data sync failed");
+    //   }
+    // } catch (fullSyncError) {
+    //   console.error("Full sync error:", fullSyncError);
+    //   throw fullSyncError;
+    // }
   }
 };
 
@@ -300,36 +338,6 @@ const cleanupDeletedRows = async (db: ExpoSQLiteDatabase<typeof schema>) => {
   await db.delete(tags).where(and(eq(tags.deleted, 1), eq(tags.synced, 1)));
   console.log("Deleted rows cleaned up");
 };
-
-interface TagContextProps {
-  createTag: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    item: Omit<TagData, "id" | "synced" | "deleted">,
-  ) => Promise<number>;
-  getTag: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    id: number,
-  ) => Promise<TagData | null>;
-  parseTag: (result: (typeof tags.$inferSelect)[]) => TagData | null;
-  updateTag: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    id: number,
-    updates: Partial<TagData>,
-  ) => Promise<void>;
-  deleteTag: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    id: number,
-  ) => Promise<void>;
-  syncUnsyncedRows: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    token: string,
-  ) => Promise<void>;
-  cleanupDeletedRows: (db: ExpoSQLiteDatabase<typeof schema>) => Promise<void>;
-  fetchAndStoreTags: (
-    db: ExpoSQLiteDatabase<typeof schema>,
-    token: string,
-  ) => Promise<void>;
-}
 
 const fetchAndStoreTags = async (
   db: ExpoSQLiteDatabase<typeof schema>,
@@ -347,36 +355,69 @@ const fetchAndStoreTags = async (
 
     if (response.status === 200) {
       const fetchedTags: TagData[] = response.data;
+
       console.log("Tags fetched successfully.");
 
       // Clear local database first
       await db.delete(tags).execute();
-
       console.log("Local database cleared successfully.");
 
-      // Insert fetched tags into SQLite
+      // Group tags by parent ID
+      const tagMap = new Map<number | null, TagData[]>();
+      const visited = new Set<number>(); // Track inserted tags
+
       for (const tag of fetchedTags) {
-        console.log("Inserting tag:", tag);
+        if (!tagMap.has(tag.parent)) {
+          tagMap.set(tag.parent, []);
+        }
+        tagMap.get(tag.parent).push(tag);
+      }
+
+      console.log("Tags grouped by parent:", tagMap);
+
+      // BFS insertion using a queue
+      const queue: TagData[] = tagMap.get(null) || []; // Start with root-level tags
+
+      while (queue.length > 0) {
+        const tag = queue.shift()!; // Remove first element
+
+        // Skip if already inserted
+        if (visited.has(tag.id)) continue;
+        visited.add(tag.id);
+
+        // Ensure children is a properly formatted JSON array string
+        const childrenArray =
+          tagMap.get(tag.id)?.map((child) => child.id) || [];
+        const childrenString = JSON.stringify(childrenArray);
+
+        console.log("Inserting tag:", { ...tag, children: childrenString });
+
         await insertTag(db, {
+          id: tag.id, // Ensure ID is preserved
           title: tag.title,
           moduleType: tag.moduleType,
           productive: tag.productive,
           lapName: tag.lapName,
           colorPreset: tag.colorPreset,
           parent: tag.parent,
-          children: tag.children,
+          children: childrenArray, // Store properly formatted children array
+          synced: 1, // Mark as synced
         });
+
+        // Add children to queue
+        if (tagMap.has(tag.id)) {
+          queue.push(...tagMap.get(tag.id)!);
+        }
       }
 
       console.log("Tags inserted into local database successfully.");
 
+      // Ensure "Root Activity" exists only ONCE
       const rootActivity = await db
         .select()
         .from(tags)
-        .where(and(eq(tags.id, 0), eq(tags.title, "Root Activity")))
+        .where(eq(tags.id, 0))
         .limit(1);
-
-      console.log("Root Activity:", rootActivity);
 
       if (rootActivity.length === 0) {
         await db.insert(tags).values({
@@ -387,12 +428,12 @@ const fetchAndStoreTags = async (
           lapName: "Lap",
           colorPreset: "green",
           parent: null,
-          children: "[]",
+          children: "[]", // Empty array for root initially
         });
 
         console.log("Root Activity created successfully.");
       } else {
-        console.log("Root Activity already exists for user.");
+        console.log("Root Activity already exists.");
       }
 
       console.log("Local database populated successfully.");

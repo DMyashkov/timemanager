@@ -34,6 +34,8 @@ import { schema } from "@/db/schema";
 export const DATABASE_NAME = "tags";
 import { tags } from "@/db/schema";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthProvider } from "@/context/AuthContext";
+import { useAuthContext } from "@/context/AuthContext"; // Import the context
 
 export default function Layout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -51,43 +53,6 @@ export default function Layout() {
     };
     fetchToken();
   }, []);
-
-  useEffect(() => {
-    if (authToken) {
-      // Sync when the device goes online
-      const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-        if (state.isConnected) {
-          syncUnsyncedRows(db, authToken).catch(console.error);
-        }
-      });
-
-      // Sync when the app moves to the background
-      const handleAppStateChange = (nextAppState: string) => {
-        if (nextAppState === "background") {
-          syncUnsyncedRows(db, authToken).catch(console.error);
-        }
-      };
-      const appStateSubscription = AppState.addEventListener(
-        "change",
-        handleAppStateChange,
-      );
-
-      // Sync periodically (every 5 minutes)
-      const interval = setInterval(
-        () => {
-          syncUnsyncedRows(db, authToken).catch(console.error);
-        },
-        5 * 60 * 1000,
-      );
-
-      // Cleanup function
-      return () => {
-        unsubscribeNetInfo();
-        appStateSubscription.remove();
-        clearInterval(interval);
-      };
-    }
-  }, [authToken]);
 
   useEffect(() => {
     if (success) {
@@ -118,110 +83,164 @@ export default function Layout() {
   if (!fontsLoaded) return null;
 
   return (
-    <Suspense fallback={<ActivityIndicator size="large" />}>
-      <SQLiteProvider
-        databaseName={DATABASE_NAME}
-        options={{ enableChangeListener: true }}
-        useSuspense
-      >
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <ThemeProvider>
-            <TagProvider>
-              <Stack screenOptions={{}}>
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-                <Stack.Screen
-                  name="add"
-                  options={{
-                    presentation: "modal",
-                    headerLeft: () => (
-                      <SysButton
-                        text="Cancel"
-                        onPress={() => {
-                          router.back();
-                        }}
-                      />
-                    ),
-                    headerTitle: (props) => (
-                      <Text
-                        {...props}
-                        style={{
-                          fontSize: useTheme().theme.fontSize.medium,
-                          fontFamily: useTheme().theme.font.semibold,
-                        }}
-                      >
-                        Create tag
-                      </Text>
-                    ),
-                  }}
-                />
+    <AuthProvider>
+      <Suspense fallback={<ActivityIndicator size="large" />}>
+        <SQLiteProvider
+          databaseName={DATABASE_NAME}
+          options={{ enableChangeListener: true }}
+          useSuspense
+        >
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider>
+              <TagProvider>
+                <AppContent db={db} authToken={authToken} />
+              </TagProvider>
+            </ThemeProvider>
+          </GestureHandlerRootView>
+        </SQLiteProvider>
+      </Suspense>
+    </AuthProvider>
+  );
+}
 
-                <Stack.Screen
-                  name="pickActivity"
-                  options={{
-                    presentation: "modal",
-                    headerShown: false,
-                    headerLeft: () => (
-                      <SysButton
-                        text="Cancel"
-                        onPress={() => {
-                          router.back();
-                        }}
-                        isRegular={true}
-                      />
-                    ),
-                    headerTitle: (props) => (
-                      <Text
-                        {...props}
-                        style={{
-                          fontSize: useTheme().theme.fontSize.medium,
-                          fontFamily: useTheme().theme.font.semibold,
-                        }}
-                      >
-                        Change Activity
-                      </Text>
-                    ),
-                    headerRight: () => (
-                      <SysButton
-                        text="Choose"
-                        onPress={() => {
-                          router.back();
-                        }}
-                      />
-                    ),
-                  }}
-                />
+// Move `useAuthContext()` inside a separate component
+function AppContent({
+  db,
+  authToken,
+}: {
+  db: ExpoSQLiteDatabase<typeof schema>;
+  authToken: string | null;
+}) {
+  const { isLoggedIn } = useAuthContext(); // Now it's safely inside the provider
 
-                <Stack.Screen
-                  name="login"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                  }}
-                />
-                <Stack.Screen
-                  name="signup"
-                  options={{
-                    headerShown: false,
-                    presentation: "modal",
-                  }}
-                />
+  useEffect(() => {
+    console.log("isLoggedIn _layout.tsx", isLoggedIn);
+  }, [isLoggedIn]);
 
-                <Stack.Screen
-                  name="authSelection"
-                  options={{
-                    headerShown: false,
-                  }}
-                />
-              </Stack>
-            </TagProvider>
-          </ThemeProvider>
-        </GestureHandlerRootView>
-      </SQLiteProvider>
-    </Suspense>
+  useEffect(() => {
+    if (authToken && isLoggedIn) {
+      const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+        if (state.isConnected) {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        }
+      });
+
+      const handleAppStateChange = (nextAppState: string) => {
+        if (nextAppState === "background") {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        }
+      };
+      const appStateSubscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
+      );
+
+      const interval = setInterval(
+        () => {
+          syncUnsyncedRows(db, authToken).catch(console.error);
+        },
+        5 * 60 * 1000,
+      );
+
+      return () => {
+        unsubscribeNetInfo();
+        appStateSubscription.remove();
+        clearInterval(interval);
+      };
+    }
+  }, [authToken, isLoggedIn]);
+
+  return (
+    <Stack screenOptions={{}}>
+      <Stack.Screen
+        name="(tabs)"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="add"
+        options={{
+          presentation: "modal",
+          headerLeft: () => (
+            <SysButton
+              text="Cancel"
+              onPress={() => {
+                router.back();
+              }}
+            />
+          ),
+          headerTitle: (props) => (
+            <Text
+              {...props}
+              style={{
+                fontSize: useTheme().theme.fontSize.medium,
+                fontFamily: useTheme().theme.font.semibold,
+              }}
+            >
+              Create tag
+            </Text>
+          ),
+        }}
+      />
+
+      <Stack.Screen
+        name="pickActivity"
+        options={{
+          presentation: "modal",
+          headerShown: false,
+          headerLeft: () => (
+            <SysButton
+              text="Cancel"
+              onPress={() => {
+                router.back();
+              }}
+              isRegular={true}
+            />
+          ),
+          headerTitle: (props) => (
+            <Text
+              {...props}
+              style={{
+                fontSize: useTheme().theme.fontSize.medium,
+                fontFamily: useTheme().theme.font.semibold,
+              }}
+            >
+              Change Activity
+            </Text>
+          ),
+          headerRight: () => (
+            <SysButton
+              text="Choose"
+              onPress={() => {
+                router.back();
+              }}
+            />
+          ),
+        }}
+      />
+
+      <Stack.Screen
+        name="login"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="signup"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
+
+      <Stack.Screen
+        name="authSelection"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 }
