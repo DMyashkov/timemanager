@@ -265,6 +265,8 @@ const deleteTag = async (
   await db.update(tags).set({ deleted: 1, synced: 0 }).where(eq(tags.id, id));
 
   console.log(`Tag with id ${id} deleted successfully`);
+  // WHole table after delete
+  console.log("Whole table after delete:", await db.select().from(tags));
 };
 
 export const syncUnsyncedRows = async (

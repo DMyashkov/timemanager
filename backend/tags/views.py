@@ -43,6 +43,7 @@ class SyncTagsView(APIView):
         for tag_data in payload:
             tag_id = tag_data.get("id")
             is_deleted = tag_data.pop("deleted", None)
+            print("For tag with name", tag_data.get("title"), " is_deleted:", is_deleted)
 
             # print("Tag ID:", tag_id)
             # print("Payload:", payload)
