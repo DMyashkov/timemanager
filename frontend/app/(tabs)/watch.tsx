@@ -195,7 +195,7 @@ export default function Watch() {
     if (activityNode) {
       return theme.color.presets[activityNode.colorPreset].medium;
     }
-    return theme.color.red;
+    return theme.color.darkRed;
   };
 
   const headerButtons: Button[] = [];
@@ -237,11 +237,11 @@ export default function Watch() {
     <View style={styles.watchScreen}>
       <Header
         title={
-          !isTimerRunning
-            ? "Break"
-            : isSessionRunning
+          !isSessionRunning
+            ? "Start Focus Timer"
+            : isTimerRunning
               ? "Focus"
-              : "Start Focus Timer"
+              : "Break"
         }
         additionalTitleStyles={{
           color: isTimerRunning ? theme.color.red : theme.color.darkestGrey,
@@ -323,7 +323,7 @@ export default function Watch() {
               <View style={styles.leftButtonContainer}>
                 <TagIcon
                   style={styles.leftButtonTag}
-                  fill={theme.color.red}
+                  fill={theme.color.darkestGrey}
                   width={23}
                   height={23}
                 />
@@ -444,9 +444,15 @@ export default function Watch() {
         visible={isPickActivityVisible}
         onClose={() => {
           setIsPickActivityVisible(false);
-          handleSessionToggle();
         }}
-        onActivitySelected={handleActivitySelected}
+        onActivitySelected={(activityData: TagData) => {
+          handleActivitySelected(activityData);
+          setIsSessionRunning(true);
+          if (selectedActivityID) {
+            // resetTimer
+          }
+          setIsTimerRunning(true);
+        }}
       />
     </View>
   );
