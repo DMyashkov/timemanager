@@ -24,13 +24,16 @@ interface PickActivityProps {
   onActivitySelected: (activity: TagData) => void;
 }
 
-export default function PickActivity({ visible, onClose, onActivitySelected }: PickActivityProps) {
+export default function PickActivity({
+  visible,
+  onClose,
+  onActivitySelected,
+}: PickActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
   const { getTag } = useTagContext();
   const [searchText, setSearchText] = useState("");
 
-  const [addScreen, setAddScreen] = useState<boolean>(false);
   const addAnim = useSharedValue(0);
 
   const expoDb = useSQLiteContext();
@@ -53,8 +56,8 @@ export default function PickActivity({ visible, onClose, onActivitySelected }: P
           pathname: "/add",
           params: {
             parentId: activity.id,
-            rawIsAddScreen: "false"
-          }
+            rawIsAddScreen: "false",
+          },
         });
       },
     },
@@ -65,7 +68,9 @@ export default function PickActivity({ visible, onClose, onActivitySelected }: P
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onRequestClose={() => {
+        onClose();
+      }}
     >
       <View style={styles.container}>
         <HeaderModal
@@ -83,8 +88,9 @@ export default function PickActivity({ visible, onClose, onActivitySelected }: P
             keyExtractor={(item) => String(item.id)}
             renderItem={() => (
               <ListModule
+                shouldThereBeAnAddItem={false}
                 addAnim={addAnim}
-                onFocusAdditional={() => setAddScreen(false)}
+                onFocusAdditional={() => {}}
                 moduleID={0} // Root node
                 customButtons={createPickActivityButtons}
               />

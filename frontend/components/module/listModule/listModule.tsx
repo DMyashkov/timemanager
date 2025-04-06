@@ -43,6 +43,7 @@ interface ListModuleProps {
   setIsVisibleAnimZero?: (value: boolean) => void;
   moduleID: number;
   customButtons?: ButtonConfig[] | ((activity: TagData) => ButtonConfig[]);
+  shouldThereBeAnAddItem?: boolean;
 }
 
 export default function ListModule(props: ListModuleProps) {
@@ -117,6 +118,7 @@ function ListModuleInner({
   setIsVisibleAnimZero = () => {},
   moduleData: activityData,
   customButtons,
+  shouldThereBeAnAddItem = true,
 }: Omit<ListModuleProps, "moduleID"> & { moduleData: TagData }) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
@@ -319,7 +321,6 @@ function ListModuleInner({
       onPress: handleEditClick,
     },
   ];
-  console.log("customButtons", customButtons);
 
   const buttonsOnTopOfTag =
     typeof customButtons === "function"
@@ -394,10 +395,12 @@ function ListModuleInner({
 
           <View style={styles.list}>
             {/* The "AddItem" row */}
-            <AddItem
-              onClickAddButton={handleAddClick}
-              style={animStyles.addItem}
-            />
+            {shouldThereBeAnAddItem && (
+              <AddItem
+                onClickAddButton={handleAddClick}
+                style={animStyles.addItem}
+              />
+            )}
 
             {isExpandAnimGreaterThanZero && (
               <FlatList
@@ -418,6 +421,7 @@ function ListModuleInner({
                       onFocusAdditional={onFocusAdditional}
                       expandAnimOfParent={expandAnimOfParentOfChild}
                       customButtons={customButtons}
+                      shouldThereBeAnAddItem={shouldThereBeAnAddItem}
                     />
                   );
                 }}

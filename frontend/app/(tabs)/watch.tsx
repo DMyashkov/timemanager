@@ -122,15 +122,6 @@ export default function Watch() {
     }
   }, [parseTag, projectData]);
 
-  console.log("selectedActivityID", selectedActivityID);
-  console.log("selectedProjectID", selectedProjectID);
-
-  console.log("activityData", activityData);
-  console.log("projectData", projectData);
-
-  console.log("activityNode", activityNode);
-  console.log("projectNode", projectNode);
-
   // Handle edit activity
   const handleEditActivity = () => {
     handlePickActivity(); // Reuse the same flow for editing
@@ -214,7 +205,7 @@ export default function Watch() {
             >
               {activityNode && <Tag text={activityNode.title} />}
               {projectNode && <Tag isProject={true} text={projectNode.title} />}
-              <TouchableOpacity onPress={handleEditActivity}>
+              <TouchableOpacity onPress={handlePickActivity}>
                 <Edit
                   width={additionalStyleConstants.editIconSize}
                   height={additionalStyleConstants.editIconSize}
