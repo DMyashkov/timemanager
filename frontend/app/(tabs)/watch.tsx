@@ -174,6 +174,9 @@ export default function Watch() {
   }, [pathname, params.selectedActivity]);
 
   const fullModeAnim = useSharedValue(0);
+  const resetTimer = () => {
+    setTimerSeconds(0);
+  };
 
   const screenHeight = Dimensions.get("window").height;
   const lapsViewMaxHeight =
@@ -449,7 +452,7 @@ export default function Watch() {
           handleActivitySelected(activityData);
           setIsSessionRunning(true);
           if (selectedActivityID) {
-            // resetTimer
+            resetTimer();
           }
           setIsTimerRunning(true);
         }}
