@@ -51,8 +51,8 @@ export default function Watch() {
     null,
   );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
-  const [isTimerStarted, setIsTimerStarted] = useState(false);
-  const [isSessionStarted, setIsSessionStarted] = useState(false);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isSessionRunning, setIsSessionRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const styles = useStyles();
   const pathname = usePathname();
@@ -61,7 +61,7 @@ export default function Watch() {
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isTimerStarted) {
+    if (isTimerRunning) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
@@ -71,7 +71,7 @@ export default function Watch() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isTimerStarted]);
+  }, [isTimerRunning]);
 
   // Format time helper
   const formatTime = (seconds: number) => {
@@ -82,7 +82,7 @@ export default function Watch() {
 
   // Handle session start/stop
   const handleSessionToggle = () => {
-    setIsTimerStarted((prev) => !prev);
+    setIsTimerRunning((prev) => !prev);
   };
 
   // Handle navigation to PickActivity
@@ -198,13 +198,13 @@ export default function Watch() {
   };
 
   const headerButtons: Button[] = [];
-  if (isSessionStarted) {
+  if (isSessionRunning) {
     headerButtons.push({
       id: "terminate",
       iconElement: <XSquare height={29} width={29} fill={theme.color.red} />,
       onPress: () => {
-        setIsSessionStarted(false);
-        setIsTimerStarted(false);
+        setIsSessionRunning(false);
+        setIsTimerRunning(false);
         setSelectedActivityID(null);
         setSelectedProjectID(null);
       },
@@ -235,7 +235,7 @@ export default function Watch() {
   return (
     <View style={styles.watchScreen}>
       <Header
-        title={isSessionStarted ? "Focus" : "Start Focus Timer"}
+        title={isSessionRunning ? "Focus" : "Start Focus Timer"}
         additionalTitleStyles={{ color: theme.color.red }}
         buttons={headerButtons}
       />
@@ -257,7 +257,7 @@ export default function Watch() {
                 <Tag
                   text={activityNode.title}
                   colorPallete={
-                    isTimerStarted
+                    isTimerRunning
                       ? theme.color.presets[activityNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -272,7 +272,7 @@ export default function Watch() {
                   isProject={true}
                   text={projectNode.title}
                   colorPallete={
-                    isTimerStarted
+                    isTimerRunning
                       ? theme.color.presets[projectNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -284,13 +284,13 @@ export default function Watch() {
               )}
               <TouchableOpacity
                 onPress={() => {
-                  if (isTimerStarted) {
+                  if (isTimerRunning) {
                     handlePickActivity;
                   } else {
                   }
                 }}
                 style={{
-                  opacity: isTimerStarted ? 1 : 0,
+                  opacity: isTimerRunning ? 1 : 0,
                 }}
               >
                 <Edit
@@ -347,7 +347,7 @@ export default function Watch() {
           </View>
         </View>
         <View style={styles.bottomButtonsContainer}>
-          {isTimerStarted ? (
+          {isTimerRunning ? (
             <>
               <View style={styles.leftButtonsContainer}>
                 <TouchableOpacity
@@ -400,7 +400,7 @@ export default function Watch() {
                   ]}
                   onPress={() => {
                     handleSessionToggle();
-                    setIsSessionStarted(true);
+                    setIsSessionRunning(true);
                   }}
                 >
                   <Text style={styles.textInsideButton}>Start</Text>
