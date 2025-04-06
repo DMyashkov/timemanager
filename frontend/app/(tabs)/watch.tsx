@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import Switch from "@assets/icons/switch.svg";
 import Edit from "@assets/icons/edit.svg";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 
 import Header from "@/components/header/headerBasic/header";
 import Tomato from "@assets/icons/tomato.svg";
@@ -24,6 +25,16 @@ import Animated, {
 } from "react-native-reanimated";
 import { useAuthContext } from "@/context/AuthContext";
 import TagIcon from "@assets/icons/tag.svg";
+import { type TagData } from "@/constants/interfaces";
+
+interface DisplayActivity {
+  id: number;
+  title: string;
+  parent?: {
+    id: number;
+    title: string;
+  };
+}
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -31,13 +42,39 @@ export default function Watch() {
     editIconSize: 15,
   };
   const { isLoggedIn } = useAuthContext();
-  useEffect(() => {
-    console.log("isLoggedIn _layout.tsx", isLoggedIn);
-  }, [isLoggedIn]);
-
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
+  const [selectedActivity, setSelectedActivity] = useState<DisplayActivity | null>(null);
   const styles = useStyles();
+  const pathname = usePathname();
+  const params = useLocalSearchParams();
+
+  // Handle navigation to PickActivity
+  const handlePickActivity = () => {
+    router.push({
+      pathname: "/pickActivity",
+      params: {
+        onSelect: "watch", // This indicates we're selecting from Watch screen
+      },
+    });
+  };
+
+  // Handle edit activity
+  const handleEditActivity = () => {
+    handlePickActivity(); // Reuse the same flow for editing
+  };
+
+  useEffect(() => {
+    // Listen for URL changes
+    if (pathname === "/watch" && params.selectedActivity) {
+      try {
+        const activity = JSON.parse(params.selectedActivity as string);
+        setSelectedActivity(activity);
+      } catch (e) {
+        console.error("Failed to parse selected activity:", e);
+      }
+    }
+  }, [pathname, params.selectedActivity]);
 
   const fullModeAnim = useSharedValue(0);
 
@@ -55,7 +92,6 @@ export default function Watch() {
       marginTop: fullModeAnim.value * styles.lapsView.marginTop,
     })),
   };
-  const tagPicked = false;
 
   return (
     <View style={styles.watchScreen}>
@@ -93,7 +129,7 @@ export default function Watch() {
       <View style={styles.content}>
         <View style={styles.emptyView} />
         <View style={styles.clock}>
-          {tagPicked ? (
+          {selectedActivity ? (
             <View
               style={[
                 styles.tagContainer,
@@ -104,9 +140,11 @@ export default function Watch() {
                 },
               ]}
             >
-              <Tag text="Photography" />
-              <Tag isProject={true} text="Homework 1" />
-              <TouchableOpacity>
+              <Tag text={selectedActivity.title} />
+              {selectedActivity.parent && (
+                <Tag isProject={true} text={selectedActivity.parent.title} />
+              )}
+              <TouchableOpacity onPress={handleEditActivity}>
                 <Edit
                   width={additionalStyleConstants.editIconSize}
                   height={additionalStyleConstants.editIconSize}
@@ -115,7 +153,10 @@ export default function Watch() {
               </TouchableOpacity>
             </View>
           ) : (
-            <View style={styles.pickActivityButton}>
+            <TouchableOpacity 
+              style={styles.pickActivityButton}
+              onPress={handlePickActivity}
+            >
               <View style={styles.leftButtonContainer}>
                 <TagIcon
                   style={styles.leftButtonTag}
@@ -125,7 +166,7 @@ export default function Watch() {
                 />
               </View>
               <Text style={styles.pickActivityText}>Pick activity</Text>
-            </View>
+            </TouchableOpacity>
           )}
           <Text style={styles.time}>25:43</Text>
           <View

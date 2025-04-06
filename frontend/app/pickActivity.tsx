@@ -80,16 +80,15 @@ export default function PickActivity() {
       />
       <FocusProvider>
         <FlatList
-          data={[{ key: "single-item" }]} // Array with one element
+          data={[{ id: 0 }]} // Ensure item has an `id` field
+          keyExtractor={(item) => String(item.id)}
           renderItem={() => (
             <ListModule
-              addScreen={addScreen}
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
-              activityData={rootTag}
+              moduleID={0} // Root node
             />
           )}
-          keyExtractor={(item) => item.key}
           style={styles.listView}
         />
       </FocusProvider>
