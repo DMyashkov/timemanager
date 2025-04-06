@@ -294,7 +294,7 @@ export default function Watch() {
               <TouchableOpacity
                 onPress={() => {
                   if (isTimerRunning) {
-                    handlePickActivity;
+                    handlePickActivity();
                   } else {
                   }
                 }}
@@ -442,7 +442,10 @@ export default function Watch() {
       </Animated.View>
       <PickActivity
         visible={isPickActivityVisible}
-        onClose={() => setIsPickActivityVisible(false)}
+        onClose={() => {
+          setIsPickActivityVisible(false);
+          handleSessionToggle();
+        }}
         onActivitySelected={handleActivitySelected}
       />
     </View>

@@ -41,7 +41,7 @@ export default function PickActivity({
 
   const createPickActivityButtons = (activity: TagData) => [
     {
-      text: "Pick",
+      text: "Start timer",
       color: theme.color.mediumGrey,
       onPress: () => {
         onActivitySelected(activity);
