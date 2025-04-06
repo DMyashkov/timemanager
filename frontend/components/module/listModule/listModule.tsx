@@ -130,6 +130,7 @@ function ListModuleInner({
   const hasChildren = activityData.children && activityData.children.length > 0;
 
   const [expandedState, setExpandedStateLocal] = useState<boolean>(isRoot);
+  const [pastChildren, setPastChildren] = useState<number[]>([]);
 
   const setExpandedState = useCallback(
     (value: boolean) => {
@@ -139,6 +140,13 @@ function ListModuleInner({
     },
     [hasChildren],
   );
+
+  useEffect(() => {
+    if (!hasChildren) {
+      setExpandedStateLocal(isRoot);
+      setIsExpandAnimGreaterThanZero(false);
+    }
+  }, [isRoot, hasChildren]);
 
   const handleExpand = useCallback(() => {
     // If attempting to expand deeper than the focus boundary, adjust the path
@@ -318,6 +326,27 @@ function ListModuleInner({
   const expandAnimOfParentOfChild = useDerivedValue(
     () => expandAnim.value * expandAnimOfParent.value,
   );
+
+  useEffect(() => {
+    if (!activityData.children) return;
+
+    // Find items that are different between past and current children
+    const differentItems = activityData.children
+      .filter((x) => !pastChildren.includes(x))
+      .concat(pastChildren.filter((x) => !activityData.children.includes(x)));
+
+    // Check if any of the different items match the focus path
+    const focusMatchesDifference = differentItems.some((childId) =>
+      focusedPath.includes(`/${childId}`),
+    );
+
+    if (focusMatchesDifference) {
+      popFocusStack();
+    }
+
+    // Update pastChildren with current children
+    setPastChildren(activityData.children);
+  }, [activityData.children, pastChildren, focusedPath, popFocusStack]);
 
   return (
     <Animated.View style={[animStyles.listModule]}>
