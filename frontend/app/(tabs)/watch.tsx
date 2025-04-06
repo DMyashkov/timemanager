@@ -393,7 +393,7 @@ export default function Watch() {
                 <TouchableOpacity
                   style={[
                     styles.filledButton,
-                    { backgroundColor: getButtonColor() },
+                    { backgroundColor: theme.color.red },
                   ]}
                   onPress={handleSessionToggle}
                 >
