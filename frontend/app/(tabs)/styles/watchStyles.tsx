@@ -23,6 +23,7 @@ export default function useStyles() {
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
+      width: "100%",
     },
     time: {
       fontSize: theme.fontSize.extraExtraLarge,
@@ -116,6 +117,35 @@ export default function useStyles() {
     separator: {
       height: 1.2,
       backgroundColor: theme.color.lightGrey,
+    },
+    leftButtonTag: {
+      aspectRatio: 1,
+      height: "100%",
+    },
+    leftButtonContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingTop: 8,
+      paddingBottom: 7,
+      paddingRight: 3,
+    },
+    pickActivityButton: {
+      height: 40,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.color.lightRed,
+      width: "92%",
+      borderRadius: theme.borderRadius.large,
+      borderWidth: 2,
+      borderColor: theme.color.red,
+      marginTop: -7,
+      marginBottom: 7,
+    },
+    pickActivityText: {
+      fontSize: theme.fontSize.mediumBig,
+      fontFamily: theme.font.semibold,
+      color: theme.color.red,
     },
   });
   return styles;

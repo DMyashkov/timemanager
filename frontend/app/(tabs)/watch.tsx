@@ -23,6 +23,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useAuthContext } from "@/context/AuthContext";
+import TagIcon from "@assets/icons/tag.svg";
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -54,6 +55,7 @@ export default function Watch() {
       marginTop: fullModeAnim.value * styles.lapsView.marginTop,
     })),
   };
+  const tagPicked = false;
 
   return (
     <View style={styles.watchScreen}>
@@ -91,26 +93,40 @@ export default function Watch() {
       <View style={styles.content}>
         <View style={styles.emptyView} />
         <View style={styles.clock}>
-          <View
-            style={[
-              styles.tagContainer,
-              {
-                marginRight:
-                  -styles.tagContainer.gap -
-                  additionalStyleConstants.editIconSize,
-              },
-            ]}
-          >
-            <Tag text="Photography" />
-            <Tag isProject={true} text="Homework 1" />
-            <TouchableOpacity>
-              <Edit
-                width={additionalStyleConstants.editIconSize}
-                height={additionalStyleConstants.editIconSize}
-                fill={theme.color.presets.green.medium}
-              />
-            </TouchableOpacity>
-          </View>
+          {tagPicked ? (
+            <View
+              style={[
+                styles.tagContainer,
+                {
+                  marginRight:
+                    -styles.tagContainer.gap -
+                    additionalStyleConstants.editIconSize,
+                },
+              ]}
+            >
+              <Tag text="Photography" />
+              <Tag isProject={true} text="Homework 1" />
+              <TouchableOpacity>
+                <Edit
+                  width={additionalStyleConstants.editIconSize}
+                  height={additionalStyleConstants.editIconSize}
+                  fill={theme.color.presets.green.medium}
+                />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.pickActivityButton}>
+              <View style={styles.leftButtonContainer}>
+                <TagIcon
+                  style={styles.leftButtonTag}
+                  fill={theme.color.red}
+                  width={23}
+                  height={23}
+                />
+              </View>
+              <Text style={styles.pickActivityText}>Pick activity</Text>
+            </View>
+          )}
           <Text style={styles.time}>25:43</Text>
           <View
             style={[

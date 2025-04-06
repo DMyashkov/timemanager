@@ -44,6 +44,7 @@ export const THEME = {
       },
       veryLightGrey: "#FBFBFB",
       red: "#FF4E4E",
+      lightRed: "#FFDCDC",
       veryLightRed: "#DC4C3E26",
       darkRed: "#DC4C3E",
       mediumGrey: "#EEEEEE",
