@@ -1,5 +1,5 @@
 export interface Color {
-  veryLight: string;
+  // veryLight: string;
   light: string;
   medium: string;
   dark: string;

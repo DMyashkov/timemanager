@@ -7,7 +7,9 @@ import {
 } from "react-native";
 import Switch from "@assets/icons/switch.svg";
 import Edit from "@assets/icons/edit.svg";
+import At from "@assets/icons/at.svg";
 import XSquare from "@assets/icons/xsquare.svg";
+import type { Color } from "@constants/interfaces";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 
 import Header from "@/components/header/headerBasic/header";
@@ -251,14 +253,30 @@ export default function Watch() {
               {activityNode && (
                 <Tag
                   text={activityNode.title}
-                  colorPallete={theme.color.presets[activityNode.colorPreset]}
+                  colorPallete={
+                    isSessionStarted
+                      ? theme.color.presets[activityNode.colorPreset]
+                      : {
+                          light: theme.color.lightestGrey,
+                          medium: theme.color.darkestGrey,
+                          dark: theme.color.darkestGrey,
+                        }
+                  }
                 />
               )}
               {projectNode && (
                 <Tag
                   isProject={true}
                   text={projectNode.title}
-                  colorPallete={theme.color.presets[projectNode.colorPreset]}
+                  colorPallete={
+                    isSessionStarted
+                      ? theme.color.presets[projectNode.colorPreset]
+                      : {
+                          light: theme.color.lightestGrey,
+                          medium: theme.color.darkestGrey,
+                          dark: theme.color.darkestGrey,
+                        }
+                  }
                 />
               )}
               <TouchableOpacity
@@ -338,9 +356,9 @@ export default function Watch() {
                 >
                   <Text style={styles.textInsideButton}>Lap</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.lapNumberButton}>
-                  <Text style={styles.lapNumberText}>01</Text>
-                </TouchableOpacity>
+                {/* <TouchableOpacity style={styles.lapNumberButton}> */}
+                {/*   <Text style={styles.lapNumberText}>01</Text> */}
+                {/* </TouchableOpacity> */}
               </View>
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
