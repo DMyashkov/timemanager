@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import Switch from "@assets/icons/switch.svg";
 import Edit from "@assets/icons/edit.svg";
+import XSquare from "@assets/icons/xsquare.svg";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
 
 import Header from "@/components/header/headerBasic/header";
@@ -206,6 +207,13 @@ export default function Watch() {
           //   ),
           //   onPress: () => console.log("Pomodoro pressed"),
           // },
+          {
+            id: "terminate",
+            iconElement: (
+              <XSquare height={29} width={29} fill={theme.color.red} />
+            ),
+            onPress: () => {},
+          },
           {
             id: "clearMode",
             iconElement: !fullMode ? (
