@@ -27,15 +27,11 @@ import { useAuthContext } from "@/context/AuthContext";
 import TagIcon from "@assets/icons/tag.svg";
 import { moduleTypeEnum, type TagData } from "@/constants/interfaces";
 import PickActivity from "@/app/pickActivity";
-
-interface DisplayActivity {
-  id: number;
-  title: string;
-  parent?: {
-    id: number;
-    title: string;
-  };
-}
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { schema, tags } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { useTagContext } from "@/context/TagContext";
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -45,8 +41,12 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
-  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(
+    null,
+  );
+  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
+    null,
+  );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const styles = useStyles();
   const pathname = usePathname();
@@ -59,13 +59,77 @@ export default function Watch() {
 
   const handleActivitySelected = (activity: TagData) => {
     if (activity.moduleType === moduleTypeEnum.project) {
-      setSelectedActivity(activity.parent);
-      setSelectedProject(activity.id);
+      setSelectedActivityID(activity.parent);
+      setSelectedProjectID(activity.id);
     } else {
-      setSelectedActivity(activity.id);
-      setSelectedProject(null);
+      setSelectedActivityID(activity.id);
+      setSelectedProjectID(null);
     }
   };
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
+
+  const { data: activityData } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, selectedActivityID ?? 0)),
+    [selectedActivityID],
+  );
+
+  const { data: projectData } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, selectedProjectID ?? 0)),
+    [selectedProjectID],
+  );
+
+  const { parseTag } = useTagContext();
+
+  const [activityNode, setActivityNode] = useState<TagData | null>(null);
+  const [projectNode, setProjectNode] = useState<TagData | null>(null);
+
+  useEffect(() => {
+    try {
+      if (activityData) {
+        // console.log("moduleData", moduleData);
+        const parsedData = parseTag(activityData);
+        if (parsedData?.id === 0) {
+          setActivityNode(null);
+        } else {
+          setActivityNode(parsedData);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching root node:", error);
+    }
+  }, [parseTag, activityData]);
+
+  useEffect(() => {
+    try {
+      if (projectData) {
+        const parsedData = parseTag(projectData);
+        if (parsedData?.id === 0) {
+          setProjectNode(null);
+        } else {
+          setProjectNode(parsedData);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching root node:", error);
+    }
+  }, [parseTag, projectData]);
+
+  console.log("selectedActivityID", selectedActivityID);
+  console.log("selectedProjectID", selectedProjectID);
+
+  console.log("activityData", activityData);
+  console.log("projectData", projectData);
+
+  console.log("activityNode", activityNode);
+  console.log("projectNode", projectNode);
 
   // Handle edit activity
   const handleEditActivity = () => {
@@ -77,7 +141,7 @@ export default function Watch() {
     if (pathname === "/watch" && params.selectedActivity) {
       try {
         const activity = JSON.parse(params.selectedActivity as string);
-        setSelectedActivity(activity);
+        setSelectedActivityID(activity);
       } catch (e) {
         console.error("Failed to parse selected activity:", e);
       }
@@ -137,7 +201,7 @@ export default function Watch() {
       <View style={styles.content}>
         <View style={styles.emptyView} />
         <View style={styles.clock}>
-          {selectedActivity ? (
+          {selectedActivityID ? (
             <View
               style={[
                 styles.tagContainer,
@@ -148,10 +212,8 @@ export default function Watch() {
                 },
               ]}
             >
-              <Tag text={selectedActivity.title} />
-              {selectedActivity.parent && (
-                <Tag isProject={true} text={selectedActivity.parent.title} />
-              )}
+              {activityNode && <Tag text={activityNode.title} />}
+              {projectNode && <Tag isProject={true} text={projectNode.title} />}
               <TouchableOpacity onPress={handleEditActivity}>
                 <Edit
                   width={additionalStyleConstants.editIconSize}
