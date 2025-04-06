@@ -41,16 +41,41 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(
-    null,
-  );
-  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
-    null,
-  );
+  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(null);
+  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(null);
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
+  const [isSessionStarted, setIsSessionStarted] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(0);
   const styles = useStyles();
   const pathname = usePathname();
   const params = useLocalSearchParams();
+
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isSessionStarted) {
+      interval = setInterval(() => {
+        setTimerSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setTimerSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isSessionStarted]);
+
+  // Format time helper
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  // Handle session start/stop
+  const handleSessionToggle = () => {
+    setIsSessionStarted(prev => !prev);
+  };
 
   // Handle navigation to PickActivity
   const handlePickActivity = () => {
@@ -229,7 +254,7 @@ export default function Watch() {
               <Text style={styles.pickActivityText}>Pick activity</Text>
             </TouchableOpacity>
           )}
-          <Text style={styles.time}>25:43</Text>
+          <Text style={styles.time}>{formatTime(timerSeconds)}</Text>
           <View
             style={[
               styles.bottomClockView,
@@ -254,12 +279,12 @@ export default function Watch() {
           </View>
         </View>
         <View style={styles.bottomButtonsContainer}>
-          {selectedActivityID ? (
+          {isSessionStarted ? (
             <>
               <View style={styles.leftButtonsContainer}>
                 <TouchableOpacity
                   style={styles.filledButton}
-                  onPress={() => console.log("Button 1 pressed")}
+                  onPress={() => console.log("Lap pressed")}
                 >
                   <Text style={styles.textInsideButton}>Lap</Text>
                 </TouchableOpacity>
@@ -270,7 +295,7 @@ export default function Watch() {
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
                   style={styles.filledButton}
-                  onPress={() => console.log("Button 1 pressed")}
+                  onPress={handleSessionToggle}
                 >
                   <Text style={styles.textInsideButton}>Break</Text>
                 </TouchableOpacity>
@@ -280,11 +305,8 @@ export default function Watch() {
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
-                  style={[
-                    styles.filledButton,
-                    { backgroundColor: theme.color.red },
-                  ]}
-                  onPress={() => console.log("Start pressed")}
+                  style={[styles.filledButton, { backgroundColor: theme.color.red }]}
+                  onPress={handleSessionToggle}
                 >
                   <Text style={styles.textInsideButton}>Start</Text>
                 </TouchableOpacity>
