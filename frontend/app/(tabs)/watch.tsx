@@ -25,7 +25,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useAuthContext } from "@/context/AuthContext";
 import TagIcon from "@assets/icons/tag.svg";
-import { type TagData } from "@/constants/interfaces";
+import { moduleTypeEnum, type TagData } from "@/constants/interfaces";
+import PickActivity from "@/app/pickActivity";
 
 interface DisplayActivity {
   id: number;
@@ -44,19 +45,26 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivity, setSelectedActivity] = useState<DisplayActivity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
+  const [selectedProject, setSelectedProject] = useState<number | null>(null);
+  const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const styles = useStyles();
   const pathname = usePathname();
   const params = useLocalSearchParams();
 
   // Handle navigation to PickActivity
   const handlePickActivity = () => {
-    router.push({
-      pathname: "/pickActivity",
-      params: {
-        onSelect: "watch", // This indicates we're selecting from Watch screen
-      },
-    });
+    setIsPickActivityVisible(true);
+  };
+
+  const handleActivitySelected = (activity: TagData) => {
+    if (activity.moduleType === moduleTypeEnum.project) {
+      setSelectedActivity(activity.parent);
+      setSelectedProject(activity.id);
+    } else {
+      setSelectedActivity(activity.id);
+      setSelectedProject(null);
+    }
   };
 
   // Handle edit activity
@@ -153,7 +161,7 @@ export default function Watch() {
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.pickActivityButton}
               onPress={handlePickActivity}
             >
@@ -235,6 +243,11 @@ export default function Watch() {
           />
         </View>
       </Animated.View>
+      <PickActivity
+        visible={isPickActivityVisible}
+        onClose={() => setIsPickActivityVisible(false)}
+        onActivitySelected={handleActivitySelected}
+      />
     </View>
   );
 }
