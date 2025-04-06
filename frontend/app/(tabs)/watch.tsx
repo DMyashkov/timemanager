@@ -253,7 +253,17 @@ export default function Watch() {
                   colorPallete={theme.color.presets[projectNode.colorPreset]}
                 />
               )}
-              <TouchableOpacity onPress={handlePickActivity}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (isSessionStarted) {
+                    handlePickActivity;
+                  } else {
+                  }
+                }}
+                style={{
+                  opacity: isSessionStarted ? 1 : 0,
+                }}
+              >
                 <Edit
                   width={additionalStyleConstants.editIconSize}
                   height={additionalStyleConstants.editIconSize}
@@ -337,7 +347,22 @@ export default function Watch() {
               </View>
             </>
           ) : (
-            <View style={{ flex: 1, alignItems: "flex-end" }}>
+            <>
+              <View style={styles.leftButtonsContainer}>
+                {selectedActivityID && (
+                  <TouchableOpacity
+                    style={styles.editBigButton}
+                    onPress={handlePickActivity}
+                  >
+                    <Edit
+                      width={46}
+                      height={80}
+                      fill={theme.color.darkGrey}
+                      style={{ marginBottom: 4, marginLeft: 4 }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
                   style={[
@@ -349,7 +374,7 @@ export default function Watch() {
                   <Text style={styles.textInsideButton}>Start</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </>
           )}
         </View>
       </View>

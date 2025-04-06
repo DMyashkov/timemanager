@@ -147,6 +147,15 @@ export default function useStyles() {
       fontFamily: theme.font.semibold,
       color: theme.color.red,
     },
+    editBigButton: {
+      borderColor: theme.color.darkGrey,
+      borderWidth: 5,
+      aspectRatio: 1,
+      height: 75,
+      borderRadius: theme.borderRadius.large,
+      justifyContent: "center",
+      alignItems: "center",
+    },
   });
   return styles;
 }
