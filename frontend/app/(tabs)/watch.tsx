@@ -52,6 +52,7 @@ export default function Watch() {
   );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isTimerStarted, setIsTimerStarted] = useState(false);
+  const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const styles = useStyles();
   const pathname = usePathname();
@@ -196,45 +197,47 @@ export default function Watch() {
     return theme.color.red;
   };
 
+  const headerButtons: Button[] = [];
+  if (isSessionStarted) {
+    headerButtons.push({
+      id: "terminate",
+      iconElement: <XSquare height={29} width={29} fill={theme.color.red} />,
+      onPress: () => {
+        setIsSessionStarted(false);
+        setIsTimerStarted(false);
+        setSelectedActivityID(null);
+        setSelectedProjectID(null);
+      },
+    });
+  }
+
+  headerButtons.push(
+    {
+      id: "clearMode",
+      iconElement: !fullMode ? (
+        <FullModeIcon height={25} width={25} fill={theme.color.red} />
+      ) : (
+        <ClearModeIcon height={25} width={25} fill={theme.color.red} />
+      ),
+      onPress: () => {
+        setFullMode(!fullMode);
+      },
+    },
+    {
+      id: "settings",
+      iconElement: <ThreeDots height={25} width={18} fill={theme.color.red} />,
+      onPress: () => {
+        // settings action here
+      },
+    },
+  );
+
   return (
     <View style={styles.watchScreen}>
       <Header
-        title="Focus"
+        title={isSessionStarted ? "Focus" : "Start Focus Timer"}
         additionalTitleStyles={{ color: theme.color.red }}
-        buttons={[
-          // {
-          //   id: "pomodoro",
-          //   iconElement: (
-          //     <Tomato height={28} width={28} fill={theme.color.red} />
-          //   ),
-          //   onPress: () => console.log("Pomodoro pressed"),
-          // },
-          {
-            id: "terminate",
-            iconElement: (
-              <XSquare height={29} width={29} fill={theme.color.red} />
-            ),
-            onPress: () => {},
-          },
-          {
-            id: "clearMode",
-            iconElement: !fullMode ? (
-              <FullModeIcon height={25} width={25} fill={theme.color.red} />
-            ) : (
-              <ClearModeIcon height={25} width={25} fill={theme.color.red} />
-            ),
-            onPress: () => {
-              setFullMode(!fullMode);
-            },
-          },
-          {
-            id: "settings",
-            iconElement: (
-              <ThreeDots height={25} width={18} fill={theme.color.red} />
-            ),
-            onPress: () => console.log("Settings pressed"),
-          },
-        ]}
+        buttons={headerButtons}
       />
       <View style={styles.content}>
         <View style={styles.emptyView} />
@@ -393,9 +396,12 @@ export default function Watch() {
                 <TouchableOpacity
                   style={[
                     styles.filledButton,
-                    { backgroundColor: theme.color.red },
+                    { backgroundColor: theme.color.darkestGrey },
                   ]}
-                  onPress={handleSessionToggle}
+                  onPress={() => {
+                    handleSessionToggle();
+                    setIsSessionStarted(true);
+                  }}
                 >
                   <Text style={styles.textInsideButton}>Start</Text>
                 </TouchableOpacity>
