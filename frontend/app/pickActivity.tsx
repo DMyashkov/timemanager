@@ -42,25 +42,25 @@ export default function PickActivity({
   const createPickActivityButtons = (activity: TagData) => [
     {
       text: "Pick",
-      color: theme.color.veryLightGrey,
+      color: theme.color.mediumGrey,
       onPress: () => {
         onActivitySelected(activity);
         onClose();
       },
     },
-    {
-      text: "Edit",
-      color: theme.color.mediumGrey,
-      onPress: () => {
-        router.push({
-          pathname: "/add",
-          params: {
-            parentId: activity.id,
-            rawIsAddScreen: "false",
-          },
-        });
-      },
-    },
+    // {
+    //   text: "Edit",
+    //   color: theme.color.mediumGrey,
+    //   onPress: () => {
+    //     router.push({
+    //       pathname: "/add",
+    //       params: {
+    //         parentId: activity.id,
+    //         rawIsAddScreen: "false",
+    //       },
+    //     });
+    //   },
+    // },
   ];
 
   return (

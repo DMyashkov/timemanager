@@ -41,8 +41,12 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(null);
-  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(null);
+  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(
+    null,
+  );
+  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
+    null,
+  );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isSessionStarted, setIsSessionStarted] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -55,7 +59,7 @@ export default function Watch() {
     let interval: NodeJS.Timeout | null = null;
     if (isSessionStarted) {
       interval = setInterval(() => {
-        setTimerSeconds(prev => prev + 1);
+        setTimerSeconds((prev) => prev + 1);
       }, 1000);
     } else {
       setTimerSeconds(0);
@@ -69,12 +73,12 @@ export default function Watch() {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   // Handle session start/stop
   const handleSessionToggle = () => {
-    setIsSessionStarted(prev => !prev);
+    setIsSessionStarted((prev) => !prev);
   };
 
   // Handle navigation to PickActivity
@@ -181,6 +185,14 @@ export default function Watch() {
     })),
   };
 
+  // Get button color based on selected tag
+  const getButtonColor = () => {
+    if (activityNode) {
+      return theme.color.presets[activityNode.colorPreset].medium;
+    }
+    return theme.color.red;
+  };
+
   return (
     <View style={styles.watchScreen}>
       <Header
@@ -228,13 +240,30 @@ export default function Watch() {
                 },
               ]}
             >
-              {activityNode && <Tag text={activityNode.title} />}
-              {projectNode && <Tag isProject={true} text={projectNode.title} />}
+              {activityNode && (
+                <Tag
+                  text={activityNode.title}
+                  colorPallete={theme.color.presets[activityNode.colorPreset]}
+                />
+              )}
+              {projectNode && (
+                <Tag
+                  isProject={true}
+                  text={projectNode.title}
+                  colorPallete={theme.color.presets[projectNode.colorPreset]}
+                />
+              )}
               <TouchableOpacity onPress={handlePickActivity}>
                 <Edit
                   width={additionalStyleConstants.editIconSize}
                   height={additionalStyleConstants.editIconSize}
-                  fill={theme.color.presets.green.medium}
+                  fill={
+                    theme.color.presets[
+                      projectNode?.colorPreset ??
+                        activityNode?.colorPreset ??
+                        "green"
+                    ].dark
+                  }
                 />
               </TouchableOpacity>
             </View>
@@ -283,7 +312,10 @@ export default function Watch() {
             <>
               <View style={styles.leftButtonsContainer}>
                 <TouchableOpacity
-                  style={styles.filledButton}
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: getButtonColor() },
+                  ]}
                   onPress={() => console.log("Lap pressed")}
                 >
                   <Text style={styles.textInsideButton}>Lap</Text>
@@ -294,7 +326,10 @@ export default function Watch() {
               </View>
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
-                  style={styles.filledButton}
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: getButtonColor() },
+                  ]}
                   onPress={handleSessionToggle}
                 >
                   <Text style={styles.textInsideButton}>Break</Text>
@@ -305,7 +340,10 @@ export default function Watch() {
             <View style={{ flex: 1, alignItems: "flex-end" }}>
               <View style={styles.rightButtonContainer}>
                 <TouchableOpacity
-                  style={[styles.filledButton, { backgroundColor: theme.color.red }]}
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: getButtonColor() },
+                  ]}
                   onPress={handleSessionToggle}
                 >
                   <Text style={styles.textInsideButton}>Start</Text>
