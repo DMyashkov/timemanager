@@ -42,7 +42,7 @@ export default function ListModule(props: ListModuleProps) {
   const [existState, setExistState] = useState(true);
   const [isVisibleAnimZero, setIsVisibleAnimZero] = useState(false);
 
-  const { focusedPath } = useFocus();
+  const { focusedPath, popFocusStack } = useFocus();
   const shouldBeVisible = props.path
     ? props.path.startsWith(focusedPath)
     : false;
@@ -83,6 +83,18 @@ export default function ListModule(props: ListModuleProps) {
       console.error("Error fetching root node:", error);
     }
   }, [parseTag, moduleData]);
+
+  // useEffect(() => {
+  //   if (moduleNode?.deleted) {
+  //     console.log("moduleNode?.deleted", moduleNode?.deleted);
+  //   }
+  //   if (props.path === focusedPath && moduleNode?.deleted) {
+  //     console.log("props.path === focusedPath", props.path === focusedPath);
+  //   }
+  //   if (moduleNode?.deleted && props.path === focusedPath) {
+  //     popFocusStack();
+  //   }
+  // }, [moduleNode, props.path, focusedPath, popFocusStack]);
 
   // If not "existing" in the visible list, render nothing
   if (!existState || !moduleNode || moduleNode.deleted) {

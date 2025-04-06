@@ -27,6 +27,7 @@ import SwitchWrapper from "@/components/basic/switchWrapper/switchWrapper";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { schema, tags } from "@/db/schema";
+import { useFocus } from "@/context/FocusContext";
 
 export default function AddScreen() {
   const { parentId: parentIdString, rawIsAddScreen } = useLocalSearchParams();
@@ -88,11 +89,17 @@ export default function AddScreen() {
 
   // Color array for color picker
   const colorArray: ColorPresets[] = [ColorPresets.ORANGE, ColorPresets.GREEN];
+  // const { popFocusStack, focusedPath } = useFocus();
 
   // Handler for deletion
   const handleDelete = async () => {
     if (current) {
       await deleteTag(db, current.id);
+      // WHole table after delete
+      console.log("Whole table after delete:", await db.select().from(tags));
+      // popFocusStack();
+      // console.log("popped focus stack");
+      // console.log("New focus path:", focusedPath);
       router.back(); // Navigate back after deletion
     }
   };
@@ -102,7 +109,11 @@ export default function AddScreen() {
     data: Omit<TagData, "id" | "synced" | "deleted">,
   ) => {
     // Build the payload
-    const tagPayload = {
+    const tagPayload: TagData & {
+      id?: number;
+      synced?: number;
+      deleted?: number;
+    } = {
       moduleType: data.moduleType,
       title: data.title,
       colorPreset: data.colorPreset,
