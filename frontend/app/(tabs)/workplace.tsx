@@ -55,22 +55,6 @@ export default function WorkplaceScreen() {
     })),
   };
 
-  const exampleButtons = useCallback(
-    () => [
-      {
-        text: "Pick",
-        color: theme.color.veryLightGrey,
-        onPress: () => console.log("Pick"),
-      },
-      {
-        text: "Edit",
-        color: theme.color.mediumGrey,
-        onPress: () => console.log("Edit"),
-      },
-    ],
-    [theme.color.veryLightGrey, theme.color.mediumGrey],
-  );
-
   return (
     <View style={styles.workplaceScreen}>
       <Header
@@ -105,7 +89,6 @@ export default function WorkplaceScreen() {
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
               moduleID={0} // Root node
-              customButtons={exampleButtons}
             />
           )}
           style={styles.listView}

@@ -40,7 +40,7 @@ export default function Component() {
         <View style={styles.logoContainer}>
           <Stopwatch width={24} height={24} fill={theme.color.red} />
         </View>
-        <Text style={styles.title}>timemanager</Text>
+        <Text style={styles.title}>chronicle</Text>
       </View>
       <View style={styles.imageContainer}>
         <Image

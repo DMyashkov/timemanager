@@ -369,7 +369,7 @@ export default function Watch() {
                   ]}
                   onPress={() => console.log("Lap pressed")}
                 >
-                  <Text style={styles.textInsideButton}>Lap</Text>
+                  <Text style={styles.textInsideButton}>Next</Text>
                 </TouchableOpacity>
                 {/* <TouchableOpacity style={styles.lapNumberButton}> */}
                 {/*   <Text style={styles.lapNumberText}>01</Text> */}
@@ -426,15 +426,14 @@ export default function Watch() {
         <View style={styles.lapsViewContent}>
           <FlatList
             data={[
-              { id: 1, time: "12:34" },
-              { id: 2, time: "12:34" },
-              { id: 3, time: "12:34" },
-              { id: 4, time: "12:34" },
-              { id: 5, time: "12:34" },
+              { id: 1, time: "0:01" },
+              { id: 2, time: "0:03" },
+              { id: 3, time: "0:05" },
+              { id: 4, time: "0:10" },
             ]}
             renderItem={({ item }) => (
               <View style={styles.lapContainer}>
-                <Text style={styles.lapText}>Problem {item.id}</Text>
+                <Text style={styles.lapText}>Subtask {item.id}</Text>
                 <Text style={styles.lapText}>{item.time}</Text>
               </View>
             )}

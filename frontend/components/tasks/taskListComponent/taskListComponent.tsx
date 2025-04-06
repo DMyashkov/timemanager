@@ -23,9 +23,9 @@ export default function TaskListComponent({
       <View style={styles.header}>
         <View style={styles.leftHeader}>
           <Text style={styles.date}>
-            {overdueOption ? "Overdue" : "10 Sep • Tuesday"}
+            {overdueOption ? "Overdue" : "8 Apr • Tuesday"}
           </Text>
-          <Text style={styles.amount}>1</Text>
+          <Text style={styles.amount}>2</Text>
         </View>
         <TouchableOpacity
           activeOpacity={overdueOption ? 0.2 : 1}
@@ -43,7 +43,7 @@ export default function TaskListComponent({
               },
             ]}
           >
-            {overdueOption ? "Reschedule" : "Today"}
+            {/* {overdueOption ? "Reschedule" : "Today"} */}
           </Text>
         </TouchableOpacity>
       </View>
