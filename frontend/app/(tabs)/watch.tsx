@@ -51,7 +51,7 @@ export default function Watch() {
     null,
   );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
-  const [isSessionStarted, setIsSessionStarted] = useState(false);
+  const [isTimerStarted, setIsTimerStarted] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const styles = useStyles();
   const pathname = usePathname();
@@ -60,7 +60,7 @@ export default function Watch() {
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isSessionStarted) {
+    if (isTimerStarted) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
@@ -70,7 +70,7 @@ export default function Watch() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isSessionStarted]);
+  }, [isTimerStarted]);
 
   // Format time helper
   const formatTime = (seconds: number) => {
@@ -81,7 +81,7 @@ export default function Watch() {
 
   // Handle session start/stop
   const handleSessionToggle = () => {
-    setIsSessionStarted((prev) => !prev);
+    setIsTimerStarted((prev) => !prev);
   };
 
   // Handle navigation to PickActivity
@@ -254,7 +254,7 @@ export default function Watch() {
                 <Tag
                   text={activityNode.title}
                   colorPallete={
-                    isSessionStarted
+                    isTimerStarted
                       ? theme.color.presets[activityNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -269,7 +269,7 @@ export default function Watch() {
                   isProject={true}
                   text={projectNode.title}
                   colorPallete={
-                    isSessionStarted
+                    isTimerStarted
                       ? theme.color.presets[projectNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -281,13 +281,13 @@ export default function Watch() {
               )}
               <TouchableOpacity
                 onPress={() => {
-                  if (isSessionStarted) {
+                  if (isTimerStarted) {
                     handlePickActivity;
                   } else {
                   }
                 }}
                 style={{
-                  opacity: isSessionStarted ? 1 : 0,
+                  opacity: isTimerStarted ? 1 : 0,
                 }}
               >
                 <Edit
@@ -344,7 +344,7 @@ export default function Watch() {
           </View>
         </View>
         <View style={styles.bottomButtonsContainer}>
-          {isSessionStarted ? (
+          {isTimerStarted ? (
             <>
               <View style={styles.leftButtonsContainer}>
                 <TouchableOpacity
