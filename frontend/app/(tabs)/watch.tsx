@@ -5,6 +5,7 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
+import type { Button } from "@constants/interfaces";
 import Switch from "@assets/icons/switch.svg";
 import Edit from "@assets/icons/edit.svg";
 import At from "@assets/icons/at.svg";
@@ -235,8 +236,16 @@ export default function Watch() {
   return (
     <View style={styles.watchScreen}>
       <Header
-        title={isSessionRunning ? "Focus" : "Start Focus Timer"}
-        additionalTitleStyles={{ color: theme.color.red }}
+        title={
+          !isTimerRunning
+            ? "Break"
+            : isSessionRunning
+              ? "Focus"
+              : "Start Focus Timer"
+        }
+        additionalTitleStyles={{
+          color: isTimerRunning ? theme.color.red : theme.color.darkestGrey,
+        }}
         buttons={headerButtons}
       />
       <View style={styles.content}>

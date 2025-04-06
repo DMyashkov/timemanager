@@ -20,12 +20,8 @@ import XMark from "@assets/icons/xmark.svg";
 import { useTheme } from "@context/ThemeContext";
 import { useEffect, useRef, useState } from "react";
 import SearchBarCustom from "../searchBar/searchBar";
+import type { Button } from "@/constants/interfaces";
 
-interface Button {
-  id: string; // Added id for unique key
-  iconElement: JSX.Element;
-  onPress: () => void;
-}
 
 interface HeaderProps {
   title: string;
