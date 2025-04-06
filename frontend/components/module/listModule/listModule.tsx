@@ -84,18 +84,6 @@ export default function ListModule(props: ListModuleProps) {
     }
   }, [parseTag, moduleData]);
 
-  // useEffect(() => {
-  //   if (moduleNode?.deleted) {
-  //     console.log("moduleNode?.deleted", moduleNode?.deleted);
-  //   }
-  //   if (props.path === focusedPath && moduleNode?.deleted) {
-  //     console.log("props.path === focusedPath", props.path === focusedPath);
-  //   }
-  //   if (moduleNode?.deleted && props.path === focusedPath) {
-  //     popFocusStack();
-  //   }
-  // }, [moduleNode, props.path, focusedPath, popFocusStack]);
-
   // If not "existing" in the visible list, render nothing
   if (!existState || !moduleNode || moduleNode.deleted) {
     return null;
@@ -134,7 +122,7 @@ function ListModuleInner({
 
   // Whether this node should be visible based on focus path
   const shouldBeVisible = path.startsWith(focusedPath);
-  const shouldBeVisibleAnim = useSharedValue(shouldBeVisible ? 1 : 0);
+  const shouldBeVisibleAnim = useSharedValue(0);
 
   const [isExpandAnimGreaterThanZero, setIsExpandAnimGreaterThanZero] =
     useState(isRoot);
@@ -198,6 +186,12 @@ function ListModuleInner({
       setExpandedState(false);
     }
   }, [level, focusedLevel, setExpandedState]);
+
+  useEffect(() => {
+    if (shouldBeVisible) {
+      runOnJS(setIsVisibleAnimZero)(false);
+    }
+  }, [shouldBeVisible, setIsVisibleAnimZero]);
 
   // "Visibility" animation for removing from the tree
   useEffect(() => {
