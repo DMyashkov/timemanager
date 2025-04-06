@@ -254,25 +254,43 @@ export default function Watch() {
           </View>
         </View>
         <View style={styles.bottomButtonsContainer}>
-          <View style={styles.leftButtonsContainer}>
-            <TouchableOpacity
-              style={styles.filledButton}
-              onPress={() => console.log("Button 1 pressed")}
-            >
-              <Text style={styles.textInsideButton}>Lap</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.lapNumberButton}>
-              <Text style={styles.lapNumberText}>01</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.rightButtonContainer}>
-            <TouchableOpacity
-              style={styles.filledButton}
-              onPress={() => console.log("Button 1 pressed")}
-            >
-              <Text style={styles.textInsideButton}>Break</Text>
-            </TouchableOpacity>
-          </View>
+          {selectedActivityID ? (
+            <>
+              <View style={styles.leftButtonsContainer}>
+                <TouchableOpacity
+                  style={styles.filledButton}
+                  onPress={() => console.log("Button 1 pressed")}
+                >
+                  <Text style={styles.textInsideButton}>Lap</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.lapNumberButton}>
+                  <Text style={styles.lapNumberText}>01</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.rightButtonContainer}>
+                <TouchableOpacity
+                  style={styles.filledButton}
+                  onPress={() => console.log("Button 1 pressed")}
+                >
+                  <Text style={styles.textInsideButton}>Break</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <View style={{ flex: 1, alignItems: "flex-end" }}>
+              <View style={styles.rightButtonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: theme.color.red },
+                  ]}
+                  onPress={() => console.log("Start pressed")}
+                >
+                  <Text style={styles.textInsideButton}>Start</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         </View>
       </View>
       <Animated.View style={[styles.lapsView, animStyles.lapsView]}>
