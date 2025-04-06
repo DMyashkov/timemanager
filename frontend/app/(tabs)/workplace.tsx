@@ -5,7 +5,7 @@ import { FlatList, StyleSheet, View, Text } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import ListModule from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -55,6 +55,22 @@ export default function WorkplaceScreen() {
     })),
   };
 
+  const exampleButtons = useCallback(
+    () => [
+      {
+        text: "Pick",
+        color: theme.color.veryLightGrey,
+        onPress: () => console.log("Pick"),
+      },
+      {
+        text: "Edit",
+        color: theme.color.mediumGrey,
+        onPress: () => console.log("Edit"),
+      },
+    ],
+    [theme.color.veryLightGrey, theme.color.mediumGrey],
+  );
+
   return (
     <View style={styles.workplaceScreen}>
       <Header
@@ -89,6 +105,7 @@ export default function WorkplaceScreen() {
               addAnim={addAnim}
               onFocusAdditional={() => setAddScreen(false)}
               moduleID={0} // Root node
+              customButtons={exampleButtons}
             />
           )}
           style={styles.listView}

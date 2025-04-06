@@ -25,6 +25,12 @@ import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { schema, tags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+interface ButtonConfig {
+  text: string;
+  color: string;
+  onPress: () => void;
+}
+
 interface ListModuleProps {
   level?: number;
   style?: object;
@@ -35,7 +41,8 @@ interface ListModuleProps {
   expandAnimOfParent?: Animated.SharedValue<number>;
   isLastInList?: boolean;
   setIsVisibleAnimZero?: (value: boolean) => void;
-  moduleID: number; // We rely fully on this TagData for rendering
+  moduleID: number;
+  customButtons?: ButtonConfig[] | ((activity: TagData) => ButtonConfig[]);
 }
 
 export default function ListModule(props: ListModuleProps) {
@@ -95,6 +102,7 @@ export default function ListModule(props: ListModuleProps) {
       {...{ ...props, moduleID: undefined }} // Removes moduleID from props
       setIsVisibleAnimZero={setIsVisibleAnimZero}
       moduleData={moduleNode}
+      customButtons={props.customButtons}
     />
   );
 }
@@ -107,7 +115,8 @@ function ListModuleInner({
   expandAnimOfParent = useSharedValue(1),
   isLastInList = true,
   setIsVisibleAnimZero = () => {},
-  moduleData: activityData, // New required field
+  moduleData: activityData,
+  customButtons,
 }: Omit<ListModuleProps, "moduleID"> & { moduleData: TagData }) {
   const { focusedPath, setFocusedPath, popFocusStack, focusedLevel } =
     useFocus();
@@ -296,7 +305,7 @@ function ListModuleInner({
     });
   }, [activityData.id]);
 
-  const buttonsOnTopOfTag = [
+  const defaultButtons = [
     {
       text: "Start timer",
       color: theme.color.veryLightGrey,
@@ -310,6 +319,12 @@ function ListModuleInner({
       onPress: handleEditClick,
     },
   ];
+  console.log("customButtons", customButtons);
+
+  const buttonsOnTopOfTag =
+    typeof customButtons === "function"
+      ? customButtons(activityData)
+      : customButtons || defaultButtons;
 
   // --- FETCH CHILD TAGS HERE, if needed ---
   // If your children are mere IDs in `activityData.children`, you can fetch them:
@@ -397,11 +412,12 @@ function ListModuleInner({
                       isLastInList={
                         childID ===
                         activityData.children[activityData.children.length - 1]
-                      } // or your own logic
+                      }
                       path={`${path}/${childID}`}
                       addAnim={addAnim}
                       onFocusAdditional={onFocusAdditional}
                       expandAnimOfParent={expandAnimOfParentOfChild}
+                      customButtons={customButtons}
                     />
                   );
                 }}
