@@ -32,22 +32,28 @@ export function useDerivedTags(tagId: number | null) {
     [parentTagID],
   );
 
+  console.log("tagData and parentTagData:", tagData, parentTagData);
+  console.log("ActivityNode and ProjectNode:", activityNode, projectNode);
+
   useEffect(() => {
     try {
-      if (tagData) {
+      if (tagData && tagData.length > 0) {
         const parsedData = parseTag(tagData);
-        if (parsedData?.id === -1) {
-          setActivityNode(null);
-          setProjectNode(null);
-        } else if (parsedData) {
+        console.log("Parsed tagData:", parsedData);
+        if (parsedData) {
           if (parsedData.moduleType === "activity") {
             setActivityNode(parsedData);
+            console.log("SETTING ACTIVITY NODE");
             setProjectNode(null);
             setParentTagID(null);
           } else {
             setProjectNode(parsedData);
             setParentTagID(parsedData.parent);
           }
+        } else {
+          console.log("Parsed data is null");
+          setActivityNode(null);
+          setProjectNode(null);
         }
       }
     } catch (error) {
@@ -57,13 +63,10 @@ export function useDerivedTags(tagId: number | null) {
 
   useEffect(() => {
     try {
-      if (parentTagData) {
+      if (parentTagData && parentTagData.length > 0) {
+        console.log("Parent tag data:", parentTagData);
         const parsedData = parseTag(parentTagData);
-        if (parsedData?.id === -1) {
-          setProjectNode(null);
-        } else {
-          setActivityNode(parsedData);
-        }
+        setActivityNode(parsedData);
       }
     } catch (error) {
       console.error("Error parsing parentTagData:", error);

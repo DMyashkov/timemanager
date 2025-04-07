@@ -33,10 +33,10 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
 
   // Get today's sessions from the hook
   const sessionsData: SessionData[] = useRelevantSessions();
-  console.log(
-    "Sessions data taken in from useReleaventSessions(sessionCalendar):",
-    sessionsData,
-  );
+  // console.log(
+  //   "Sessions data taken in from useReleaventSessions(sessionCalendar):",
+  //   sessionsData,
+  // );
   // Convert SessionData to Session instances
   const sessions =
     sessionsData?.map((data) => {
