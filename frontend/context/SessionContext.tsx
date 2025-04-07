@@ -45,19 +45,20 @@ const insertSession = async (
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
   console.log("Insert session:", item);
-  const { id, tagId, totalWorkTime, totalBreakTime, intervals, laps, synced } =
+  const { tagId, totalWorkTime, totalBreakTime, intervals, laps, synced, startTime, endTime } =
     item;
 
   const result = await db
     .insert(sessions)
     .values({
-      id,
       tagId,
       totalWorkTime,
       totalBreakTime,
       intervals: JSON.stringify(intervals),
       laps: JSON.stringify(laps),
       synced,
+      startTime,
+      endTime,
     })
     .returning({ insertId: sessions.id });
 
@@ -84,6 +85,8 @@ const parseSession = (
     laps: JSON.parse(row.laps || "[]"),
     deleted: row.deleted ?? 0,
     synced: row.synced ?? 0,
+    startTime: row.startTime ? row.startTime * 1000 : 0,
+    endTime: row.endTime ? row.endTime * 1000 : 0,
   };
 };
 
@@ -221,6 +224,8 @@ const fetchAndStoreSessions = async (
           laps: session.laps,
           deleted: session.deleted ?? 0,
           synced: 1,
+          startTime: session.startTime,
+          endTime: session.endTime,
         });
       }
 

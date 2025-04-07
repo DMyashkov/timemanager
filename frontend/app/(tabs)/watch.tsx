@@ -303,12 +303,15 @@ export default function Watch() {
   };
 
   const handleActivitySelected = async (activity: TagData) => {
+    console.log('Selected activity:', activity.id, 'Current activity:', selectedActivityID);
+    
     // If we're switching to a different activity, save the current session
     if (
       selectedActivityID &&
       activity.id !== selectedActivityID &&
       currentSession
     ) {
+      console.log('Switching to different activity, saving current session');
       const now = new Date();
       const currentDate = new DateStruct(
         now.getFullYear(),
@@ -333,10 +336,41 @@ export default function Watch() {
           ...currentSession.getIntervals(),
           finalInterval,
         ];
+        
+        // Calculate start and end time from intervals
+        const firstInterval = updatedIntervals[0];
+        const lastInterval = updatedIntervals[updatedIntervals.length - 1];
+        const startTime = new Date(
+          firstInterval.startTime.date.year,
+          firstInterval.startTime.date.month - 1,
+          firstInterval.startTime.date.day,
+          firstInterval.startTime.time.hours,
+          firstInterval.startTime.time.minutes,
+          firstInterval.startTime.time.seconds,
+        ).getTime();
+        const endTime = new Date(
+          lastInterval.endTime.date.year,
+          lastInterval.endTime.date.month - 1,
+          lastInterval.endTime.date.day,
+          lastInterval.endTime.time.hours,
+          lastInterval.endTime.time.minutes,
+          lastInterval.endTime.time.seconds,
+        ).getTime();
+        
         const finalSession = new Session(selectedActivityID, updatedIntervals);
+        console.log('Final session to save:', finalSession);
 
         try {
-          await createSession(db, finalSession.toSessionData());
+          const sessionData = finalSession.toSessionData();
+          // Create a new session data object with all required fields
+          const newSessionData = {
+            ...sessionData,
+            startTime,
+            endTime,
+            id: 0, // Use 0 as a dummy id that will be ignored by SQLite auto-increment
+          };
+          await createSession(db, newSessionData);
+          console.log('Session saved successfully');
         } catch (error) {
           console.error("Failed to save session:", error);
         }
@@ -356,6 +390,7 @@ export default function Watch() {
 
     // Only start a new session if we're switching to a different activity
     if (selectedActivityID && activity.id !== selectedActivityID) {
+      console.log('Starting new session for different activity');
       const now = new Date();
       const currentDate = new DateStruct(
         now.getFullYear(),
@@ -690,7 +725,7 @@ export default function Watch() {
                 onPress={handleSessionToggle}
                 disabled={isBreak}
               >
-                <Text style={styles.textInsideButton}>Break</Text>
+                <Text style={styles.textInsideButton}>Bonta</Text>
               </TouchableOpacity>
             </Animated.View>
             <Animated.View style={buttonAnimStyles.idleButtons}>
