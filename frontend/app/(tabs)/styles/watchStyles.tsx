@@ -55,13 +55,19 @@ export default function useStyles() {
       flexDirection: "row",
       justifyContent: "space-between",
       width: "100%",
+      height: 75,
     },
     leftButtonsContainer: {
       flexDirection: "row",
       gap: 9,
+      backgroundColor: theme.color.black,
     },
     rightButtonContainer: {
       flexDirection: "row",
+      right: 0,
+      bottom: 0,
+      height: 75,
+      width: 75,
     },
     filledButton: {
       backgroundColor: theme.color.presets.green.medium,

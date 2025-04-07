@@ -258,25 +258,6 @@ export default function Watch() {
     },
   );
 
-  const buttonAnim = useSharedValue(0);
-
-  useEffect(() => {
-    buttonAnim.value = withTiming(isTimerRunning ? 1 : 0, { duration: 300 });
-  }, [isTimerRunning, buttonAnim]);
-
-  const buttonAnimStyles = {
-    runningButtons: useAnimatedStyle(() => ({
-      opacity: buttonAnim.value,
-      position: "absolute",
-      width: "100%",
-    })),
-    idleButtons: useAnimatedStyle(() => ({
-      opacity: 1 - buttonAnim.value,
-      position: "absolute",
-      width: "100%",
-    })),
-  };
-
   return (
     <View style={styles.watchScreen}>
       <Header
@@ -400,61 +381,67 @@ export default function Watch() {
           </View>
         </View>
         <View style={styles.bottomButtonsContainer}>
-          <View style={styles.leftButtonsContainer}>
-            <Animated.View style={[buttonAnimStyles.runningButtons]}>
-              <TouchableOpacity
-                style={[
-                  styles.filledButton,
-                  { backgroundColor: getButtonColor() },
-                ]}
-                onPress={() => console.log("Lap pressed")}
-              >
-                <Text style={styles.textInsideButton}>Next</Text>
-              </TouchableOpacity>
-            </Animated.View>
-            <Animated.View style={buttonAnimStyles.idleButtons}>
-              {selectedActivityID && (
+          {isTimerRunning ? (
+            <>
+              <View style={styles.leftButtonsContainer}>
                 <TouchableOpacity
-                  style={styles.editBigButton}
-                  onPress={handlePickActivity}
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: getButtonColor() },
+                  ]}
+                  onPress={() => console.log("Lap pressed")}
                 >
-                  <Edit
-                    width={46}
-                    height={80}
-                    fill={theme.color.darkGrey}
-                    style={{ marginBottom: 4, marginLeft: 4 }}
-                  />
+                  <Text style={styles.textInsideButton}>Next</Text>
                 </TouchableOpacity>
-              )}
-            </Animated.View>
-          </View>
-          <View style={styles.rightButtonContainer}>
-            <Animated.View style={[buttonAnimStyles.runningButtons]}>
-              <TouchableOpacity
-                style={[
-                  styles.filledButton,
-                  { backgroundColor: getButtonColor() },
-                ]}
-                onPress={handleSessionToggle}
-              >
-                <Text style={styles.textInsideButton}>Break</Text>
-              </TouchableOpacity>
-            </Animated.View>
-            <Animated.View style={buttonAnimStyles.idleButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.filledButton,
-                  { backgroundColor: theme.color.darkestGrey },
-                ]}
-                onPress={() => {
-                  handleSessionToggle();
-                  setIsSessionRunning(true);
-                }}
-              >
-                <Text style={styles.textInsideButton}>Start</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
+                {/* <TouchableOpacity style={styles.lapNumberButton}> */}
+                {/*   <Text style={styles.lapNumberText}>01</Text> */}
+                {/* </TouchableOpacity> */}
+              </View>
+              <View style={styles.rightButtonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: getButtonColor() },
+                  ]}
+                  onPress={handleSessionToggle}
+                >
+                  <Text style={styles.textInsideButton}>Break</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.leftButtonsContainer}>
+                {selectedActivityID && (
+                  <TouchableOpacity
+                    style={styles.editBigButton}
+                    onPress={handlePickActivity}
+                  >
+                    <Edit
+                      width={46}
+                      height={80}
+                      fill={theme.color.darkGrey}
+                      style={{ marginBottom: 4, marginLeft: 4 }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={styles.rightButtonContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.filledButton,
+                    { backgroundColor: theme.color.darkestGrey },
+                  ]}
+                  onPress={() => {
+                    handleSessionToggle();
+                    setIsSessionRunning(true);
+                  }}
+                >
+                  <Text style={styles.textInsideButton}>Start</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
       <Animated.View style={[styles.lapsView, animStyles.lapsView]}>
