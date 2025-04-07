@@ -334,6 +334,28 @@ function ListModuleInner({
   const expandAnimOfParentOfChild = useDerivedValue(
     () => expandAnim.value * expandAnimOfParent.value,
   );
+  const [pastChildren, setPastChildren] = useState<number[]>([]);
+
+  useEffect(() => {
+    if (!activityData.children) return;
+
+    // Find items that are different between past and current children
+    const differentItems = activityData.children
+      .filter((x) => !pastChildren.includes(x))
+      .concat(pastChildren.filter((x) => !activityData.children.includes(x)));
+
+    // Check if any of the different items match the focus path
+    const focusMatchesDifference = differentItems.some((childId) =>
+      focusedPath.includes(`/${childId}`),
+    );
+
+    if (focusMatchesDifference) {
+      popFocusStack();
+    }
+
+    // Update pastChildren with current children
+    setPastChildren(activityData.children);
+  }, [activityData.children, pastChildren, focusedPath, popFocusStack]);
 
   return (
     <Animated.View style={[animStyles.listModule]}>
