@@ -44,6 +44,7 @@ const insertSession = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
+  console.log("Insert session:", item);
   const { id, tagId, totalWorkTime, totalBreakTime, intervals, laps, synced } =
     item;
 
@@ -59,6 +60,9 @@ const insertSession = async (
       synced,
     })
     .returning({ insertId: sessions.id });
+
+  console.log("Inserted session:", result);
+  console.log("table after insert:", await db.select().from(sessions));
 
   return result[0].insertId;
 };
@@ -261,4 +265,3 @@ export const useSessionContext = () => {
   }
   return context;
 };
-

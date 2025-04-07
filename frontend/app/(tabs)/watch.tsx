@@ -13,6 +13,18 @@ import At from "@assets/icons/at.svg";
 import XSquare from "@assets/icons/xsquare.svg";
 import type { Color } from "@constants/interfaces";
 import { router, useLocalSearchParams, usePathname } from "expo-router";
+import {
+  Session,
+  Interval,
+  DateTime,
+  Time,
+  IntervalType,
+  DateStruct,
+} from "@/utils/dateTimeSession";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema, tags } from "@/db/schema";
+import { useSessionContext } from "@/context/SessionContext";
 
 import Header from "@/components/header/headerBasic/header";
 import Tomato from "@assets/icons/tomato.svg";
@@ -32,11 +44,9 @@ import { useAuthContext } from "@/context/AuthContext";
 import TagIcon from "@assets/icons/tag.svg";
 import { moduleTypeEnum, type TagData } from "@/constants/interfaces";
 import PickActivity from "@/app/pickActivity";
-import { useSQLiteContext } from "expo-sqlite";
-import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { schema, tags } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { useTagContext } from "@/context/TagContext";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { eq } from "drizzle-orm";
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -46,17 +56,21 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(
-    null,
-  );
-  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
-    null,
-  );
+  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(null);
+  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(null);
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isContinuousSessionRunning, setIsContinuousSessionRunning] =
-    useState(false);
+  const [isContinuousSessionRunning, setIsContinuousSessionRunning] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [currentSession, setCurrentSession] = useState<Session | null>(null);
+  const [currentIntervalStartTime, setCurrentIntervalStartTime] = useState<DateTime | null>(null);
+  const [previousActivityID, setPreviousActivityID] = useState<number | null>(null);
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
+  const { createSession } = useSessionContext();
+
   const styles = useStyles();
   const pathname = usePathname();
   const params = useLocalSearchParams();
@@ -64,17 +78,15 @@ export default function Watch() {
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isTimerRunning) {
+    if (isTimerRunning || isBreak) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
-    } else {
-      setTimerSeconds(0);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isTimerRunning]);
+  }, [isTimerRunning, isBreak]);
 
   // Format time helper
   const formatTime = (seconds: number) => {
@@ -85,7 +97,190 @@ export default function Watch() {
 
   // Handle session start/stop
   const handleSessionToggle = () => {
-    setIsTimerRunning((prev) => !prev);
+    if (!isTimerRunning && !isBreak) {
+      // Starting a new timer
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate(),
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds(),
+      );
+      const startDateTime = new DateTime(currentDate, currentTime);
+
+      setCurrentIntervalStartTime(startDateTime);
+      if (!currentSession && selectedActivityID) {
+        setCurrentSession(new Session(selectedActivityID));
+      }
+      setIsTimerRunning(true);
+    } else if (isTimerRunning) {
+      // Switching to break
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate(),
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds(),
+      );
+      const endDateTime = new DateTime(currentDate, currentTime);
+
+      if (currentSession && currentIntervalStartTime) {
+        const newInterval = new Interval(
+          currentIntervalStartTime,
+          endDateTime,
+          IntervalType.WORK,
+        );
+        const updatedIntervals = [
+          ...currentSession.getIntervals(),
+          newInterval,
+        ];
+        setCurrentSession(new Session(selectedActivityID!, updatedIntervals));
+      }
+
+      setCurrentIntervalStartTime(endDateTime);
+      setIsTimerRunning(false);
+      setIsBreak(true);
+      setTimerSeconds(0);
+    } else if (isBreak) {
+      // Starting a new subsession after break
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate(),
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds(),
+      );
+      const endDateTime = new DateTime(currentDate, currentTime);
+
+      if (currentSession && currentIntervalStartTime) {
+        // Add the break interval
+        const breakInterval = new Interval(
+          currentIntervalStartTime,
+          endDateTime,
+          IntervalType.BREAK,
+        );
+        const updatedIntervals = [
+          ...currentSession.getIntervals(),
+          breakInterval,
+        ];
+        setCurrentSession(new Session(selectedActivityID!, updatedIntervals));
+      }
+
+      // Start new work interval
+      setCurrentIntervalStartTime(endDateTime);
+      setIsBreak(false);
+      setIsTimerRunning(true);
+      setTimerSeconds(0);
+    }
+  };
+
+  // Handle next (after break)
+  const handleNext = async () => {
+    if (isBreak && currentSession && currentIntervalStartTime) {
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate(),
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds(),
+      );
+      const endDateTime = new DateTime(currentDate, currentTime);
+
+      // Add break interval
+      const breakInterval = new Interval(
+        currentIntervalStartTime,
+        endDateTime,
+        IntervalType.BREAK,
+      );
+      const updatedIntervals = [
+        ...currentSession.getIntervals(),
+        breakInterval,
+      ];
+      setCurrentSession(new Session(selectedActivityID!, updatedIntervals));
+
+      // Start new work interval
+      setCurrentIntervalStartTime(endDateTime);
+      setIsBreak(false);
+      setIsTimerRunning(true);
+      setTimerSeconds(0);
+    }
+  };
+
+  // Handle session terminate
+  const handleSessionTerminate = () => {
+    Alert.alert(
+      "End Continuous Session",
+      "Are you sure you want to terminate this continuous session?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "End",
+          style: "destructive",
+          onPress: async () => {
+            if (currentSession && currentIntervalStartTime) {
+              const now = new Date();
+              const currentDate = new DateStruct(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                now.getDate()
+              );
+              const currentTime = new Time(
+                now.getHours(),
+                now.getMinutes(),
+                now.getSeconds()
+              );
+              const endDateTime = new DateTime(currentDate, currentTime);
+              
+              // Add final interval
+              const finalInterval = new Interval(
+                currentIntervalStartTime,
+                endDateTime,
+                isBreak ? IntervalType.BREAK : IntervalType.WORK
+              );
+              const updatedIntervals = [...currentSession.getIntervals(), finalInterval];
+              const finalSession = new Session(selectedActivityID!, updatedIntervals);
+              
+              // Save session to database
+              try {
+                await createSession(db, finalSession.toSessionData());
+              } catch (error) {
+                console.error("Failed to save session:", error);
+              }
+            }
+            
+            setIsContinuousSessionRunning(false);
+            setIsTimerRunning(false);
+            setIsBreak(false);
+            setSelectedActivityID(null);
+            setSelectedProjectID(null);
+            setTimerSeconds(0);
+            setCurrentSession(null);
+            setCurrentIntervalStartTime(null);
+            setPreviousActivityID(null);
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   // Handle navigation to PickActivity
@@ -93,18 +288,71 @@ export default function Watch() {
     setIsPickActivityVisible(true);
   };
 
-  const handleActivitySelected = (activity: TagData) => {
+  const handleActivitySelected = async (activity: TagData) => {
+    // If we're switching activities, save the current session
+    if (selectedActivityID && activity.id !== selectedActivityID && currentSession) {
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate()
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds()
+      );
+      const endDateTime = new DateTime(currentDate, currentTime);
+      
+      // Add final interval if we're in a work or break period
+      if (currentIntervalStartTime) {
+        const finalInterval = new Interval(
+          currentIntervalStartTime,
+          endDateTime,
+          isBreak ? IntervalType.BREAK : IntervalType.WORK
+        );
+        const updatedIntervals = [...currentSession.getIntervals(), finalInterval];
+        const finalSession = new Session(selectedActivityID, updatedIntervals);
+        
+        try {
+          await createSession(db, finalSession.toSessionData());
+        } catch (error) {
+          console.error("Failed to save session:", error);
+        }
+      }
+    }
+
+    // Update activity IDs
     if (activity.moduleType === moduleTypeEnum.project) {
+      setPreviousActivityID(selectedActivityID);
       setSelectedActivityID(activity.parent);
       setSelectedProjectID(activity.id);
     } else {
+      setPreviousActivityID(selectedActivityID);
       setSelectedActivityID(activity.id);
       setSelectedProjectID(null);
     }
-  };
 
-  const expoDb = useSQLiteContext();
-  const db = drizzle(expoDb, { schema: schema });
+    // Start new session
+    const now = new Date();
+    const currentDate = new DateStruct(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      now.getDate()
+    );
+    const currentTime = new Time(
+      now.getHours(),
+      now.getMinutes(),
+      now.getSeconds()
+    );
+    const startDateTime = new DateTime(currentDate, currentTime);
+    
+    setCurrentIntervalStartTime(startDateTime);
+    setCurrentSession(new Session(activity.id));
+    setIsTimerRunning(true);
+    setIsContinuousSessionRunning(true);
+    setTimerSeconds(0);
+  };
 
   const { data: activityData } = useLiveQuery(
     db
@@ -203,32 +451,6 @@ export default function Watch() {
     return theme.color.darkRed;
   };
 
-  // Handle session terminate
-  const handleSessionTerminate = () => {
-    Alert.alert(
-      "End Continious Session",
-      "Are you sure you want to terminate this continuous session?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "End",
-          style: "destructive",
-          onPress: () => {
-            setIsContinuousSessionRunning(false);
-            setIsTimerRunning(false);
-            setSelectedActivityID(null);
-            setSelectedProjectID(null);
-            setTimerSeconds(0);
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
-
   const headerButtons: Button[] = [];
   if (isContinuousSessionRunning) {
     headerButtons.push({
@@ -286,12 +508,15 @@ export default function Watch() {
         title={
           !isContinuousSessionRunning
             ? "Start Focus Timer"
-            : isTimerRunning
-              ? "Focus"
-              : "Break"
+            : isBreak
+              ? "Break"
+              : "Focus"
         }
         additionalTitleStyles={{
-          color: isTimerRunning ? theme.color.red : theme.color.darkestGrey,
+          color:
+            isTimerRunning || isBreak
+              ? theme.color.red
+              : theme.color.darkestGrey,
         }}
         buttons={headerButtons}
       />
@@ -410,7 +635,8 @@ export default function Watch() {
                   styles.filledButton,
                   { backgroundColor: getButtonColor() },
                 ]}
-                onPress={() => console.log("Lap pressed")}
+                onPress={handleNext}
+                disabled={!isBreak}
               >
                 <Text style={styles.textInsideButton}>Next</Text>
               </TouchableOpacity>
@@ -439,6 +665,7 @@ export default function Watch() {
                   { backgroundColor: getButtonColor() },
                 ]}
                 onPress={handleSessionToggle}
+                disabled={isBreak}
               >
                 <Text style={styles.textInsideButton}>Break</Text>
               </TouchableOpacity>
@@ -490,7 +717,7 @@ export default function Watch() {
         onActivitySelected={(activityData: TagData) => {
           handleActivitySelected(activityData);
           setIsContinuousSessionRunning(true);
-          if (selectedActivityID) {
+          if (selectedActivityID && activityData.id !== selectedActivityID) {
             resetTimer();
           }
           setIsTimerRunning(true);
