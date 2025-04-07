@@ -23,3 +23,4 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   synced INTEGER DEFAULT 0,
   deleted INTEGER DEFAULT 0
 );
+

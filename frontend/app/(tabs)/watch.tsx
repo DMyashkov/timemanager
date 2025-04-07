@@ -56,16 +56,24 @@ export default function Watch() {
   const { isLoggedIn } = useAuthContext();
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
-  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(null);
-  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(null);
+  const [selectedActivityID, setSelectedActivityID] = useState<number | null>(
+    null,
+  );
+  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
+    null,
+  );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isContinuousSessionRunning, setIsContinuousSessionRunning] = useState(false);
+  const [isContinuousSessionRunning, setIsContinuousSessionRunning] =
+    useState(false);
   const [isBreak, setIsBreak] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
-  const [currentIntervalStartTime, setCurrentIntervalStartTime] = useState<DateTime | null>(null);
-  const [previousActivityID, setPreviousActivityID] = useState<number | null>(null);
+  const [currentIntervalStartTime, setCurrentIntervalStartTime] =
+    useState<DateTime | null>(null);
+  const [previousActivityID, setPreviousActivityID] = useState<number | null>(
+    null,
+  );
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
@@ -241,24 +249,30 @@ export default function Watch() {
               const currentDate = new DateStruct(
                 now.getFullYear(),
                 now.getMonth() + 1,
-                now.getDate()
+                now.getDate(),
               );
               const currentTime = new Time(
                 now.getHours(),
                 now.getMinutes(),
-                now.getSeconds()
+                now.getSeconds(),
               );
               const endDateTime = new DateTime(currentDate, currentTime);
-              
+
               // Add final interval
               const finalInterval = new Interval(
                 currentIntervalStartTime,
                 endDateTime,
-                isBreak ? IntervalType.BREAK : IntervalType.WORK
+                isBreak ? IntervalType.BREAK : IntervalType.WORK,
               );
-              const updatedIntervals = [...currentSession.getIntervals(), finalInterval];
-              const finalSession = new Session(selectedActivityID!, updatedIntervals);
-              
+              const updatedIntervals = [
+                ...currentSession.getIntervals(),
+                finalInterval,
+              ];
+              const finalSession = new Session(
+                selectedActivityID!,
+                updatedIntervals,
+              );
+
               // Save session to database
               try {
                 await createSession(db, finalSession.toSessionData());
@@ -266,7 +280,7 @@ export default function Watch() {
                 console.error("Failed to save session:", error);
               }
             }
-            
+
             setIsContinuousSessionRunning(false);
             setIsTimerRunning(false);
             setIsBreak(false);
@@ -289,31 +303,38 @@ export default function Watch() {
   };
 
   const handleActivitySelected = async (activity: TagData) => {
-    // If we're switching activities, save the current session
-    if (selectedActivityID && activity.id !== selectedActivityID && currentSession) {
+    // If we're switching to a different activity, save the current session
+    if (
+      selectedActivityID &&
+      activity.id !== selectedActivityID &&
+      currentSession
+    ) {
       const now = new Date();
       const currentDate = new DateStruct(
         now.getFullYear(),
         now.getMonth() + 1,
-        now.getDate()
+        now.getDate(),
       );
       const currentTime = new Time(
         now.getHours(),
         now.getMinutes(),
-        now.getSeconds()
+        now.getSeconds(),
       );
       const endDateTime = new DateTime(currentDate, currentTime);
-      
+
       // Add final interval if we're in a work or break period
       if (currentIntervalStartTime) {
         const finalInterval = new Interval(
           currentIntervalStartTime,
           endDateTime,
-          isBreak ? IntervalType.BREAK : IntervalType.WORK
+          isBreak ? IntervalType.BREAK : IntervalType.WORK,
         );
-        const updatedIntervals = [...currentSession.getIntervals(), finalInterval];
+        const updatedIntervals = [
+          ...currentSession.getIntervals(),
+          finalInterval,
+        ];
         const finalSession = new Session(selectedActivityID, updatedIntervals);
-        
+
         try {
           await createSession(db, finalSession.toSessionData());
         } catch (error) {
@@ -333,25 +354,27 @@ export default function Watch() {
       setSelectedProjectID(null);
     }
 
-    // Start new session
-    const now = new Date();
-    const currentDate = new DateStruct(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      now.getDate()
-    );
-    const currentTime = new Time(
-      now.getHours(),
-      now.getMinutes(),
-      now.getSeconds()
-    );
-    const startDateTime = new DateTime(currentDate, currentTime);
-    
-    setCurrentIntervalStartTime(startDateTime);
-    setCurrentSession(new Session(activity.id));
-    setIsTimerRunning(true);
-    setIsContinuousSessionRunning(true);
-    setTimerSeconds(0);
+    // Only start a new session if we're switching to a different activity
+    if (selectedActivityID && activity.id !== selectedActivityID) {
+      const now = new Date();
+      const currentDate = new DateStruct(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        now.getDate(),
+      );
+      const currentTime = new Time(
+        now.getHours(),
+        now.getMinutes(),
+        now.getSeconds(),
+      );
+      const startDateTime = new DateTime(currentDate, currentTime);
+
+      setCurrentIntervalStartTime(startDateTime);
+      setCurrentSession(new Session(activity.id));
+      setIsTimerRunning(true);
+      setIsContinuousSessionRunning(true);
+      setTimerSeconds(0);
+    }
   };
 
   const { data: activityData } = useLiveQuery(
@@ -715,11 +738,11 @@ export default function Watch() {
           setIsPickActivityVisible(false);
         }}
         onActivitySelected={(activityData: TagData) => {
-          handleActivitySelected(activityData);
-          setIsContinuousSessionRunning(true);
           if (selectedActivityID && activityData.id !== selectedActivityID) {
             resetTimer();
           }
+          handleActivitySelected(activityData);
+          setIsContinuousSessionRunning(true);
           setIsTimerRunning(true);
         }}
         pickButtonText={selectedActivityID ? "Start new timer" : "Choose"}
