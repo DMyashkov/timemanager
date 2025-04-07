@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'authentication',
     'tags',
+    'time_sessions'
 ]
 
 REST_FRAMEWORK = {

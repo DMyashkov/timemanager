@@ -19,6 +19,7 @@ import migrations from "@/drizzle/migrations";
 
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { syncUnsyncedRows } from "@/context/TagContext";
+import { SessionProvider } from "@/context/SessionContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -93,7 +94,9 @@ export default function Layout() {
           <GestureHandlerRootView style={{ flex: 1 }}>
             <ThemeProvider>
               <TagProvider>
-                <AppContent db={db} authToken={authToken} />
+                <SessionProvider>
+                  <AppContent db={db} authToken={authToken} />
+                </SessionProvider>
               </TagProvider>
             </ThemeProvider>
           </GestureHandlerRootView>

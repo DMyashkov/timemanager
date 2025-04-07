@@ -13,6 +13,18 @@ export const tags = sqliteTable("tags", {
   deleted: int("deleted").default(0),
 });
 
+export const sessions = sqliteTable("sessions", {
+  id: int("id").primaryKey({ autoIncrement: true }),
+  tagId: int("tag_id"),
+  totalWorkTime: int("total_work_time"),
+  totalBreakTime: int("total_break_time"),
+  intervals: text("intervals"),
+  laps: text("laps"),
+  synced: int("synced").default(0),
+  deleted: int("deleted").default(0),
+});
+
 export const schema = {
   tags,
+  sessions,
 };
