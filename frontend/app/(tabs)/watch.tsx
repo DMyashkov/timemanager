@@ -731,7 +731,7 @@ export default function Watch() {
                 onPress={handleSessionToggle}
                 disabled={isBreak}
               >
-                <Text style={styles.textInsideButton}>Bonta</Text>
+                <Text style={styles.textInsideButton}>Break</Text>
               </TouchableOpacity>
             </Animated.View>
             <Animated.View style={buttonAnimStyles.idleButtons}>
@@ -789,4 +789,3 @@ export default function Watch() {
     </View>
   );
 }
-

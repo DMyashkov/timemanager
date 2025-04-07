@@ -18,14 +18,16 @@ import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
 import { useAuthContext } from "@/context/AuthContext";
+import { useSessionContext } from "@/context/SessionContext";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
   const { height } = useWindowDimensions();
+  const { fetchAndStoreSessions } = useSessionContext();
 
   const { theme } = useTheme();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("a@a.com");
+  const [password, setPassword] = useState("a");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -47,6 +49,11 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   useEffect(() => {
     console.log("isLoggedIn authScreen.tsx", isLoggedIn);
   }, [isLoggedIn]);
+
+  const fetchData = async (token: string) => {
+    await fetchAndStoreTags(db, token);
+    await fetchAndStoreSessions(db, token);
+  };
 
   const handleLogin = async () => {
     setLoading(true);
@@ -72,7 +79,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
 
       axios.defaults.headers.common.Authorization = `Token ${token}`;
 
-      await fetchAndStoreTags(db, token);
+      await fetchData(token);
 
       setIsLoggedIn(true);
       router.replace("/watch");
@@ -107,14 +114,18 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     setError("");
     try {
       console.log("Signing up with email:", email, "and password", password);
-      const response = await axios.post(`${API_URL}/register/`, {
-        email: email,
-        password: password,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
+      const response = await axios.post(
+        `${API_URL}/register/`,
+        {
+          email: email,
+          password: password,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       setLoading(false);
       console.log("Sign-up successful:", response.data);
@@ -123,7 +134,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       await saveToken(token);
 
       axios.defaults.headers.common.Authorization = `Token ${token}`;
-      await fetchAndStoreTags(db, token);
+      await fetchData(token);
       setIsLoggedIn(true);
       router.replace("/watch");
     } catch (err) {

@@ -116,10 +116,6 @@ function AppContent({
   const { syncUnsyncedRows: syncUnsyncedSessions, fetchAndStoreSessions } =
     useSessionContext();
 
-  // useEffect(() => {
-  //   setInitialFetchDone(false);
-  // }, [authToken]);
-
   useEffect(() => {
     if (authToken) {
       const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
