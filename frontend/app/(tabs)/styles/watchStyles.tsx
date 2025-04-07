@@ -60,7 +60,8 @@ export default function useStyles() {
     leftButtonsContainer: {
       flexDirection: "row",
       gap: 9,
-      backgroundColor: theme.color.black,
+      height: 75,
+      width: 75,
     },
     rightButtonContainer: {
       flexDirection: "row",

@@ -192,7 +192,7 @@ export default function Watch() {
       height: fullModeAnim.value * lapsViewMaxHeight,
       marginTop: fullModeAnim.value * styles.lapsView.marginTop,
       opacity: fullModeAnim.value,
-      transform: [{ scale: 0.8 + (fullModeAnim.value * 0.2) }],
+      transform: [{ scale: 0 + fullModeAnim.value * 1 }],
     })),
   };
 
@@ -271,13 +271,13 @@ export default function Watch() {
       opacity: buttonAnim.value,
       position: "absolute",
       width: "100%",
-      transform: [{ scale: 0.8 + (buttonAnim.value * 0.2) }],
+      transform: [{ scale: 0.8 + buttonAnim.value * 0.2 }],
     })),
     idleButtons: useAnimatedStyle(() => ({
       opacity: 1 - buttonAnim.value,
       position: "absolute",
       width: "100%",
-      transform: [{ scale: 1 - (buttonAnim.value * 0.2) }],
+      transform: [{ scale: 1 - buttonAnim.value * 0.2 }],
     })),
   };
 
