@@ -92,7 +92,7 @@ const insertTag = async (
       });
     }
 
-    console.log("Whole table after insert:", await db.select().from(tags));
+    // console.log("Whole table after insert:", await db.select().from(tags));
 
     return result[0].insertId;
   }
@@ -112,7 +112,7 @@ const insertTag = async (
     })
     .returning({ insertId: tags.id });
 
-  console.log("Whole table after insert:", await db.select().from(tags));
+  // console.log("Whole table after insert:", await db.select().from(tags));
 
   return result[0].insertId;
 };
@@ -280,7 +280,7 @@ export const syncUnsyncedRows = async (
   // console.log("Sending rows for sync: ", rows);
 
   if (rows.length === 0) {
-    console.log("Tried to sync rows but no unsynced rows found");
+    console.log("Tried to sync tags but no unsynced rows found");
     return;
   }
 
@@ -347,14 +347,14 @@ const fetchAndStoreTags = async (
   token: string,
 ) => {
   try {
-    console.log("Auth token:", token);
+    // console.log("Auth token:", token);
 
     const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
       headers: { Authorization: `Token ${token}` },
     });
 
-    console.log("Fetched tags:", response.data);
-    console.log("Response status:", response.status);
+    // console.log("Fetched tags:", response.data);
+    // console.log("Response status:", response.status);
 
     if (response.status === 200) {
       const fetchedTags: TagData[] = response.data;
@@ -362,7 +362,7 @@ const fetchAndStoreTags = async (
       console.log("Tags fetched successfully.");
 
       // Clear local database first
-      await db.delete(tags).execute();
+      await db.delete(tags);
       console.log("Local database cleared successfully.");
 
       // Group tags by parent ID

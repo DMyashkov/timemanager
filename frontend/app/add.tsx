@@ -96,7 +96,7 @@ export default function AddScreen() {
     if (current) {
       await deleteTag(db, current.id);
       // WHole table after delete
-      console.log("Whole table after delete:", await db.select().from(tags));
+      // console.log("Whole table after delete:", await db.select().from(tags));
       // popFocusStack();
       // console.log("popped focus stack");
       // console.log("New focus path:", focusedPath);

@@ -154,7 +154,7 @@ export const syncUnsyncedRows = async (
   const rows = await db.select().from(sessions).where(eq(sessions.synced, 0));
 
   if (rows.length === 0) {
-    console.log("Tried to sync rows but no unsynced rows found");
+    console.log("Tried to sync sessions but no unsynced rows found");
     return;
   }
 
@@ -210,7 +210,7 @@ const fetchAndStoreSessions = async (
       console.log("Sessions fetched successfully.");
 
       // Clear local database first
-      await db.delete(sessions).execute();
+      await db.delete(sessions);
       console.log("Local database cleared successfully.");
 
       // Insert all sessions
