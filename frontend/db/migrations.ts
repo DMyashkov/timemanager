@@ -19,4 +19,39 @@ export const migrations = [
       `,
     ],
   },
-]; 
+  {
+    version: 2,
+    statements: [
+      // Add new columns
+      sql`ALTER TABLE sessions ADD COLUMN start_time INTEGER;`,
+      sql`ALTER TABLE sessions ADD COLUMN end_time INTEGER;`,
+
+      // Create index on start_time
+      sql`CREATE INDEX idx_sessions_start_time ON sessions(start_time);`,
+
+      // Update existing records to set start_time and end_time from intervals
+      sql`
+        WITH first_intervals AS (
+          SELECT 
+            id,
+            json_extract(
+              json_extract(intervals, '$[0]'),
+              '$.startTime'
+            ) as first_interval_start,
+            json_extract(
+              json_extract(intervals, '$[-1]'),
+              '$.endTime'
+            ) as last_interval_end
+          FROM sessions
+        )
+        UPDATE sessions
+        SET 
+          start_time = CAST(strftime('%s', json_extract(first_interval_start, '$.date')) * 1000 AS INTEGER),
+          end_time = CAST(strftime('%s', json_extract(last_interval_end, '$.date')) * 1000 AS INTEGER)
+        FROM first_intervals
+        WHERE sessions.id = first_intervals.id;
+      `,
+    ],
+  },
+];
+
