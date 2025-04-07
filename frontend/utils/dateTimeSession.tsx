@@ -158,11 +158,11 @@ export class Session {
   private intervals: Interval[] = [];
   private totalWorkTime = 0;
   private totalBreakTime = 0;
-  private activityId: number; // Foreign key reference to ActivityData
+  private tagId: number; // Foreign key reference to ActivityData
   private laps: Time[] = [new Time(0, 0, 0), new Time(0, 0, 0)];
 
   constructor(activityId: number, intervals: Interval[] = []) {
-    this.activityId = activityId;
+    this.tagId = activityId;
     this.intervals = intervals;
     this.recalculateTotals();
   }
@@ -198,14 +198,14 @@ export class Session {
     return this.intervals;
   }
 
-  getActivityId(): number {
-    return this.activityId;
+  getTagId(): number {
+    return this.tagId;
   }
 
   // Example toString() method
   toString(): string {
     return (
-      `Session for Activity ID: ${this.activityId}\n` +
+      `Session for Activity ID: ${this.tagId}\n` +
       `Work Time: ${this.getWorkTime().toString()}\n` +
       `Break Time: ${this.getBreakTime().toString()}\n` +
       `Total Time: ${this.getTotalTime().toString()}`
