@@ -22,12 +22,14 @@ interface PickActivityProps {
   visible: boolean;
   onClose: () => void;
   onActivitySelected: (activity: TagData) => void;
+  pickButtonText: string;
 }
 
 export default function PickActivity({
   visible,
   onClose,
   onActivitySelected,
+  pickButtonText = "Pick",
 }: PickActivityProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -41,7 +43,7 @@ export default function PickActivity({
 
   const createPickActivityButtons = (activity: TagData) => [
     {
-      text: "Start timer",
+      text: pickButtonText,
       color: theme.color.mediumGrey,
       onPress: () => {
         onActivitySelected(activity);

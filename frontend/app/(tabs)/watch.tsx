@@ -494,6 +494,7 @@ export default function Watch() {
           }
           setIsTimerRunning(true);
         }}
+        pickButtonText={selectedActivityID ? "Start new timer" : "Choose"}
       />
     </View>
   );
