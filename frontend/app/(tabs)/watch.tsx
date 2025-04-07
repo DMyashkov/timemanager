@@ -71,9 +71,6 @@ export default function Watch() {
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
   const [currentIntervalStartTime, setCurrentIntervalStartTime] =
     useState<DateTime | null>(null);
-  const [previousActivityID, setPreviousActivityID] = useState<number | null>(
-    null,
-  );
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
@@ -303,15 +300,25 @@ export default function Watch() {
   };
 
   const handleActivitySelected = async (activity: TagData) => {
-    console.log('Selected activity:', activity.id, 'Current activity:', selectedActivityID);
-    
+    console.log(
+      "Selected activity:",
+      activity.id,
+      "Current activity:",
+      selectedActivityID,
+    );
+
     // If we're switching to a different activity, save the current session
+    console.log(currentSession);
     if (
       selectedActivityID &&
-      activity.id !== selectedActivityID &&
-      currentSession
+      !(
+        (activity.moduleType === moduleTypeEnum.activity &&
+          activity.id === selectedActivityID) ||
+        (activity.moduleType === moduleTypeEnum.project &&
+          activity.id === selectedProjectID)
+      )
     ) {
-      console.log('Switching to different activity, saving current session');
+      console.log("aksahs");
       const now = new Date();
       const currentDate = new DateStruct(
         now.getFullYear(),
@@ -327,6 +334,7 @@ export default function Watch() {
 
       // Add final interval if we're in a work or break period
       if (currentIntervalStartTime) {
+        console.log("HELOOO");
         const finalInterval = new Interval(
           currentIntervalStartTime,
           endDateTime,
@@ -336,7 +344,7 @@ export default function Watch() {
           ...currentSession.getIntervals(),
           finalInterval,
         ];
-        
+
         // Calculate start and end time from intervals
         const firstInterval = updatedIntervals[0];
         const lastInterval = updatedIntervals[updatedIntervals.length - 1];
@@ -356,9 +364,9 @@ export default function Watch() {
           lastInterval.endTime.time.minutes,
           lastInterval.endTime.time.seconds,
         ).getTime();
-        
+
         const finalSession = new Session(selectedActivityID, updatedIntervals);
-        console.log('Final session to save:', finalSession);
+        console.log("Final session to save:", finalSession);
 
         try {
           const sessionData = finalSession.toSessionData();
@@ -370,7 +378,7 @@ export default function Watch() {
             id: 0, // Use 0 as a dummy id that will be ignored by SQLite auto-increment
           };
           await createSession(db, newSessionData);
-          console.log('Session saved successfully');
+          console.log("Session saved successfully");
         } catch (error) {
           console.error("Failed to save session:", error);
         }
@@ -379,18 +387,16 @@ export default function Watch() {
 
     // Update activity IDs
     if (activity.moduleType === moduleTypeEnum.project) {
-      setPreviousActivityID(selectedActivityID);
       setSelectedActivityID(activity.parent);
       setSelectedProjectID(activity.id);
     } else {
-      setPreviousActivityID(selectedActivityID);
       setSelectedActivityID(activity.id);
       setSelectedProjectID(null);
     }
 
     // Only start a new session if we're switching to a different activity
-    if (selectedActivityID && activity.id !== selectedActivityID) {
-      console.log('Starting new session for different activity');
+    if (activity.id !== selectedActivityID || selectedActivityID === null) {
+      console.log("Starting new session for different activity");
       const now = new Date();
       const currentDate = new DateStruct(
         now.getFullYear(),
@@ -773,9 +779,7 @@ export default function Watch() {
           setIsPickActivityVisible(false);
         }}
         onActivitySelected={(activityData: TagData) => {
-          if (selectedActivityID && activityData.id !== selectedActivityID) {
-            resetTimer();
-          }
+          console.log("HIII");
           handleActivitySelected(activityData);
           setIsContinuousSessionRunning(true);
           setIsTimerRunning(true);
@@ -785,3 +789,4 @@ export default function Watch() {
     </View>
   );
 }
+
