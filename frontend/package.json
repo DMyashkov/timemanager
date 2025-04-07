@@ -38,6 +38,7 @@
     "axios": "^1.7.7",
     "babel-plugin-inline-import": "^3.0.0",
     "better-sqlite3": "^11.8.1",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
     "expo": "^52.0.37",

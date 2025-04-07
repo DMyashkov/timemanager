@@ -3,7 +3,13 @@ import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { FlatList } from "react-native-gesture-handler";
-import { Session, Time, DateTime, Interval, IntervalType } from "@/utils/dateTimeSession";
+import {
+  Session,
+  Time,
+  DateTime,
+  Interval,
+  IntervalType,
+} from "@/utils/dateTimeSession";
 import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 import At from "@assets/icons/at.svg";
 import { moduleTypeEnum } from "@/constants/interfaces";
@@ -26,18 +32,34 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
 
   // Get today's sessions from the hook
   const sessionsData = useRelevantSessions();
-  
+
   // Convert SessionData to Session instances
-  const sessions = sessionsData?.map(data => {
-    const intervals = data.intervals.map(interval => 
-      new Interval(
-        new DateTime(interval.startTime.date, new Time(interval.startTime.time.hours, interval.startTime.time.minutes, interval.startTime.time.seconds)),
-        new DateTime(interval.endTime.date, new Time(interval.endTime.time.hours, interval.endTime.time.minutes, interval.endTime.time.seconds)),
-        interval.type as IntervalType
-      )
-    );
-    return new Session(data.tagId, intervals);
-  }) ?? [];
+  const sessions =
+    sessionsData?.map((data) => {
+      const intervals = data.intervals.map(
+        (interval) =>
+          new Interval(
+            new DateTime(
+              interval.startTime.date,
+              new Time(
+                interval.startTime.time.hours,
+                interval.startTime.time.minutes,
+                interval.startTime.time.seconds,
+              ),
+            ),
+            new DateTime(
+              interval.endTime.date,
+              new Time(
+                interval.endTime.time.hours,
+                interval.endTime.time.minutes,
+                interval.endTime.time.seconds,
+              ),
+            ),
+            interval.type as IntervalType,
+          ),
+      );
+      return new Session(data.tagId, intervals);
+    }) ?? [];
 
   // State to keep track of current time
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -138,9 +160,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             >
               <View style={styles.content}>
                 <View style={styles.project}>
-                  <Text style={styles.textSession}>
-                    {tagId}
-                  </Text>
+                  <Text style={styles.textSession}>{tagId}</Text>
                 </View>
                 <View style={styles.footer}>
                   <Text
@@ -188,7 +208,10 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       top: breakTopOffset,
                       height: breakHeight,
                       width: "100%",
-                      backgroundColor: hexWithOpacity(theme.color.presets.green.dark, 0.3),
+                      backgroundColor: hexWithOpacity(
+                        theme.color.presets.green.dark,
+                        0.3,
+                      ),
                       borderTopLeftRadius: 5,
                       borderBottomLeftRadius: 5,
                     }}
