@@ -9,6 +9,7 @@ import {
   DateTime,
   Interval,
   IntervalType,
+  DateStruct,
 } from "@/utils/dateTimeSession";
 import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 import At from "@assets/icons/at.svg";
@@ -37,8 +38,22 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   // Convert SessionData to Session instances
   const sessions =
     sessionsData?.map((data) => {
+      if (!data.intervals || !Array.isArray(data.intervals)) {
+        return new Session(data.tagId, []);
+      }
+
       const intervals = data.intervals.map(
-        (interval) =>
+        (interval: {
+          startTime: {
+            date: DateStruct;
+            time: { hours: number; minutes: number; seconds: number };
+          };
+          endTime: {
+            date: DateStruct;
+            time: { hours: number; minutes: number; seconds: number };
+          };
+          type: IntervalType;
+        }) =>
           new Interval(
             new DateTime(
               interval.startTime.date,

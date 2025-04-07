@@ -5,7 +5,14 @@ import { useTheme } from "@context/ThemeContext";
 import SessionElement from "../session/session";
 import { FlatList } from "react-native-gesture-handler";
 import { useRelevantSessions } from "@/hooks/useRelevantSessions";
-import { Session, Interval, DateTime, Time, IntervalType, DateStruct } from "@/utils/dateTimeSession";
+import {
+  Session,
+  Interval,
+  DateTime,
+  Time,
+  IntervalType,
+  DateStruct,
+} from "@/utils/dateTimeSession";
 
 export default function SessionList({ style = {} }: { style?: object }) {
   const styles = useStyles();
@@ -15,54 +22,73 @@ export default function SessionList({ style = {} }: { style?: object }) {
   const sessionsData = useRelevantSessions();
 
   // Convert SessionData to Session instances
-  const sessions = sessionsData?.map(data => {
-    if (!data.intervals || !Array.isArray(data.intervals) || data.intervals.length === 0) {
-      // Create a default interval if none exists to avoid errors
-      const now = new Date();
-      const defaultInterval = new Interval(
-        new DateTime(
-          new DateStruct(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-          new Time(now.getHours(), now.getMinutes(), 0)
-        ),
-        new DateTime(
-          new DateStruct(now.getFullYear(), now.getMonth() + 1, now.getDate()),
-          new Time(now.getHours(), now.getMinutes() + 30, 0)
-        ),
-        IntervalType.WORK
-      );
-      return new Session(data.tagId, [defaultInterval]);
-    }
+  const sessions =
+    sessionsData?.map((data) => {
+      if (!data.intervals || !Array.isArray(data.intervals)) {
+        // Create a default interval if none exists to avoid errors
+        const now = new Date();
+        const defaultInterval = new Interval(
+          new DateTime(
+            new DateStruct(
+              now.getFullYear(),
+              now.getMonth() + 1,
+              now.getDate(),
+            ),
+            new Time(now.getHours(), now.getMinutes(), 0),
+          ),
+          new DateTime(
+            new DateStruct(
+              now.getFullYear(),
+              now.getMonth() + 1,
+              now.getDate(),
+            ),
+            new Time(now.getHours(), now.getMinutes() + 30, 0),
+          ),
+          IntervalType.WORK,
+        );
+        return new Session(data.tagId, [defaultInterval]);
+      }
 
-    // Parse intervals if they're in string format
-    const parsedIntervals = typeof data.intervals === 'string' ? JSON.parse(data.intervals) : data.intervals;
-    
-    const intervals = parsedIntervals.map((interval: {
-      startTime: { date: DateStruct; time: { hours: number; minutes: number; seconds: number } };
-      endTime: { date: DateStruct; time: { hours: number; minutes: number; seconds: number } };
-      type: IntervalType;
-    }) => 
-      new Interval(
-        new DateTime(
-          interval.startTime.date,
-          new Time(
-            interval.startTime.time.hours,
-            interval.startTime.time.minutes,
-            interval.startTime.time.seconds
-          )
-        ),
-        new DateTime(
-          interval.endTime.date,
-          new Time(
-            interval.endTime.time.hours,
-            interval.endTime.time.minutes,
-            interval.endTime.time.seconds
-          )
-        ),
-        interval.type as IntervalType
-      )
-    );
-    return new Session(data.tagId, intervals);
-  }) ?? [];
+      const intervals = data.intervals.map(
+        (interval: {
+          startTime: {
+            date: DateStruct;
+            time: { hours: number; minutes: number; seconds: number };
+          };
+          endTime: {
+            date: DateStruct;
+            time: { hours: number; minutes: number; seconds: number };
+          };
+          type: IntervalType;
+        }) =>
+          new Interval(
+            new DateTime(
+              interval.startTime.date,
+              new Time(
+                interval.startTime.time.hours,
+                interval.startTime.time.minutes,
+                interval.startTime.time.seconds,
+              ),
+            ),
+            new DateTime(
+              interval.endTime.date,
+              new Time(
+                interval.endTime.time.hours,
+                interval.endTime.time.minutes,
+                interval.endTime.time.seconds,
+              ),
+            ),
+            interval.type as IntervalType,
+          ),
+      );
+      return new Session(data.tagId, intervals);
+    }) ?? [];
+  console.log(
+    "SESSION DATA PARSING ",
+    sessionsData,
+    "got parsed intervals",
+    sessions,
+  );
 
   return (
     <View style={[styles.container, style]}>
