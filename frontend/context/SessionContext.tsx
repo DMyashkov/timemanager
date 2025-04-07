@@ -73,9 +73,9 @@ const parseSession = (
 
   return {
     id: row.id,
-    tagId: row.tagId,
-    totalWorkTime: row.totalWorkTime,
-    totalBreakTime: row.totalBreakTime,
+    tagId: row.tagId ?? 0,
+    totalWorkTime: row.totalWorkTime ?? 0,
+    totalBreakTime: row.totalBreakTime ?? 0,
     intervals: JSON.parse(row.intervals || "[]"),
     laps: JSON.parse(row.laps || "[]"),
     deleted: row.deleted ?? 0,
@@ -215,6 +215,7 @@ const fetchAndStoreSessions = async (
           totalBreakTime: session.totalBreakTime,
           intervals: session.intervals,
           laps: session.laps,
+          deleted: session.deleted ?? 0,
           synced: 1,
         });
       }
