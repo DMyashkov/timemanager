@@ -216,7 +216,7 @@ export class Session {
   // Convert to SessionData
   toSessionData(): SessionData {
     return {
-      id: this.tagId,
+      id: 0,  // Let the database handle ID assignment
       tagId: this.tagId,
       startTime: this.startTime,
       endTime: this.endTime,

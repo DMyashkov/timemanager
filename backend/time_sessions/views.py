@@ -41,22 +41,28 @@ class SyncSessionsView(APIView):
             session_id = session_data.get("id")
             is_deleted = session_data.pop("deleted", None)
 
-            if session_id is None:
-                return Response({"error": "ID field is required"}, status=status.HTTP_400_BAD_REQUEST)
-
             if is_deleted:
-                Session.objects.filter(id=session_id).delete()
+                if session_id != 0:  # Only delete if it's an existing session
+                    Session.objects.filter(id=session_id).delete()
                 continue
 
             try:
-                session_instance = Session.objects.get(id=session_id)
-                for key, value in session_data.items():
-                    setattr(session_instance, key, value)
-                session_instance.save()
+                if session_id == 0:  # New session
+                    # Create new session without specifying ID
+                    new_session = Session.objects.create(**session_data)
+                    # Return the generated ID to the frontend
+                    session_data["id"] = new_session.id
+                else:  # Update existing session
+                    session_instance = Session.objects.get(id=session_id)
+                    for key, value in session_data.items():
+                        setattr(session_instance, key, value)
+                    session_instance.save()
             except Session.DoesNotExist:
-                Session.objects.create(**session_data)
+                if session_id != 0:  # Only try to create if it's a new session
+                    new_session = Session.objects.create(**session_data)
+                    session_data["id"] = new_session.id
 
-        return Response({"message": "Sessions synced successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": "Sessions synced successfully", "sessions": payload}, status=status.HTTP_200_OK)
 
 class DeleteAllSessionsView(APIView):
     permission_classes = [IsAuthenticated]

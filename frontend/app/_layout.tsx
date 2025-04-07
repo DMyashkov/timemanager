@@ -8,7 +8,7 @@ import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { ActivityIndicator, AppState, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { TagProvider } from "@/context/TagContext";
+import { TagProvider, useTagContext } from "@/context/TagContext";
 import { SQLiteProvider, openDatabaseSync } from "expo-sqlite";
 import {
   ExpoSQLiteDatabase,
@@ -18,8 +18,11 @@ import {
 import migrations from "@/drizzle/migrations";
 
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { syncUnsyncedRows } from "@/context/TagContext";
-import { SessionProvider } from "@/context/SessionContext";
+import { SessionProvider, useSessionContext } from "@/context/SessionContext";
+import { schema } from "@/db/schema";
+import { tags } from "@/db/schema";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -30,13 +33,7 @@ const loadFonts = () => {
   });
 };
 
-import { schema } from "@/db/schema";
-
 export const DATABASE_NAME = "tags";
-import { tags } from "@/db/schema";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthProvider } from "@/context/AuthContext";
-import { useAuthContext } from "@/context/AuthContext"; // Import the context
 
 export default function Layout() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -106,7 +103,6 @@ export default function Layout() {
   );
 }
 
-// Move `useAuthContext()` inside a separate component
 function AppContent({
   db,
   authToken,
@@ -114,7 +110,9 @@ function AppContent({
   db: ExpoSQLiteDatabase<typeof schema>;
   authToken: string | null;
 }) {
-  const { isLoggedIn } = useAuthContext(); // Now it's safely inside the provider
+  const { isLoggedIn } = useAuthContext();
+  const { syncUnsyncedRows: syncUnsyncedTags, fetchAndStoreTags } = useTagContext();
+  const { syncUnsyncedRows: syncUnsyncedSessions, fetchAndStoreSessions } = useSessionContext();
 
   useEffect(() => {
     console.log("isLoggedIn _layout.tsx", isLoggedIn);
@@ -122,15 +120,20 @@ function AppContent({
 
   useEffect(() => {
     if (authToken && isLoggedIn) {
+      fetchAndStoreTags(db, authToken).catch(console.error);
+      fetchAndStoreSessions(db, authToken).catch(console.error);
+
       const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
         if (state.isConnected) {
-          syncUnsyncedRows(db, authToken).catch(console.error);
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
         }
       });
 
       const handleAppStateChange = (nextAppState: string) => {
         if (nextAppState === "background") {
-          syncUnsyncedRows(db, authToken).catch(console.error);
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
         }
       };
       const appStateSubscription = AppState.addEventListener(
@@ -140,7 +143,8 @@ function AppContent({
 
       const interval = setInterval(
         () => {
-          syncUnsyncedRows(db, authToken).catch(console.error);
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
         },
         5 * 60 * 1000,
       );
