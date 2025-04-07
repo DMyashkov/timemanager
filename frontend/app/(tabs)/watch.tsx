@@ -191,8 +191,6 @@ export default function Watch() {
     lapsView: useAnimatedStyle(() => ({
       height: fullModeAnim.value * lapsViewMaxHeight,
       marginTop: fullModeAnim.value * styles.lapsView.marginTop,
-      opacity: fullModeAnim.value,
-      transform: [{ scale: 0 + fullModeAnim.value * 1 }],
     })),
   };
 
