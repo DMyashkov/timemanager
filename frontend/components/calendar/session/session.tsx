@@ -1,12 +1,18 @@
 import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import type { Color } from "@interfaces";
+import type { Color, TagData } from "@interfaces";
 import type { Session, Time } from "@/utils/dateTimeSession";
 import { dataIndex } from "@/constants/exampleData";
 import { TagsFromId } from "@/utils/getComponentsFromTag";
-import type { ActivityData } from "@interfaces";
-import Stopwatch from "@/assets/icons/stopwatch.svg";
+import { useEffect, useState } from "react";
+
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { schema, tags } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { useTagContext } from "@/context/TagContext";
+import Tag from "@/components/tag/tagComponent";
 
 export default function SessionElement({
   style = {},
@@ -16,11 +22,75 @@ export default function SessionElement({
   session: Session;
 }) {
   const { theme } = useTheme();
-  const activityItem: ActivityData | null =
-    session.getAssociatedActivityItem(dataIndex);
-  const colorPallete: Color = activityItem
-    ? theme.color.presets[activityItem.colorPreset]
-    : theme.color.presets.green;
+  const tagId = session.getTagId();
+  const [parentTagID, setParentTagID] = useState<number | null>(null);
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
+
+  const { data: tagData } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, tagId ?? -1)),
+    [tagId],
+  );
+
+  const { data: parentTagData } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.id, parentTagID ?? -1)),
+    [parentTagID],
+  );
+
+  const { parseTag } = useTagContext();
+
+  const [activityNode, setActivityNode] = useState<TagData | null>(null);
+  const [projectNode, setProjectNode] = useState<TagData | null>(null);
+
+  useEffect(() => {
+    try {
+      if (tagData) {
+        // console.log("moduleData", moduleData);
+        const parsedData = parseTag(tagData);
+        if (parsedData?.id === -1) {
+          setActivityNode(null);
+          setProjectNode(null);
+        } else if (parsedData) {
+          if (parsedData.moduleType === "activity") {
+            setActivityNode(parsedData);
+            setProjectNode(null);
+            setParentTagID(null);
+          } else {
+            setProjectNode(parsedData);
+            setParentTagID(parsedData.parent);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching root node:", error);
+    }
+  }, [parseTag, tagData]);
+
+  useEffect(() => {
+    try {
+      if (parentTagData) {
+        const parsedData = parseTag(parentTagData);
+        if (parsedData?.id === -1) {
+          setProjectNode(null);
+        } else {
+          setActivityNode(parsedData);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching root node:", error);
+    }
+  }, [parseTag, parentTagData]);
+
+  const colorPallete: Color =
+    theme.color.presets[
+      activityNode?.colorPreset ?? projectNode?.colorPreset ?? "green"
+    ];
   const styles = useStyles(colorPallete);
   const workTime: Time = session.getWorkTime();
   const breakTime: Time = session.getBreakTime();
@@ -72,18 +142,28 @@ export default function SessionElement({
       </View>
       <View style={styles.content}>
         <View style={styles.tagContainer}>
-          {activityItem && (
-            <TagsFromId
-              tagId={activityItem.id}
+          {activityNode && (
+            <Tag
+              text={activityNode.title}
+              colorPallete={colorPallete}
               desiredHeight={29}
-              fontSize={theme.fontSize.small}
+              textSize={theme.fontSize.small}
+            />
+          )}
+          {projectNode && (
+            <Tag
+              text={projectNode.title}
+              colorPallete={colorPallete}
+              isProject={true}
+              desiredHeight={29}
+              textSize={theme.fontSize.small}
             />
           )}
         </View>
         <View style={styles.footer}>
           <Text
             style={styles.textFooter}
-          >{`${session.getLapAmount()} x ${activityItem ? activityItem.lapName : "Lap"}`}</Text>
+          >{`${session.getLapAmount()} x ${projectNode?.lapName ?? activityNode?.lapName ?? "Lap"}`}</Text>
           <View style={styles.rightFooter}>
             <Text style={styles.textFooter}>
               {session.getStartTime().toString()} -{" "}
