@@ -39,7 +39,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       console.error("Error saving token:", e);
     }
   };
-  const API_URL = "http://172.0.0.1:8000/api"; // Works on iOS Simulator
+  const API_URL = "http://127.0.0.1:8000/api"; // Updated API URL
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
@@ -107,9 +107,13 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     setError("");
     try {
       console.log("Signing up with email:", email, "and password", password);
-      const response = await axios.post("http://127.0.0.1:8000/api/register/", {
+      const response = await axios.post(`${API_URL}/register/`, {
         email: email,
         password: password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       setLoading(false);
@@ -118,21 +122,20 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       const token = response.data.token;
       await saveToken(token);
 
-      // Set the token globally for future authenticated requests
       axios.defaults.headers.common.Authorization = `Token ${token}`;
-
       await fetchAndStoreTags(db, token);
       setIsLoggedIn(true);
-
       router.replace("/watch");
     } catch (err) {
       setLoading(false);
-
       if (axios.isAxiosError(err)) {
+        console.error("Signup error:", err.response?.data);
         setError(err.response?.data?.error || "An API error occurred");
       } else if (err instanceof Error) {
+        console.error("Signup error:", err);
         setError(err.message);
       } else {
+        console.error("Unknown signup error:", err);
         setError("An unknown error occurred");
       }
     }

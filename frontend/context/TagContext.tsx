@@ -81,7 +81,7 @@ const insertTag = async (
         colorPreset,
         parent,
         children: JSON.stringify(children),
-        synced,
+        synced: synced ?? 0,
       })
       .returning({ insertId: tags.id });
 

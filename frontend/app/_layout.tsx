@@ -120,35 +120,35 @@ function AppContent({
   //   setInitialFetchDone(false);
   // }, [authToken]);
 
-  // useEffect(() => {
-  //   if (authToken && initialFetchDone) {
-  //     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
-  //       if (state.isConnected) {
-  //         syncUnsyncedTags(db, authToken).catch(console.error);
-  //         syncUnsyncedSessions(db, authToken).catch(console.error);
-  //       }
-  //     });
-  //
-  //     const handleAppStateChange = (nextAppState: string) => {
-  //       if (nextAppState === "background") {
-  //         syncUnsyncedTags(db, authToken).catch(console.error);
-  //         syncUnsyncedSessions(db, authToken).catch(console.error);
-  //       }
-  //     };
-  //     const appStateSubscription = AppState.addEventListener(
-  //       "change",
-  //       handleAppStateChange,
-  //     );
-  //
-  //     const interval = setInterval(
-  //       () => {
-  //         syncUnsyncedTags(db, authToken).catch(console.error);
-  //         syncUnsyncedSessions(db, authToken).catch(console.error);
-  //       },
-  //       5 * 60 * 1000,
-  //     );
-  //   }
-  // }, [authToken, syncUnsyncedTags, syncUnsyncedSessions, initialFetchDone]);
+  useEffect(() => {
+    if (authToken) {
+      const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+        if (state.isConnected) {
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
+        }
+      });
+
+      const handleAppStateChange = (nextAppState: string) => {
+        if (nextAppState === "background") {
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
+        }
+      };
+      const appStateSubscription = AppState.addEventListener(
+        "change",
+        handleAppStateChange,
+      );
+
+      const interval = setInterval(
+        () => {
+          syncUnsyncedTags(db, authToken).catch(console.error);
+          syncUnsyncedSessions(db, authToken).catch(console.error);
+        },
+        5 * 60 * 1000,
+      );
+    }
+  }, [authToken, syncUnsyncedTags, syncUnsyncedSessions]);
 
   return (
     <Stack screenOptions={{}}>
