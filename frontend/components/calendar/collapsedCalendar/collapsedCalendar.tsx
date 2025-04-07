@@ -11,12 +11,21 @@ import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Calendar from "@assets/icons/calendar.svg";
 import { transform } from "@babel/core";
+import { Time } from "@utils/dateTimeSession";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import { DateStruct } from "@utils/dateTimeSession";
 
-export default function CollapsedCalendar({ style = {} }: { style?: object }) {
+interface CollapsedCalendarProps {
+  style?: object;
+  productiveTime: Time;
+}
+
+export default function CollapsedCalendar({
+  style = {},
+  productiveTime,
+}: CollapsedCalendarProps) {
   const styles = useStyles();
   const { theme } = useTheme();
 
@@ -121,7 +130,10 @@ export default function CollapsedCalendar({ style = {} }: { style?: object }) {
           )}
         </View>
         <Text style={styles.rightHeaderText}>
-          Productivity: <Text style={styles.productiveTimeText}>4:54:32</Text>
+          Productivity:{" "}
+          <Text style={styles.productiveTimeText}>
+            {productiveTime.toStringLong()}
+          </Text>
         </Text>
       </View>
       <View style={styles.week}>
