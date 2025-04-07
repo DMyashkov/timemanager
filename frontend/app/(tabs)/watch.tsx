@@ -54,7 +54,8 @@ export default function Watch() {
   );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isSessionRunning, setIsSessionRunning] = useState(false);
+  const [isContinuousSessionRunning, setIsContinuousSessionRunning] =
+    useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const styles = useStyles();
   const pathname = usePathname();
@@ -216,7 +217,7 @@ export default function Watch() {
           text: "End",
           style: "destructive",
           onPress: () => {
-            setIsSessionRunning(false);
+            setIsContinuousSessionRunning(false);
             setIsTimerRunning(false);
             setSelectedActivityID(null);
             setSelectedProjectID(null);
@@ -229,7 +230,7 @@ export default function Watch() {
   };
 
   const headerButtons: Button[] = [];
-  if (isSessionRunning) {
+  if (isContinuousSessionRunning) {
     headerButtons.push({
       id: "terminate",
       iconElement: <XSquare height={29} width={29} fill={theme.color.red} />,
@@ -283,7 +284,7 @@ export default function Watch() {
     <View style={styles.watchScreen}>
       <Header
         title={
-          !isSessionRunning
+          !isContinuousSessionRunning
             ? "Start Focus Timer"
             : isTimerRunning
               ? "Focus"
@@ -450,7 +451,7 @@ export default function Watch() {
                 ]}
                 onPress={() => {
                   handleSessionToggle();
-                  setIsSessionRunning(true);
+                  setIsContinuousSessionRunning(true);
                 }}
               >
                 <Text style={styles.textInsideButton}>Start</Text>
@@ -488,7 +489,7 @@ export default function Watch() {
         }}
         onActivitySelected={(activityData: TagData) => {
           handleActivitySelected(activityData);
-          setIsSessionRunning(true);
+          setIsContinuousSessionRunning(true);
           if (selectedActivityID) {
             resetTimer();
           }
