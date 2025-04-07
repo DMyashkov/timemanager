@@ -5,7 +5,7 @@ export interface Color {
   dark: string;
 }
 
-import type { Interval, Time } from "@/utils/dateTimeSession";
+import type { DateTime, Interval, Time } from "@/utils/dateTimeSession";
 
 export type TagData = {
   id: number;
@@ -26,7 +26,7 @@ export type SessionData = {
   totalWorkTime: number;
   totalBreakTime: number;
   intervals: Interval[];
-  laps: Time[];
+  laps: DateTime[];
   deleted: number;
   synced: number;
 };
