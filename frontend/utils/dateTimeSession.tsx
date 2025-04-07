@@ -161,13 +161,16 @@ export class Session {
   private totalWorkTime = 0;
   private totalBreakTime = 0;
   private tagId: number; // Foreign key reference to ActivityData
-  private laps: Time[] = [new Time(0, 0, 0), new Time(0, 0, 0)];
+  private laps: DateTime[] = [];
 
   // Constructor with overloads
   constructor(activityId: number, intervals?: Interval[]);
   constructor(sessionData: SessionData);
-  constructor(activityIdOrData: number | SessionData, intervals: Interval[] = []) {
-    if (typeof activityIdOrData === 'number') {
+  constructor(
+    activityIdOrData: number | SessionData,
+    intervals: Interval[] = [],
+  ) {
+    if (typeof activityIdOrData === "number") {
       // Regular constructor
       this.tagId = activityIdOrData;
       this.intervals = intervals;
