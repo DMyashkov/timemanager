@@ -13,43 +13,23 @@ import {
   IntervalType,
   DateStruct,
 } from "@/utils/dateTimeSession";
+import { SessionData } from "@/constants/interfaces";
 
 export default function SessionList({ style = {} }: { style?: object }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   // Get today's sessions from the hook
-  const sessionsData = useRelevantSessions();
+  const sessionsData: SessionData[] = useRelevantSessions();
+  console.log(
+    "Sessions data taken in from useReleaventSessions (sessionList):",
+    sessionsData,
+  );
 
   // Convert SessionData to Session instances
   const sessions =
     sessionsData?.map((data) => {
-      if (!data.intervals || !Array.isArray(data.intervals)) {
-        // Create a default interval if none exists to avoid errors
-        const now = new Date();
-        const defaultInterval = new Interval(
-          new DateTime(
-            new DateStruct(
-              now.getFullYear(),
-              now.getMonth() + 1,
-              now.getDate(),
-            ),
-            new Time(now.getHours(), now.getMinutes(), 0),
-          ),
-          new DateTime(
-            new DateStruct(
-              now.getFullYear(),
-              now.getMonth() + 1,
-              now.getDate(),
-            ),
-            new Time(now.getHours(), now.getMinutes() + 30, 0),
-          ),
-          IntervalType.WORK,
-        );
-        return new Session(data.tagId, [defaultInterval]);
-      }
-
-      const intervals = data.intervals.map(
+      const intervals = data?.intervals?.map(
         (interval: {
           startTime: {
             date: DateStruct;

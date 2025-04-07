@@ -45,8 +45,21 @@ const insertSession = async (
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
   console.log("Insert session:", item);
-  const { tagId, totalWorkTime, totalBreakTime, intervals, laps, synced, startTime, endTime } =
-    item;
+  const {
+    tagId,
+    totalWorkTime,
+    totalBreakTime,
+    intervals,
+    laps,
+    synced,
+    startTime,
+    endTime,
+  } = item;
+
+  // Check if intervals and laps are already strings
+  const intervalsStr =
+    typeof intervals === "string" ? intervals : JSON.stringify(intervals);
+  const lapsStr = typeof laps === "string" ? laps : JSON.stringify(laps);
 
   const result = await db
     .insert(sessions)
@@ -54,8 +67,8 @@ const insertSession = async (
       tagId,
       totalWorkTime,
       totalBreakTime,
-      intervals: JSON.stringify(intervals),
-      laps: JSON.stringify(laps),
+      intervals: intervalsStr,
+      laps: lapsStr,
       synced,
       startTime,
       endTime,

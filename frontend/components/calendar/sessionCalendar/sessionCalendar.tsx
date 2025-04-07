@@ -13,7 +13,7 @@ import {
 } from "@/utils/dateTimeSession";
 import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 import At from "@assets/icons/at.svg";
-import { moduleTypeEnum } from "@/constants/interfaces";
+import { SessionData, moduleTypeEnum } from "@/constants/interfaces";
 import ArrowRotateLeft from "@assets/icons/arrow-rotate-left.svg";
 import TagIcon from "@assets/icons/tag.svg";
 import { useRelevantSessions } from "@/hooks/useRelevantSessions";
@@ -32,17 +32,15 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   });
 
   // Get today's sessions from the hook
-  const sessionsData = useRelevantSessions();
-  console.log("Sessions data:", sessionsData);
-
+  const sessionsData: SessionData[] = useRelevantSessions();
+  console.log(
+    "Sessions data taken in from useReleaventSessions(sessionCalendar):",
+    sessionsData,
+  );
   // Convert SessionData to Session instances
   const sessions =
     sessionsData?.map((data) => {
-      if (!data.intervals || !Array.isArray(data.intervals)) {
-        return new Session(data.tagId, []);
-      }
-
-      const intervals = data.intervals.map(
+      const intervals = data?.intervals?.map(
         (interval: {
           startTime: {
             date: DateStruct;
