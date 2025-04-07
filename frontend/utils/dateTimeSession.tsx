@@ -1,5 +1,3 @@
-import type { ActivityData, DataIndex } from "@interfaces";
-
 export class DateStruct {
   year: number;
   month: number;
@@ -160,10 +158,10 @@ export class Session {
   private intervals: Interval[] = [];
   private totalWorkTime = 0;
   private totalBreakTime = 0;
-  private activityId: string; // Foreign key reference to ActivityData
+  private activityId: number; // Foreign key reference to ActivityData
   private laps: Time[] = [new Time(0, 0, 0), new Time(0, 0, 0)];
 
-  constructor(activityId: string, intervals: Interval[] = []) {
+  constructor(activityId: number, intervals: Interval[] = []) {
     this.activityId = activityId;
     this.intervals = intervals;
     this.recalculateTotals();
@@ -183,11 +181,6 @@ export class Session {
     }
   }
 
-  // Method to validate the activityId reference
-  static validateActivityId(activityId: string, dataIndex: DataIndex): boolean {
-    return Boolean(dataIndex[activityId]);
-  }
-
   // Getters
   getWorkTime(): Time {
     return Time.fromSeconds(this.totalWorkTime);
@@ -205,12 +198,7 @@ export class Session {
     return this.intervals;
   }
 
-  // Utility to get associated activity data
-  getAssociatedActivityItem(dataIndex: DataIndex): ActivityData | null {
-    return dataIndex[this.activityId]?.item || null;
-  }
-
-  getActivityId(): string {
+  getActivityId(): number {
     return this.activityId;
   }
 
