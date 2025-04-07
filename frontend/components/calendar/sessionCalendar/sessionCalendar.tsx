@@ -3,14 +3,13 @@ import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import { FlatList } from "react-native-gesture-handler";
-import { exampleSessions } from "@/constants/exampleSessions";
-import { dataIndex } from "@/constants/exampleData";
-import { IntervalType, Time } from "@/utils/dateTimeSession";
+import { Session, Time, DateTime, Interval, IntervalType } from "@/utils/dateTimeSession";
 import { blendColors, hexWithOpacity } from "@/utils/colorUtils";
 import At from "@assets/icons/at.svg";
 import { moduleTypeEnum } from "@/constants/interfaces";
 import ArrowRotateLeft from "@assets/icons/arrow-rotate-left.svg";
 import TagIcon from "@assets/icons/tag.svg";
+import { useRelevantSessions } from "@/hooks/useRelevantSessions";
 
 export default function SessionCalendar({ style = {} }: { style?: object }) {
   const { theme } = useTheme();
@@ -25,7 +24,20 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
     return `${hour}:00 ${period}`;
   });
 
-  const sessionData = exampleSessions;
+  // Get today's sessions from the hook
+  const sessionsData = useRelevantSessions();
+  
+  // Convert SessionData to Session instances
+  const sessions = sessionsData?.map(data => {
+    const intervals = data.intervals.map(interval => 
+      new Interval(
+        new DateTime(interval.startTime.date, new Time(interval.startTime.time.hours, interval.startTime.time.minutes, interval.startTime.time.seconds)),
+        new DateTime(interval.endTime.date, new Time(interval.endTime.time.hours, interval.endTime.time.minutes, interval.endTime.time.seconds)),
+        interval.type as IntervalType
+      )
+    );
+    return new Session(data.tagId, intervals);
+  }) ?? [];
 
   // State to keep track of current time
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -48,7 +60,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
 
     const relevantSessions =
       index !== 24
-        ? sessionData.filter((session) => {
+        ? sessions.filter((session) => {
             const sessionStartInHours =
               session.getStartTime().hours +
               session.getStartTime().minutes / 60;
@@ -84,7 +96,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             style={styles.line}
             onLayout={(event) => {
               if (isCurrentHour) {
-                const { width, x } = event.nativeEvent.layout;
+                const { width } = event.nativeEvent.layout;
                 setCurrentLineWidth(width);
               }
             }}
@@ -95,7 +107,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
         {relevantSessions.map((session, sessionIndex) => {
           const startTime: Time = session.getStartTime();
           const totalTime: Time = session.getTotalTime();
-          const tagId = session.getActivityId();
+          const tagId = session.getTagId();
           const intervals = session.getIntervals();
           const workTime = session.getWorkTime();
 
@@ -106,22 +118,10 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
 
           const durationInMinutes = totalTime.hours * 60 + totalTime.minutes;
           const height = (FULL_ENTRY_HEIGHT / 60) * durationInMinutes;
-          const tagItem = dataIndex[tagId]?.item;
-          const colorPallete = theme.color.presets[tagItem?.colorPreset];
 
           const breakIntervals = intervals.filter(
             (interval) => interval.type === IntervalType.BREAK,
           );
-
-          const isProject = tagItem?.type === moduleTypeEnum.project;
-          const parentId = dataIndex[tagId].path.at(-1);
-          const parentTagItem = parentId ? dataIndex[parentId]?.item : null;
-          const itemProject = isProject ? tagItem : null;
-          const itemActivity = isProject
-            ? parentTagItem
-              ? tagItem
-              : null
-            : tagItem;
 
           return (
             <View
@@ -132,29 +132,15 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                   top: topOffset,
                   overflow: "hidden",
                   height,
-                  backgroundColor: blendColors(
-                    theme.color.white,
-                    colorPallete.medium,
-                    0.8,
-                  ),
+                  backgroundColor: theme.color.presets.green.medium, // Default to green for now
                 },
               ]}
             >
               <View style={styles.content}>
                 <View style={styles.project}>
-                  {itemProject && (
-                    <>
-                      <At
-                        width={13}
-                        height={13}
-                        fill={textColor}
-                        style={styles.textSession}
-                      />
-                      <Text style={styles.textSession}>
-                        {itemProject?.title}
-                      </Text>
-                    </>
-                  )}
+                  <Text style={styles.textSession}>
+                    {tagId}
+                  </Text>
                 </View>
                 <View style={styles.footer}>
                   <Text
@@ -179,10 +165,6 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                         fill={textColor}
                         style={styles.textSession}
                       />
-                      <Text style={styles.textSession}>
-                        {" "}
-                        {itemActivity?.title}
-                      </Text>
                     </View>
                   </View>
                 </View>
@@ -206,7 +188,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
                       top: breakTopOffset,
                       height: breakHeight,
                       width: "100%",
-                      backgroundColor: hexWithOpacity(colorPallete.dark, 0.3), // 15% opacity
+                      backgroundColor: hexWithOpacity(theme.color.presets.green.dark, 0.3),
                       borderTopLeftRadius: 5,
                       borderBottomLeftRadius: 5,
                     }}
@@ -224,8 +206,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
               position: "absolute",
               top: redLineTop - 3 / 2,
               right: 0,
-              height: 3, // Thickness of the red line
-
+              height: 3,
               backgroundColor: "red",
               width: currentLineWidth,
               zIndex: 5,

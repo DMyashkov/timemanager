@@ -16,6 +16,8 @@ export const tags = sqliteTable("tags", {
 export const sessions = sqliteTable("sessions", {
   id: int("id").primaryKey({ autoIncrement: true }),
   tagId: int("tag_id"),
+  startTime: int("start_time"),
+  endTime: int("end_time"),
   totalWorkTime: int("total_work_time"),
   totalBreakTime: int("total_break_time"),
   intervals: text("intervals"),

@@ -23,6 +23,8 @@ export type TagData = {
 export type SessionData = {
   id: number;
   tagId: number;
+  startTime: number;  // Unix timestamp in milliseconds
+  endTime: number;    // Unix timestamp in milliseconds
   totalWorkTime: number;
   totalBreakTime: number;
   intervals: Interval[];

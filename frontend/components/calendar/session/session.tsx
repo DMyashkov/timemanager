@@ -13,6 +13,7 @@ import { schema, tags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { useTagContext } from "@/context/TagContext";
 import Tag from "@/components/tag/tagComponent";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
 
 export default function SessionElement({
   style = {},
@@ -23,69 +24,7 @@ export default function SessionElement({
 }) {
   const { theme } = useTheme();
   const tagId = session.getTagId();
-  const [parentTagID, setParentTagID] = useState<number | null>(null);
-  const expoDb = useSQLiteContext();
-  const db = drizzle(expoDb, { schema: schema });
-
-  const { data: tagData } = useLiveQuery(
-    db
-      .select()
-      .from(tags)
-      .where(eq(tags.id, tagId ?? -1)),
-    [tagId],
-  );
-
-  const { data: parentTagData } = useLiveQuery(
-    db
-      .select()
-      .from(tags)
-      .where(eq(tags.id, parentTagID ?? -1)),
-    [parentTagID],
-  );
-
-  const { parseTag } = useTagContext();
-
-  const [activityNode, setActivityNode] = useState<TagData | null>(null);
-  const [projectNode, setProjectNode] = useState<TagData | null>(null);
-
-  useEffect(() => {
-    try {
-      if (tagData) {
-        // console.log("moduleData", moduleData);
-        const parsedData = parseTag(tagData);
-        if (parsedData?.id === -1) {
-          setActivityNode(null);
-          setProjectNode(null);
-        } else if (parsedData) {
-          if (parsedData.moduleType === "activity") {
-            setActivityNode(parsedData);
-            setProjectNode(null);
-            setParentTagID(null);
-          } else {
-            setProjectNode(parsedData);
-            setParentTagID(parsedData.parent);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching root node:", error);
-    }
-  }, [parseTag, tagData]);
-
-  useEffect(() => {
-    try {
-      if (parentTagData) {
-        const parsedData = parseTag(parentTagData);
-        if (parsedData?.id === -1) {
-          setProjectNode(null);
-        } else {
-          setActivityNode(parsedData);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching root node:", error);
-    }
-  }, [parseTag, parentTagData]);
+  const { activityNode, projectNode } = useDerivedTags(tagId);
 
   const colorPallete: Color =
     theme.color.presets[

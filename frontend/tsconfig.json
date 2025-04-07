@@ -28,8 +28,10 @@
       ],
       "@utils/*": [
         "utils/*"
+      ],
+      "@hooks/*": [
+        "hooks/*"
       ]
-
     }
   },
   "include": [

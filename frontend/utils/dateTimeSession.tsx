@@ -160,10 +160,11 @@ export class Session {
   private intervals: Interval[] = [];
   private totalWorkTime = 0;
   private totalBreakTime = 0;
-  private tagId: number; // Foreign key reference to ActivityData
+  private tagId: number;
   private laps: DateTime[] = [];
+  private startTime: number;  // Unix timestamp in milliseconds
+  private endTime: number;    // Unix timestamp in milliseconds
 
-  // Constructor with overloads
   constructor(activityId: number, intervals?: Interval[]);
   constructor(sessionData: SessionData);
   constructor(
@@ -175,6 +176,30 @@ export class Session {
       this.tagId = activityIdOrData;
       this.intervals = intervals;
       this.recalculateTotals();
+      // Set timestamps from first and last intervals
+      if (intervals.length > 0) {
+        const firstInterval = intervals[0];
+        const lastInterval = intervals[intervals.length - 1];
+        this.startTime = new Date(
+          firstInterval.startTime.date.year,
+          firstInterval.startTime.date.month - 1, // JavaScript months are 0-based
+          firstInterval.startTime.date.day,
+          firstInterval.startTime.time.hours,
+          firstInterval.startTime.time.minutes,
+          firstInterval.startTime.time.seconds
+        ).getTime();
+        this.endTime = new Date(
+          lastInterval.endTime.date.year,
+          lastInterval.endTime.date.month - 1, // JavaScript months are 0-based
+          lastInterval.endTime.date.day,
+          lastInterval.endTime.time.hours,
+          lastInterval.endTime.time.minutes,
+          lastInterval.endTime.time.seconds
+        ).getTime();
+      } else {
+        this.startTime = 0;
+        this.endTime = 0;
+      }
     } else {
       // Constructor from SessionData
       const sessionData = activityIdOrData;
@@ -183,6 +208,8 @@ export class Session {
       this.totalBreakTime = sessionData.totalBreakTime;
       this.intervals = sessionData.intervals;
       this.laps = sessionData.laps;
+      this.startTime = sessionData.startTime;
+      this.endTime = sessionData.endTime;
     }
   }
 
@@ -191,6 +218,8 @@ export class Session {
     return {
       id: this.tagId,
       tagId: this.tagId,
+      startTime: this.startTime,
+      endTime: this.endTime,
       totalWorkTime: this.totalWorkTime,
       totalBreakTime: this.totalBreakTime,
       intervals: this.intervals,
@@ -259,5 +288,13 @@ export class Session {
 
   getEndTime(): Time {
     return this.intervals[this.intervals.length - 1].endTime.time;
+  }
+
+  getStartTimestamp(): number {
+    return this.startTime;
+  }
+
+  getEndTimestamp(): number {
+    return this.endTime;
   }
 }
