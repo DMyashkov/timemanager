@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   FlatList,
   Dimensions,
+  Alert,
 } from "react-native";
 import type { Button } from "@constants/interfaces";
 import Switch from "@assets/icons/switch.svg";
@@ -201,17 +202,38 @@ export default function Watch() {
     return theme.color.darkRed;
   };
 
+  // Handle session terminate
+  const handleSessionTerminate = () => {
+    Alert.alert(
+      "End Continious Session",
+      "Are you sure you want to terminate this continuous session?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "End",
+          style: "destructive",
+          onPress: () => {
+            setIsSessionRunning(false);
+            setIsTimerRunning(false);
+            setSelectedActivityID(null);
+            setSelectedProjectID(null);
+            setTimerSeconds(0);
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
   const headerButtons: Button[] = [];
   if (isSessionRunning) {
     headerButtons.push({
       id: "terminate",
       iconElement: <XSquare height={29} width={29} fill={theme.color.red} />,
-      onPress: () => {
-        setIsSessionRunning(false);
-        setIsTimerRunning(false);
-        setSelectedActivityID(null);
-        setSelectedProjectID(null);
-      },
+      onPress: handleSessionTerminate,
     });
   }
 
@@ -433,7 +455,9 @@ export default function Watch() {
             ]}
             renderItem={({ item }) => (
               <View style={styles.lapContainer}>
-                <Text style={styles.lapText}>Subtask {item.id}</Text>
+                <Text style={styles.lapText}>
+                  {activityNode?.lapName} {item.id}
+                </Text>
                 <Text style={styles.lapText}>{item.time}</Text>
               </View>
             )}
