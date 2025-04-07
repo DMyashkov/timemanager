@@ -1,3 +1,5 @@
+import type { SessionData } from "@/constants/interfaces";
+
 export class DateStruct {
   year: number;
   month: number;
@@ -161,10 +163,38 @@ export class Session {
   private tagId: number; // Foreign key reference to ActivityData
   private laps: Time[] = [new Time(0, 0, 0), new Time(0, 0, 0)];
 
-  constructor(activityId: number, intervals: Interval[] = []) {
-    this.tagId = activityId;
-    this.intervals = intervals;
-    this.recalculateTotals();
+  // Constructor with overloads
+  constructor(activityId: number, intervals?: Interval[]);
+  constructor(sessionData: SessionData);
+  constructor(activityIdOrData: number | SessionData, intervals: Interval[] = []) {
+    if (typeof activityIdOrData === 'number') {
+      // Regular constructor
+      this.tagId = activityIdOrData;
+      this.intervals = intervals;
+      this.recalculateTotals();
+    } else {
+      // Constructor from SessionData
+      const sessionData = activityIdOrData;
+      this.tagId = sessionData.tagId;
+      this.totalWorkTime = sessionData.totalWorkTime;
+      this.totalBreakTime = sessionData.totalBreakTime;
+      this.intervals = sessionData.intervals;
+      this.laps = sessionData.laps;
+    }
+  }
+
+  // Convert to SessionData
+  toSessionData(): SessionData {
+    return {
+      id: this.tagId,
+      tagId: this.tagId,
+      totalWorkTime: this.totalWorkTime,
+      totalBreakTime: this.totalBreakTime,
+      intervals: this.intervals,
+      laps: this.laps,
+      deleted: 0,
+      synced: 0,
+    };
   }
 
   private recalculateTotals(): void {
