@@ -9,6 +9,8 @@ class SessionSyncSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'tag_id',
+            'start_time',
+            'end_time',
             'total_work_time',
             'total_break_time',
             'intervals',
@@ -22,6 +24,8 @@ class SessionSyncSerializer(serializers.ModelSerializer):
         converted_data = {
             "id": data.get("id"),
             "tag_id": data.get("tagId"),
+            "start_time": data.get("startTime"),
+            "end_time": data.get("endTime"),
             "total_work_time": data.get("totalWorkTime"),
             "total_break_time": data.get("totalBreakTime"),
             "intervals": data.get("intervals"),
@@ -37,6 +41,8 @@ class SessionSyncSerializer(serializers.ModelSerializer):
         return {
             "id": representation["id"],
             "tagId": representation["tag_id"],
+            "startTime": representation["start_time"],
+            "endTime": representation["end_time"],
             "totalWorkTime": representation["total_work_time"],
             "totalBreakTime": representation["total_break_time"],
             "intervals": representation["intervals"],

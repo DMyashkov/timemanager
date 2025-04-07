@@ -132,6 +132,8 @@ const updateSession = async (
         ? JSON.stringify(updates.laps)
         : currentSession.laps,
     synced: 0,
+    startTime: updates.startTime ?? currentSession.startTime,
+    endTime: updates.endTime ?? currentSession.endTime,
   };
 
   await db.update(sessions).set(updatedSession).where(eq(sessions.id, id));

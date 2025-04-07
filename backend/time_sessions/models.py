@@ -4,6 +4,8 @@ import json
 class Session(models.Model):
     id = models.AutoField(primary_key=True)
     tag_id = models.IntegerField()  # Foreign key reference to ActivityData
+    start_time = models.BigIntegerField(null=True)  # Unix timestamp in milliseconds
+    end_time = models.BigIntegerField(null=True)  # Unix timestamp in milliseconds
     total_work_time = models.IntegerField(default=0)  # in seconds
     total_break_time = models.IntegerField(default=0)  # in seconds
     intervals = models.JSONField(default=list)  # Store intervals as JSON

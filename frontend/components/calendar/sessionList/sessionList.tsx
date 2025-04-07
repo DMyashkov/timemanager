@@ -33,7 +33,14 @@ export default function SessionList({ style = {} }: { style?: object }) {
       return new Session(data.tagId, [defaultInterval]);
     }
 
-    const intervals = data.intervals.map(interval => 
+    // Parse intervals if they're in string format
+    const parsedIntervals = typeof data.intervals === 'string' ? JSON.parse(data.intervals) : data.intervals;
+    
+    const intervals = parsedIntervals.map((interval: {
+      startTime: { date: DateStruct; time: { hours: number; minutes: number; seconds: number } };
+      endTime: { date: DateStruct; time: { hours: number; minutes: number; seconds: number } };
+      type: IntervalType;
+    }) => 
       new Interval(
         new DateTime(
           interval.startTime.date,
