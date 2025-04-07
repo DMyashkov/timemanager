@@ -162,8 +162,8 @@ export class Session {
   private totalBreakTime = 0;
   private tagId: number;
   private laps: DateTime[] = [];
-  private startTime: number;  // Unix timestamp in milliseconds
-  private endTime: number;    // Unix timestamp in milliseconds
+  private startTime: number; // Unix timestamp in milliseconds
+  private endTime: number; // Unix timestamp in milliseconds
 
   constructor(activityId: number, intervals?: Interval[]);
   constructor(sessionData: SessionData);
@@ -186,7 +186,7 @@ export class Session {
           firstInterval.startTime.date.day,
           firstInterval.startTime.time.hours,
           firstInterval.startTime.time.minutes,
-          firstInterval.startTime.time.seconds
+          firstInterval.startTime.time.seconds,
         ).getTime();
         this.endTime = new Date(
           lastInterval.endTime.date.year,
@@ -194,7 +194,7 @@ export class Session {
           lastInterval.endTime.date.day,
           lastInterval.endTime.time.hours,
           lastInterval.endTime.time.minutes,
-          lastInterval.endTime.time.seconds
+          lastInterval.endTime.time.seconds,
         ).getTime();
       } else {
         this.startTime = 0;
@@ -232,6 +232,10 @@ export class Session {
   private recalculateTotals(): void {
     this.totalWorkTime = 0;
     this.totalBreakTime = 0;
+
+    if (!this.intervals || this.intervals.length === 0) {
+      return;
+    }
 
     for (const interval of this.intervals) {
       const duration = interval.getDurationInSeconds();
@@ -275,18 +279,30 @@ export class Session {
   }
 
   getWorkToTotalRatio(): number {
+    if (this.totalWorkTime === 0 && this.totalBreakTime === 0) {
+      return 1; // Default to 100% work if no times are recorded
+    }
     return this.totalWorkTime / (this.totalWorkTime + this.totalBreakTime);
   }
 
   getLapAmount(): number {
+    if (!this.laps) {
+      return 0;
+    }
     return this.laps.length;
   }
 
   getStartTime(): Time {
+    if (!this.intervals || this.intervals.length === 0) {
+      return new Time(0, 0, 0);
+    }
     return this.intervals[0].startTime.time;
   }
 
   getEndTime(): Time {
+    if (!this.intervals || this.intervals.length === 0) {
+      return new Time(0, 0, 0);
+    }
     return this.intervals[this.intervals.length - 1].endTime.time;
   }
 
