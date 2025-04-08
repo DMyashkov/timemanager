@@ -109,9 +109,11 @@ export default function SessionElement({
           )}
         </View>
         <View style={styles.footer}>
-          <Text
-            style={styles.textFooter}
-          >{`${session.getLapAmount()} x ${projectNode?.lapName ?? activityNode?.lapName ?? "Lap"}`}</Text>
+          {session.getLapAmount() > 0 && (
+            <Text
+              style={styles.textFooter}
+            >{`${session.getLapAmount()} x ${projectNode?.lapName ?? activityNode?.lapName ?? "Lap"}`}</Text>
+          )}
           <View style={styles.rightFooter}>
             <Text style={styles.textFooter}>
               {session.getStartTime().toString()} -{" "}
