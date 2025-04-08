@@ -8,6 +8,13 @@
       "when": 1740320345831,
       "tag": "0000_amusing_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740320345832,
+      "tag": "0001_tasks_table",
+      "breakpoints": true
     }
   ]
 }

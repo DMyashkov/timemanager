@@ -70,6 +70,20 @@ export interface TaskProps {
   priority: priorityEnum;
 }
 
+export type TaskData = {
+  id?: number;
+  title: string;
+  description: string;
+  date: number; // Unix timestamp in milliseconds
+  activityId: number | null;
+  projectId: number | null;
+  priority: priorityEnum;
+  completed: boolean;
+  synced: number;
+  deleted: number;
+  tagId: string;
+};
+
 export function getDaysInMonth(month: number, year: number): number {
   // Validate the month range
   if (month < 1 || month > 12) {

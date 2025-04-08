@@ -67,6 +67,7 @@ const ActionSheet = ({
     <BottomSheet
       ref={bottomSheetRef}
       index={-1}
+      snapPoints={["50%"]}
       backdropComponent={renderBackdrop}
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: "transparent" }}

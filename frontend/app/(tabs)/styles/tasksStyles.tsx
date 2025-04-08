@@ -6,6 +6,7 @@ export default function useStyles() {
 
   return StyleSheet.create({
     container: {
+      overflow: "visible",
       flex: 1,
       backgroundColor: theme.color.white,
     },
@@ -13,6 +14,7 @@ export default function useStyles() {
       flex: 1,
       paddingHorizontal: 15,
       paddingTop: 15,
+      overflow: "visible",
     },
   });
 }

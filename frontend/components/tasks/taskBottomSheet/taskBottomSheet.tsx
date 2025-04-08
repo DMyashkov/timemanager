@@ -27,37 +27,88 @@ import FlagIconFull from "@assets/icons/flag-full.svg";
 import FlagIconHollow from "@assets/icons/flag.svg";
 import Checkmark from "@assets/icons/checkmark.svg";
 import WorkplaceIcon from "@assets/icons/workplace.svg";
-import { priorityEnum } from "@/constants/interfaces";
-import { dataIndex } from "@/constants/exampleData";
+import { priorityEnum, type TaskData } from "@/constants/interfaces";
 import Tag from "@/components/tag/tagComponent";
-import { moduleTypeEnum } from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
 import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
 import { router } from "expo-router";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
+import { useTaskContext } from "@/context/TaskContext";
+
+interface TaskBottomSheetProps {
+  bottomSheetRef: React.RefObject<BottomSheet>;
+  task: TaskData;
+}
 
 export default function TaskBottomSheet({
-  title = "asksak",
-  setTitle = (s: string) => {},
-  description = "",
-  setDescription = (s: string) => {},
   bottomSheetRef,
-  checkMark,
-  setCheckMark,
-  priority,
-  tagId,
-}: {
-  title: string;
-  setTitle: (s: string) => void;
-  description: string;
-  setDescription: (s: string) => void;
-  bottomSheetRef: React.RefObject<BottomSheet>;
-  checkMark: boolean;
-  setCheckMark: (s: boolean) => void;
-  priority: number;
-  tagId: string;
-}) {
-  const handleSheetChanges = useCallback((index: number) => {}, []);
+  task,
+}: TaskBottomSheetProps) {
+  const styles = useStyles();
+  const { theme } = useTheme();
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
+  const [priority, setPriority] = useState<priorityEnum>(task.priority);
+  const [date, setDate] = useState<number>(task.date);
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
+  const { updateTask } = useTaskContext();
+
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        style={{
+          backgroundColor: "#000",
+          opacity: 0.4,
+          marginTop: -20000,
+        }}
+      />
+    ),
+    [],
+  );
+
+  const handleUpdateTask = async () => {
+    if (!title || !task.id) return;
+
+    try {
+      await updateTask(db, task.id, {
+        title,
+        description,
+        date,
+        activityId: task.activityId,
+        projectId: task.projectId,
+        priority,
+        completed: task.completed,
+      });
+
+      bottomSheetRef.current?.close();
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
+
+  const handleToggleComplete = async () => {
+    if (!task.id) return;
+
+    try {
+      await updateTask(db, task.id, {
+        completed: !task.completed,
+      });
+    } catch (error) {
+      console.error("Error toggling task completion:", error);
+    }
+  };
 
   const actionSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
 
@@ -70,26 +121,7 @@ export default function TaskBottomSheet({
     calendarSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
-  const styles = useStyles();
-  const { theme } = useTheme();
-
   const isSendable = title.length > 0;
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1} // Hides the backdrop when the sheet is closed
-        appearsOnIndex={0} // Shows the backdrop when the sheet is opened
-        style={{
-          backgroundColor: "#000",
-          opacity: 0.4,
-          marginTop: -20000,
-        }}
-      />
-    ),
-    [],
-  );
 
   interface ColorCheckmarkStyles {
     backgroundColor: string;
@@ -122,27 +154,6 @@ export default function TaskBottomSheet({
         backgroundColor: theme.color.warmGrey,
       };
   }
-  const isTagProject = dataIndex[tagId].item.type === moduleTypeEnum.project;
-
-  const parentId = dataIndex[tagId].path.at(-1);
-  const itemActivity = isTagProject
-    ? parentId
-      ? dataIndex[parentId].item
-      : null
-    : dataIndex[tagId].item;
-  const itemProject = isTagProject ? dataIndex[tagId].item : null;
-
-  const [priorityLevel, setPriorityLevel] = useState(4);
-  const actionItems = actionItemsArray({
-    setPriority: (number: number) => {
-      setPriorityLevel(number);
-    },
-  });
-
-  // ##TASK## See why that is the case
-  if (!bottomSheetRef.current) {
-    return null;
-  }
 
   return (
     <>
@@ -150,13 +161,12 @@ export default function TaskBottomSheet({
         ref={bottomSheetRef}
         onChange={handleSheetChanges}
         enableDynamicSizing={false}
-        // snapPoints={["50%", "90%"]}
-        snapPoints={[1000]}
+        snapPoints={["50%", "90%"]}
         enablePanDownToClose={true}
         keyboardBehavior="extend"
         keyboardBlurBehavior="restore"
         enableContentPanningGesture={true}
-        handleIndicatorStyle={{ backgroundColor: "transparent" }}
+        handleIndicatorStyle={{ backgroundColor: theme.color.darkGrey }}
         backdropComponent={renderBackdrop}
         index={-1}
       >
@@ -171,20 +181,10 @@ export default function TaskBottomSheet({
             <BottomSheetView style={styles.titleContainer}>
               <View style={styles.firstRow}>
                 <TouchableOpacity
-                  onPress={() => {
-                    setCheckMark(!checkMark);
-                  }}
+                  onPress={handleToggleComplete}
                   activeOpacity={1}
                 >
-                  {!checkMark ? (
-                    <View style={[styles.checkMark, colorCheckmarkStyles]} />
-                  ) : (
-                    <Checkmark
-                      fill={theme.color.darkGrey}
-                      height={22.3}
-                      width={22.3}
-                    />
-                  )}
+                  {task.completed && <Text style={styles.checkmark}>✓</Text>}
                 </TouchableOpacity>
                 <BottomSheetTextInput
                   placeholder="Task Name"
@@ -233,7 +233,12 @@ export default function TaskBottomSheet({
                     width={20}
                   />
                 </View>
-                <Text style={styles.dateText}>27 Nov</Text>
+                <Text style={styles.dateText}>
+                  {new Date(date).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </Text>
               </TouchableOpacity>
               <View style={styles.separator} />
               <TouchableOpacity
@@ -255,7 +260,7 @@ export default function TaskBottomSheet({
                     />
                   )}
                 </View>
-                <Text style={styles.dateText}>Priority 1</Text>
+                <Text style={styles.dateText}>Priority {priority}</Text>
               </TouchableOpacity>
               <View style={styles.separator} />
               <View style={styles.row}>
@@ -268,37 +273,27 @@ export default function TaskBottomSheet({
                   ]}
                 >
                   <WorkplaceIcon
-                    fill={
-                      // theme.color.presets[dataIndex[tagId].item.colorPreset]
-                      //   .medium
-                      theme.color.presets.green
-                    }
+                    fill={theme.color.darkGrey}
                     height={24}
                     width={24}
                   />
                 </View>
                 <View style={styles.tagContainer}>
-                  {itemActivity && (
+                  {task.activityId && (
                     <Tag
-                      text={itemActivity.title}
+                      text={task.activityId.toString()}
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
-                      colorPallete={
-                        // theme.color.presets[itemActivity.colorPreset]
-                        theme.color.presets.green
-                      }
+                      colorPallete={theme.color.presets.blue}
                     />
                   )}
-                  {itemProject && (
+                  {task.projectId && (
                     <Tag
-                      text={itemProject.title}
+                      text={task.projectId.toString()}
                       isProject={true}
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
-                      colorPallete={
-                        // theme.color.presets[itemProject.colorPreset]
-                        theme.color.presets.green
-                      }
+                      colorPallete={theme.color.presets.green}
                     />
                   )}
                 </View>
@@ -322,7 +317,11 @@ export default function TaskBottomSheet({
       <ActionSheet
         actionTextColor={theme.color.black}
         bottomSheetRef={actionSheetRef}
-        actionItems={actionItems}
+        actionItems={actionItemsArray({
+          setPriority: (number: number) => {
+            setPriority(number as priorityEnum);
+          },
+        })}
         cancelTextStyle={{
           fontFamily: theme.font.medium,
           color: theme.color.black,
@@ -330,7 +329,13 @@ export default function TaskBottomSheet({
       />
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
-        onPickDate={() => {}}
+        onPickDate={(date) => {
+          if (date) {
+            const dateWithTime = new Date(date.year, date.month - 1, date.day);
+            dateWithTime.setHours(23, 59, 0, 0);
+            setDate(dateWithTime.getTime());
+          }
+        }}
       />
     </>
   );

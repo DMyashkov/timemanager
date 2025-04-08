@@ -6,6 +6,7 @@ export default function useStyles() {
 
   return StyleSheet.create({
     container: {
+      overflow: "visible",
       flexDirection: "column",
       gap: 15,
     },
@@ -16,6 +17,7 @@ export default function useStyles() {
     header: {
       flexDirection: "row",
       justifyContent: "space-between",
+      overflow: "visible",
     },
     date: {
       fontFamily: theme.font.medium,
@@ -33,4 +35,3 @@ export default function useStyles() {
     },
   });
 }
-

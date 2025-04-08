@@ -8,13 +8,24 @@ import BottomSheet, {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { TextInput, View, Text, Keyboard } from "react-native";
+import {
+  TextInput,
+  View,
+  Text,
+  Keyboard,
+  TouchableOpacity,
+} from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
 import type { SvgProps } from "react-native-svg";
 import ArrowUp from "@assets/icons/arrow-up.svg";
 import Calendar from "@assets/icons/calendar.svg";
 import Flag from "@assets/icons/flag.svg";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
+import { useTaskContext } from "@/context/TaskContext";
+import { priorityEnum } from "@/constants/interfaces";
 
 export default function AddTaskSheet({
   bottomSheetRef,
@@ -25,6 +36,14 @@ export default function AddTaskSheet({
 
   const [title, setTitle] = useState(""); // State for task title
   const [description, setDescription] = useState(""); // State for task description
+  const [priority, setPriority] = useState<priorityEnum>(priorityEnum.none);
+  const [date, setDate] = useState<number>(Date.now());
+  const [activityId, setActivityId] = useState<number | null>(null);
+  const [projectId, setProjectId] = useState<number | null>(null);
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
+  const { createTask } = useTaskContext();
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
@@ -41,6 +60,38 @@ export default function AddTaskSheet({
   const { theme } = useTheme();
 
   const isSendable = title.length > 0;
+
+  const handleCreateTask = async () => {
+    if (!isSendable) return;
+
+    try {
+      await createTask(db, {
+        title,
+        description,
+        date,
+        activityId,
+        projectId,
+        priority,
+        completed: false,
+        synced: 0,
+        deleted: 0,
+        tagId: (activityId || projectId || 0).toString(),
+      });
+
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setPriority(priorityEnum.none);
+      setDate(Date.now());
+      setActivityId(null);
+      setProjectId(null);
+
+      // Close the sheet
+      bottomSheetRef.current?.close();
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -109,12 +160,14 @@ export default function AddTaskSheet({
               text={"Today"}
               color={theme.color.red}
               marginBottomIcon={3}
+              onPress={() => {}}
             />
             <ButtonInsideFooterComponent
               Icon={Flag}
               text={"Priority"}
               color={theme.color.darkGrey}
               marginBottomIcon={2}
+              onPress={() => {}}
             />
           </BottomSheetView>
         </BottomSheetScrollView>
@@ -124,20 +177,22 @@ export default function AddTaskSheet({
             text="Change Activity"
             color={theme.color.darkGrey}
           />
-          <View
+          <TouchableOpacity
             style={[
               styles.sendButton,
               {
                 backgroundColor: isSendable ? theme.color.red : "#EDA59E",
               },
             ]}
+            onPress={handleCreateTask}
+            disabled={!isSendable}
           >
             <ArrowUp
               width={16}
               height={16}
               fill={isSendable ? theme.color.white : "#F6D2CE"}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
     </BottomSheet>
@@ -149,17 +204,19 @@ function ButtonInsideFooterComponent({
   text,
   color,
   marginBottomIcon = 0,
+  onPress,
 }: {
   Icon: React.FC<SvgProps>;
   text: string;
   color: string;
   marginBottomIcon?: number;
+  onPress?: () => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   return (
-    <View style={styles.changeActivityButton}>
+    <TouchableOpacity style={styles.changeActivityButton} onPress={onPress}>
       <Icon
         width={16}
         height={16}
@@ -178,6 +235,6 @@ function ButtonInsideFooterComponent({
       >
         {text}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }

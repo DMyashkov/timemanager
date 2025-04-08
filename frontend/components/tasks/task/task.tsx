@@ -8,9 +8,12 @@ import Checkmark from "@/assets/icons/checkmark.svg";
 import { priorityEnum } from "@/constants/interfaces";
 import { TaskData } from "@/constants/interfaces";
 
-function formatDate(date: Date, today: Date): string {
+function formatDate(timestamp: number, today: Date): string {
+  const date = new Date(timestamp);
   const dayInMs = 24 * 60 * 60 * 1000;
-  const diff = date.setHours(0, 0, 0, 0) - 2 * today.setHours(0, 0, 0, 0);
+  const todayStart = new Date(today).setHours(0, 0, 0, 0);
+  const dateStart = new Date(date).setHours(0, 0, 0, 0);
+  const diff = dateStart - todayStart;
 
   if (diff === 0) {
     return "Today";
@@ -29,28 +32,26 @@ function formatDate(date: Date, today: Date): string {
   return date.toLocaleDateString("en-GB", options);
 }
 
-interface SpecificTaskProps extends TaskData {
+interface TaskProps {
+  task: TaskData;
   showDateIfPassed?: boolean;
   showDateAlways?: boolean;
+  onPress?: () => void;
 }
 
 export default function Task({
-  title,
-  date,
-  description,
-  activityId: activityName = "",
-  projectId: projectName = "",
-  priority = 2,
+  task,
   showDateIfPassed = true,
   showDateAlways = false,
-}: SpecificTaskProps) {
-  const styles = useStyles(priority);
+  onPress,
+}: TaskProps) {
+  const styles = useStyles(task.priority);
   const { theme } = useTheme();
   const [checkMark, setCheckMark] = useState(false);
   const todayDate = new Date();
 
   let colorCheckmarkStyles: object;
-  switch (priority) {
+  switch (task.priority) {
     case priorityEnum.low:
       colorCheckmarkStyles = {
         backgroundColor: theme.color.presets.blue.light,
@@ -77,8 +78,11 @@ export default function Task({
   }
 
   return (
-    <View style={styles.container}>
-      {/* <TouchableOpacity style={styles.touchContainer} onPress={() => {}} /> */}
+    <TouchableOpacity 
+      style={styles.container}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <View style={styles.leftColumn}>
         <TouchableOpacity
           onPress={() => {
@@ -95,32 +99,31 @@ export default function Task({
       </View>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{task.title}</Text>
           {showDateAlways ||
-            (showDateIfPassed && date < todayDate && (
+            (showDateIfPassed && task.date < todayDate.getTime() && (
               <View style={styles.date}>
                 <Text style={styles.dateText}>
-                  {formatDate(date, todayDate)}
+                  {formatDate(task.date, todayDate)}
                 </Text>
-                {/* <Calendar fill={theme.color.darkRed} height={14} width={14} /> */}
               </View>
             ))}
         </View>
         <Text style={styles.description} numberOfLines={1}>
-          {description}
+          {task.description}
         </Text>
         <View style={styles.footer}>
           <View style={styles.tagContainer}>
-            {activityName !== "" && (
+            {task.activityId && (
               <Tag
-                text={activityName}
+                text={task.activityId.toString()}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
               />
             )}
-            {projectName !== "" && (
+            {task.projectId && (
               <Tag
-                text={projectName}
+                text={task.projectId.toString()}
                 isProject={true}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
@@ -129,6 +132,6 @@ export default function Task({
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

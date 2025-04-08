@@ -2,71 +2,83 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import Task from "@components/tasks/task/task";
+import type { TaskData } from "@/constants/interfaces";
 
-import type { TaskData } from "@constants/interfaces";
+function formatDate(timestamp: number): string {
+  const date = new Date(timestamp);
+  const today = new Date();
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const todayStart = new Date(today).setHours(0, 0, 0, 0);
+  const dateStart = new Date(date).setHours(0, 0, 0, 0);
+  const diff = dateStart - todayStart;
+
+  if (diff === 0) {
+    return "Today";
+  }
+  if (diff === dayInMs) {
+    return "Tomorrow";
+  }
+  if (diff === -dayInMs) {
+    return "Yesterday";
+  }
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: date.getFullYear() !== today.getFullYear() ? "numeric" : undefined,
+  };
+  return date.toLocaleDateString("en-GB", options);
+}
 
 export default function TaskListComponent({
-  overdueOption = false,
-  date,
-  tasks = [],
+  title,
+  tasks,
+  onReschedule,
+  onTaskPress,
 }: {
-  overdueOption?: boolean;
-  date?: Date;
+  title: string;
   tasks: TaskData[];
+  onReschedule?: () => void;
+  onTaskPress: (task: TaskData) => void;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
-  const handleReschedule = () => {};
+
+  const TaskSeparator = () => <View style={{ height: 12 }} />;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.leftHeader}>
-          <Text style={styles.date}>
-            {overdueOption ? "Overdue" : "8 Apr • Tuesday"}
-          </Text>
-          <Text style={styles.amount}>2</Text>
+          <Text style={styles.date}>{title}</Text>
+          <Text style={styles.amount}>{tasks.length}</Text>
         </View>
-        <TouchableOpacity
-          activeOpacity={overdueOption ? 0.2 : 1}
-          onPress={() => {
-            if (overdueOption) {
-              handleReschedule();
-            }
-          }}
-        >
-          <Text
-            style={[
-              styles.rightText,
-              {
-                color: overdueOption ? theme.color.darkRed : theme.color.black,
-              },
-            ]}
-          >
-            {/* {overdueOption ? "Reschedule" : "Today"} */}
-          </Text>
-        </TouchableOpacity>
+        {onReschedule && (
+          <TouchableOpacity activeOpacity={0.2} onPress={onReschedule}>
+            <Text
+              style={[
+                styles.rightText,
+                {
+                  color: theme.color.darkRed,
+                },
+              ]}
+            >
+              Reschedule
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
-      <Task
-        title="Take a pic"
-        description="Take a picture of the sunset"
-        date={new Date(new Date().setDate(new Date().getDate() - 1))}
-        projectId="Homework 1"
-        activityId="Photography"
-        priority={1}
-      />
-      <Task
-        title="Take a pic"
-        description="Take a picture of the sunset"
-        date={new Date(new Date().setDate(new Date().getDate() - 1))}
-        projectId="Homework 1"
-        activityId="Photography"
-        priority={1}
-      />
-
       <FlatList
         data={tasks}
-        renderItem={({ item }) => <Task {...item} showDateIfPassed={true} />}
+        renderItem={({ item }) => (
+          <Task
+            task={item}
+            showDateIfPassed={false}
+            onPress={() => onTaskPress(item)}
+          />
+        )}
+        keyExtractor={(item) => item.id?.toString() ?? ""}
+        ItemSeparatorComponent={TaskSeparator}
+        contentContainerStyle={{ paddingVertical: 12 }}
       />
     </View>
   );

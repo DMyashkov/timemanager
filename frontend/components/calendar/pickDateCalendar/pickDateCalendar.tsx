@@ -71,6 +71,7 @@ export default function PickDateCalendar({
   return (
     <BottomSheet
       ref={bottomSheetRef}
+      snapPoints={["75%"]}
       enablePanDownToClose={true}
       enableContentPanningGesture={true}
       handleIndicatorStyle={{ backgroundColor: theme.color.darkGrey }}

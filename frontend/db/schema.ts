@@ -26,7 +26,22 @@ export const sessions = sqliteTable("sessions", {
   deleted: int("deleted").default(0),
 });
 
+export const tasks = sqliteTable("tasks", {
+  id: int("id").primaryKey({ autoIncrement: true }),
+  title: text("title"),
+  description: text("description"),
+  date: int("date"), // Unix timestamp in milliseconds
+  activityId: int("activity_id"),
+  projectId: int("project_id"),
+  priority: int("priority"),
+  completed: int("completed").default(0),
+  synced: int("synced").default(0),
+  deleted: int("deleted").default(0),
+  tagId: text("tag_id"),
+});
+
 export const schema = {
   tags,
   sessions,
+  tasks,
 };
