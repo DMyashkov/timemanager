@@ -20,6 +20,13 @@ export default function useStyles(priority: number) {
       color: theme.color.black,
     },
     leftColumn: {},
+    checkmarkContainer: {
+      position: 'relative',
+      width: 22.3,
+      height: 22.3,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     checkMark: {
       height: 20,
       aspectRatio: 1,

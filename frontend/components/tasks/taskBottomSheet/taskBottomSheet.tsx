@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useStyles from "./styles";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import Paragraph from "@assets/icons/paragraph.svg";
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -27,7 +27,12 @@ import FlagIconFull from "@assets/icons/flag-full.svg";
 import FlagIconHollow from "@assets/icons/flag.svg";
 import Checkmark from "@assets/icons/checkmark.svg";
 import WorkplaceIcon from "@assets/icons/workplace.svg";
-import { priorityEnum, type TaskData } from "@/constants/interfaces";
+import {
+  priorityEnum,
+  type TaskData,
+  TagData,
+  moduleTypeEnum,
+} from "@/constants/interfaces";
 import Tag from "@/components/tag/tagComponent";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
@@ -37,26 +42,49 @@ import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
 import { useTaskContext } from "@/context/TaskContext";
+import PickActivity from "@/app/pickActivity";
+import { useTagContext } from "@/context/TagContext";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { DateStruct } from "@/utils/dateTimeSession";
 
 interface TaskBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet>;
   task: TaskData;
+  onTaskUpdate?: (task: TaskData) => void;
+  onTaskDelete?: (taskId: number) => void;
 }
 
-export default function TaskBottomSheet({
+export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   bottomSheetRef,
   task,
-}: TaskBottomSheetProps) {
+  onTaskUpdate,
+  onTaskDelete,
+}) => {
+  console.log("TaskbottomSheet task", task);
   const styles = useStyles();
   const { theme } = useTheme();
   const [title, setTitle] = useState(task.title);
-  const [description, setDescription] = useState(task.description);
-  const [priority, setPriority] = useState<priorityEnum>(task.priority);
+  const [description, setDescription] = useState(task.description || "");
+  const [priority, setPriority] = useState(task.priority);
   const [date, setDate] = useState<number>(task.date);
+  const [completed, setCompleted] = useState(task.completed);
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
   const { updateTask } = useTaskContext();
+  const { getTag } = useTagContext();
+  const [selectedTag, setSelectedTag] = useState<TagData | null>(null);
+
+  // Load the tag data when component mounts
+  useEffect(() => {
+    const loadTag = async () => {
+      if (task.tagId) {
+        const tag = await getTag(db, parseInt(task.tagId));
+        setSelectedTag(tag);
+      }
+    };
+    loadTag();
+  }, [task.tagId, db, getTag]);
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
@@ -78,37 +106,52 @@ export default function TaskBottomSheet({
     [],
   );
 
-  const handleUpdateTask = async () => {
-    if (!title || !task.id) return;
-
-    try {
-      await updateTask(db, task.id, {
-        title,
-        description,
-        date,
-        activityId: task.activityId,
-        projectId: task.projectId,
-        priority,
-        completed: task.completed,
-      });
-
-      bottomSheetRef.current?.close();
-    } catch (error) {
-      console.error("Error updating task:", error);
-    }
-  };
-
-  const handleToggleComplete = async () => {
+  const handleUpdateTask = useCallback(() => {
     if (!task.id) return;
 
-    try {
-      await updateTask(db, task.id, {
-        completed: !task.completed,
-      });
-    } catch (error) {
-      console.error("Error toggling task completion:", error);
-    }
+    const updatedTask: TaskData = {
+      id: task.id,
+      title,
+      description,
+      priority,
+      date,
+      completed,
+      synced: false,
+      deleted: false,
+      tagId: task.tagId,
+    };
+
+    onTaskUpdate?.(updatedTask);
+    bottomSheetRef.current?.close();
+  }, [
+    title,
+    description,
+    priority,
+    date,
+    completed,
+    task.id,
+    task.tagId,
+    bottomSheetRef,
+    onTaskUpdate,
+  ]);
+
+  const handleToggleComplete = useCallback(() => {
+    setCompleted(!completed);
+  }, [completed]);
+
+  const handleDateChange = (date: DateStruct | null) => {
+    if (!date) return;
+    // Convert DateStruct to Date and set time to 23:59
+    const selectedDate = new Date(date.year, date.month - 1, date.day);
+    selectedDate.setHours(23, 59, 0, 0);
+    setDate(selectedDate.getTime());
   };
+
+  const handleDelete = useCallback(() => {
+    if (!task.id) return;
+    onTaskDelete?.(task.id);
+    bottomSheetRef.current?.close();
+  }, [task.id, bottomSheetRef, onTaskDelete]);
 
   const actionSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
 
@@ -138,8 +181,8 @@ export default function TaskBottomSheet({
       break;
     case priorityEnum.medium:
       colorCheckmarkStyles = {
-        backgroundColor: theme.color.presets.yellow.light,
-        borderColor: theme.color.presets.yellow.dark,
+        backgroundColor: theme.color.presets.orange.light,
+        borderColor: theme.color.presets.orange.dark,
       };
       break;
     case priorityEnum.high:
@@ -154,6 +197,19 @@ export default function TaskBottomSheet({
         backgroundColor: theme.color.warmGrey,
       };
   }
+
+  const handleActivitySelected = async (newTag: TagData) => {
+    if (!task.id) return;
+
+    try {
+      await updateTask(db, task.id, {
+        tagId: newTag.id.toString(),
+      });
+      setSelectedTag(newTag);
+    } catch (error) {
+      console.error("Error updating task tag:", error);
+    }
+  };
 
   return (
     <>
@@ -184,7 +240,7 @@ export default function TaskBottomSheet({
                   onPress={handleToggleComplete}
                   activeOpacity={1}
                 >
-                  {task.completed && <Text style={styles.checkmark}>✓</Text>}
+                  {completed && <Text style={styles.checkMark}>✓</Text>}
                 </TouchableOpacity>
                 <BottomSheetTextInput
                   placeholder="Task Name"
@@ -279,21 +335,17 @@ export default function TaskBottomSheet({
                   />
                 </View>
                 <View style={styles.tagContainer}>
-                  {task.activityId && (
+                  {selectedTag && (
                     <Tag
-                      text={task.activityId.toString()}
+                      text={selectedTag.title}
+                      isProject={
+                        selectedTag.moduleType === moduleTypeEnum.project
+                      }
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
-                      colorPallete={theme.color.presets.blue}
-                    />
-                  )}
-                  {task.projectId && (
-                    <Tag
-                      text={task.projectId.toString()}
-                      isProject={true}
-                      desiredHeight={31}
-                      textSize={theme.fontSize.small}
-                      colorPallete={theme.color.presets.green}
+                      colorPallete={
+                        theme.color.presets[selectedTag.colorPreset]
+                      }
                     />
                   )}
                 </View>
@@ -306,7 +358,7 @@ export default function TaskBottomSheet({
                   marginTop: -2,
                 }}
                 onPress={() => {
-                  router.push("/pickActivity");
+                  // Implement project selection logic
                 }}
               />
               <View style={styles.bigSeparator} />
@@ -329,17 +381,11 @@ export default function TaskBottomSheet({
       />
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
-        onPickDate={(date) => {
-          if (date) {
-            const dateWithTime = new Date(date.year, date.month - 1, date.day);
-            dateWithTime.setHours(23, 59, 0, 0);
-            setDate(dateWithTime.getTime());
-          }
-        }}
+        onPickDate={handleDateChange}
       />
     </>
   );
-}
+};
 
 function ButtonInsideFooterComponent({
   Icon,

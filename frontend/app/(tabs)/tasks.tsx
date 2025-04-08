@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import TaskBottomSheetAdd from "@/components/tasks/addTask/addTaskBottomSheet";
-import TaskBottomSheet from "@/components/tasks/taskBottomSheet/taskBottomSheet";
+import { TaskBottomSheet } from "@/components/tasks/taskBottomSheet/taskBottomSheet";
 import type BottomSheet from "@gorhom/bottom-sheet";
 import useStyles from "./styles/tasksStyles";
 import Header from "@/components/header/headerBasic/header";
@@ -90,7 +90,7 @@ export default function TasksScreen() {
 
   // Query all non-deleted tasks
   const taskResults = useLiveQuery(
-    db.select().from(tasks).where(eq(tasks.deleted, 0)),
+    db.select().from(tasks).where(eq(tasks.deleted, false)),
     [],
   ).data;
 
@@ -145,15 +145,13 @@ export default function TasksScreen() {
   ];
   const dummyTask: TaskData = {
     id: 0,
-    title: "",
+    title: "Dummy",
     description: "",
     date: 0,
-    activityId: null,
-    projectId: null,
     priority: priorityEnum.none,
     completed: false,
-    synced: 0,
-    deleted: 0,
+    synced: false,
+    deleted: false,
     tagId: "",
   };
 

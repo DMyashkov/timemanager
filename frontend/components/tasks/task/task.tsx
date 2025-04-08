@@ -1,12 +1,14 @@
 import { View, Text, TouchableOpacity, Touchable } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import { useState } from "react";
+import { useCallback } from "react";
 import Calendar from "@/assets/icons/calendar.svg";
 import Tag from "@/components/tag/tagComponent";
 import Checkmark from "@/assets/icons/checkmark.svg";
 import { priorityEnum } from "@/constants/interfaces";
 import { TaskData } from "@/constants/interfaces";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 function formatDate(timestamp: number, today: Date): string {
   const date = new Date(timestamp);
@@ -47,8 +49,20 @@ export default function Task({
 }: TaskProps) {
   const styles = useStyles(task.priority);
   const { theme } = useTheme();
-  const [checkMark, setCheckMark] = useState(false);
+  const checkMarkAnim = useSharedValue(task.completed ? 1 : 0);
   const todayDate = new Date();
+  const { activityNode, projectNode } = useDerivedTags(task.tagId ? Number(task.tagId) : null);
+
+  const toggleCheckmark = useCallback(() => {
+    checkMarkAnim.value = withSpring(checkMarkAnim.value ? 0 : 1);
+  }, []);
+
+  const checkmarkAnimStyle = useAnimatedStyle(() => {
+    return {
+      opacity: checkMarkAnim.value,
+      transform: [{ scale: 1 - checkMarkAnim.value * 0.1 }],
+    };
+  });
 
   let colorCheckmarkStyles: object;
   switch (task.priority) {
@@ -85,16 +99,16 @@ export default function Task({
     >
       <View style={styles.leftColumn}>
         <TouchableOpacity
-          onPress={() => {
-            setCheckMark(!checkMark);
-          }}
+          onPress={toggleCheckmark}
           activeOpacity={1}
         >
-          {!checkMark ? (
-            <View style={[styles.checkMark, colorCheckmarkStyles]} />
-          ) : (
-            <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
-          )}
+          <Animated.View style={[styles.checkmarkContainer, checkmarkAnimStyle]}>
+            {checkMarkAnim.value === 0 ? (
+              <View style={[styles.checkMark, colorCheckmarkStyles]} />
+            ) : (
+              <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
+            )}
+          </Animated.View>
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
@@ -114,19 +128,21 @@ export default function Task({
         </Text>
         <View style={styles.footer}>
           <View style={styles.tagContainer}>
-            {task.activityId && (
+            {activityNode && (
               <Tag
-                text={task.activityId.toString()}
+                text={activityNode.title}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
+                colorPallete={theme.color.presets[activityNode.colorPreset]}
               />
             )}
-            {task.projectId && (
+            {projectNode && (
               <Tag
-                text={task.projectId.toString()}
+                text={projectNode.title}
                 isProject={true}
                 desiredHeight={28}
                 textSize={theme.fontSize.smaller}
+                colorPallete={theme.color.presets[projectNode.colorPreset]}
               />
             )}
           </View>

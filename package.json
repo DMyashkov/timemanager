@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.1.2",
     "@react-native-community/netinfo": "^11.4.1",
     "date-fns": "^4.1.0"
   }
