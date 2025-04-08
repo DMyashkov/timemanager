@@ -160,18 +160,18 @@ export class Session {
   private intervals: Interval[] = [];
   private totalWorkTime = 0;
   private totalBreakTime = 0;
-  private tagId: number;
+  private tagId: number | null;
   private laps: DateTime[] = [];
   private startTime: number; // Unix timestamp in milliseconds
   private endTime: number; // Unix timestamp in milliseconds
 
-  constructor(activityId: number, intervals?: Interval[]);
+  constructor(tagId: number | null, intervals?: Interval[]);
   constructor(sessionData: SessionData);
   constructor(
-    activityIdOrData: number | SessionData,
+    activityIdOrData: number | SessionData | null,
     intervals: Interval[] = [],
   ) {
-    if (typeof activityIdOrData === "number") {
+    if (typeof activityIdOrData === "number" || activityIdOrData === null) {
       // Regular constructor
       this.tagId = activityIdOrData;
       this.intervals = intervals;
@@ -213,10 +213,14 @@ export class Session {
     }
   }
 
+  sameSessionWithDifferentTagId(tagId: number): Session {
+    return new Session(tagId, this.intervals);
+  }
+
   // Convert to SessionData
   toSessionData(): SessionData {
     return {
-      id: 0,  // Let the database handle ID assignment
+      id: 0, // Let the database handle ID assignment
       tagId: this.tagId,
       startTime: this.startTime,
       endTime: this.endTime,

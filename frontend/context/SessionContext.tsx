@@ -75,8 +75,8 @@ const insertSession = async (
     })
     .returning({ insertId: sessions.id });
 
-  console.log("Inserted session:", result);
-  console.log("table after insert:", await db.select().from(sessions));
+  // console.log("Inserted session:", result);
+  // console.log("table after insert:", await db.select().from(sessions));
 
   return result[0].insertId;
 };
