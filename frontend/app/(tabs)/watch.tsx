@@ -48,6 +48,13 @@ import { useTagContext } from "@/context/TagContext";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
+import { time } from "console";
+
+const timerStateEnum = {
+  IDLE: 0,
+  RUNNING: 1,
+  BREAK: 2,
+};
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -59,13 +66,12 @@ export default function Watch() {
   const [fullMode, setFullMode] = useState<boolean>(false);
   const [selectedTagID, setSelectedTagID] = useState<number | null>(null);
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isContinuousSessionRunning, setIsContinuousSessionRunning] =
     useState(false);
-  const [isBreak, setIsBreak] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [currentIntervalStartTime, setCurrentIntervalStartTime] =
     useState<DateTime | null>(null);
+  const [timerState, setTimerState] = useState(timerStateEnum.IDLE);
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
@@ -78,7 +84,7 @@ export default function Watch() {
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (isTimerRunning || isBreak) {
+    if (timerState !== timerStateEnum.IDLE) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
       }, 1000);
@@ -86,7 +92,7 @@ export default function Watch() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isTimerRunning, isBreak]);
+  }, [timerState]);
 
   // Format time helper
   const formatTime = (seconds: number) => {
@@ -112,14 +118,22 @@ export default function Watch() {
   const startNewTimer = () => {
     const startDateTime = getDateTimeFromDate(new Date());
     setCurrentIntervalStartTime(startDateTime);
-    setIsTimerRunning(true);
+    setTimerState(timerStateEnum.RUNNING);
   };
 
   const [intervalsCurrentSessions, setIntervalsCurrentSession] = useState<
     Interval[]
   >([]);
 
-  const logNewInterval = (type: IntervalType) => {
+  const logNewInterval = () => {
+    if (timerState === timerStateEnum.IDLE) {
+      console.warn("Cannot log interval when timer is idle");
+      return;
+    }
+    const type =
+      timerState === timerStateEnum.RUNNING
+        ? IntervalType.WORK
+        : IntervalType.BREAK;
     const endTime = getDateTimeFromDate(new Date());
     const newInterval = new Interval(currentIntervalStartTime!, endTime, type);
     setIntervalsCurrentSession((prev) => [...prev, newInterval]);
@@ -128,27 +142,19 @@ export default function Watch() {
 
   // Handle session start/stop
   const handleSessionToggle = () => {
-    if (!isTimerRunning && !isBreak) {
+    if (timerState === timerStateEnum.IDLE) {
       startNewTimer();
       setIsContinuousSessionRunning(true);
-      setIsTimerRunning(true);
-    } else if (isTimerRunning) {
-      logNewInterval(IntervalType.WORK);
-      setIsBreak(true);
-      setIsTimerRunning(false);
-      setTimerSeconds(0);
-    } else if (isBreak) {
-      logNewInterval(IntervalType.BREAK);
-      setIsBreak(false);
-      setIsTimerRunning(true);
+    } else {
+      logNewInterval();
+      setTimerState(timerStateEnum.RUNNING + timerStateEnum.BREAK - timerState);
       setTimerSeconds(0);
     }
   };
 
   const terminateSession = () => {
     setIsContinuousSessionRunning(false);
-    setIsTimerRunning(false);
-    setIsBreak(false);
+    setTimerState(timerStateEnum.IDLE);
     setSelectedTagID(null);
     setTimerSeconds(0);
     setCurrentIntervalStartTime(null);
@@ -168,7 +174,7 @@ export default function Watch() {
           text: "End",
           style: "destructive",
           onPress: async () => {
-            logNewInterval(isBreak ? IntervalType.BREAK : IntervalType.WORK);
+            logNewInterval();
             const finalSession = new Session(
               selectedTagID,
               intervalsCurrentSessions,
@@ -193,34 +199,24 @@ export default function Watch() {
   };
 
   const handleActivitySelected = async (activity: TagData) => {
-    console.log(
-      "Selected activity:",
-      activity.id,
-      "Current activity:",
-      selectedTagID,
-    );
-
     if (activity.id === selectedTagID) {
       return;
+    }
+    if (timerState === timerStateEnum.IDLE) {
+      setIsContinuousSessionRunning(true);
     }
     if (!selectedTagID) {
       setSelectedTagID(activity.id);
       return;
     }
-    if (selectedTagID)
-      logNewInterval(isBreak ? IntervalType.BREAK : IntervalType.WORK);
+    if (selectedTagID) logNewInterval();
     const finalSession = new Session(activity.id, intervalsCurrentSessions);
-
-    setIsBreak(false);
     setTimerSeconds(0);
+    setIntervalsCurrentSession([]);
 
     try {
       const sessionData = finalSession.toSessionData();
-      // Create a new session data object with all required fields
-      const newSessionData = {
-        ...sessionData,
-      };
-      await createSession(db, newSessionData);
+      await createSession(db, sessionData);
     } catch (error) {
       console.error("Failed to save session:", error);
     }
@@ -288,8 +284,11 @@ export default function Watch() {
   const buttonAnim = useSharedValue(0);
 
   useEffect(() => {
-    buttonAnim.value = withTiming(isTimerRunning ? 1 : 0, { duration: 300 });
-  }, [isTimerRunning, buttonAnim]);
+    buttonAnim.value = withTiming(
+      timerState === timerStateEnum.RUNNING ? 1 : 0,
+      { duration: 300 },
+    );
+  }, [timerState, buttonAnim]);
 
   const buttonAnimStyles = {
     runningButtons: useAnimatedStyle(() => ({
@@ -310,15 +309,15 @@ export default function Watch() {
     <View style={styles.watchScreen}>
       <Header
         title={
-          !isContinuousSessionRunning
+          timerState === timerStateEnum.IDLE
             ? "Start Focus Timer"
-            : isBreak
+            : timerState === timerStateEnum.BREAK
               ? "Break"
               : "Focus"
         }
         additionalTitleStyles={{
           color:
-            isTimerRunning || isBreak
+            timerState === timerStateEnum.RUNNING
               ? theme.color.red
               : theme.color.darkestGrey,
         }}
@@ -342,7 +341,7 @@ export default function Watch() {
                 <Tag
                   text={activityNode.title}
                   colorPallete={
-                    isTimerRunning
+                    timerState === timerStateEnum.RUNNING
                       ? theme.color.presets[activityNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -357,7 +356,7 @@ export default function Watch() {
                   isProject={true}
                   text={projectNode.title}
                   colorPallete={
-                    isTimerRunning
+                    timerState === timerStateEnum.RUNNING
                       ? theme.color.presets[projectNode.colorPreset]
                       : {
                           light: theme.color.lightestGrey,
@@ -369,13 +368,13 @@ export default function Watch() {
               )}
               <TouchableOpacity
                 onPress={() => {
-                  if (isTimerRunning) {
+                  if (timerState === timerStateEnum.RUNNING) {
                     handlePickActivity();
                   } else {
                   }
                 }}
                 style={{
-                  opacity: isTimerRunning ? 1 : 0,
+                  opacity: timerState === timerStateEnum.RUNNING ? 1 : 0,
                 }}
               >
                 <Edit
@@ -440,7 +439,7 @@ export default function Watch() {
                   { backgroundColor: getButtonColor() },
                 ]}
                 onPress={() => {}}
-                disabled={!isBreak}
+                disabled={timerState !== timerStateEnum.BREAK}
               >
                 <Text style={styles.textInsideButton}>Next</Text>
               </TouchableOpacity>
@@ -469,7 +468,7 @@ export default function Watch() {
                   { backgroundColor: getButtonColor() },
                 ]}
                 onPress={handleSessionToggle}
-                disabled={isBreak}
+                disabled={timerState === timerStateEnum.BREAK}
               >
                 <Text style={styles.textInsideButton}>Break</Text>
               </TouchableOpacity>
@@ -519,10 +518,7 @@ export default function Watch() {
           setIsPickActivityVisible(false);
         }}
         onActivitySelected={(activityData: TagData) => {
-          console.log("HIII");
           handleActivitySelected(activityData);
-          setIsContinuousSessionRunning(true);
-          setIsTimerRunning(true);
         }}
         pickButtonText={selectedTagID ? "Start new timer" : "Choose"}
       />

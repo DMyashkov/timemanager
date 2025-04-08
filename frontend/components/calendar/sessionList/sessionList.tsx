@@ -28,41 +28,47 @@ export default function SessionList({ style = {} }: { style?: object }) {
 
   // Convert SessionData to Session instances
   const sessions =
-    sessionsData?.map((data) => {
-      const intervals = data?.intervals?.map(
-        (interval: {
-          startTime: {
-            date: DateStruct;
-            time: { hours: number; minutes: number; seconds: number };
-          };
-          endTime: {
-            date: DateStruct;
-            time: { hours: number; minutes: number; seconds: number };
-          };
-          type: IntervalType;
-        }) =>
-          new Interval(
-            new DateTime(
-              interval.startTime.date,
-              new Time(
-                interval.startTime.time.hours,
-                interval.startTime.time.minutes,
-                interval.startTime.time.seconds,
+    sessionsData
+      ?.map((data) => {
+        const intervals = data?.intervals?.map(
+          (interval: {
+            startTime: {
+              date: DateStruct;
+              time: { hours: number; minutes: number; seconds: number };
+            };
+            endTime: {
+              date: DateStruct;
+              time: { hours: number; minutes: number; seconds: number };
+            };
+            type: IntervalType;
+          }) =>
+            new Interval(
+              new DateTime(
+                interval.startTime.date,
+                new Time(
+                  interval.startTime.time.hours,
+                  interval.startTime.time.minutes,
+                  interval.startTime.time.seconds,
+                ),
               ),
-            ),
-            new DateTime(
-              interval.endTime.date,
-              new Time(
-                interval.endTime.time.hours,
-                interval.endTime.time.minutes,
-                interval.endTime.time.seconds,
+              new DateTime(
+                interval.endTime.date,
+                new Time(
+                  interval.endTime.time.hours,
+                  interval.endTime.time.minutes,
+                  interval.endTime.time.seconds,
+                ),
               ),
+              interval.type as IntervalType,
             ),
-            interval.type as IntervalType,
-          ),
-      );
-      return new Session(data.tagId, intervals);
-    }) ?? [];
+        );
+        return new Session(data.tagId, intervals);
+      })
+      ?.sort((a, b) => {
+        const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+        const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+        return bEnd - aEnd; // descending
+      }) ?? [];
   console.log(
     "SESSION DATA PARSING ",
     sessionsData,

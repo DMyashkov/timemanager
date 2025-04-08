@@ -132,6 +132,17 @@ export class DateTime {
   toString(): string {
     return `${this.date.toString()} ${this.time.toString()}`;
   }
+
+  toDate(): Date {
+    return new Date(
+      this.date.year,
+      this.date.month - 1, // JavaScript months are 0-based
+      this.date.day,
+      this.time.hours,
+      this.time.minutes,
+      this.time.seconds
+    );
+  }
 }
 
 export class Interval {
@@ -268,8 +279,15 @@ export class Session {
     return this.intervals;
   }
 
-  getTagId(): number {
+  getTagId(): number | null {
     return this.tagId;
+  }
+
+  getLatestEndTime(): DateTime | null {
+    if (this.intervals.length === 0) {
+      return null;
+    }
+    return this.intervals[this.intervals.length - 1].endTime;
   }
 
   // Example toString() method
