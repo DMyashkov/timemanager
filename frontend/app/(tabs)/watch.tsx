@@ -47,6 +47,7 @@ import PickActivity from "@/app/pickActivity";
 import { useTagContext } from "@/context/TagContext";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
 
 export default function Watch() {
   const additionalStyleConstants = {
@@ -57,9 +58,6 @@ export default function Watch() {
   const { theme } = useTheme();
   const [fullMode, setFullMode] = useState<boolean>(false);
   const [selectedTagID, setSelectedTagID] = useState<number | null>(null);
-  const [selectedProjectID, setSelectedProjectID] = useState<number | null>(
-    null,
-  );
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isContinuousSessionRunning, setIsContinuousSessionRunning] =
@@ -152,7 +150,6 @@ export default function Watch() {
     setIsTimerRunning(false);
     setIsBreak(false);
     setSelectedTagID(null);
-    setSelectedProjectID(null);
     setTimerSeconds(0);
     setCurrentIntervalStartTime(null);
   };
@@ -203,15 +200,15 @@ export default function Watch() {
       selectedTagID,
     );
 
-    if (
-      (activity.moduleType === moduleTypeEnum.activity &&
-        activity.id === selectedTagID) ||
-      (activity.moduleType === moduleTypeEnum.project &&
-        activity.id === selectedProjectID)
-    ) {
+    if (activity.id === selectedTagID) {
       return;
     }
-    logNewInterval(isBreak ? IntervalType.BREAK : IntervalType.WORK);
+    if (!selectedTagID) {
+      setSelectedTagID(activity.id);
+      return;
+    }
+    if (selectedTagID)
+      logNewInterval(isBreak ? IntervalType.BREAK : IntervalType.WORK);
     const finalSession = new Session(activity.id, intervalsCurrentSessions);
 
     setIsBreak(false);
@@ -231,79 +228,9 @@ export default function Watch() {
     setSelectedTagID(activity.id);
   };
 
-  const { data: activityData } = useLiveQuery(
-    db
-      .select()
-      .from(tags)
-      .where(eq(tags.id, selectedTagID ?? 0)),
-    [selectedTagID],
-  );
-
-  const { data: projectData } = useLiveQuery(
-    db
-      .select()
-      .from(tags)
-      .where(eq(tags.id, selectedProjectID ?? 0)),
-    [selectedProjectID],
-  );
-
-  const { parseTag } = useTagContext();
-
-  const [activityNode, setActivityNode] = useState<TagData | null>(null);
-  const [projectNode, setProjectNode] = useState<TagData | null>(null);
-
-  useEffect(() => {
-    try {
-      if (activityData) {
-        // console.log("moduleData", moduleData);
-        const parsedData = parseTag(activityData);
-        if (parsedData?.id === 0) {
-          setActivityNode(null);
-        } else {
-          setActivityNode(parsedData);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching root node:", error);
-    }
-  }, [parseTag, activityData]);
-
-  useEffect(() => {
-    try {
-      if (projectData) {
-        const parsedData = parseTag(projectData);
-        if (parsedData?.id === 0) {
-          setProjectNode(null);
-        } else {
-          setProjectNode(parsedData);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching root node:", error);
-    }
-  }, [parseTag, projectData]);
-
-  // Handle edit activity
-  const handleEditActivity = () => {
-    handlePickActivity(); // Reuse the same flow for editing
-  };
-
-  useEffect(() => {
-    // Listen for URL changes
-    if (pathname === "/watch" && params.selectedActivity) {
-      try {
-        const activity = JSON.parse(params.selectedActivity as string);
-        setSelectedTagID(activity);
-      } catch (e) {
-        console.error("Failed to parse selected activity:", e);
-      }
-    }
-  }, [pathname, params.selectedActivity]);
+  const { activityNode, projectNode } = useDerivedTags(selectedTagID);
 
   const fullModeAnim = useSharedValue(0);
-  const resetTimer = () => {
-    setTimerSeconds(0);
-  };
 
   const screenHeight = Dimensions.get("window").height;
   const lapsViewMaxHeight =

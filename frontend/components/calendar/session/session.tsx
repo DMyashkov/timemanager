@@ -25,15 +25,15 @@ export default function SessionElement({
   const { theme } = useTheme();
   const tagId = session.getTagId();
   const { activityNode, projectNode } = useDerivedTags(tagId);
-  console.log(
-    "tagId in sessionElement:",
-    tagId,
-  );
-  console.log(
-    "activityNode and projectNode in sessionElement:",
-    activityNode,
-    projectNode,
-  );
+  // console.log(
+  //   "tagId in sessionElement:",
+  //   tagId,
+  // );
+  // console.log(
+  //   "activityNode and projectNode in sessionElement:",
+  //   activityNode,
+  //   projectNode,
+  // );
 
   const colorPallete: Color =
     theme.color.presets[

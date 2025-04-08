@@ -32,8 +32,8 @@ export function useDerivedTags(tagId: number | null) {
     [parentTagID],
   );
 
-  console.log("tagData and parentTagData:", tagData, parentTagData);
-  console.log("ActivityNode and ProjectNode:", activityNode, projectNode);
+  // console.log("tagData and parentTagData:", tagData, parentTagData);
+  // console.log("ActivityNode and ProjectNode:", activityNode, projectNode);
 
   useEffect(() => {
     try {
