@@ -39,11 +39,11 @@ export function useDerivedTags(tagId: number | null) {
     try {
       if (tagData && tagData.length > 0) {
         const parsedData = parseTag(tagData);
-        console.log("Parsed tagData:", parsedData);
+        // console.log("Parsed tagData:", parsedData);
         if (parsedData) {
           if (parsedData.moduleType === "activity") {
             setActivityNode(parsedData);
-            console.log("SETTING ACTIVITY NODE");
+            // console.log("SETTING ACTIVITY NODE");
             setProjectNode(null);
             setParentTagID(null);
           } else {
@@ -51,7 +51,7 @@ export function useDerivedTags(tagId: number | null) {
             setParentTagID(parsedData.parent);
           }
         } else {
-          console.log("Parsed data is null");
+          // console.log("Parsed data is null");
           setActivityNode(null);
           setProjectNode(null);
         }
