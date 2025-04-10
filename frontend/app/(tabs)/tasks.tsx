@@ -39,6 +39,12 @@ type OverdueGroup = {
   onReschedule: () => void;
 };
 
+type NoDateGroup = {
+  type: "noDate";
+  title: string;
+  tasks: TaskData[];
+};
+
 function formatDateTitle(timestamp: number): string {
   const date = new Date(timestamp);
   const today = new Date();
@@ -100,6 +106,14 @@ export default function TasksScreen() {
   // Group tasks by date
   const taskGroups = allTasks.reduce(
     (groups, task) => {
+      if (!task.date) {
+        if (!groups.noDate) {
+          groups.noDate = [];
+        }
+        groups.noDate.push(task);
+        return groups;
+      }
+
       const taskDate = new Date(task.date);
       taskDate.setHours(0, 0, 0, 0);
       const dateKey = taskDate.getTime();
@@ -115,14 +129,15 @@ export default function TasksScreen() {
       groups[dateKey].push(task);
       return groups;
     },
-    {} as Record<number, TaskData[]>,
+    {} as Record<number | 'noDate', TaskData[]>,
   );
 
   // Get overdue tasks
-  const overdueTasks = allTasks.filter((task) => task.date < todayStart);
+  const overdueTasks = allTasks.filter((task) => task.date && task.date < todayStart);
 
   // Sort task groups by date
   const sortedGroups = Object.entries(taskGroups)
+    .filter(([key]) => key !== 'noDate')
     .sort(([dateA], [dateB]) => Number(dateA) - Number(dateB))
     .map(([date, tasks]) => ({
       type: "date" as const,
@@ -132,7 +147,7 @@ export default function TasksScreen() {
     }));
 
   // Prepare data for FlatList
-  const listData: (TaskGroup | OverdueGroup)[] = [
+  const listData: (TaskGroup | OverdueGroup | NoDateGroup)[] = [
     ...(overdueTasks.length > 0
       ? [
           {
@@ -145,7 +160,17 @@ export default function TasksScreen() {
           },
         ]
       : []),
-    ...sortedGroups,
+    ...sortedGroups.filter(group => group.title === "Today"),
+    ...(taskGroups.noDate
+      ? [
+          {
+            type: "noDate" as const,
+            title: "No Date",
+            tasks: taskGroups.noDate,
+          },
+        ]
+      : []),
+    ...sortedGroups.filter(group => group.title !== "Today"),
   ];
   const dummyTask: TaskData = {
     id: 0,
@@ -194,7 +219,11 @@ export default function TasksScreen() {
             />
           )}
           keyExtractor={(item) =>
-            item.type === "overdue" ? "overdue" : item.date.toString()
+            item.type === "overdue" 
+              ? "overdue" 
+              : item.type === "noDate"
+                ? "noDate"
+                : item.date.toString()
           }
           contentContainerStyle={{ overflow: "visible" }}
           ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
