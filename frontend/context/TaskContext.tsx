@@ -40,34 +40,39 @@ const insertTask = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: TaskData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
+  console.log("Inserting task into database with data:", item);
   const {
     id,
     title,
     description,
     date,
-    activityId,
-    projectId,
     priority,
     completed,
     synced,
+    tagId,
   } = item;
 
-  const result = await db
-    .insert(tasks)
-    .values({
-      id,
-      title,
-      description,
-      date,
-      activityId,
-      projectId,
-      priority,
-      completed: completed ? 1 : 0,
-      synced: synced ?? 0,
-    })
-    .returning({ insertId: tasks.id });
+  try {
+    const result = await db
+      .insert(tasks)
+      .values({
+        title,
+        description,
+        date,
+        priority,
+        completed: completed ? 1 : 0,
+        synced: synced ? 1 : 0,
+        deleted: 0,
+        tagId,
+      })
+      .returning({ insertId: tasks.id });
 
-  return result[0].insertId;
+    console.log("Database insert result:", result);
+    return result[0].insertId;
+  } catch (error) {
+    console.error("Error inserting task into database:", error);
+    throw error;
+  }
 };
 
 const parseTask = (result: (typeof tasks.$inferSelect)[]): TaskData | null => {

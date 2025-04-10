@@ -25,7 +25,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
 import { useTaskContext } from "@/context/TaskContext";
-import { priorityEnum } from "@/constants/interfaces";
+import { priorityEnum, type TaskData } from "@/constants/interfaces";
 
 export default function AddTaskSheet({
   bottomSheetRef,
@@ -64,19 +64,22 @@ export default function AddTaskSheet({
   const handleCreateTask = async () => {
     if (!isSendable) return;
 
+    const taskData = {
+      title,
+      description,
+      date,
+      priority,
+      completed: false,
+      synced: false,
+      deleted: false,
+      tagId: projectId ? projectId.toString() : activityId ? activityId.toString() : "",
+    };
+
+    console.log("Attempting to create task with data:", taskData);
+
     try {
-      await createTask(db, {
-        title,
-        description,
-        date,
-        activityId,
-        projectId,
-        priority,
-        completed: false,
-        synced: 0,
-        deleted: 0,
-        tagId: (activityId || projectId || 0).toString(),
-      });
+      const taskId = await createTask(db, taskData);
+      console.log("Task created successfully with ID:", taskId);
 
       // Reset form
       setTitle("");

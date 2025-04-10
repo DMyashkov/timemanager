@@ -97,7 +97,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   }, [task.tagId, getTag]);
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+    // console.log("handleSheetChanges", index);
   }, []);
 
   const renderBackdrop = useCallback(
@@ -272,7 +272,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
-    
+
     try {
       await updateTask(db, task.id, { tagId: newTag.id.toString() });
       setSelectedTag(newTag);
