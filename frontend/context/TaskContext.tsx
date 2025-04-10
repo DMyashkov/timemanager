@@ -96,13 +96,22 @@ const updateTask = async (
   id: number,
   updates: Partial<TaskData>,
 ): Promise<void> => {
+  console.log("Updating task with ID:", id, "with data:", updates);
   const dbUpdates: Partial<typeof tasks.$inferInsert> = {
     ...updates,
     completed: updates.completed ? 1 : 0,
     synced: 0,
   };
+  console.log("WOWOO");
 
-  await db.update(tasks).set(dbUpdates).where(eq(tasks.id, id));
+  try {
+    console.log(dbUpdates);
+    await db.update(tasks).set(dbUpdates).where(eq(tasks.id, id));
+    console.log("After update");
+  } catch (error) {
+    console.error("Error updating task:", error);
+    throw error;
+  }
 };
 
 const deleteTask = async (
@@ -234,4 +243,3 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
     </TaskContext.Provider>
   );
 }
-

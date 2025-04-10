@@ -1,10 +1,18 @@
 import { StyleSheet } from "react-native";
 import { useTheme } from "@context/ThemeContext";
+import { useSQLiteContext } from "@contexts/SQLiteContext";
+import { useMemo } from "react";
+import { useEffect } from "react";
+import { drizzle } from "drizzle-orm";
+import { getTag } from "@lib/tags";
 
 export default function useStyles() {
   const { theme } = useTheme();
   const HIT_SLOP_TEXT_INPUT = 10;
   const SEND_BUTTON_SIZE = 34;
+
+  const expoDb = useSQLiteContext();
+  const db = useMemo(() => drizzle(expoDb, { schema }), [expoDb]);
 
   return StyleSheet.create({
     contentContainer: {

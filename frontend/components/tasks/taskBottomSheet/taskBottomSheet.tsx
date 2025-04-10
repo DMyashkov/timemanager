@@ -46,6 +46,7 @@ import PickActivity from "@/app/pickActivity";
 import { useTagContext } from "@/context/TagContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { DateStruct } from "@/utils/dateTimeSession";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
 
 interface TaskBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet>;
@@ -73,7 +74,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const db = drizzle(expoDb, { schema });
   const { updateTask } = useTaskContext();
   const { getTag } = useTagContext();
-  const [selectedTag, setSelectedTag] = useState<TagData | null>(null);
+  const [selectedTagID, setSelectedTagID] = useState<number | null>(null);
 
   useEffect(() => {
     if (task) {
@@ -82,22 +83,11 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       setPriority(task.priority);
       setDate(task.date);
       setCompleted(task.completed);
-      setSelectedTag(null);
+      setSelectedTagID(task.tagId);
     }
   }, [task]);
 
-  // Load the tag data when component mounts
-  useEffect(() => {
-    const loadTag = async () => {
-      if (task.tagId) {
-        const tag = await getTag(db, task.tagId);
-        setSelectedTag(tag);
-      } else {
-        setSelectedTag(null);
-      }
-    };
-    loadTag();
-  }, [task.tagId, getTag, db]);
+  const { activityNode, projectNode } = useDerivedTags(selectedTagID);
 
   const handleSheetChanges = useCallback((index: number) => {
     // console.log("handleSheetChanges", index);
@@ -275,10 +265,12 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
+    console.log("Selected tag:", newTag);
+    console.log("YAHOOOO");
 
     try {
       await updateTask(db, task.id, { tagId: newTag.id });
-      setSelectedTag(newTag);
+      setSelectedTagID(newTag.id);
       onTaskUpdate?.({ ...task, tagId: newTag.id });
     } catch (error) {
       console.error("Error updating task tag:", error);
@@ -411,16 +403,29 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   />
                 </View>
                 <View style={styles.tagContainer}>
-                  {selectedTag && (
+                  {activityNode && (
                     <Tag
-                      text={selectedTag.title}
+                      text={activityNode.title}
                       isProject={
-                        selectedTag.moduleType === moduleTypeEnum.project
+                        activityNode.moduleType === moduleTypeEnum.project
                       }
                       desiredHeight={31}
                       textSize={theme.fontSize.small}
                       colorPallete={
-                        theme.color.presets[selectedTag.colorPreset]
+                        theme.color.presets[activityNode.colorPreset]
+                      }
+                    />
+                  )}
+                  {projectNode && (
+                    <Tag
+                      text={projectNode.title}
+                      isProject={
+                        projectNode.moduleType === moduleTypeEnum.project
+                      }
+                      desiredHeight={31}
+                      textSize={theme.fontSize.small}
+                      colorPallete={
+                        theme.color.presets[projectNode.colorPreset]
                       }
                     />
                   )}
@@ -463,7 +468,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
           setIsPickActivityVisible(false);
         }}
         onActivitySelected={handleActivitySelected}
-        pickButtonText={selectedTag ? "Change" : "Choose"}
+        pickButtonText={selectedTagID ? "Change" : "Choose"}
       />
     </>
   );
