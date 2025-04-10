@@ -32,6 +32,13 @@ type TaskGroup = {
   date: number;
 };
 
+type NoDateGroup = {
+  type: "no_date";
+  title: string;
+  tasks: TaskData[];
+  date: number;
+};
+
 type OverdueGroup = {
   type: "overdue";
   title: string;
@@ -89,7 +96,7 @@ export default function TasksScreen() {
 
   // Query all non-deleted tasks
   const taskResults = useLiveQuery(
-    db.select().from(tasks).where(eq(tasks.deleted, false)),
+    db.select().from(tasks).where(eq(tasks.deleted, 0)),
     [],
   ).data;
 
@@ -100,6 +107,14 @@ export default function TasksScreen() {
   // Group tasks by date
   const taskGroups = allTasks.reduce(
     (groups, task) => {
+      if (task.date === null) {
+        if (!groups.no_date) {
+          groups.no_date = [];
+        }
+        groups.no_date.push(task);
+        return groups;
+      }
+
       const taskDate = new Date(task.date);
       taskDate.setHours(0, 0, 0, 0);
       const dateKey = taskDate.getTime();
@@ -115,24 +130,30 @@ export default function TasksScreen() {
       groups[dateKey].push(task);
       return groups;
     },
-    {} as Record<number, TaskData[]>,
+    {} as Record<string | number, TaskData[]>,
   );
 
   // Get overdue tasks
-  const overdueTasks = allTasks.filter((task) => task.date < todayStart);
+  const overdueTasks = allTasks.filter(
+    (task) => task.date !== null && task.date < todayStart,
+  );
 
   // Sort task groups by date
   const sortedGroups = Object.entries(taskGroups)
-    .sort(([dateA], [dateB]) => Number(dateA) - Number(dateB))
+    .sort(([dateA], [dateB]) => {
+      if (dateA === "no_date") return 1;
+      if (dateB === "no_date") return -1;
+      return Number(dateA) - Number(dateB);
+    })
     .map(([date, tasks]) => ({
-      type: "date" as const,
-      title: formatDateTitle(Number(date)),
+      type: date === "no_date" ? ("no_date" as const) : ("date" as const),
+      title: date === "no_date" ? "No Date" : formatDateTitle(Number(date)),
       tasks,
-      date: Number(date),
+      date: date === "no_date" ? 0 : Number(date),
     }));
 
   // Prepare data for FlatList
-  const listData: (TaskGroup | OverdueGroup)[] = [
+  const listData: (TaskGroup | NoDateGroup | OverdueGroup)[] = [
     ...(overdueTasks.length > 0
       ? [
           {
@@ -154,9 +175,9 @@ export default function TasksScreen() {
     date: 0,
     priority: priorityEnum.none,
     completed: false,
-    synced: false,
-    deleted: false,
-    tagId: "",
+    synced: 0,
+    deleted: 0,
+    tagId: null,
   };
 
   return (

@@ -82,6 +82,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       setPriority(task.priority);
       setDate(task.date);
       setCompleted(task.completed);
+      setSelectedTag(null);
     }
   }, [task]);
 
