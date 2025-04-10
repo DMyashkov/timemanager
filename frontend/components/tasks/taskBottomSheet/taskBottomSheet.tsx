@@ -18,6 +18,8 @@ import {
   Modal,
   Touchable,
 } from "react-native";
+import TrashIcon from "@assets/icons/trash-can.svg";
+import XIcon from "@assets/icons/x.svg";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
 import type { SvgProps } from "react-native-svg";
@@ -304,6 +306,28 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
         index={-1}
       >
         <View style={styles.outer}>
+          {/* <BottomSheetView style={styles.topView}> */}
+          {/*   <View style={styles.topIcon}> */}
+          {/*     <TrashIcon */}
+          {/*       fill={theme.color.darkGrey} */}
+          {/*       height={17} */}
+          {/*       width={20} */}
+          {/*       onPress={() => { */}
+          {/*         handleDelete(); */}
+          {/*       }} */}
+          {/*     /> */}
+          {/*   </View> */}
+          {/*   <View style={styles.topIcon}> */}
+          {/*     <XIcon */}
+          {/*       fill={theme.color.darkGrey} */}
+          {/*       height={20} */}
+          {/*       width={20} */}
+          {/*       onPress={() => { */}
+          {/*         handleDelete(); */}
+          {/*       }} */}
+          {/*     /> */}
+          {/*   </View> */}
+          {/* </BottomSheetView> */}
           <BottomSheetScrollView
             style={styles.contentContainer}
             contentContainerStyle={{

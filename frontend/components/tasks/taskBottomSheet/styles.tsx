@@ -5,6 +5,7 @@ export default function useStyles() {
   const { theme } = useTheme();
   const HIT_SLOP_TEXT_INPUT = 10;
   const SEND_BUTTON_SIZE = 34;
+  const TOP_ICON_SIZE = 30;
 
   return StyleSheet.create({
     contentContainer: {
@@ -132,6 +133,20 @@ export default function useStyles() {
       width: "200%",
       marginLeft: -22,
       marginTop: 14,
+    },
+    topIcon: {
+      height: TOP_ICON_SIZE,
+      backgroundColor: theme.color.lightGrey,
+      justifyContent: "center",
+      alignItems: "center",
+      aspectRatio: 1,
+      zIndex: 3,
+    },
+    topView: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      paddingHorizontal: 22,
+      gap: 5,
     },
   });
 }
