@@ -97,7 +97,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   }, [task.tagId, getTag]);
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+    //   console.log("handleSheetChanges", index);
   }, []);
 
   const renderBackdrop = useCallback(
@@ -234,6 +234,17 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     calendarSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
+  // Add useEffect to handle calendar opening
+  useEffect(() => {
+    if (calendarSheetRef.current) {
+      const calendarComponent = calendarSheetRef.current as any;
+      if (calendarComponent.calendarRef?.current) {
+        const dateStruct = DateStruct.fromDate(new Date(date));
+        calendarComponent.calendarRef.current.goToDate(dateStruct);
+      }
+    }
+  }, [date]);
+
   const isSendable = title.length > 0;
 
   interface ColorCheckmarkStyles {
@@ -272,7 +283,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
-    
+
     try {
       await updateTask(db, task.id, { tagId: newTag.id.toString() });
       setSelectedTag(newTag);

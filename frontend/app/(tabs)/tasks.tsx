@@ -73,7 +73,6 @@ export default function TasksScreen() {
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
   const openTaskBottomSheet = (task: TaskData) => {
-    console.log("Task selected:", task);
     setSelectedTask(task);
     taskSheetRef.current?.snapToIndex(0);
   };
