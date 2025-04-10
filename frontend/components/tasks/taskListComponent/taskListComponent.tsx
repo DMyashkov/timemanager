@@ -46,7 +46,7 @@ export default function TaskListComponent({
   const TaskSeparator = () => <View style={{ height: 12 }} />;
 
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} activeOpacity={1}>
       <View style={styles.header}>
         <View style={styles.leftHeader}>
           <Text style={styles.date}>{title}</Text>
@@ -80,6 +80,6 @@ export default function TaskListComponent({
         ItemSeparatorComponent={TaskSeparator}
         contentContainerStyle={{ paddingVertical: 12 }}
       />
-    </View>
+    </TouchableOpacity>
   );
 }
