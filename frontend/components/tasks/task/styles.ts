@@ -48,6 +48,7 @@ export default function useStyles(priority: number) {
       fontSize: theme.fontSize.smaller,
       fontFamily: theme.font.regular,
       color: theme.color.darkerDarkGrey,
+      marginBottom: 3,
     },
     date: {
       flexDirection: "row",
@@ -65,7 +66,6 @@ export default function useStyles(priority: number) {
       justifyContent: "space-between",
       width: "100%",
       alignItems: "flex-start",
-      marginTop: 3,
     },
     tagContainer: {
       flexDirection: "row",

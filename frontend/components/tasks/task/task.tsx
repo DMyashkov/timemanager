@@ -131,10 +131,19 @@ export default function Task({
               </View>
             ))}
         </View>
-        <Text style={styles.description} numberOfLines={1}>
-          {task.description}
-        </Text>
-        <View style={styles.footer}>
+        {task.description && (
+          <Text style={styles.description} numberOfLines={1}>
+            {task.description}
+          </Text>
+        )}
+        <View
+          style={[
+            styles.footer,
+            {
+              marginTop: activityNode || projectNode ? 0 : -5,
+            },
+          ]}
+        >
           <View style={styles.tagContainer}>
             {activityNode && (
               <Tag
