@@ -89,12 +89,14 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   useEffect(() => {
     const loadTag = async () => {
       if (task.tagId) {
-        const tag = await getTag(db, parseInt(task.tagId));
+        const tag = await getTag(db, task.tagId.toString());
         setSelectedTag(tag);
+      } else {
+        setSelectedTag(null);
       }
     };
     loadTag();
-  }, [task.tagId, getTag]);
+  }, [task.tagId, getTag, db]);
 
   const handleSheetChanges = useCallback((index: number) => {
     // console.log("handleSheetChanges", index);
@@ -274,9 +276,9 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     if (!task.id) return;
 
     try {
-      await updateTask(db, task.id, { tagId: newTag.id.toString() });
+      await updateTask(db, task.id, { tagId: newTag.id });
       setSelectedTag(newTag);
-      onTaskUpdate?.({ ...task, tagId: newTag.id.toString() });
+      onTaskUpdate?.({ ...task, tagId: newTag.id });
     } catch (error) {
       console.error("Error updating task tag:", error);
     }

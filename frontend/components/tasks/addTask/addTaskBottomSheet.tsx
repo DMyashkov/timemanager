@@ -42,6 +42,8 @@ import { useTagContext } from "@/context/TagContext";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import PickActivity from "@/app/pickActivity";
 
+type FlatListItem = TagData | { type: "button" };
+
 export default function AddTaskSheet({
   bottomSheetRef,
 }: {
@@ -68,6 +70,17 @@ export default function AddTaskSheet({
   const { getTag } = useTagContext();
   const { activityNode, projectNode } = useDerivedTags(selectedTag);
 
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setDescription("");
+    setPriority(priorityEnum.none);
+    setDate(Date.now());
+    setActivityId(null);
+    setProjectId(null);
+    setSelectedTag(null);
+    setIsPickActivityVisible(false);
+  }, []);
+
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
     if (index >= 0) {
@@ -81,6 +94,15 @@ export default function AddTaskSheet({
 
   const isSendable = title.length > 0;
 
+  const handleActivitySelected = async (newTag: TagData | null) => {
+    if (newTag) {
+      setSelectedTag(newTag.id);
+    } else {
+      setSelectedTag(null);
+    }
+    setIsPickActivityVisible(false);
+  };
+
   const handleCreateTask = async () => {
     if (!isSendable) return;
 
@@ -92,24 +114,12 @@ export default function AddTaskSheet({
       completed: false,
       synced: 0,
       deleted: 0,
-      tagId: projectId || activityId || undefined,
+      tagId: selectedTag || undefined,
     };
 
-    console.log("Attempting to create task with data:", taskData);
-
     try {
-      const taskId = await createTask(db, taskData);
-      console.log("Task created successfully with ID:", taskId);
-
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setPriority(priorityEnum.none);
-      setDate(Date.now());
-      setActivityId(null);
-      setProjectId(null);
-
-      // Close the sheet
+      await createTask(db, taskData);
+      resetForm();
       bottomSheetRef.current?.close();
     } catch (error) {
       console.error("Error creating task:", error);
@@ -166,16 +176,14 @@ export default function AddTaskSheet({
     [],
   );
 
-  const handleActivitySelected = async (newTag: TagData) => {
-    setSelectedTag(newTag.id);
-    setIsPickActivityVisible(false);
-  };
-
-  const renderTag = ({ item }: { item: TagData }) => {
-    const colorPalette =
-      theme.color.presets[item.colorPreset as keyof typeof theme.color.presets];
-    const hasMedium = "medium" in colorPalette;
-
+  const renderTag = ({ item }: { item: FlatListItem }) => {
+    if ("type" in item) {
+      return null;
+    }
+    
+    const colorPalette = theme.color.presets[item.colorPreset as keyof typeof theme.color.presets];
+    const hasMedium = 'medium' in colorPalette;
+    
     return (
       <Tag
         text={item.title}
@@ -205,6 +213,7 @@ export default function AddTaskSheet({
         handleIndicatorStyle={{ backgroundColor: "transparent" }}
         backdropComponent={renderBackdrop}
         index={-1}
+        onClose={resetForm}
       >
         <View style={styles.outer}>
           <BottomSheetScrollView
@@ -263,15 +272,11 @@ export default function AddTaskSheet({
             </BottomSheetView>
           </BottomSheetScrollView>
           <View style={styles.footer}>
-            <View
-              style={[{ flexDirection: "row", alignItems: "center", flex: 1 }]}
-            >
-              <FlatList
+            <View style={[styles.footer, { flexDirection: "row", alignItems: "center", flex: 1 }]}>
+              <FlatList<FlatListItem>
                 data={[
-                  { type: "button" },
-                  ...[activityNode, projectNode].filter(
-                    (item): item is TagData => item !== null,
-                  ),
+                  { type: "button" as const },
+                  ...([activityNode, projectNode].filter((item): item is TagData => item !== null && selectedTag !== null)),
                 ]}
                 renderItem={({ item }) => {
                   if ("type" in item && item.type === "button") {
@@ -286,11 +291,7 @@ export default function AddTaskSheet({
                   }
                   return renderTag({ item });
                 }}
-                keyExtractor={(item, index) =>
-                  "type" in item && item.type === "button"
-                    ? "button"
-                    : item.id.toString()
-                }
+                keyExtractor={(item) => ("type" in item ? "button" : item.id.toString())}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingLeft: 8, gap: 8 }}
