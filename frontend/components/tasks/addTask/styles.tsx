@@ -43,7 +43,7 @@ export default function useStyles() {
       height: 55,
       alignItems: "center",
       flexDirection: "row",
-      paddingHorizontal: 22,
+      paddingHorizontal: 11,
       borderTopWidth: 0.5,
       borderColor: theme.color.lightGrey,
       justifyContent: "space-between",

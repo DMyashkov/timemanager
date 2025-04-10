@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import useStyles from "./styles";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -14,6 +14,7 @@ import {
   Text,
   Keyboard,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
@@ -26,18 +27,28 @@ import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
 import { useTaskContext } from "@/context/TaskContext";
-import { priorityEnum, type TaskData } from "@/constants/interfaces";
+import {
+  priorityEnum,
+  type TaskData,
+  moduleTypeEnum,
+  type TagData,
+} from "@/constants/interfaces";
 import ActionSheet from "@/components/basic/actionSheet/actionSheet";
 import { actionItemsArray } from "@/components/basic/actionSheetPriority/actionSheetPriority";
 import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
 import { DateStruct } from "@/utils/dateTimeSession";
+import Tag from "@/components/tag/tagComponent";
+import { useTagContext } from "@/context/TagContext";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
+import PickActivity from "@/app/pickActivity";
 
 export default function AddTaskSheet({
   bottomSheetRef,
 }: {
   bottomSheetRef: React.RefObject<BottomSheet>;
 }) {
-  const taskNameInputRef = useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
+  const taskNameInputRef =
+    useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
   const actionSheetRef = useRef<BottomSheet>(null);
   const calendarSheetRef = useRef<BottomSheet>(null);
 
@@ -47,11 +58,15 @@ export default function AddTaskSheet({
   const [date, setDate] = useState<number>(Date.now());
   const [activityId, setActivityId] = useState<number | null>(null);
   const [projectId, setProjectId] = useState<number | null>(null);
+  const [selectedTag, setSelectedTag] = useState<number | null>(null);
+  const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
   const { createTask } = useTaskContext();
   const { theme } = useTheme();
+  const { getTag } = useTagContext();
+  const { activityNode, projectNode } = useDerivedTags(selectedTag);
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
@@ -151,6 +166,31 @@ export default function AddTaskSheet({
     [],
   );
 
+  const handleActivitySelected = async (newTag: TagData) => {
+    setSelectedTag(newTag.id);
+    setIsPickActivityVisible(false);
+  };
+
+  const renderTag = ({ item }: { item: TagData }) => {
+    const colorPalette =
+      theme.color.presets[item.colorPreset as keyof typeof theme.color.presets];
+    const hasMedium = "medium" in colorPalette;
+
+    return (
+      <Tag
+        text={item.title}
+        isProject={item.moduleType === moduleTypeEnum.project}
+        desiredHeight={31}
+        textSize={theme.fontSize.small}
+        colorPallete={{
+          light: colorPalette.light,
+          medium: hasMedium ? colorPalette.medium : colorPalette.dark,
+          dark: colorPalette.dark,
+        }}
+      />
+    );
+  };
+
   // renders
   return (
     <>
@@ -210,7 +250,11 @@ export default function AddTaskSheet({
               />
               <ButtonInsideFooterComponent
                 Icon={FlagHollow}
-                text={priority === priorityEnum.none ? "No Priority" : `Priority ${priority}`}
+                text={
+                  priority === priorityEnum.none
+                    ? "No Priority"
+                    : `Priority ${priority}`
+                }
                 color={getPriorityColor(priority)}
                 marginBottomIcon={2}
                 onPress={openActionSheet}
@@ -219,11 +263,39 @@ export default function AddTaskSheet({
             </BottomSheetView>
           </BottomSheetScrollView>
           <View style={styles.footer}>
-            <ButtonInsideFooterComponent
-              Icon={TwoArrows}
-              text="Change Activity"
-              color={theme.color.darkGrey}
-            />
+            <View
+              style={[{ flexDirection: "row", alignItems: "center", flex: 1 }]}
+            >
+              <FlatList
+                data={[
+                  { type: "button" },
+                  ...[activityNode, projectNode].filter(
+                    (item): item is TagData => item !== null,
+                  ),
+                ]}
+                renderItem={({ item }) => {
+                  if ("type" in item && item.type === "button") {
+                    return (
+                      <ButtonInsideFooterComponent
+                        Icon={TwoArrows}
+                        text={!selectedTag ? "Pick Activity" : ""}
+                        color={theme.color.darkGrey}
+                        onPress={() => setIsPickActivityVisible(true)}
+                      />
+                    );
+                  }
+                  return renderTag({ item });
+                }}
+                keyExtractor={(item, index) =>
+                  "type" in item && item.type === "button"
+                    ? "button"
+                    : item.id.toString()
+                }
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingLeft: 8, gap: 8 }}
+              />
+            </View>
             <TouchableOpacity
               style={[
                 styles.sendButton,
@@ -259,6 +331,13 @@ export default function AddTaskSheet({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
+      />
+
+      <PickActivity
+        visible={isPickActivityVisible}
+        onClose={() => setIsPickActivityVisible(false)}
+        onActivitySelected={handleActivitySelected}
+        pickButtonText={selectedTag ? "Change" : "Choose"}
       />
     </>
   );
@@ -314,16 +393,18 @@ function ButtonInsideFooterComponent({
           }}
         />
       )}
-      <Text
-        style={[
-          styles.textInsideChangeActivityButton,
-          {
-            color: color,
-          },
-        ]}
-      >
-        {text}
-      </Text>
+      {text && (
+        <Text
+          style={[
+            styles.textInsideChangeActivityButton,
+            {
+              color: color,
+            },
+          ]}
+        >
+          {text}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 }
