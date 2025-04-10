@@ -21,11 +21,11 @@ export default function useStyles(priority: number) {
     },
     leftColumn: {},
     checkmarkContainer: {
-      position: 'relative',
+      position: "relative",
       width: 22.3,
       height: 22.3,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     },
     checkMark: {
       height: 20,

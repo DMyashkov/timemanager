@@ -1,14 +1,18 @@
 import { View, Text, TouchableOpacity, Touchable } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Calendar from "@/assets/icons/calendar.svg";
 import Tag from "@/components/tag/tagComponent";
 import Checkmark from "@/assets/icons/checkmark.svg";
 import { priorityEnum } from "@/constants/interfaces";
 import { TaskData } from "@/constants/interfaces";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 function formatDate(timestamp: number, today: Date): string {
   const date = new Date(timestamp);
@@ -51,7 +55,9 @@ export default function Task({
   const { theme } = useTheme();
   const checkMarkAnim = useSharedValue(task.completed ? 1 : 0);
   const todayDate = new Date();
-  const { activityNode, projectNode } = useDerivedTags(task.tagId ? Number(task.tagId) : null);
+  const { activityNode, projectNode } = useDerivedTags(
+    task.tagId ? Number(task.tagId) : null,
+  );
 
   const toggleCheckmark = useCallback(() => {
     checkMarkAnim.value = withSpring(checkMarkAnim.value ? 0 : 1);
@@ -91,24 +97,26 @@ export default function Task({
       };
   }
 
+  const [checkMark, setCheckMark] = useState(false);
+
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.container}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={styles.leftColumn}>
         <TouchableOpacity
-          onPress={toggleCheckmark}
+          onPress={() => {
+            setCheckMark(!checkMark);
+          }}
           activeOpacity={1}
         >
-          <Animated.View style={[styles.checkmarkContainer, checkmarkAnimStyle]}>
-            {checkMarkAnim.value === 0 ? (
-              <View style={[styles.checkMark, colorCheckmarkStyles]} />
-            ) : (
-              <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
-            )}
-          </Animated.View>
+          {!checkMark ? (
+            <View style={[styles.checkMark, colorCheckmarkStyles]} />
+          ) : (
+            <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
+          )}
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
