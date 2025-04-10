@@ -94,7 +94,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       }
     };
     loadTag();
-  }, [task.tagId, db, getTag]);
+  }, [task.tagId, getTag]);
 
   const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
@@ -172,7 +172,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     selectedDate.setHours(23, 59, 0, 0);
     const newDate = selectedDate.getTime();
     setDate(newDate);
-    
+
     try {
       await updateTask(db, task.id, { date: newDate });
       onTaskUpdate?.({ ...task, date: newDate });
@@ -184,7 +184,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const handlePriorityChange = async (newPriority: priorityEnum) => {
     if (!task.id) return;
     setPriority(newPriority);
-    
+
     try {
       await updateTask(db, task.id, { priority: newPriority });
       onTaskUpdate?.({ ...task, priority: newPriority });
@@ -196,7 +196,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const handleDescriptionChange = async (newDescription: string) => {
     if (!task.id) return;
     setDescription(newDescription);
-    
+
     try {
       await updateTask(db, task.id, { description: newDescription });
       onTaskUpdate?.({ ...task, description: newDescription });
@@ -208,7 +208,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const handleTitleChange = async (newTitle: string) => {
     if (!task.id) return;
     setTitle(newTitle);
-    
+
     try {
       await updateTask(db, task.id, { title: newTitle });
       onTaskUpdate?.({ ...task, title: newTitle });
@@ -268,14 +268,15 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       };
   }
 
+  const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
+
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
-
+    
     try {
-      await updateTask(db, task.id, {
-        tagId: newTag.id.toString(),
-      });
+      await updateTask(db, task.id, { tagId: newTag.id.toString() });
       setSelectedTag(newTag);
+      onTaskUpdate?.({ ...task, tagId: newTag.id.toString() });
     } catch (error) {
       console.error("Error updating task tag:", error);
     }
@@ -428,7 +429,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   marginTop: -2,
                 }}
                 onPress={() => {
-                  // Implement project selection logic
+                  setIsPickActivityVisible(true);
                 }}
               />
               <View style={styles.bigSeparator} />
@@ -450,6 +451,14 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
+      />
+      <PickActivity
+        visible={isPickActivityVisible}
+        onClose={() => {
+          setIsPickActivityVisible(false);
+        }}
+        onActivitySelected={handleActivitySelected}
+        pickButtonText={selectedTag ? "Change" : "Choose"}
       />
     </>
   );
