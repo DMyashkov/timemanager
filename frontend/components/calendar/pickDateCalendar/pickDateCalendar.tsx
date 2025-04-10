@@ -13,7 +13,7 @@ import BottomSheet, {
   BottomSheetBackdropProps,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { router } from "expo-router";
 import { DateStruct } from "@/utils/dateTimeSession";
@@ -21,14 +21,22 @@ import { DateStruct } from "@/utils/dateTimeSession";
 export default function PickDateCalendar({
   bottomSheetRef,
   onPickDate,
+  initialDate,
 }: {
   bottomSheetRef: React.RefObject<BottomSheet>;
   onPickDate: (date: DateStruct | null) => void;
+  initialDate?: DateStruct | null;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
   const ICON_SIZE = 22;
   const calendarRef = useRef<ExpandedCalendarRef>(null);
+
+  useEffect(() => {
+    if (initialDate && calendarRef.current) {
+      calendarRef.current.goToDate(initialDate);
+    }
+  }, [initialDate]);
 
   // Custom backdrop with dimmed effect
   const renderBackdrop = useCallback(

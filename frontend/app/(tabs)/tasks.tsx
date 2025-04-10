@@ -129,15 +129,17 @@ export default function TasksScreen() {
       groups[dateKey].push(task);
       return groups;
     },
-    {} as Record<number | 'noDate', TaskData[]>,
+    {} as Record<number | "noDate", TaskData[]>,
   );
 
   // Get overdue tasks
-  const overdueTasks = allTasks.filter((task) => task.date && task.date < todayStart);
+  const overdueTasks = allTasks.filter(
+    (task) => task.date && task.date < todayStart,
+  );
 
   // Sort task groups by date
   const sortedGroups = Object.entries(taskGroups)
-    .filter(([key]) => key !== 'noDate')
+    .filter(([key]) => key !== "noDate")
     .sort(([dateA], [dateB]) => Number(dateA) - Number(dateB))
     .map(([date, tasks]) => ({
       type: "date" as const,
@@ -160,7 +162,7 @@ export default function TasksScreen() {
           },
         ]
       : []),
-    ...sortedGroups.filter(group => group.title === "Today"),
+    ...sortedGroups.filter((group) => group.title === "Today"),
     ...(taskGroups.noDate
       ? [
           {
@@ -170,7 +172,7 @@ export default function TasksScreen() {
           },
         ]
       : []),
-    ...sortedGroups.filter(group => group.title !== "Today"),
+    ...sortedGroups.filter((group) => group.title !== "Today"),
   ];
   const dummyTask: TaskData = {
     id: 0,
@@ -219,8 +221,8 @@ export default function TasksScreen() {
             />
           )}
           keyExtractor={(item) =>
-            item.type === "overdue" 
-              ? "overdue" 
+            item.type === "overdue"
+              ? "overdue"
               : item.type === "noDate"
                 ? "noDate"
                 : item.date.toString()

@@ -160,6 +160,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleDateChange = async (date: DateStruct | null) => {
     // Convert DateStruct to Date and set time to 23:59
+    //
     if (!task.id) return;
     let newDate: number | null;
     if (date) {
@@ -169,7 +170,9 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       setDate(newDate);
     } else {
       newDate = null;
+      setDate(null);
     }
+
     try {
       console.log("Updating task date:", newDate);
       await updateTask(db, task.id, { date: newDate });
@@ -268,6 +271,9 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
 
+  const [initialExpandedCalendarDate, setInitialExpandedCalendarDate] =
+    useState<DateStruct | null>(null);
+
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
     console.log("Selected tag:", newTag);
@@ -350,6 +356,9 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => {
+                  setInitialExpandedCalendarDate(
+                    date ? DateStruct.fromDate(new Date(date)) : null,
+                  );
                   openCalendarSheet();
                 }}
               >
@@ -466,6 +475,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
+        initialDate={initialExpandedCalendarDate}
       />
       <PickActivity
         visible={isPickActivityVisible}
