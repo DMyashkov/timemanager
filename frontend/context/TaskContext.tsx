@@ -25,7 +25,7 @@ interface TaskContextProps {
     db: ExpoSQLiteDatabase<typeof schema>,
     id: number,
   ) => Promise<void>;
-  syncUnsyncedRows: (
+  syncUnsyncedTasks: (
     db: ExpoSQLiteDatabase<typeof schema>,
     token: string,
   ) => Promise<void>;
@@ -218,7 +218,7 @@ const TaskContext = createContext<TaskContextProps>({
   parseTask,
   updateTask,
   deleteTask,
-  syncUnsyncedRows,
+  syncUnsyncedTasks: syncUnsyncedRows,
   cleanupDeletedRows,
   fetchAndStoreTasks,
 });
@@ -234,7 +234,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         parseTask,
         updateTask,
         deleteTask,
-        syncUnsyncedRows,
+        syncUnsyncedTasks: syncUnsyncedRows,
         cleanupDeletedRows,
         fetchAndStoreTasks,
       }}

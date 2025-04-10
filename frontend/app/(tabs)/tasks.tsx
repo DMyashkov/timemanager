@@ -181,9 +181,9 @@ export default function TasksScreen() {
     date: 0,
     priority: priorityEnum.none,
     completed: false,
-    synced: false,
-    deleted: false,
-    tagId: "",
+    synced: 0,
+    deleted: 0,
+    tagId: -1,
   };
 
   return (

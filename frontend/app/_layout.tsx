@@ -3,7 +3,7 @@ import { Stack, router } from "expo-router";
 import * as Font from "expo-font";
 import { FONTS } from "@/constants/fonts";
 import * as SplashScreen from "expo-splash-screen";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "@context/ThemeContext";
 import SysButton from "@/components/basic/blueSystemButton/blueSystemButton";
 import { ActivityIndicator, AppState, Text } from "react-native";
@@ -23,6 +23,7 @@ import { schema } from "@/db/schema";
 import { tags } from "@/db/schema";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
+import { useTaskContext } from "@/context/TaskContext";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -115,20 +116,27 @@ function AppContent({
     useTagContext();
   const { syncUnsyncedRows: syncUnsyncedSessions, fetchAndStoreSessions } =
     useSessionContext();
+  const { syncUnsyncedTasks } = useTaskContext();
+
+  const syncEverything = useCallback(async () => {
+    if (authToken) {
+      await fetchAndStoreTags(db, authToken);
+      await fetchAndStoreSessions(db, authToken);
+      await syncUnsyncedTasks(db, authToken);
+    }
+  }, [fetchAndStoreTags, fetchAndStoreSessions, syncUnsyncedTasks, authToken]);
 
   useEffect(() => {
     if (authToken) {
       const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
         if (state.isConnected) {
-          syncUnsyncedTags(db, authToken).catch(console.error);
-          syncUnsyncedSessions(db, authToken).catch(console.error);
+          syncEverything().catch(console.error);
         }
       });
 
       const handleAppStateChange = (nextAppState: string) => {
         if (nextAppState === "background") {
-          syncUnsyncedTags(db, authToken).catch(console.error);
-          syncUnsyncedSessions(db, authToken).catch(console.error);
+          syncEverything().catch(console.error);
         }
       };
       const appStateSubscription = AppState.addEventListener(
@@ -138,13 +146,12 @@ function AppContent({
 
       const interval = setInterval(
         () => {
-          syncUnsyncedTags(db, authToken).catch(console.error);
-          syncUnsyncedSessions(db, authToken).catch(console.error);
+          syncEverything().catch(console.error);
         },
         5 * 60 * 1000,
       );
     }
-  }, [authToken, syncUnsyncedTags, syncUnsyncedSessions]);
+  }, [authToken, syncEverything]);
 
   return (
     <Stack screenOptions={{}}>
