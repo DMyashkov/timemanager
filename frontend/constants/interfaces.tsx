@@ -77,9 +77,9 @@ export interface TaskData {
   date: number; // Unix timestamp in milliseconds
   priority: number;
   completed: boolean;
-  synced: boolean;
-  deleted: boolean;
-  tagId?: string;
+  synced: number;
+  deleted: number;
+  tagId?: number;
 }
 
 export function getDaysInMonth(month: number, year: number): number {
