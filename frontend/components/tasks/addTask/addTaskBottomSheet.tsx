@@ -20,7 +20,8 @@ import TwoArrows from "@assets/icons/two-arrows.svg";
 import type { SvgProps } from "react-native-svg";
 import ArrowUp from "@assets/icons/arrow-up.svg";
 import Calendar from "@assets/icons/calendar.svg";
-import Flag from "@assets/icons/flag.svg";
+import FlagHollow from "@assets/icons/flag.svg";
+import FlagFull from "@assets/icons/flag-full.svg";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
@@ -121,6 +122,19 @@ export default function AddTaskSheet({
     actionSheetRef.current?.close();
   };
 
+  const getPriorityColor = (priority: priorityEnum): string => {
+    switch (priority) {
+      case priorityEnum.high:
+        return theme.color.darkRed;
+      case priorityEnum.medium:
+        return theme.color.presets.yellow.dark;
+      case priorityEnum.low:
+        return theme.color.presets.blue.dark;
+      default:
+        return theme.color.darkGrey;
+    }
+  };
+
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -195,11 +209,12 @@ export default function AddTaskSheet({
                 onPress={openCalendarSheet}
               />
               <ButtonInsideFooterComponent
-                Icon={Flag}
-                text={`Priority ${priority}`}
-                color={priority === priorityEnum.none ? theme.color.darkGrey : theme.color.red}
+                Icon={FlagHollow}
+                text={priority === priorityEnum.none ? "No Priority" : `Priority ${priority}`}
+                color={getPriorityColor(priority)}
                 marginBottomIcon={2}
                 onPress={openActionSheet}
+                priority={priority}
               />
             </BottomSheetView>
           </BottomSheetScrollView>
@@ -255,26 +270,50 @@ function ButtonInsideFooterComponent({
   color,
   marginBottomIcon = 0,
   onPress,
+  priority,
 }: {
   Icon: React.FC<SvgProps>;
   text: string;
   color: string;
   marginBottomIcon?: number;
   onPress?: () => void;
+  priority?: priorityEnum;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   return (
     <TouchableOpacity style={styles.changeActivityButton} onPress={onPress}>
-      <Icon
-        width={16}
-        height={16}
-        fill={color}
-        style={{
-          marginBottom: marginBottomIcon,
-        }}
-      />
+      {text.startsWith("Priority") ? (
+        priority === priorityEnum.none ? (
+          <FlagHollow
+            width={16}
+            height={16}
+            fill={color}
+            style={{
+              marginBottom: marginBottomIcon,
+            }}
+          />
+        ) : (
+          <FlagFull
+            width={16}
+            height={16}
+            fill={color}
+            style={{
+              marginBottom: marginBottomIcon,
+            }}
+          />
+        )
+      ) : (
+        <Icon
+          width={16}
+          height={16}
+          fill={color}
+          style={{
+            marginBottom: marginBottomIcon,
+          }}
+        />
+      )}
       <Text
         style={[
           styles.textInsideChangeActivityButton,
