@@ -74,12 +74,12 @@ export interface TaskData {
   id?: number;
   title: string;
   description?: string;
-  date: number; // Unix timestamp in milliseconds
+  date: number | null; // Unix timestamp in milliseconds
   priority: number;
   completed: boolean;
   synced: number;
   deleted: number;
-  tagId?: number;
+  tagId: number | null;
 }
 
 export function getDaysInMonth(month: number, year: number): number {

@@ -41,16 +41,8 @@ const insertTask = async (
   item: TaskData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
   console.log("Inserting task into database with data:", item);
-  const {
-    id,
-    title,
-    description,
-    date,
-    priority,
-    completed,
-    synced,
-    tagId,
-  } = item;
+  const { id, title, description, date, priority, completed, synced, tagId } =
+    item;
 
   try {
     const result = await db
@@ -83,13 +75,11 @@ const parseTask = (result: (typeof tasks.$inferSelect)[]): TaskData | null => {
     title: task.title ?? "",
     description: task.description ?? "",
     date: task.date ?? 0,
-    activityId: task.activityId ?? null,
-    projectId: task.projectId ?? null,
     priority: task.priority ?? 4,
     completed: task.completed === 1,
     synced: task.synced ?? 0,
     deleted: task.deleted ?? 0,
-    tagId: task.tagId ?? "",
+    tagId: task.tagId,
   };
 };
 
@@ -145,10 +135,9 @@ const syncUnsyncedRows = async (
           title: row.title,
           description: row.description,
           date: row.date,
-          activity_id: row.activityId,
-          project_id: row.projectId,
           priority: row.priority,
           completed: row.completed === 1,
+          tagId: row.tagId,
         },
         {
           headers: {
@@ -157,10 +146,7 @@ const syncUnsyncedRows = async (
         },
       );
 
-      await db
-        .update(tasks)
-        .set({ synced: 1 })
-        .where(eq(tasks.id, row.id));
+      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.id, row.id));
     } catch (error) {
       console.error("Error syncing task:", error);
     }
@@ -174,10 +160,7 @@ const syncUnsyncedRows = async (
         },
       });
 
-      await db
-        .update(tasks)
-        .set({ synced: 1 })
-        .where(eq(tasks.id, row.id));
+      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.id, row.id));
     } catch (error) {
       console.error("Error deleting task:", error);
     }
@@ -187,9 +170,7 @@ const syncUnsyncedRows = async (
 const cleanupDeletedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
 ): Promise<void> => {
-  await db
-    .delete(tasks)
-    .where(and(eq(tasks.deleted, 1), eq(tasks.synced, 1)));
+  await db.delete(tasks).where(and(eq(tasks.deleted, 1), eq(tasks.synced, 1)));
 };
 
 const fetchAndStoreTasks = async (
@@ -210,13 +191,11 @@ const fetchAndStoreTasks = async (
         title: task.title,
         description: task.description,
         date: task.date,
-        activityId: task.activity_id,
-        projectId: task.project_id,
         priority: task.priority,
         completed: task.completed,
         synced: 1,
         deleted: 0,
-        tagId: task.tag_id ?? "",
+        tagId: task.tag_id,
       });
     }
   } catch (error) {
@@ -254,4 +233,5 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
       {children}
     </TaskContext.Provider>
   );
-} 
+}
+

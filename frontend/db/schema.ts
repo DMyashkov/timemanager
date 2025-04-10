@@ -30,12 +30,12 @@ export const tasks = sqliteTable("tasks", {
   id: int("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
   description: text("description"),
-  date: int("date").notNull(),
+  date: int("date"),
   priority: int("priority").notNull(),
-  completed: int("completed", { mode: "boolean" }).notNull(),
-  synced: int("synced", { mode: "boolean" }).notNull(),
-  deleted: int("deleted", { mode: "boolean" }).notNull(),
-  tagId: text("tag_id"),
+  completed: int("completed").notNull().default(0),
+  synced: int("synced").default(0),
+  deleted: int("deleted").default(0),
+  tagId: int("tag_id"),
 });
 
 export const schema = {
