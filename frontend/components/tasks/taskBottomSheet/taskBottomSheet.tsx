@@ -116,7 +116,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     [],
   );
 
-  const handleUpdateTask = useCallback(() => {
+  const handleUpdateTask = useCallback(async () => {
     if (!task.id) return;
 
     const updatedTask: TaskData = {
@@ -131,7 +131,12 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       tagId: task.tagId,
     };
 
-    onTaskUpdate?.(updatedTask);
+    try {
+      await updateTask(db, task.id, updatedTask);
+      onTaskUpdate?.(updatedTask);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
     bottomSheetRef.current?.close();
   }, [
     title,
@@ -143,18 +148,73 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     task.tagId,
     bottomSheetRef,
     onTaskUpdate,
+    updateTask,
+    db,
   ]);
 
-  const handleToggleComplete = useCallback(() => {
-    setCompleted(!completed);
-  }, [completed]);
+  const handleToggleComplete = useCallback(async () => {
+    const newCompleted = !completed;
+    setCompleted(newCompleted);
+    if (task.id) {
+      try {
+        await updateTask(db, task.id, { completed: newCompleted });
+        onTaskUpdate?.({ ...task, completed: newCompleted });
+      } catch (error) {
+        console.error("Error updating task completion:", error);
+      }
+    }
+  }, [completed, task, updateTask, db, onTaskUpdate]);
 
-  const handleDateChange = (date: DateStruct | null) => {
-    if (!date) return;
+  const handleDateChange = async (date: DateStruct | null) => {
+    if (!date || !task.id) return;
     // Convert DateStruct to Date and set time to 23:59
     const selectedDate = new Date(date.year, date.month - 1, date.day);
     selectedDate.setHours(23, 59, 0, 0);
-    setDate(selectedDate.getTime());
+    const newDate = selectedDate.getTime();
+    setDate(newDate);
+    
+    try {
+      await updateTask(db, task.id, { date: newDate });
+      onTaskUpdate?.({ ...task, date: newDate });
+    } catch (error) {
+      console.error("Error updating task date:", error);
+    }
+  };
+
+  const handlePriorityChange = async (newPriority: priorityEnum) => {
+    if (!task.id) return;
+    setPriority(newPriority);
+    
+    try {
+      await updateTask(db, task.id, { priority: newPriority });
+      onTaskUpdate?.({ ...task, priority: newPriority });
+    } catch (error) {
+      console.error("Error updating task priority:", error);
+    }
+  };
+
+  const handleDescriptionChange = async (newDescription: string) => {
+    if (!task.id) return;
+    setDescription(newDescription);
+    
+    try {
+      await updateTask(db, task.id, { description: newDescription });
+      onTaskUpdate?.({ ...task, description: newDescription });
+    } catch (error) {
+      console.error("Error updating task description:", error);
+    }
+  };
+
+  const handleTitleChange = async (newTitle: string) => {
+    if (!task.id) return;
+    setTitle(newTitle);
+    
+    try {
+      await updateTask(db, task.id, { title: newTitle });
+      onTaskUpdate?.({ ...task, title: newTitle });
+    } catch (error) {
+      console.error("Error updating task title:", error);
+    }
   };
 
   const handleDelete = useCallback(() => {
@@ -259,7 +319,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   selectionColor={theme.color.red}
                   keyboardType="default"
                   value={title}
-                  onChangeText={setTitle}
+                  onChangeText={handleTitleChange}
                 />
               </View>
               <View style={styles.row}>
@@ -280,7 +340,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                     multiline={true}
                     scrollEnabled={false}
                     value={description}
-                    onChangeText={setDescription}
+                    onChangeText={handleDescriptionChange}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   />
                 </View>
@@ -380,9 +440,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
         actionTextColor={theme.color.black}
         bottomSheetRef={actionSheetRef}
         actionItems={actionItemsArray({
-          setPriority: (number: number) => {
-            setPriority(number as priorityEnum);
-          },
+          setPriority: handlePriorityChange,
         })}
         cancelTextStyle={{
           fontFamily: theme.font.medium,

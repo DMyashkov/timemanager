@@ -198,6 +198,7 @@ export default function TasksScreen() {
             item.type === "overdue" ? "overdue" : item.date.toString()
           }
           contentContainerStyle={{ overflow: "visible" }}
+          ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
         />
       </TouchableOpacity>
       <TaskBottomSheet
