@@ -114,7 +114,7 @@ export default function AddTaskSheet({
       completed: false,
       synced: 0,
       deleted: 0,
-      tagId: selectedTag || undefined,
+      tagId: selectedTag || null,
     };
 
     try {
@@ -180,10 +180,11 @@ export default function AddTaskSheet({
     if ("type" in item) {
       return null;
     }
-    
-    const colorPalette = theme.color.presets[item.colorPreset as keyof typeof theme.color.presets];
-    const hasMedium = 'medium' in colorPalette;
-    
+
+    const colorPalette =
+      theme.color.presets[item.colorPreset as keyof typeof theme.color.presets];
+    const hasMedium = "medium" in colorPalette;
+
     return (
       <Tag
         text={item.title}
@@ -272,11 +273,19 @@ export default function AddTaskSheet({
             </BottomSheetView>
           </BottomSheetScrollView>
           <View style={styles.footer}>
-            <View style={[styles.footer, { flexDirection: "row", alignItems: "center", flex: 1 }]}>
+            <View
+              style={[
+                styles.footer,
+                { flexDirection: "row", alignItems: "center", flex: 1 },
+              ]}
+            >
               <FlatList<FlatListItem>
                 data={[
                   { type: "button" as const },
-                  ...([activityNode, projectNode].filter((item): item is TagData => item !== null && selectedTag !== null)),
+                  ...[activityNode, projectNode].filter(
+                    (item): item is TagData =>
+                      item !== null && selectedTag !== null,
+                  ),
                 ]}
                 renderItem={({ item }) => {
                   if ("type" in item && item.type === "button") {
@@ -291,7 +300,9 @@ export default function AddTaskSheet({
                   }
                   return renderTag({ item });
                 }}
-                keyExtractor={(item) => ("type" in item ? "button" : item.id.toString())}
+                keyExtractor={(item) =>
+                  "type" in item ? "button" : item.id.toString()
+                }
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingLeft: 8, gap: 8 }}

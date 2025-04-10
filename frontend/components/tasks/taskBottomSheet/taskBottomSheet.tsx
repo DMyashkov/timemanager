@@ -66,7 +66,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description || "");
   const [priority, setPriority] = useState(task.priority);
-  const [date, setDate] = useState<number>(task.date);
+  const [date, setDate] = useState<number | null>(task.date);
   const [completed, setCompleted] = useState(task.completed);
 
   const expoDb = useSQLiteContext();
@@ -89,7 +89,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   useEffect(() => {
     const loadTag = async () => {
       if (task.tagId) {
-        const tag = await getTag(db, task.tagId.toString());
+        const tag = await getTag(db, task.tagId);
         setSelectedTag(tag);
       } else {
         setSelectedTag(null);
@@ -128,8 +128,8 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       priority,
       date,
       completed,
-      synced: false,
-      deleted: false,
+      synced: 0,
+      deleted: 0,
       tagId: task.tagId,
     };
 
@@ -363,10 +363,12 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   />
                 </View>
                 <Text style={styles.dateText}>
-                  {new Date(date).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "short",
-                  })}
+                  {date
+                    ? new Date(date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "No Date"}
                 </Text>
               </TouchableOpacity>
               <View style={styles.separator} />
