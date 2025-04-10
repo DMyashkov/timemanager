@@ -105,6 +105,11 @@ export default function TasksScreen() {
       taskDate.setHours(0, 0, 0, 0);
       const dateKey = taskDate.getTime();
 
+      // Skip overdue tasks in the regular groups
+      if (dateKey < todayStart) {
+        return groups;
+      }
+
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }

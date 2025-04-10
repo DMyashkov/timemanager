@@ -11,10 +11,12 @@
       "resizeMode": "contain"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dmyashkov.timemanager"
     },
     "android": {
-      "adaptiveIcon": {}
+      "adaptiveIcon": {},
+      "package": "com.dmyashkov.timemanager"
     },
     "web": {
       "bundler": "metro",
