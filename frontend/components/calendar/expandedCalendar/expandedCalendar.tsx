@@ -281,7 +281,7 @@ const WeekRow: React.FC = React.memo(() => {
 interface MonthViewProps {
   monthStart: DateStruct;
   focusedDate: DateStruct;
-  setFocusedDate: (date: DateStruct) => void;
+  setFocusedDate: (date: DateStruct | null) => void;
 }
 
 const MonthView: React.FC<MonthViewProps> = React.memo(

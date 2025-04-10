@@ -159,14 +159,19 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   }, [completed, task, updateTask, db, onTaskUpdate]);
 
   const handleDateChange = async (date: DateStruct | null) => {
-    if (!date || !task.id) return;
     // Convert DateStruct to Date and set time to 23:59
-    const selectedDate = new Date(date.year, date.month - 1, date.day);
-    selectedDate.setHours(23, 59, 0, 0);
-    const newDate = selectedDate.getTime();
-    setDate(newDate);
-
+    if (!task.id) return;
+    let newDate: number | null;
+    if (date) {
+      const selectedDate = new Date(date.year, date.month - 1, date.day);
+      selectedDate.setHours(23, 59, 0, 0);
+      newDate = selectedDate.getTime();
+      setDate(newDate);
+    } else {
+      newDate = null;
+    }
     try {
+      console.log("Updating task date:", newDate);
       await updateTask(db, task.id, { date: newDate });
       onTaskUpdate?.({ ...task, date: newDate });
     } catch (error) {
