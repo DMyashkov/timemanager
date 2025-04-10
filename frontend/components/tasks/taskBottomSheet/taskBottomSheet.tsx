@@ -60,7 +60,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   onTaskUpdate,
   onTaskDelete,
 }) => {
-  console.log("TaskbottomSheet task", task);
+  // console.log("TaskbottomSheet task", task);
   const styles = useStyles();
   const { theme } = useTheme();
   const [title, setTitle] = useState(task.title);
@@ -74,6 +74,16 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const { updateTask } = useTaskContext();
   const { getTag } = useTagContext();
   const [selectedTag, setSelectedTag] = useState<TagData | null>(null);
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description || "");
+      setPriority(task.priority);
+      setDate(task.date);
+      setCompleted(task.completed);
+    }
+  }, [task]);
 
   // Load the tag data when component mounts
   useEffect(() => {
