@@ -193,19 +193,31 @@ const fetchAndStoreTasks = async (
       },
     });
 
-    const remoteTasks = response.data;
-    for (const task of remoteTasks) {
-      await insertTask(db, {
-        id: task.id,
-        title: task.title,
-        description: task.description,
-        date: task.date,
-        priority: task.priority,
-        completed: task.completed,
-        synced: 1,
-        deleted: 0,
-        tagId: task.tag_id,
-      });
+    if (response.status === 200) {
+      const remoteTasks = response.data;
+      
+      // Clear local database first
+      await db.delete(tasks);
+      console.log("Local database cleared successfully.");
+
+      // Insert all tasks
+      for (const task of remoteTasks) {
+        await insertTask(db, {
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          date: task.date,
+          priority: task.priority,
+          completed: task.completed,
+          synced: 1,
+          deleted: 0,
+          tagId: task.tag_id,
+        });
+      }
+      
+      console.log("Tasks inserted into local database successfully.");
+    } else {
+      console.error("Failed to fetch tasks:", response.statusText);
     }
   } catch (error) {
     console.error("Error fetching tasks:", error);
