@@ -125,54 +125,32 @@ const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ): Promise<void> => {
-  const unsyncedRows = await db
-    .select()
-    .from(tasks)
-    .where(and(eq(tasks.synced, 0), eq(tasks.deleted, 0)));
+  const rows = await db.select().from(tasks).where(eq(tasks.synced, 0));
 
-  const deletedRows = await db
-    .select()
-    .from(tasks)
-    .where(and(eq(tasks.synced, 0), eq(tasks.deleted, 1)));
-
-  for (const row of unsyncedRows) {
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/tasks/",
-        {
-          id: row.id,
-          title: row.title,
-          description: row.description,
-          date: row.date,
-          priority: row.priority,
-          completed: row.completed === 1,
-          tagId: row.tagId,
-        },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        },
-      );
-
-      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.id, row.id));
-    } catch (error) {
-      console.error("Error syncing task:", error);
-    }
+  if (rows.length === 0) {
+    console.log("Tried to sync tasks but no unsynced rows found");
+    return;
   }
 
-  for (const row of deletedRows) {
-    try {
-      await axios.delete(`http://localhost:8000/api/tasks/${row.id}/`, {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      });
+  try {
+    const response = await fetch("http://127.0.0.1:8000/api/tasks/sync/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+      body: JSON.stringify(rows),
+    });
 
-      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.id, row.id));
-    } catch (error) {
-      console.error("Error deleting task:", error);
+    if (response.ok) {
+      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.synced, 0));
+      console.log("All unsynced rows marked as synced");
+      await cleanupDeletedRows(db);
+    } else {
+      throw new Error("Failed to sync with backend");
     }
+  } catch (error) {
+    console.error("Sync error:", error);
   }
 };
 
@@ -187,15 +165,22 @@ const fetchAndStoreTasks = async (
   token: string,
 ): Promise<void> => {
   try {
+    console.log("Fetching tasks with token:", token);
+
     const response = await axios.get("http://localhost:8000/api/tasks/", {
       headers: {
         Authorization: `Token ${token}`,
       },
     });
 
+    console.log("Fetched tasks:", response.data);
+    console.log("Response status:", response.status);
+
     if (response.status === 200) {
       const remoteTasks = response.data;
       
+      console.log("Tasks fetched successfully. Count:", remoteTasks.length);
+
       // Clear local database first
       await db.delete(tasks);
       console.log("Local database cleared successfully.");

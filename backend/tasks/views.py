@@ -13,7 +13,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.all()
+        return Task.objects.filter(deleted=False)
 
 
 @api_view(['POST'])
@@ -21,28 +21,36 @@ class TaskViewSet(viewsets.ModelViewSet):
 def sync_tasks(request):
     tasks_data = request.data
     
-    for task_data in tasks_data:
+    for task_data in request.data:
         task_id = task_data.get('id')
-        if task_id:
-            # Update existing task
-            try:
-                task = Task.objects.get(id=task_id)
-                serializer = TaskSerializer(task, data=task_data, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-            except Task.DoesNotExist:
-                # Create new task if it doesn't exist
+        is_deleted = task_data.get('deleted', False)
+
+        if is_deleted:
+            if task_id != 0:  # Only delete if it's an existing task
+                Task.objects.filter(id=task_id).delete()
+            continue
+
+        try:
+            if task_id == 0:  # New task
+                # Create new task without specifying ID
                 serializer = TaskSerializer(data=task_data)
                 if serializer.is_valid():
+                    new_task = serializer.save()
+                    task_data["id"] = new_task.id
+            else:  # Update existing task
+                task_instance = Task.objects.get(id=task_id)
+                serializer = TaskSerializer(task_instance, data=task_data, partial=True)
+                if serializer.is_valid():
                     serializer.save()
-        else:
-            # Create new task
-            serializer = TaskSerializer(data=task_data)
-            if serializer.is_valid():
-                serializer.save()
+        except Task.DoesNotExist:
+            if task_id != 0:  # Only try to create if it's a new task
+                serializer = TaskSerializer(data=task_data)
+                if serializer.is_valid():
+                    new_task = serializer.save()
+                    task_data["id"] = new_task.id
     
-    # Return all tasks
-    tasks = Task.objects.all()
+    # Return all non-deleted tasks
+    tasks = Task.objects.filter(deleted=False)
     serializer = TaskSerializer(tasks, many=True)
     return Response(serializer.data)
 

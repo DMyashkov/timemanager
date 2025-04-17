@@ -16,6 +16,8 @@ class TaskSerializer(serializers.ModelSerializer):
             'project',
             'priority',
             'completed',
+            'deleted',
+            'synced',
             'created_at',
             'updated_at',
             'tagId',
@@ -34,6 +36,8 @@ class TaskSerializer(serializers.ModelSerializer):
             "activity_id": data.get("tagId"),
             "priority": data.get("priority"),
             "completed": data.get("completed"),
+            "deleted": data.get("deleted", False),
+            "synced": data.get("synced", True),
         }
         return super().to_internal_value(converted_data)
 
@@ -50,4 +54,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "tagId": representation["tagId"],
             "priority": representation["priority"],
             "completed": representation["completed"],
+            "deleted": representation["deleted"],
+            "synced": representation["synced"],
         } 

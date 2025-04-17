@@ -23,6 +23,8 @@ class Task(models.Model):
     )
     priority = models.IntegerField(null=True, blank=True)
     completed = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    synced = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
