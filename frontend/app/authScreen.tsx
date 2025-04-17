@@ -19,6 +19,7 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
 import { useAuthContext } from "@/context/AuthContext";
 import { useSessionContext } from "@/context/SessionContext";
+import { useTaskContext } from "@/context/TaskContext";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -50,9 +51,12 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     console.log("isLoggedIn authScreen.tsx", isLoggedIn);
   }, [isLoggedIn]);
 
+  const { fetchAndStoreTasks } = useTaskContext();
+
   const fetchData = async (token: string) => {
     await fetchAndStoreTags(db, token);
     await fetchAndStoreSessions(db, token);
+    await fetchAndStoreTasks(db, token);
   };
 
   const handleLogin = async () => {

@@ -18,8 +18,6 @@ import {
   Modal,
   Touchable,
 } from "react-native";
-import TrashIcon from "@assets/icons/trash-can.svg";
-import XIcon from "@assets/icons/x.svg";
 import { useTheme } from "@context/ThemeContext";
 import TwoArrows from "@assets/icons/two-arrows.svg";
 import type { SvgProps } from "react-native-svg";
@@ -162,7 +160,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleDateChange = async (date: DateStruct | null) => {
     // Convert DateStruct to Date and set time to 23:59
-    //
     if (!task.id) return;
     let newDate: number | null;
     if (date) {
@@ -172,9 +169,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       setDate(newDate);
     } else {
       newDate = null;
-      setDate(null);
     }
-
     try {
       console.log("Updating task date:", newDate);
       await updateTask(db, task.id, { date: newDate });
@@ -273,9 +268,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
 
-  const [initialExpandedCalendarDate, setInitialExpandedCalendarDate] =
-    useState<DateStruct | null>(null);
-
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
     console.log("Selected tag:", newTag);
@@ -306,28 +298,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
         index={-1}
       >
         <View style={styles.outer}>
-          {/* <BottomSheetView style={styles.topView}> */}
-          {/*   <View style={styles.topIcon}> */}
-          {/*     <TrashIcon */}
-          {/*       fill={theme.color.darkGrey} */}
-          {/*       height={17} */}
-          {/*       width={20} */}
-          {/*       onPress={() => { */}
-          {/*         handleDelete(); */}
-          {/*       }} */}
-          {/*     /> */}
-          {/*   </View> */}
-          {/*   <View style={styles.topIcon}> */}
-          {/*     <XIcon */}
-          {/*       fill={theme.color.darkGrey} */}
-          {/*       height={20} */}
-          {/*       width={20} */}
-          {/*       onPress={() => { */}
-          {/*         handleDelete(); */}
-          {/*       }} */}
-          {/*     /> */}
-          {/*   </View> */}
-          {/* </BottomSheetView> */}
           <BottomSheetScrollView
             style={styles.contentContainer}
             contentContainerStyle={{
@@ -380,9 +350,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
               <TouchableOpacity
                 style={styles.row}
                 onPress={() => {
-                  setInitialExpandedCalendarDate(
-                    date ? DateStruct.fromDate(new Date(date)) : null,
-                  );
                   openCalendarSheet();
                 }}
               >
@@ -499,7 +466,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
-        initialDate={initialExpandedCalendarDate}
       />
       <PickActivity
         visible={isPickActivityVisible}

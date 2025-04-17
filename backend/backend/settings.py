@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv(
-    'ALLOWED_HOSTS', '127.0.0.1,10.0.2.2,192.168.1.100').split(',')
+    'ALLOWED_HOSTS', '127.0.0.1,10.0.2.2,192.168.1.100,localhost').split(',')
 
 # Application definition
 
@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'authentication',
     'tags',
-    'time_sessions'
+    'time_sessions',
+    'tasks'
 ]
 
 REST_FRAMEWORK = {
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'backend.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'

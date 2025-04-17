@@ -1,10 +1,14 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import TaskViewSet
+import logging
 
-router = DefaultRouter()
-router.register(r'tasks', TaskViewSet, basename='task')
+from django.urls import path
+from rest_framework.routers import DefaultRouter
+
+from .views import DeleteAllTasksView, TaskViewSet, sync_tasks
+
+logger = logging.getLogger(__name__)
 
 urlpatterns = [
-    path('', include(router.urls)),
-] 
+    path('tasks/', TaskViewSet.as_view({'get': 'list', 'post': 'create'}), name='list-tasks'),
+    path('tasks/sync/', sync_tasks, name='sync-tasks'),
+    path('tasks/delete-all/', DeleteAllTasksView.as_view(), name='delete-all-tasks'),
+]

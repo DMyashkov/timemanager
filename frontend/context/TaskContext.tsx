@@ -138,7 +138,7 @@ const syncUnsyncedRows = async (
   for (const row of unsyncedRows) {
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/tasks/",
+        "http://127.0.0.1:8000/api/tasks/",
         {
           id: row.id,
           title: row.title,

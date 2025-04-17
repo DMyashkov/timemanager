@@ -16,6 +16,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('tags.urls')),  # Include the tags app URLs here
     path('api/', include('time_sessions.urls')),  # Include the time_sessions app URLs here
+    path('api/', include('tasks.urls')), # Include the tasks app URLs here
 ]
 # Serve media files if DEBUG is True (development mode)
 if settings.DEBUG:
