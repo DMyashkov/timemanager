@@ -87,6 +87,10 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     }
   }, [task]);
 
+  useEffect(() => {
+    console.log("Selected Tag ID:", selectedTagID);
+  }, [selectedTagID]);
+
   const { activityNode, projectNode } = useDerivedTags(selectedTagID);
 
   const handleSheetChanges = useCallback((index: number) => {
@@ -434,19 +438,35 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                       }
                     />
                   )}
+                  {!(activityNode || projectNode) && (
+                    <ButtonInsideFooterComponent
+                      Icon={TwoArrows}
+                      text="Pick Activity / Project"
+                      color={theme.color.darkGrey}
+                      style={{
+                        marginTop: -2,
+                      }}
+                      onPress={() => {
+                        setIsPickActivityVisible(true);
+                      }}
+                    />
+                  )}
                 </View>
               </View>
-              <ButtonInsideFooterComponent
-                Icon={TwoArrows}
-                text="Change Activity / Project"
-                color={theme.color.darkGrey}
-                style={{
-                  marginTop: -2,
-                }}
-                onPress={() => {
-                  setIsPickActivityVisible(true);
-                }}
-              />
+              {(activityNode || projectNode) && (
+                <ButtonInsideFooterComponent
+                  Icon={TwoArrows}
+                  text="Change Activity / Project"
+                  color={theme.color.darkGrey}
+                  style={{
+                    marginTop: -2,
+                    marginBottom: 14,
+                  }}
+                  onPress={() => {
+                    setIsPickActivityVisible(true);
+                  }}
+                />
+              )}
               <View style={styles.bigSeparator} />
             </BottomSheetView>
           </BottomSheetScrollView>

@@ -132,7 +132,6 @@ export default function useStyles() {
       backgroundColor: theme.color.defGrey,
       width: "200%",
       marginLeft: -22,
-      marginTop: 14,
     },
     topIcon: {
       height: TOP_ICON_SIZE,
