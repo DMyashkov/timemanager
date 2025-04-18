@@ -7,13 +7,16 @@ import SessionCalendar from "@components/calendar/sessionCalendar/sessionCalenda
 import SessionList from "@components/calendar/sessionList/sessionList";
 import CollapsedCalendar from "@/components/calendar/collapsedCalendar/collapsedCalendar";
 import { useProductivityMetric } from "@/hooks/useProductivityMetric";
-import { Time } from "@/utils/dateTimeSession";
+import { DateStruct, Time } from "@/utils/dateTimeSession";
+import { useState } from "react";
 
 export default function CalendarScreen() {
   const styles = useStyles();
   const { theme } = useTheme();
   const productiveTime = useProductivityMetric();
   const productiveTimeObj = Time.fromSeconds(productiveTime);
+  const today = DateStruct.fromDate(new Date());
+  const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
 
   return (
     <View style={styles.screen}>
@@ -25,9 +28,11 @@ export default function CalendarScreen() {
         ]}
         styleSwitch={{ paddingHorizontal: 13 }}
         TopElement={() => (
-          <CollapsedCalendar 
-            style={{ paddingHorizontal: 15 }} 
+          <CollapsedCalendar
+            style={{ paddingHorizontal: 15 }}
             productiveTime={productiveTimeObj}
+            focusedDate={focusedDate}
+            setFocusedDate={setFocusedDate}
           />
         )}
       >

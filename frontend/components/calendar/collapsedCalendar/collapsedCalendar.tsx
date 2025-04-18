@@ -20,11 +20,15 @@ import { DateStruct } from "@utils/dateTimeSession";
 interface CollapsedCalendarProps {
   style?: object;
   productiveTime: Time;
+  focusedDate: DateStruct;
+  setFocusedDate: (date: DateStruct) => void;
 }
 
 export default function CollapsedCalendar({
   style = {},
   productiveTime,
+  focusedDate,
+  setFocusedDate,
 }: CollapsedCalendarProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -48,7 +52,6 @@ export default function CollapsedCalendar({
     [startingDay],
   );
 
-  const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
   const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
   const [transitioning, setTransitioning] = useState(false);
   const goBackToToday = () => {
