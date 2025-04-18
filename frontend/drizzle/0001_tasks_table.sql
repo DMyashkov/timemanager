@@ -9,5 +9,5 @@ CREATE TABLE IF NOT EXISTS `tasks` (
     `completed` INTEGER DEFAULT 0,
     `synced` INTEGER DEFAULT 0,
     `deleted` INTEGER DEFAULT 0,
-    `tag_id` TEXT
+    `tag_id` INTEGER
 ); 

@@ -56,7 +56,7 @@ const insertTag = async (
     children,
     synced,
   } = item;
-  console.log("Tag ", title, " has a synced value of ", synced);
+  // console.log("Tag ", title, " has a synced value of ", synced);
 
   // ✅ Allow parent to be null (for root-level tags)
   if (parent !== null) {
@@ -359,11 +359,11 @@ const fetchAndStoreTags = async (
     if (response.status === 200) {
       const fetchedTags: TagData[] = response.data;
 
-      console.log("Tags fetched successfully.");
+      // console.log("Tags fetched successfully.");
 
       // Clear local database first
       await db.delete(tags);
-      console.log("Local database cleared successfully.");
+      // console.log("Local database cleared successfully.");
 
       // Group tags by parent ID
       const tagMap = new Map<number | null, TagData[]>();
@@ -375,7 +375,7 @@ const fetchAndStoreTags = async (
         tagMap.set(tag.parent, parentTags);
       }
 
-      console.log("Tags grouped by parent:", tagMap);
+      // console.log("Tags grouped by parent:", tagMap);
 
       // BFS insertion using a queue
       const queue: TagData[] = tagMap.get(null) ?? []; // Start with root-level tags

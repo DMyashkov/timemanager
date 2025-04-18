@@ -44,7 +44,7 @@ const insertSession = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
-  console.log("Insert session:", item);
+  // console.log("Insert session:", item);
   const {
     tagId,
     totalWorkTime,
@@ -188,7 +188,7 @@ export const syncUnsyncedRows = async (
         .update(sessions)
         .set({ synced: 1 })
         .where(eq(sessions.synced, 0));
-      console.log("All unsynced rows marked as synced");
+      // console.log("All unsynced rows marked as synced");
       await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
@@ -202,7 +202,7 @@ const cleanupDeletedRows = async (db: ExpoSQLiteDatabase<typeof schema>) => {
   await db
     .delete(sessions)
     .where(and(eq(sessions.deleted, 1), eq(sessions.synced, 1)));
-  console.log("Deleted rows cleaned up");
+  // console.log("Deleted rows cleaned up");
 };
 
 const fetchAndStoreSessions = async (
@@ -210,23 +210,23 @@ const fetchAndStoreSessions = async (
   token: string,
 ) => {
   try {
-    console.log("Auth token:", token);
+    // console.log("Auth token:", token);
 
     const response = await axios.get("http://127.0.0.1:8000/api/sessions/", {
       headers: { Authorization: `Token ${token}` },
     });
 
-    console.log("Fetched sessions:", response.data);
-    console.log("Response status:", response.status);
+    // console.log("Fetched sessions:", response.data);
+    // console.log("Response status:", response.status);
 
     if (response.status === 200) {
       const fetchedSessions: SessionData[] = response.data;
 
-      console.log("Sessions fetched successfully.");
+      // console.log("Sessions fetched successfully.");
 
       // Clear local database first
       await db.delete(sessions);
-      console.log("Local database cleared successfully.");
+      // console.log("Local database cleared successfully.");
 
       // Insert all sessions
       for (const session of fetchedSessions) {
@@ -244,7 +244,7 @@ const fetchAndStoreSessions = async (
         });
       }
 
-      console.log("Sessions inserted into local database successfully.");
+      // console.log("Sessions inserted into local database successfully.");
     } else {
       console.error("Failed to fetch sessions:", response.statusText);
     }

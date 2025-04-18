@@ -126,6 +126,7 @@ const syncUnsyncedRows = async (
   token: string,
 ): Promise<void> => {
   const rows = await db.select().from(tasks).where(eq(tasks.synced, 0));
+  console.log("Rows to sync:", rows);
 
   if (rows.length === 0) {
     console.log("Tried to sync tasks but no unsynced rows found");
@@ -178,15 +179,16 @@ const fetchAndStoreTasks = async (
 
     if (response.status === 200) {
       const remoteTasks = response.data;
-      
-      console.log("Tasks fetched successfully. Count:", remoteTasks.length);
+
+      // console.log("Tasks fetched successfully. Count:", remoteTasks.length);
 
       // Clear local database first
       await db.delete(tasks);
-      console.log("Local database cleared successfully.");
+      // console.log("Local database cleared successfully.");
 
       // Insert all tasks
       for (const task of remoteTasks) {
+        console.log("Looking trough task", task);
         await insertTask(db, {
           id: task.id,
           title: task.title,
@@ -196,10 +198,10 @@ const fetchAndStoreTasks = async (
           completed: task.completed,
           synced: 1,
           deleted: 0,
-          tagId: task.tag_id,
+          tagId: task.tagId,
         });
       }
-      
+
       console.log("Tasks inserted into local database successfully.");
     } else {
       console.error("Failed to fetch tasks:", response.statusText);

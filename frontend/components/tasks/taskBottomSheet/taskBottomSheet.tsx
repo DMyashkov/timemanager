@@ -87,9 +87,9 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     }
   }, [task]);
 
-  useEffect(() => {
-    console.log("Selected Tag ID:", selectedTagID);
-  }, [selectedTagID]);
+  // useEffect(() => {
+  //   // console.log("Selected Tag ID:", selectedTagID);
+  // }, [selectedTagID]);
 
   const { activityNode, projectNode } = useDerivedTags(selectedTagID);
 
@@ -274,8 +274,8 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const handleActivitySelected = async (newTag: TagData) => {
     if (!task.id) return;
-    console.log("Selected tag:", newTag);
-    console.log("YAHOOOO");
+    // console.log("Selected tag:", newTag);
+    // console.log("YAHOOOO");
 
     try {
       await updateTask(db, task.id, { tagId: newTag.id });

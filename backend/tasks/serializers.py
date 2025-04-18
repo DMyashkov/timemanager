@@ -39,7 +39,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "deleted": data.get("deleted", False),
             "synced": data.get("synced", True),
         }
-        return super().to_internal_value(converted_data)
+        return {k: v for k, v in converted_data.items() if v is not None}
 
     def to_representation(self, instance):
         """
@@ -54,6 +54,6 @@ class TaskSerializer(serializers.ModelSerializer):
             "tagId": representation["tagId"],
             "priority": representation["priority"],
             "completed": representation["completed"],
-            "deleted": representation["deleted"],
             "synced": representation["synced"],
+            "deleted": representation["deleted"]
         } 
