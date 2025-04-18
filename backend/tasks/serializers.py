@@ -4,8 +4,6 @@ from .models import Task
 
 
 class TaskSyncSerializer(serializers.ModelSerializer):
-    tagId = serializers.IntegerField(
-        source='activity_id', required=False, allow_null=True)
 
     class Meta:
         model = Task
@@ -44,7 +42,7 @@ class TaskSyncSerializer(serializers.ModelSerializer):
             "title": representation["title"],
             "description": representation["description"],
             "date": representation["date"],
-            "tagId": representation["tagId"],
+            "tagId": representation["tag_id"],
             "priority": representation["priority"],
             "completed": representation["completed"],
         }
