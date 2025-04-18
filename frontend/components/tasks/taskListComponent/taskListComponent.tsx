@@ -78,7 +78,7 @@ export default function TaskListComponent({
         )}
         keyExtractor={(item) => item.id?.toString() ?? ""}
         ItemSeparatorComponent={TaskSeparator}
-        contentContainerStyle={{ paddingVertical: 12, overflow: "visible" }}
+        contentContainerStyle={{ paddingVertical: 12 }}
         style={{ overflow: "visible" }}
       />
     </TouchableOpacity>

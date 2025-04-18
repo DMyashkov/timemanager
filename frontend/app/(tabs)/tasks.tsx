@@ -227,7 +227,6 @@ export default function TasksScreen() {
                 ? "noDate"
                 : item.date.toString()
           }
-          contentContainerStyle={{ overflow: "visible" }}
           style={{ overflow: "visible" }}
           ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
         />
