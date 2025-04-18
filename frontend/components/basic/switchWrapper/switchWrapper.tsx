@@ -1,4 +1,4 @@
-import { View, Text, DimensionValue } from "react-native";
+import { View, Text, DimensionValue, LayoutChangeEvent } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 
@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
+import { useState } from "react";
 
 interface SwitchWrapperProps extends SwitchProps {
   children: [React.ReactNode, React.ReactNode];
@@ -25,12 +26,13 @@ export default function SwitchWrapper({
   const { theme } = useTheme();
 
   const positionAnim = useSharedValue(0);
+
   const animStyles = {
     main: useAnimatedStyle(() => ({
       marginLeft: `-${positionAnim.value * 100}%` as DimensionValue,
     })),
-    transform: [{ translateX: `-${positionAnim.value * 100}%` }],
   };
+
   return (
     <View style={styles.container}>
       <View style={styleSwitch}>

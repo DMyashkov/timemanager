@@ -69,12 +69,6 @@ export default function SessionList({ style = {} }: { style?: object }) {
         const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
         return bEnd - aEnd; // descending
       }) ?? [];
-  console.log(
-    "SESSION DATA PARSING ",
-    sessionsData,
-    "got parsed intervals",
-    sessions,
-  );
 
   return (
     <View style={[styles.container, style]}>
