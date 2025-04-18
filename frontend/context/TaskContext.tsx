@@ -48,6 +48,7 @@ const insertTask = async (
     const result = await db
       .insert(tasks)
       .values({
+        id,
         title,
         description,
         date,
@@ -59,7 +60,7 @@ const insertTask = async (
       })
       .returning({ insertId: tasks.id });
 
-    console.log("Database insert result:", result);
+    console.log("Database after insert", await db.select().from(tasks));
     return result[0].insertId;
   } catch (error) {
     console.error("Error inserting task into database:", error);
@@ -168,7 +169,7 @@ const fetchAndStoreTasks = async (
   token: string,
 ): Promise<void> => {
   try {
-    const response = await axios.get("http://localhost:8000/api/tasks/", {
+    const response = await axios.get("http://127.0.0.1:8000/api/tasks/", {
       headers: {
         Authorization: `Token ${token}`,
       },
@@ -177,14 +178,14 @@ const fetchAndStoreTasks = async (
     console.log("Fetched tasks:", response.data);
 
     if (response.status === 200) {
-      const remoteTasks = response.data;
+      const fetchedTasks = response.data;
 
       // Clear local database first
       await db.delete(tasks);
       console.log("Local database cleared successfully.");
 
       // Insert all tasks
-      for (const task of remoteTasks) {
+      for (const task of fetchedTasks) {
         await insertTask(db, {
           id: task.id,
           title: task.title,
@@ -194,7 +195,7 @@ const fetchAndStoreTasks = async (
           completed: task.completed,
           synced: 1,
           deleted: 0,
-          tagId: task.tag_id,
+          tagId: task.tagId,
         });
       }
 
