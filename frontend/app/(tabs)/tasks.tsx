@@ -228,7 +228,6 @@ export default function TasksScreen() {
                 ? "noDate"
                 : item.date.toString()
           }
-          style={{ overflow: "visible" }}
           ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
         />
       </TouchableOpacity>
