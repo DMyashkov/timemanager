@@ -46,6 +46,7 @@ const insertSession = async (
 ): Promise<number> => {
   // console.log("Insert session:", item);
   const {
+    id,
     tagId,
     totalWorkTime,
     totalBreakTime,
@@ -64,6 +65,7 @@ const insertSession = async (
   const result = await db
     .insert(sessions)
     .values({
+      id,
       tagId,
       totalWorkTime,
       totalBreakTime,
