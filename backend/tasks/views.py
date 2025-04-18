@@ -1,58 +1,66 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
+import json
+
+from django.utils.functional import empty
+from rest_framework import status
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import status
+
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import TaskSyncSerializer, TaskSyncWithDeletedSerializer
 
 
-class TaskViewSet(viewsets.ModelViewSet):
-    serializer_class = TaskSerializer
+class ListTasksView(ListAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskSyncSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Task.objects.filter(deleted=False)
 
+class SyncTasksView(APIView):
+    permission_classes = [IsAuthenticated]
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def sync_tasks(request):
-    tasks_data = request.data
-    
-    for task_data in request.data:
-        task_id = task_data.get('id')
-        is_deleted = task_data.get('deleted', False)
+    def post(self, request, *args, **kwargs):
+        for task_data in request.data:
+            task_data.pop("synced", None)
 
-        if is_deleted:
-            if task_id != 0:  # Only delete if it's an existing task
+        print("TASKS BEFORE SERIALIZER:")
+        print(json.dumps(request.data, indent=4, sort_keys=True))
+
+        # Validate the incoming payload
+        payload_serializer = TaskSyncWithDeletedSerializer(
+            data=request.data, many=True)
+        if not payload_serializer.is_valid():
+            return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        payload = list(payload_serializer.validated_data) if isinstance(
+            payload_serializer.validated_data, list) else []
+
+        print("TASKS AFTER SERIALIZER:")
+        print(json.dumps(payload, indent=4, sort_keys=True))
+
+        for task_data in payload:
+            task_id = task_data.get("id")
+            is_deleted = task_data.pop("deleted", None)
+            print("For task with title", task_data.get(
+                "title"), " is_deleted:", is_deleted)
+
+            if task_id is None:
+                return Response({"error": "ID field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if is_deleted:
                 Task.objects.filter(id=task_id).delete()
-            continue
+                continue
 
-        try:
-            if task_id == 0:  # New task
-                # Create new task without specifying ID
-                serializer = TaskSerializer(data=task_data)
-                if serializer.is_valid():
-                    new_task = serializer.save()
-                    task_data["id"] = new_task.id
-            else:  # Update existing task
+            try:
                 task_instance = Task.objects.get(id=task_id)
-                serializer = TaskSerializer(task_instance, data=task_data, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-        except Task.DoesNotExist:
-            if task_id != 0:  # Only try to create if it's a new task
-                serializer = TaskSerializer(data=task_data)
-                if serializer.is_valid():
-                    new_task = serializer.save()
-                    task_data["id"] = new_task.id
-    
-    # Return all non-deleted tasks
-    tasks = Task.objects.filter(deleted=False)
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
+                for key, value in task_data.items():
+                    setattr(task_instance, key, value)
+                task_instance.save()
+            except Task.DoesNotExist:
+                Task.objects.create(**task_data)
+
+        return Response({"message": "Tasks synced successfully"}, status=status.HTTP_200_OK)
 
 
 class DeleteAllTasksView(APIView):
@@ -60,10 +68,11 @@ class DeleteAllTasksView(APIView):
 
     def delete(self, request, *args, **kwargs):
         """
-        Deletes all tasks.
+        Deletes all tasks for the authenticated user.
         """
-        deleted_count, _ = Task.objects.all().delete()
+        deleted_count, _ = Task.objects.all().delete()  # Delete all records
+
         return Response(
             {"message": f"Deleted {deleted_count} tasks successfully."},
             status=status.HTTP_200_OK
-        ) 
+        )

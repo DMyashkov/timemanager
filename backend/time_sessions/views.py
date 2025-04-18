@@ -1,19 +1,23 @@
-from django.shortcuts import render
 import json
 
+from django.shortcuts import render
+from django.utils.functional import empty
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Session
-from .serializers import SessionSyncSerializer, SessionSyncWithDeletedSerializer
+from .serializers import (SessionSyncSerializer,
+                          SessionSyncWithDeletedSerializer)
+
 
 class ListSessionsView(ListAPIView):
     queryset = Session.objects.all()
     serializer_class = SessionSyncSerializer
     permission_classes = [IsAuthenticated]
+
 
 class SyncSessionsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -22,7 +26,7 @@ class SyncSessionsView(APIView):
         for session_data in request.data:
             session_data.pop("synced", None)
 
-        print("BEFORE SERIALIZER:")
+        print("SESSIONS BEFORE SERIALIZER:")
         print(json.dumps(request.data, indent=4, sort_keys=True))
 
         # Validate the incoming payload
@@ -34,35 +38,32 @@ class SyncSessionsView(APIView):
         payload = list(payload_serializer.validated_data) if isinstance(
             payload_serializer.validated_data, list) else []
 
-        print("AFTER SERIALIZER:")
+        print("SESSIONS AFTER SERIALIZER:")
         print(json.dumps(payload_serializer.validated_data, indent=4, sort_keys=True))
 
         for session_data in payload:
             session_id = session_data.get("id")
             is_deleted = session_data.pop("deleted", None)
+            print("For session with id", session_id,
+                  " is_deleted:", is_deleted)
+
+            if session_id is None:
+                return Response({"error": "ID field is required"}, status=status.HTTP_400_BAD_REQUEST)
 
             if is_deleted:
-                if session_id != 0:  # Only delete if it's an existing session
-                    Session.objects.filter(id=session_id).delete()
+                Session.objects.filter(id=session_id).delete()
                 continue
 
             try:
-                if session_id == 0:  # New session
-                    # Create new session without specifying ID
-                    new_session = Session.objects.create(**session_data)
-                    # Return the generated ID to the frontend
-                    session_data["id"] = new_session.id
-                else:  # Update existing session
-                    session_instance = Session.objects.get(id=session_id)
-                    for key, value in session_data.items():
-                        setattr(session_instance, key, value)
-                    session_instance.save()
+                session_instance = Session.objects.get(id=session_id)
+                for key, value in session_data.items():
+                    setattr(session_instance, key, value)
+                session_instance.save()
             except Session.DoesNotExist:
-                if session_id != 0:  # Only try to create if it's a new session
-                    new_session = Session.objects.create(**session_data)
-                    session_data["id"] = new_session.id
+                Session.objects.create(**session_data)
 
-        return Response({"message": "Sessions synced successfully", "sessions": payload}, status=status.HTTP_200_OK)
+        return Response({"message": "Sessions synced successfully"}, status=status.HTTP_200_OK)
+
 
 class DeleteAllSessionsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -71,7 +72,8 @@ class DeleteAllSessionsView(APIView):
         """
         Deletes all sessions for the authenticated user.
         """
-        deleted_count, _ = Session.objects.all().delete()
+        deleted_count, _ = Session.objects.all().delete()  # Delete all records
+
         return Response(
             {"message": f"Deleted {deleted_count} sessions successfully."},
             status=status.HTTP_200_OK

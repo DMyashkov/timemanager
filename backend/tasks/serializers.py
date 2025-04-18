@@ -1,9 +1,11 @@
 from rest_framework import serializers
+
 from .models import Task
 
 
-class TaskSerializer(serializers.ModelSerializer):
-    tagId = serializers.IntegerField(source='activity_id', required=False, allow_null=True)
+class TaskSyncSerializer(serializers.ModelSerializer):
+    tagId = serializers.IntegerField(
+        source='activity_id', required=False, allow_null=True)
 
     class Meta:
         model = Task
@@ -12,17 +14,10 @@ class TaskSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'date',
-            'activity',
-            'project',
             'priority',
             'completed',
-            'deleted',
-            'synced',
-            'created_at',
-            'updated_at',
-            'tagId',
+            'tag_id',
         ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
 
     def to_internal_value(self, data):
         """
@@ -33,13 +28,11 @@ class TaskSerializer(serializers.ModelSerializer):
             "title": data.get("title"),
             "description": data.get("description"),
             "date": data.get("date"),
-            "activity_id": data.get("tagId"),
             "priority": data.get("priority"),
             "completed": data.get("completed"),
-            "deleted": data.get("deleted", False),
-            "synced": data.get("synced", True),
+            "tag_id": data.get("tagId"),
         }
-        return {k: v for k, v in converted_data.items() if v is not None}
+        return super().to_internal_value(converted_data)
 
     def to_representation(self, instance):
         """
@@ -54,6 +47,22 @@ class TaskSerializer(serializers.ModelSerializer):
             "tagId": representation["tagId"],
             "priority": representation["priority"],
             "completed": representation["completed"],
-            "synced": representation["synced"],
-            "deleted": representation["deleted"]
-        } 
+        }
+
+
+class TaskSyncWithDeletedSerializer(TaskSyncSerializer):
+    deleted = serializers.IntegerField(required=False)
+
+    class Meta(TaskSyncSerializer.Meta):
+        fields = TaskSyncSerializer.Meta.fields + ['deleted']
+
+    def to_internal_value(self, data):
+        """
+        Ensure `deleted` is preserved if provided, otherwise set to -1.
+        """
+        converted_data = super().to_internal_value(data)
+
+        converted_data["deleted"] = data.get("deleted", -1)  # 🔥 FIX HERE
+
+        return converted_data
+

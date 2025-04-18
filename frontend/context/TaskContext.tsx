@@ -126,10 +126,12 @@ const syncUnsyncedRows = async (
   token: string,
 ): Promise<void> => {
   const rows = await db.select().from(tasks).where(eq(tasks.synced, 0));
-  console.log("Rows to sync:", rows);
+  // console.log("Unsynced rows found: ", rows);
+
+  // console.log("Sending rows for sync: ", rows);
 
   if (rows.length === 0) {
-    console.log("Tried to sync tasks but no unsynced rows found");
+    console.log("Tried to sync tags but no unsynced rows found");
     return;
   }
 
@@ -166,8 +168,6 @@ const fetchAndStoreTasks = async (
   token: string,
 ): Promise<void> => {
   try {
-    console.log("Fetching tasks with token:", token);
-
     const response = await axios.get("http://localhost:8000/api/tasks/", {
       headers: {
         Authorization: `Token ${token}`,
@@ -175,20 +175,16 @@ const fetchAndStoreTasks = async (
     });
 
     console.log("Fetched tasks:", response.data);
-    console.log("Response status:", response.status);
 
     if (response.status === 200) {
       const remoteTasks = response.data;
 
-      // console.log("Tasks fetched successfully. Count:", remoteTasks.length);
-
       // Clear local database first
       await db.delete(tasks);
-      // console.log("Local database cleared successfully.");
+      console.log("Local database cleared successfully.");
 
       // Insert all tasks
       for (const task of remoteTasks) {
-        console.log("Looking trough task", task);
         await insertTask(db, {
           id: task.id,
           title: task.title,
@@ -198,7 +194,7 @@ const fetchAndStoreTasks = async (
           completed: task.completed,
           synced: 1,
           deleted: 0,
-          tagId: task.tagId,
+          tagId: task.tag_id,
         });
       }
 

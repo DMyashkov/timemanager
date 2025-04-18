@@ -54,18 +54,9 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const { fetchAndStoreTasks } = useTaskContext();
 
   const fetchData = async (token: string) => {
-    try {
-      console.log("Starting data fetch...");
-      await fetchAndStoreTags(db, token);
-      console.log("Tags fetched successfully");
-      await fetchAndStoreSessions(db, token);
-      console.log("Sessions fetched successfully");
-      await fetchAndStoreTasks(db, token);
-      console.log("Tasks fetched successfully");
-    } catch (error) {
-      console.error("Error during data fetch:", error);
-      throw error;
-    }
+    await fetchAndStoreTags(db, token);
+    await fetchAndStoreSessions(db, token);
+    await fetchAndStoreTasks(db, token);
   };
 
   const handleLogin = async () => {

@@ -24,7 +24,7 @@ class SyncTagsView(APIView):
         for tag_data in request.data:
             tag_data.pop("synced", None)
 
-        print("BEFORE SERIALIZER:")
+        print("TAGS BEFORE SERIALIZER:")
         print(json.dumps(request.data, indent=4, sort_keys=True))
 
         # Validate the incoming payload
@@ -37,13 +37,14 @@ class SyncTagsView(APIView):
         payload = list(payload_serializer.validated_data) if isinstance(
             payload_serializer.validated_data, list) else []
 
-        print("AFTER SERIALIZER:")
-        print(json.dumps(payload_serializer.validated_data, indent=4, sort_keys=True))
+        print("TAGS AFTER SERIALIZER:")
+        print(json.dumps(payload, indent=4, sort_keys=True))
 
         for tag_data in payload:
             tag_id = tag_data.get("id")
             is_deleted = tag_data.pop("deleted", None)
-            print("For tag with name", tag_data.get("title"), " is_deleted:", is_deleted)
+            print("For tag with name", tag_data.get(
+                "title"), " is_deleted:", is_deleted)
 
             # print("Tag ID:", tag_id)
             # print("Payload:", payload)

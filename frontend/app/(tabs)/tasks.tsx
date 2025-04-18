@@ -209,6 +209,7 @@ export default function TasksScreen() {
         activeOpacity={1}
       >
         <FlatList
+          contentContainerStyle={{ paddingHorizontal: 15 }}
           data={listData}
           renderItem={({ item }) => (
             <TaskListComponent

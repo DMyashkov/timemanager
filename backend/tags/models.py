@@ -7,7 +7,7 @@ class Tag(models.Model):
         ACTIVITY = 'activity', 'Activity'
         PROJECT = 'project', 'Project'
 
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=255)
     module_type = models.CharField(max_length=20, choices=TagType.choices)
     color_preset = models.CharField(max_length=50)
