@@ -47,7 +47,7 @@ const insertSession = async (
 ): Promise<number> => {
   console.log("Insert session:", item);
   const {
-    idConst,
+    id,
     tagId,
     totalWorkTime,
     totalBreakTime,
@@ -57,7 +57,7 @@ const insertSession = async (
     startTime,
     endTime,
   } = item;
-  const id = idConst === 0 ? undefined : idConst; // Use null if idConst is 0
+  const actualID = id === 0 ? undefined : id; // Use null if idConst is 0
   // Check if intervals and laps are already strings
   const intervalsStr =
     typeof intervals === "string" ? intervals : JSON.stringify(intervals);
@@ -66,7 +66,7 @@ const insertSession = async (
   const result = await db
     .insert(sessions)
     .values({
-      id,
+      id: actualID,
       tagId,
       totalWorkTime,
       totalBreakTime,
@@ -171,9 +171,10 @@ export const syncUnsyncedRows = async (
 ) => {
   // console.log("syncUnsyncedRows of all rows", await db.select().from(sessions));
   const rows = await db.select().from(sessions).where(eq(sessions.synced, 0));
+  console.log("Unsynced rows SESSIONS :", rows);
 
   if (rows.length === 0) {
-    // console.log("Tried to sync sessions but no unsynced rows found");
+    console.log("Tried to sync sessions but no unsynced rows found");
     return;
   }
 

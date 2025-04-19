@@ -49,6 +49,7 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import { time } from "console";
+import { interval } from "drizzle-orm/pg-core";
 
 const timerStateEnum = {
   IDLE: 0,
@@ -125,19 +126,33 @@ export default function Watch() {
     Interval[]
   >([]);
 
-  const logNewInterval = () => {
+  const logNewInterval = (): Interval[] => {
     if (timerState === timerStateEnum.IDLE) {
-      console.warn("Cannot log interval when timer is idle");
-      return;
+      console.error("Cannot log interval when timer is idle");
     }
-    const type =
-      timerState === timerStateEnum.RUNNING
-        ? IntervalType.WORK
-        : IntervalType.BREAK;
-    const endTime = getDateTimeFromDate(new Date());
-    const newInterval = new Interval(currentIntervalStartTime!, endTime, type);
-    setIntervalsCurrentSession((prev) => [...prev, newInterval]);
-    setCurrentIntervalStartTime(endTime);
+    console.log("Logging new interval timerstate is not idle");
+    try {
+      const type =
+        timerState === timerStateEnum.RUNNING
+          ? IntervalType.WORK
+          : IntervalType.BREAK;
+      const endTime = getDateTimeFromDate(new Date());
+      if (!currentIntervalStartTime) {
+        console.error("Current interval start time is null");
+        return [];
+      }
+      const newInterval = new Interval(currentIntervalStartTime, endTime, type);
+      // console.log("New interval created:", newInterval);
+      // console.log("Previous sessions", intervalsCurrentSessions);
+      const newIntervals = [...intervalsCurrentSessions, newInterval];
+      setIntervalsCurrentSession(newIntervals);
+      // console.log("New sessions", intervalsCurrentSessions);
+      setCurrentIntervalStartTime(endTime);
+      return newIntervals;
+    } catch (error) {
+      console.error("Error logging new interval:", error);
+    }
+    return [];
   };
 
   // Handle session start/stop
@@ -153,11 +168,13 @@ export default function Watch() {
   };
 
   const terminateSession = () => {
+    console.log("Session terminated");
     setIsContinuousSessionRunning(false);
     setTimerState(timerStateEnum.IDLE);
     setSelectedTagID(null);
     setTimerSeconds(0);
     setCurrentIntervalStartTime(null);
+    setIntervalsCurrentSession([]);
   };
 
   // Handle session terminate
@@ -174,11 +191,16 @@ export default function Watch() {
           text: "End",
           style: "destructive",
           onPress: async () => {
-            logNewInterval();
-            const finalSession = new Session(
-              selectedTagID,
-              intervalsCurrentSessions,
-            );
+            console.log("Before logging interval", intervalsCurrentSessions);
+            const finalIntervals: Interval[] = logNewInterval();
+            if (!finalIntervals) {
+              console.error("No intervals to log");
+              return;
+            }
+            console.log("After logging interval", intervalsCurrentSessions);
+
+            const finalSession = new Session(selectedTagID, finalIntervals);
+
             try {
               await createSession(db, finalSession.toSessionData());
             } catch (error) {
@@ -202,15 +224,21 @@ export default function Watch() {
     if (activity.id === selectedTagID) {
       return;
     }
+    setTimerState(timerStateEnum.RUNNING);
     if (timerState === timerStateEnum.IDLE) {
       setIsContinuousSessionRunning(true);
+      setCurrentIntervalStartTime(getDateTimeFromDate(new Date()));
+      setTimerSeconds(0);
+      setIntervalsCurrentSession([]);
+      setSelectedTagID(activity.id);
+      return;
     }
     if (!selectedTagID) {
       setSelectedTagID(activity.id);
       return;
     }
-    if (selectedTagID) logNewInterval();
-    const finalSession = new Session(activity.id, intervalsCurrentSessions);
+    const finalIntervals = logNewInterval();
+    const finalSession = new Session(activity.id, finalIntervals);
     setTimerSeconds(0);
     setIntervalsCurrentSession([]);
 
