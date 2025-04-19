@@ -40,7 +40,7 @@ const insertTask = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: TaskData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
-  console.log("Inserting task into database with data:", item);
+  // console.log("Inserting task into database with data:", item);
   const { id, title, description, date, priority, completed, synced, tagId } =
     item;
 
@@ -60,7 +60,7 @@ const insertTask = async (
       })
       .returning({ insertId: tasks.id });
 
-    console.log("Database after insert", await db.select().from(tasks));
+    // console.log("Database after insert", await db.select().from(tasks));
     return result[0].insertId;
   } catch (error) {
     console.error("Error inserting task into database:", error);

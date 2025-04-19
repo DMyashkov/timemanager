@@ -120,11 +120,11 @@ function AppContent({
 
   const syncEverything = useCallback(async () => {
     if (authToken) {
-      await fetchAndStoreTags(db, authToken);
-      await fetchAndStoreSessions(db, authToken);
       await syncUnsyncedTasks(db, authToken);
+      await syncUnsyncedTags(db, authToken);
+      await syncUnsyncedSessions(db, authToken);
     }
-  }, [fetchAndStoreTags, fetchAndStoreSessions, syncUnsyncedTasks, authToken]);
+  }, [syncUnsyncedTags, syncUnsyncedSessions, syncUnsyncedTasks, authToken]);
 
   useEffect(() => {
     if (authToken) {

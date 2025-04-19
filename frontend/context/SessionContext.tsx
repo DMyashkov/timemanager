@@ -7,6 +7,7 @@ import axios from "axios";
 import type { schema } from "@/db/schema";
 import { useFocus } from "./FocusContext";
 import type { SessionData } from "@constants/interfaces";
+import { underDampedSpringCalculations } from "react-native-reanimated/lib/typescript/animation/springUtils";
 
 interface SessionContextProps {
   createSession: (
@@ -44,9 +45,9 @@ const insertSession = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
-  // console.log("Insert session:", item);
+  console.log("Insert session:", item);
   const {
-    id,
+    idConst,
     tagId,
     totalWorkTime,
     totalBreakTime,
@@ -56,7 +57,7 @@ const insertSession = async (
     startTime,
     endTime,
   } = item;
-
+  const id = idConst === 0 ? undefined : idConst; // Use null if idConst is 0
   // Check if intervals and laps are already strings
   const intervalsStr =
     typeof intervals === "string" ? intervals : JSON.stringify(intervals);
@@ -168,6 +169,7 @@ export const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ) => {
+  console.log("syncUnsyncedRows of all rows", await db.select().from(sessions));
   const rows = await db.select().from(sessions).where(eq(sessions.synced, 0));
 
   if (rows.length === 0) {
@@ -218,7 +220,7 @@ const fetchAndStoreSessions = async (
       headers: { Authorization: `Token ${token}` },
     });
 
-    // console.log("Fetched sessions:", response.data);
+    console.log("Fetched sessions:", response.data);
     // console.log("Response status:", response.status);
 
     if (response.status === 200) {
@@ -245,6 +247,10 @@ const fetchAndStoreSessions = async (
           endTime: session.endTime,
         });
       }
+      console.log(
+        "Sessions inserted - end result:",
+        await db.select().from(sessions),
+      );
 
       // console.log("Sessions inserted into local database successfully.");
     } else {

@@ -25,7 +25,7 @@ export function useRelevantSessions(dateStruct?: DateStruct) {
     if (!dateStruct) return new Date();
     return new Date(
       dateStruct.year,
-      dateStruct.month - 1, // JavaScript months are 0-based
+      dateStruct.month - 1,
       dateStruct.day
     );
   }, [dateStruct]);

@@ -140,7 +140,7 @@ export class DateTime {
       this.date.day,
       this.time.hours,
       this.time.minutes,
-      this.time.seconds
+      this.time.seconds,
     );
   }
 }
