@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { schema, sessions } from "@/db/schema";
@@ -7,40 +7,36 @@ import { startOfDay } from "date-fns/startOfDay";
 import { endOfDay } from "date-fns/endOfDay";
 import type { SessionData } from "@constants/interfaces";
 import { and, eq, gte, lt } from "drizzle-orm";
+import { DateStruct } from "@/utils/dateTimeSession";
 
 type DBSession = typeof sessions.$inferSelect;
 
 /**
- * Fetches sessions from the database that occurred today.
+ * Fetches sessions from the database that occurred on the specified date.
  * Uses a live query to stay updated.
+ * @param dateStruct - The date to fetch sessions for. If not provided, defaults to today.
  */
-export function useRelevantSessions() {
+export function useRelevantSessions(dateStruct?: DateStruct) {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
 
-  const [todayStart, setTodayStart] = useState(startOfDay(new Date()));
-  const [todayEnd, setTodayEnd] = useState(endOfDay(new Date()));
+  // Convert DateStruct to Date and memoize the result
+  const date = useMemo(() => {
+    if (!dateStruct) return new Date();
+    return new Date(
+      dateStruct.year,
+      dateStruct.month - 1, // JavaScript months are 0-based
+      dateStruct.day
+    );
+  }, [dateStruct]);
 
-  // Update date range daily or if the component remounts significantly later
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        const now = new Date();
-        setTodayStart(startOfDay(now));
-        setTodayEnd(endOfDay(now));
-      },
-      60 * 60 * 1000,
-    ); // Check every hour, less frequent than per minute update
+  // Memoize the date range calculations
+  const { dateStart, dateEnd } = useMemo(() => ({
+    dateStart: startOfDay(date),
+    dateEnd: endOfDay(date)
+  }), [date]);
 
-    // Initial check in case the day changed between initial render and effect setup
-    const now = new Date();
-    setTodayStart(startOfDay(now));
-    setTodayEnd(endOfDay(now));
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Fetch sessions that overlap with today using the indexed startTime field
+  // Fetch sessions that overlap with the specified date using the indexed startTime field
   const sessionsData = useLiveQuery(
     db
       .select()
@@ -48,12 +44,12 @@ export function useRelevantSessions() {
       .where(
         and(
           eq(sessions.deleted, 0),
-          gte(sessions.startTime, todayStart.getTime()),
-          lt(sessions.startTime, todayEnd.getTime()),
+          gte(sessions.startTime, dateStart.getTime()),
+          lt(sessions.startTime, dateEnd.getTime()),
         ),
       )
       .orderBy(sessions.startTime),
-    [],
+    [dateStart, dateEnd],
   );
 
   // Transform database sessions to SessionData

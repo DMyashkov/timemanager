@@ -14,13 +14,24 @@ import {
   DateStruct,
 } from "@/utils/dateTimeSession";
 import { SessionData } from "@/constants/interfaces";
+import { useFocusedDate } from "@/context/focusedDateContext";
 
 export default function SessionList({ style = {} }: { style?: object }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   // Get today's sessions from the hook
-  const sessionsData: SessionData[] = useRelevantSessions();
+  const { focusedDate } = useFocusedDate();
+
+  // Convert DateStruct to Date
+  const date = new Date(
+    focusedDate.year,
+    focusedDate.month - 1, // JavaScript months are 0-based
+    focusedDate.day
+  );
+
+  // Get sessions for the focused date from the hook
+  const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
   // console.log(
   //   "Sessions data taken in from useReleaventSessions (sessionList):",
   //   sessionsData,

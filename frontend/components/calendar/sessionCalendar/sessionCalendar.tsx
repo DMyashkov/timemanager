@@ -17,6 +17,7 @@ import { SessionData, moduleTypeEnum } from "@/constants/interfaces";
 import ArrowRotateLeft from "@assets/icons/arrow-rotate-left.svg";
 import TagIcon from "@assets/icons/tag.svg";
 import { useRelevantSessions } from "@/hooks/useRelevantSessions";
+import { useFocusedDate } from "@/context/focusedDateContext";
 
 export default function SessionCalendar({ style = {} }: { style?: object }) {
   const { theme } = useTheme();
@@ -24,6 +25,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   const styles = useStyles(textColor);
   const FULL_ENTRY_HEIGHT = 60; // Height for one hour
   const ENTRY_LINE_HEIGHT = 17; // Height for the time line
+  const { focusedDate } = useFocusedDate();
 
   const hours = Array.from({ length: 25 }, (_, i) => {
     const hour = i % 12 || 12; // Convert to 12-hour format
@@ -31,8 +33,15 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
     return `${hour}:00 ${period}`;
   });
 
-  // Get today's sessions from the hook
-  const sessionsData: SessionData[] = useRelevantSessions();
+  // Convert DateStruct to Date
+  const date = new Date(
+    focusedDate.year,
+    focusedDate.month - 1, // JavaScript months are 0-based
+    focusedDate.day
+  );
+
+  // Get sessions for the focused date from the hook
+  const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
   // console.log(
   //   "Sessions data taken in from useReleaventSessions(sessionCalendar):",
   //   sessionsData,
