@@ -16,19 +16,16 @@ import { Time } from "@utils/dateTimeSession";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import { DateStruct } from "@utils/dateTimeSession";
+import { useFocusedDate } from "@/context/focusedDateContext";
 
 interface CollapsedCalendarProps {
   style?: object;
   productiveTime: Time;
-  focusedDate: DateStruct;
-  setFocusedDate: (date: DateStruct) => void;
 }
 
 export default function CollapsedCalendar({
   style = {},
   productiveTime,
-  focusedDate,
-  setFocusedDate,
 }: CollapsedCalendarProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -51,6 +48,8 @@ export default function CollapsedCalendar({
     () => generateWeeks(startingDay, CURRENT_WEEK_INDEX),
     [startingDay],
   );
+
+  const { focusedDate, setFocusedDate } = useFocusedDate();
 
   const dayOfWeekFocus = focusedDate.getDayOfTheWeek();
   const [transitioning, setTransitioning] = useState(false);

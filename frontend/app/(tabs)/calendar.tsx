@@ -9,6 +9,7 @@ import CollapsedCalendar from "@/components/calendar/collapsedCalendar/collapsed
 import { useProductivityMetric } from "@/hooks/useProductivityMetric";
 import { DateStruct, Time } from "@/utils/dateTimeSession";
 import { useState } from "react";
+import { FocusedDateProvider } from "@/context/focusedDateContext";
 
 export default function CalendarScreen() {
   const styles = useStyles();
@@ -16,29 +17,28 @@ export default function CalendarScreen() {
   const productiveTime = useProductivityMetric();
   const productiveTimeObj = Time.fromSeconds(productiveTime);
   const today = DateStruct.fromDate(new Date());
-  const [focusedDate, setFocusedDate] = useState(new DateStruct(today));
 
   return (
-    <View style={styles.screen}>
-      <Header title="Calendar" />
-      <SwitchWrapper
-        buttons={[
-          { text: "List", onPress: () => {} },
-          { text: "Calendar", onPress: () => {} },
-        ]}
-        styleSwitch={{ paddingHorizontal: 13 }}
-        TopElement={() => (
-          <CollapsedCalendar
-            style={{ paddingHorizontal: 15 }}
-            productiveTime={productiveTimeObj}
-            focusedDate={focusedDate}
-            setFocusedDate={setFocusedDate}
-          />
-        )}
-      >
-        <SessionList style={styles.leftScreen} />
-        <SessionCalendar style={styles.rightScreen} />
-      </SwitchWrapper>
-    </View>
+    <FocusedDateProvider>
+      <View style={styles.screen}>
+        <Header title="Calendar" />
+        <SwitchWrapper
+          buttons={[
+            { text: "List", onPress: () => {} },
+            { text: "Calendar", onPress: () => {} },
+          ]}
+          styleSwitch={{ paddingHorizontal: 13 }}
+          TopElement={() => (
+            <CollapsedCalendar
+              style={{ paddingHorizontal: 15 }}
+              productiveTime={productiveTimeObj}
+            />
+          )}
+        >
+          <SessionList style={styles.leftScreen} />
+          <SessionCalendar style={styles.rightScreen} />
+        </SwitchWrapper>
+      </View>
+    </FocusedDateProvider>
   );
 }
