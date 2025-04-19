@@ -8,6 +8,7 @@ import BottomSheet, {
   BottomSheetTextInput,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import XMark from "@assets/icons/x.svg";
 import {
   TextInput,
   View,
@@ -42,7 +43,7 @@ import { useTagContext } from "@/context/TagContext";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import PickActivity from "@/app/pickActivity";
 
-type FlatListItem = TagData | { type: "button" };
+type FlatListItem = { type: "button" } | { type: "clear" } | TagData;
 
 export default function AddTaskSheet({
   bottomSheetRef,
@@ -298,22 +299,44 @@ export default function AddTaskSheet({
                     (item): item is TagData =>
                       item !== null && selectedTag !== null,
                   ),
+                  ...(activityNode !== null
+                    ? [
+                        {
+                          type: "clear" as const,
+                        },
+                      ]
+                    : []),
                 ]}
                 renderItem={({ item }) => {
-                  if ("type" in item && item.type === "button") {
-                    return (
-                      <ButtonInsideFooterComponent
-                        Icon={TwoArrows}
-                        text={!selectedTag ? "Pick Activity" : ""}
-                        color={theme.color.darkGrey}
-                        onPress={() => setIsPickActivityVisible(true)}
-                      />
-                    );
+                  if ("type" in item) {
+                    if (item.type === "button") {
+                      return (
+                        <ButtonInsideFooterComponent
+                          Icon={TwoArrows}
+                          text={!selectedTag ? "Pick Activity" : ""}
+                          color={theme.color.darkGrey}
+                          onPress={() => setIsPickActivityVisible(true)}
+                        />
+                      );
+                    }
+                    if (item.type === "clear") {
+                      return (
+                        <ButtonInsideFooterComponent
+                          Icon={XMark}
+                          text=""
+                          color={theme.color.darkGrey}
+                          style={{}}
+                          onPress={() => {
+                            handleActivitySelected(null);
+                          }}
+                        />
+                      );
+                    }
                   }
                   return renderTag({ item });
                 }}
                 keyExtractor={(item) =>
-                  "type" in item ? "button" : item.id.toString()
+                  "type" in item ? item.type : item.id.toString()
                 }
                 horizontal
                 showsHorizontalScrollIndicator={false}
