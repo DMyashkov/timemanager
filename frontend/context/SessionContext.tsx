@@ -8,6 +8,7 @@ import type { schema } from "@/db/schema";
 import { useFocus } from "./FocusContext";
 import type { SessionData } from "@constants/interfaces";
 import { underDampedSpringCalculations } from "react-native-reanimated/lib/typescript/animation/springUtils";
+import { API_URL } from "@/utils/config";
 
 interface SessionContextProps {
   createSession: (
@@ -169,7 +170,6 @@ export const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ) => {
-  // console.log("syncUnsyncedRows of all rows", await db.select().from(sessions));
   const rows = await db.select().from(sessions).where(eq(sessions.synced, 0));
   console.log("Unsynced rows SESSIONS :", rows);
 
@@ -179,7 +179,7 @@ export const syncUnsyncedRows = async (
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/sessions/sync/", {
+    const response = await fetch(`${API_URL}/api/sessions/sync/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -193,7 +193,6 @@ export const syncUnsyncedRows = async (
         .update(sessions)
         .set({ synced: 1 })
         .where(eq(sessions.synced, 0));
-      // console.log("All unsynced rows marked as synced");
       await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
@@ -215,9 +214,7 @@ const fetchAndStoreSessions = async (
   token: string,
 ) => {
   try {
-    // console.log("Auth token:", token);
-
-    const response = await axios.get("http://127.0.0.1:8000/api/sessions/", {
+    const response = await axios.get(`${API_URL}/api/sessions/`, {
       headers: { Authorization: `Token ${token}` },
     });
 

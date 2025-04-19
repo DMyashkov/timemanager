@@ -20,6 +20,7 @@ import { schema } from "@/db/schema";
 import { useAuthContext } from "@/context/AuthContext";
 import { useSessionContext } from "@/context/SessionContext";
 import { useTaskContext } from "@/context/TaskContext";
+import { API_URL } from "@/utils/config";
 
 export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
   const styles = useStyles();
@@ -42,7 +43,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
       console.error("Error saving token:", e);
     }
   };
-  const API_URL = "http://127.0.0.1:8000/api"; // Updated API URL
+  const API_BASE_URL = `${API_URL}/api`;
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
@@ -119,7 +120,7 @@ export default function AuthScreen({ isSignUp = true }: { isSignUp: boolean }) {
     try {
       console.log("Signing up with email:", email, "and password", password);
       const response = await axios.post(
-        `${API_URL}/register/`,
+        `${API_BASE_URL}/register/`,
         {
           email: email,
           password: password,

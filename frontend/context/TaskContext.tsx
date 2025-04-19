@@ -5,6 +5,7 @@ import { type TaskData } from "@/constants/interfaces";
 import { tasks } from "@/db/schema";
 import axios from "axios";
 import type { schema } from "@/db/schema";
+import { API_URL } from "@/utils/config";
 
 interface TaskContextProps {
   createTask: (
@@ -122,23 +123,20 @@ const deleteTask = async (
   await db.update(tasks).set({ deleted: 1, synced: 0 }).where(eq(tasks.id, id));
 };
 
-const syncUnsyncedRows = async (
+const syncUnsyncedTasks = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
-): Promise<void> => {
-  console.log("Syncing unsynced TASK rows");
+) => {
   const rows = await db.select().from(tasks).where(eq(tasks.synced, 0));
-  console.log("Unsynced TASK rows found: ", rows);
-
-  // console.log("Sending rows for sync: ", rows);
+  console.log("Unsynced rows TASKS:", rows);
 
   if (rows.length === 0) {
-    console.log("Tried to sync TASKS but no unsynced rows found");
+    console.log("Tried to sync tasks but no unsynced rows found");
     return;
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/tasks/sync/", {
+    const response = await fetch(`${API_URL}/api/tasks/sync/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -148,8 +146,10 @@ const syncUnsyncedRows = async (
     });
 
     if (response.ok) {
-      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.synced, 0));
-      console.log("All unsynced rows marked as synced");
+      await db
+        .update(tasks)
+        .set({ synced: 1 })
+        .where(eq(tasks.synced, 0));
       await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
@@ -170,7 +170,7 @@ const fetchAndStoreTasks = async (
   token: string,
 ): Promise<void> => {
   try {
-    const response = await axios.get("http://127.0.0.1:8000/api/tasks/", {
+    const response = await axios.get(`${API_URL}/api/tasks/`, {
       headers: {
         Authorization: `Token ${token}`,
       },
@@ -215,7 +215,7 @@ const TaskContext = createContext<TaskContextProps>({
   parseTask,
   updateTask,
   deleteTask,
-  syncUnsyncedTasks: syncUnsyncedRows,
+  syncUnsyncedTasks,
   cleanupDeletedRows,
   fetchAndStoreTasks,
 });
@@ -231,7 +231,7 @@ export function TaskProvider({ children }: { children: React.ReactNode }) {
         parseTask,
         updateTask,
         deleteTask,
-        syncUnsyncedTasks: syncUnsyncedRows,
+        syncUnsyncedTasks,
         cleanupDeletedRows,
         fetchAndStoreTasks,
       }}

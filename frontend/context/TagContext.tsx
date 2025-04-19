@@ -11,6 +11,7 @@ import { tags } from "@/db/schema";
 import axios from "axios";
 import type { schema } from "@/db/schema";
 import { useFocus } from "./FocusContext";
+import { API_URL } from "@/utils/config";
 
 interface TagContextProps {
   createTag: (
@@ -275,9 +276,7 @@ export const syncUnsyncedRows = async (
   token: string,
 ) => {
   const rows = await db.select().from(tags).where(eq(tags.synced, 0));
-  // console.log("Unsynced rows found: ", rows);
-
-  // console.log("Sending rows for sync: ", rows);
+  console.log("Unsynced rows TAGS:", rows);
 
   if (rows.length === 0) {
     console.log("Tried to sync tags but no unsynced rows found");
@@ -285,7 +284,7 @@ export const syncUnsyncedRows = async (
   }
 
   try {
-    const response = await fetch("http://127.0.0.1:8000/api/tags/sync/", {
+    const response = await fetch(`${API_URL}/api/tags/sync/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -295,44 +294,16 @@ export const syncUnsyncedRows = async (
     });
 
     if (response.ok) {
-      await db.update(tags).set({ synced: 1 }).where(eq(tags.synced, 0));
-      console.log("All unsynced rows marked as synced");
+      await db
+        .update(tags)
+        .set({ synced: 1 })
+        .where(eq(tags.synced, 0));
       await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
     }
   } catch (error) {
     console.error("Sync error TAGS:", error);
-    // console.log("Attempting to sync all data from frontend...");
-
-    // try {
-    //   // Fetch all rows instead of just the unsynced ones
-    //   rows = await db.select().from(tags);
-    //   console.log("Syncing all rows:", rows);
-    //
-    //   const fullSyncResponse = await fetch(
-    //     "http://127.0.0.1:8000/api/tags/sync/",
-    //     {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: `Token ${token}`,
-    //       },
-    //       body: JSON.stringify(rows),
-    //     },
-    //   );
-    //
-    //   if (fullSyncResponse.ok) {
-    //     await db.update(tags).set({ synced: 1 });
-    //     console.log("All data successfully synced after retry.");
-    //     await cleanupDeletedRows(db);
-    //   } else {
-    //     throw new Error("Full data sync failed");
-    //   }
-    // } catch (fullSyncError) {
-    //   console.error("Full sync error:", fullSyncError);
-    //   throw fullSyncError;
-    // }
   }
 };
 
@@ -347,23 +318,15 @@ const fetchAndStoreTags = async (
   token: string,
 ) => {
   try {
-    // console.log("Auth token:", token);
-
-    const response = await axios.get("http://127.0.0.1:8000/api/tags/", {
+    const response = await axios.get(`${API_URL}/api/tags/`, {
       headers: { Authorization: `Token ${token}` },
     });
-
-    // console.log("Fetched tags:", response.data);
-    // console.log("Response status:", response.status);
 
     if (response.status === 200) {
       const fetchedTags: TagData[] = response.data;
 
-      // console.log("Tags fetched successfully.");
-
       // Clear local database first
       await db.delete(tags);
-      // console.log("Local database cleared successfully.");
 
       // Group tags by parent ID
       const tagMap = new Map<number | null, TagData[]>();
@@ -375,8 +338,6 @@ const fetchAndStoreTags = async (
         tagMap.set(tag.parent, parentTags);
       }
 
-      // console.log("Tags grouped by parent:", tagMap);
-
       // BFS insertion using a queue
       const queue: TagData[] = tagMap.get(null) ?? []; // Start with root-level tags
 
@@ -385,7 +346,6 @@ const fetchAndStoreTags = async (
         if (!tag) continue;
 
         // Skip if already inserted
-
         if (visited.has(tag.id)) continue;
         visited.add(tag.id);
 
