@@ -57,7 +57,7 @@ export default function AddTaskSheet({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<priorityEnum>(priorityEnum.none);
-  const [date, setDate] = useState<number>(Date.now());
+  const [date, setDate] = useState<number | null>(Date.now());
   const [activityId, setActivityId] = useState<number | null>(null);
   const [projectId, setProjectId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<number | null>(null);
@@ -133,16 +133,21 @@ export default function AddTaskSheet({
   };
 
   const openCalendarSheet = () => {
-    setSelectedDate(DateStruct.fromDate(new Date(date)));
+    setSelectedDate(DateStruct.fromDate(date ? new Date(date) : new Date()));
     calendarSheetRef.current?.snapToIndex(0);
   };
 
-  const handleDateChange = (date: DateStruct | null) => {
-    if (!date) return;
-    const selectedDate = new Date(date.year, date.month - 1, date.day);
-    selectedDate.setHours(23, 59, 0, 0);
-    setDate(selectedDate.getTime());
-    calendarSheetRef.current?.close();
+  const handleDateChange = async (date: DateStruct | null) => {
+    let newDate: number | null;
+    if (date) {
+      const selectedDate = new Date(date.year, date.month - 1, date.day);
+      selectedDate.setHours(23, 59, 0, 0);
+      newDate = selectedDate.getTime();
+      setDate(newDate);
+    } else {
+      newDate = null;
+    }
+    setDate(newDate);
   };
 
   const handlePriorityChange = (newPriority: priorityEnum) => {
@@ -253,10 +258,14 @@ export default function AddTaskSheet({
             <BottomSheetView style={styles.buttonView}>
               <ButtonInsideFooterComponent
                 Icon={Calendar}
-                text={new Date(date).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                })}
+                text={
+                  date
+                    ? new Date(date).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : "No Date"
+                }
                 color={theme.color.red}
                 marginBottomIcon={3}
                 onPress={openCalendarSheet}
