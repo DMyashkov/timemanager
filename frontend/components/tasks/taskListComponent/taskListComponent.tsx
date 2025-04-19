@@ -34,11 +34,13 @@ export default function TaskListComponent({
   tasks,
   onReschedule,
   onTaskPress,
+  showDateNextToTasks = false,
 }: {
   title: string;
   tasks: TaskData[];
   onReschedule?: () => void;
   onTaskPress: (task: TaskData) => void;
+  showDateNextToTasks?: boolean;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -72,7 +74,7 @@ export default function TaskListComponent({
         renderItem={({ item }) => (
           <Task
             task={item}
-            showDateIfPassed={false}
+            showDateIfPassed={showDateNextToTasks}
             onPress={() => onTaskPress(item)}
           />
         )}

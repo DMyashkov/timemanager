@@ -218,6 +218,7 @@ export default function TasksScreen() {
               onReschedule={
                 item.type === "overdue" ? item.onReschedule : undefined
               }
+              showDateNextToTasks={item.type === "overdue"}
               onTaskPress={openTaskBottomSheet}
             />
           )}
