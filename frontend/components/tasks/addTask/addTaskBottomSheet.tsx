@@ -305,7 +305,7 @@ export default function AddTaskSheet({
                 }
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingLeft: 8, gap: 8 }}
+                contentContainerStyle={{ gap: 8 }}
               />
             </View>
             <TouchableOpacity
