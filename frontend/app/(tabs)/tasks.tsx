@@ -24,6 +24,8 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq, and, gte, lt } from "drizzle-orm";
 import { useTaskContext } from "@/context/TaskContext";
 import { priorityEnum, type TaskData } from "@/constants/interfaces";
+import PickDateCalendar from "@/components/calendar/pickDateCalendar/pickDateCalendar";
+import { DateStruct } from "@/utils/dateTimeSession";
 
 type TaskGroup = {
   type: "date";
@@ -74,7 +76,36 @@ export default function TasksScreen() {
   const { theme } = useTheme();
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
-  const { parseTask } = useTaskContext();
+  const { parseTask, updateTask } = useTaskContext();
+
+  const [rescheduleDate, setRescheduleDate] = useState<number | null>(null);
+  const calendarSheetRef = useRef<BottomSheet>(null);
+  const openCalendarSheet = () => {
+    calendarSheetRef.current?.snapToIndex(0);
+  };
+  const handleRescheduleDateChange = (date: DateStruct | null) => {
+    if (!date) return;
+    const selectedDate = new Date(date.year, date.month - 1, date.day);
+    selectedDate.setHours(23, 59, 0, 0);
+    const newDate = selectedDate.getTime();
+    setRescheduleDate(newDate);
+
+    // Update all overdue tasks with the new date
+    if (overdueTasks.length > 0) {
+      overdueTasks.forEach(async (task) => {
+        if (task.id) {
+          try {
+            await updateTask(db, task.id, { date: newDate });
+          } catch (error) {
+            console.error("Error rescheduling task:", error);
+          }
+        }
+      });
+    }
+
+    setRescheduleDate(null);
+    calendarSheetRef.current?.close();
+  };
 
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
 
@@ -157,7 +188,7 @@ export default function TasksScreen() {
             title: "Overdue",
             tasks: overdueTasks,
             onReschedule: () => {
-              // TODO: Implement reschedule functionality
+              openCalendarSheet();
             },
           },
         ]
@@ -239,6 +270,10 @@ export default function TasksScreen() {
       {/* {selectedTask && ( */}
       {/* )} */}
       <AddTaskSheet bottomSheetRef={addSheetRef} />
+      <PickDateCalendar
+        bottomSheetRef={calendarSheetRef}
+        onPickDate={handleRescheduleDateChange}
+      />
     </GestureHandlerRootView>
   );
 }
