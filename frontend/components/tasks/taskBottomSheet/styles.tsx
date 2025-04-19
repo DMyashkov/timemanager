@@ -147,5 +147,9 @@ export default function useStyles() {
       paddingHorizontal: 22,
       gap: 5,
     },
+    buttonRowBottom: {
+      flexDirection: "row",
+      gap: 7,
+    },
   });
 }

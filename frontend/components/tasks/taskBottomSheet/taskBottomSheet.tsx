@@ -47,6 +47,8 @@ import { useTagContext } from "@/context/TagContext";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { DateStruct } from "@/utils/dateTimeSession";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
+import { ButtonInsideFooterComponent } from "@components/tasks/addTask/addTaskBottomSheet";
+import XMark from "@assets/icons/x.svg";
 
 interface TaskBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet>;
@@ -238,8 +240,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     calendarSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
-  const isSendable = title.length > 0;
-
   interface ColorCheckmarkStyles {
     backgroundColor: string;
     borderColor: string;
@@ -274,15 +274,13 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const [isPickActivityVisible, setIsPickActivityVisible] = useState(false);
 
-  const handleActivitySelected = async (newTag: TagData) => {
+  const handleActivitySelected = async (newTag: TagData | null) => {
     if (!task.id) return;
-    // console.log("Selected tag:", newTag);
-    // console.log("YAHOOOO");
 
     try {
-      await updateTask(db, task.id, { tagId: newTag.id });
-      setSelectedTagID(newTag.id);
-      onTaskUpdate?.({ ...task, tagId: newTag.id });
+      await updateTask(db, task.id, { tagId: newTag ? newTag.id : null });
+      setSelectedTagID(newTag ? newTag.id : null);
+      onTaskUpdate?.({ ...task, tagId: newTag ? newTag.id : null });
     } catch (error) {
       console.error("Error updating task tag:", error);
     }
@@ -456,18 +454,32 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                 </View>
               </View>
               {(activityNode || projectNode) && (
-                <ButtonInsideFooterComponent
-                  Icon={TwoArrows}
-                  text="Change Activity / Project"
-                  color={theme.color.darkGrey}
-                  style={{
-                    marginTop: -2,
-                    marginBottom: 14,
-                  }}
-                  onPress={() => {
-                    setIsPickActivityVisible(true);
-                  }}
-                />
+                <View style={styles.buttonRowBottom}>
+                  <ButtonInsideFooterComponent
+                    Icon={TwoArrows}
+                    text="Change Activity / Project"
+                    color={theme.color.darkGrey}
+                    style={{
+                      marginTop: -2,
+                      marginBottom: 14,
+                    }}
+                    onPress={() => {
+                      setIsPickActivityVisible(true);
+                    }}
+                  />
+                  <ButtonInsideFooterComponent
+                    Icon={XMark}
+                    text=""
+                    color={theme.color.darkGrey}
+                    style={{
+                      marginTop: -2,
+                      marginBottom: 14,
+                    }}
+                    onPress={() => {
+                      handleActivitySelected(null);
+                    }}
+                  />
+                </View>
               )}
               <View style={styles.bigSeparator} />
             </BottomSheetView>
@@ -501,48 +513,3 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
     </>
   );
 };
-
-function ButtonInsideFooterComponent({
-  Icon,
-  text,
-  color,
-  marginBottomIcon = 0,
-  style,
-  onPress,
-}: {
-  Icon: React.FC<SvgProps>;
-  text: string;
-  color: string;
-  marginBottomIcon?: number;
-  style?: object;
-  onPress?: () => void;
-}) {
-  const styles = useStyles();
-  const { theme } = useTheme();
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[styles.changeActivityButton, style]}
-    >
-      <Icon
-        width={16}
-        height={16}
-        fill={color}
-        style={{
-          marginBottom: marginBottomIcon,
-        }}
-      />
-      <Text
-        style={[
-          styles.textInsideChangeActivityButton,
-          {
-            color: color,
-          },
-        ]}
-      >
-        {text}
-      </Text>
-    </TouchableOpacity>
-  );
-}

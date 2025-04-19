@@ -368,13 +368,14 @@ export default function AddTaskSheet({
   );
 }
 
-function ButtonInsideFooterComponent({
+export function ButtonInsideFooterComponent({
   Icon,
   text,
   color,
   marginBottomIcon = 0,
   onPress,
   priority,
+  style,
 }: {
   Icon: React.FC<SvgProps>;
   text: string;
@@ -382,12 +383,16 @@ function ButtonInsideFooterComponent({
   marginBottomIcon?: number;
   onPress?: () => void;
   priority?: priorityEnum;
+  style?: object;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
 
   return (
-    <TouchableOpacity style={styles.changeActivityButton} onPress={onPress}>
+    <TouchableOpacity
+      style={[styles.changeActivityButton, style]}
+      onPress={onPress}
+    >
       {text.startsWith("Priority") ? (
         priority === priorityEnum.none ? (
           <FlagHollow
