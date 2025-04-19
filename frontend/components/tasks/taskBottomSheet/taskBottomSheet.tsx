@@ -74,6 +74,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   const db = drizzle(expoDb, { schema });
   const { updateTask } = useTaskContext();
   const { getTag } = useTagContext();
+  const [selectedDate, setSelectedDate] = useState<DateStruct | null>(null);
   const [selectedTagID, setSelectedTagID] = useState<number | null>(null);
 
   useEffect(() => {
@@ -233,6 +234,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
 
   const calendarSheetRef = useRef<BottomSheet>(null); // Correct ref type for BottomSheet
   const openCalendarSheet = () => {
+    setSelectedDate(DateStruct.fromDate(date ? new Date(date) : new Date()));
     calendarSheetRef.current?.snapToIndex(0); // Properly trigger bottom sheet open
   };
 
@@ -486,6 +488,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
+        initialDate={selectedDate}
       />
       <PickActivity
         visible={isPickActivityVisible}
