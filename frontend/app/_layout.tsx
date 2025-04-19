@@ -24,6 +24,7 @@ import { tags } from "@/db/schema";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { useTaskContext } from "@/context/TaskContext";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -42,6 +43,8 @@ export default function Layout() {
     enableChangeListener: true,
   });
   const db = drizzle(expoDb, { schema });
+  useDrizzleStudio(expoDb);
+
   const [authToken, setAuthToken] = useState<string | null>(null);
   const { success, error } = useMigrations(db, migrations);
 

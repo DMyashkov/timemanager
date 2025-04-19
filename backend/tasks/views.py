@@ -31,6 +31,8 @@ class SyncTasksView(APIView):
         payload_serializer = TaskSyncWithDeletedSerializer(
             data=request.data, many=True)
         if not payload_serializer.is_valid():
+            print("SERIALIZER ERRORS:")
+            print(json.dumps(payload_serializer.errors, indent=4, sort_keys=True))
             return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         payload = list(payload_serializer.validated_data) if isinstance(

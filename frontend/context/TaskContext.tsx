@@ -126,13 +126,14 @@ const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ): Promise<void> => {
+  console.log("Syncing unsynced TASK rows");
   const rows = await db.select().from(tasks).where(eq(tasks.synced, 0));
-  // console.log("Unsynced rows found: ", rows);
+  console.log("Unsynced TASK rows found: ", rows);
 
   // console.log("Sending rows for sync: ", rows);
 
   if (rows.length === 0) {
-    console.log("Tried to sync tags but no unsynced rows found");
+    console.log("Tried to sync TASKS but no unsynced rows found");
     return;
   }
 
@@ -154,7 +155,7 @@ const syncUnsyncedRows = async (
       throw new Error("Failed to sync with backend");
     }
   } catch (error) {
-    console.error("Sync error:", error);
+    console.error("Sync error TASKS:", error);
   }
 };
 

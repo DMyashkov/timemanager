@@ -169,11 +169,11 @@ export const syncUnsyncedRows = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   token: string,
 ) => {
-  console.log("syncUnsyncedRows of all rows", await db.select().from(sessions));
+  // console.log("syncUnsyncedRows of all rows", await db.select().from(sessions));
   const rows = await db.select().from(sessions).where(eq(sessions.synced, 0));
 
   if (rows.length === 0) {
-    console.log("Tried to sync sessions but no unsynced rows found");
+    // console.log("Tried to sync sessions but no unsynced rows found");
     return;
   }
 
@@ -198,7 +198,7 @@ export const syncUnsyncedRows = async (
       throw new Error("Failed to sync with backend");
     }
   } catch (error) {
-    console.error("Sync error:", error);
+    console.error("Sync error SESSIONS :", error);
   }
 };
 

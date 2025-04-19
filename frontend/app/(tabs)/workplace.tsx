@@ -29,7 +29,6 @@ export default function WorkplaceScreen() {
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
-  useDrizzleStudio(expoDb);
 
   const { data } = useLiveQuery(db.select().from(tags));
   // console.log("data", data);

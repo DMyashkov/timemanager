@@ -302,7 +302,7 @@ export const syncUnsyncedRows = async (
       throw new Error("Failed to sync with backend");
     }
   } catch (error) {
-    console.error("Sync error:", error);
+    console.error("Sync error TAGS:", error);
     // console.log("Attempting to sync all data from frontend...");
 
     // try {

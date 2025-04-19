@@ -4,6 +4,7 @@ from .models import Task
 
 
 class TaskSyncSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
 
     class Meta:
         model = Task
@@ -63,4 +64,3 @@ class TaskSyncWithDeletedSerializer(TaskSyncSerializer):
         converted_data["deleted"] = data.get("deleted", -1)  # 🔥 FIX HERE
 
         return converted_data
-
