@@ -70,6 +70,8 @@ export default function AddTaskSheet({
   const { getTag } = useTagContext();
   const { activityNode, projectNode } = useDerivedTags(selectedTag);
 
+  const [selectedDate, setSelectedDate] = useState<DateStruct | null>(null);
+
   const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
@@ -131,6 +133,7 @@ export default function AddTaskSheet({
   };
 
   const openCalendarSheet = () => {
+    setSelectedDate(DateStruct.fromDate(new Date(date)));
     calendarSheetRef.current?.snapToIndex(0);
   };
 
@@ -343,6 +346,7 @@ export default function AddTaskSheet({
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
         onPickDate={handleDateChange}
+        initialDate={selectedDate}
       />
 
       <PickActivity
