@@ -172,7 +172,7 @@ export class Session {
   private totalWorkTime = 0;
   private totalBreakTime = 0;
   private tagId: number | null;
-  private laps: DateTime[] = [];
+  private laps: Time[] = [];
   private startTime: number; // Unix timestamp in milliseconds
   private endTime: number; // Unix timestamp in milliseconds
 
