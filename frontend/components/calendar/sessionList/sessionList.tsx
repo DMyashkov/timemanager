@@ -25,7 +25,6 @@ const SessionList = memo(function SessionList({
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
-  console.log("Session list rerender");
 
   const renderItem = React.useCallback(
     ({ item }: { item: Session }) => <SessionElement session={item} />,
