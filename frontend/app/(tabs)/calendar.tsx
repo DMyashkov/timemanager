@@ -25,7 +25,7 @@ import { useRelevantSessions } from "@/hooks/useRelevantSessions";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { schema } from "@/db/schema";
 import { tags } from "@/db/schema";
 import type { TagData } from "@/constants/interfaces";
@@ -67,96 +67,85 @@ function CalendarScreenInner(): [ReactNode, ReactNode] {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
 
-  // Get unique tag IDs from sessions
-  const tagIds = useMemo(() => {
-    if (!sessionsData?.length) return [];
-    const ids = new Set<number>();
-    sessionsData.forEach((session) => {
-      if (session.tagId && session.tagId > 0) ids.add(session.tagId);
-    });
-    return Array.from(ids);
-  }, [sessionsData]);
-
-  // Only fetch the tags we need
   const { data: tagsData } = useLiveQuery(
-    db
-      .select()
-      .from(tags)
-      .where(and(eq(tags.deleted, 0), ...tagIds.map((id) => eq(tags.id, id)))),
-    [tagIds],
+    db.select().from(tags).where(eq(tags.deleted, 0)),
+    [],
   );
 
   // Create a map of tag IDs to their productivity status
   const productiveTagsMap = useMemo(() => {
     if (!tagsData?.length) return new Map<number, boolean>();
     const map = new Map<number, boolean>();
-    tagsData.forEach((tag: { id: number; productive: number | null }) => {
-      map.set(tag.id, tag.productive === 1);
-    });
+
+    for (const tag of tagsData) {
+      if (tag.id) {
+        const isProductive = tag.productive === 1;
+        map.set(tag.id, isProductive);
+      }
+    }
+
     return map;
   }, [tagsData]);
 
-  const sessions = useMemo(() => {
-    if (!sessionsData?.length) return [];
-    return sessionsData
-      .map((data: SessionData) => {
-        if (!data.tagId || !data.intervals?.length) return null;
-        const intervals = data.intervals.map(
-          (interval: {
-            startTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            endTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            type: IntervalType;
-          }) =>
-            new Interval(
-              new DateTime(
-                interval.startTime.date,
-                new Time(
-                  interval.startTime.time.hours,
-                  interval.startTime.time.minutes,
-                  interval.startTime.time.seconds,
+  const sessions = useMemo(
+    () =>
+      sessionsData
+        ?.map((data: SessionData) => {
+          const intervals = data?.intervals?.map(
+            (interval: {
+              startTime: {
+                date: DateStruct;
+                time: { hours: number; minutes: number; seconds: number };
+              };
+              endTime: {
+                date: DateStruct;
+                time: { hours: number; minutes: number; seconds: number };
+              };
+              type: IntervalType;
+            }) =>
+              new Interval(
+                new DateTime(
+                  interval.startTime.date,
+                  new Time(
+                    interval.startTime.time.hours,
+                    interval.startTime.time.minutes,
+                    interval.startTime.time.seconds,
+                  ),
                 ),
-              ),
-              new DateTime(
-                interval.endTime.date,
-                new Time(
-                  interval.endTime.time.hours,
-                  interval.endTime.time.minutes,
-                  interval.endTime.time.seconds,
+                new DateTime(
+                  interval.endTime.date,
+                  new Time(
+                    interval.endTime.time.hours,
+                    interval.endTime.time.minutes,
+                    interval.endTime.time.seconds,
+                  ),
                 ),
+                interval.type as IntervalType,
               ),
-              interval.type as IntervalType,
-            ),
-        );
-        return new Session(data.tagId, intervals, data.laps);
-      })
-      .filter((session): session is Session => session !== null)
-      .sort((a, b) => {
-        const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        return bEnd - aEnd; // descending
-      });
-  }, [sessionsData]);
+          );
+          return new Session(data.tagId, intervals, data.laps);
+        })
+        ?.sort((a, b) => {
+          const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+          const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+          return bEnd - aEnd; // descending
+        }) ?? [],
+    [sessionsData],
+  );
 
   const { productiveTime, setProductiveTime } = useFocusedDate();
 
   const productiveTimeLocal = useMemo(() => {
-    if (!sessions.length) return new Time(0, 0, 0);
     let result = new Time(0, 0, 0);
     for (const session of sessions) {
-      const tagId = session.getTagId();
-      if (tagId && productiveTagsMap.get(tagId)) {
+      const tag = tagsData?.find((t) => t.id === session.getTagId());
+      if (tag?.productive === 1) {
         const workTime = session.getWorkTime();
         result = result.add(workTime);
       }
     }
     return result;
-  }, [sessions, productiveTagsMap]);
+  }, [sessions, tagsData]);
 
   useEffect(() => {
     if (!productiveTimeLocal.equals(productiveTime)) {
