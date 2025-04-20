@@ -92,7 +92,7 @@ export default function SessionElement({
         style={[
           styles.content,
           {
-            paddingTop: activityNode || projectNode ? 14 : 3,
+            paddingTop: activityNode || projectNode ? 14 : 2,
           },
         ]}
       >
