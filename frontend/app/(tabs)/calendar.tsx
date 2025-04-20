@@ -22,6 +22,13 @@ import {
 } from "@/context/focusedDateContext";
 import { SessionData } from "@/constants/interfaces";
 import { useRelevantSessions } from "@/hooks/useRelevantSessions";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { eq } from "drizzle-orm";
+import { schema } from "@/db/schema";
+import { tags } from "@/db/schema";
+import type { TagData } from "@/constants/interfaces";
 
 export default function CalendarScreen() {
   const styles = useStyles();
@@ -56,6 +63,17 @@ function CalendarScreenInner(): [ReactNode, ReactNode] {
   const { focusedDate } = useFocusedDate();
 
   const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
+
+  const { data: tagsData } = useLiveQuery(
+    db
+      .select()
+      .from(tags)
+      .where(eq(tags.deleted, 0)),
+    [],
+  );
 
   const sessions = useMemo(
     () =>
@@ -108,12 +126,15 @@ function CalendarScreenInner(): [ReactNode, ReactNode] {
   const productiveTimeLocal = useMemo(() => {
     let result = new Time(0, 0, 0);
     for (const session of sessions) {
-      const workTime = session.getWorkTime();
-      console.log("Work time:", workTime);
-      result = result.add(workTime);
+      const tag = tagsData?.find(t => t.id === session.getTagId());
+      if (tag?.productive === 1) {
+        const workTime = session.getWorkTime();
+        console.log("Work time:", workTime);
+        result = result.add(workTime);
+      }
     }
     return result;
-  }, [sessions]);
+  }, [sessions, tagsData]);
 
   useEffect(() => {
     if (!productiveTimeLocal.equals(productiveTime)) {
