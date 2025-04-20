@@ -99,6 +99,19 @@ export class Time {
     this.seconds = seconds;
   }
 
+  equals(other: Time): boolean {
+    return (
+      this.hours === other.hours &&
+      this.minutes === other.minutes &&
+      this.seconds === other.seconds
+    );
+  }
+
+  add(time: Time): Time {
+    const totalSeconds = this.toSeconds() + time.toSeconds();
+    return Time.fromSeconds(totalSeconds);
+  }
+
   toStringLong(): string {
     return `${String(this.hours).padStart(2, "0")}:${String(this.minutes).padStart(2, "0")}:${String(this.seconds).padStart(2, "0")}`;
   }

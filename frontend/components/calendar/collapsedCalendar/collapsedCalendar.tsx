@@ -20,12 +20,10 @@ import { useFocusedDate } from "@/context/focusedDateContext";
 
 interface CollapsedCalendarProps {
   style?: object;
-  productiveTime: Time;
 }
 
 export default function CollapsedCalendar({
   style = {},
-  productiveTime,
 }: CollapsedCalendarProps) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -66,6 +64,7 @@ export default function CollapsedCalendar({
       setTransitioning(false);
     }, 300);
   };
+  const { productiveTime } = useFocusedDate();
 
   const shouldGoBackBeVisible = !focusedDate.equals(today);
 
@@ -131,12 +130,14 @@ export default function CollapsedCalendar({
             </TouchableOpacity>
           )}
         </View>
-        <Text style={styles.rightHeaderText}>
-          Productivity:{" "}
-          <Text style={styles.productiveTimeText}>
-            {productiveTime.toStringLong()}
+        {!productiveTime.equals(new Time(0, 0, 0)) && ( // Only show if productive time is not zero
+          <Text style={styles.rightHeaderText}>
+            Productivity:{" "}
+            <Text style={styles.productiveTimeText}>
+              {productiveTime.toStringLong()}
+            </Text>
           </Text>
-        </Text>
+        )}
       </View>
       <View style={styles.week}>
         {["M", "T", "W", "T", "F", "S", "S"].map((dayName, index) => (
