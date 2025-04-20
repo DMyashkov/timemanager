@@ -116,12 +116,6 @@ function CalendarScreenInner(): [ReactNode, ReactNode] {
   }, [sessions]);
 
   useEffect(() => {
-    console.log("Sessions:", sessions);
-    console.log("Productive time local:", productiveTimeLocal);
-  }, [sessions, productiveTimeLocal]);
-
-  useEffect(() => {
-    console.log("Productive time changed:", productiveTimeLocal);
     if (!productiveTimeLocal.equals(productiveTime)) {
       setProductiveTime(productiveTimeLocal);
     }
