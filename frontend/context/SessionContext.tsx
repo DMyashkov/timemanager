@@ -46,7 +46,6 @@ const insertSession = async (
   db: ExpoSQLiteDatabase<typeof schema>,
   item: SessionData & { id?: number; synced?: number; deleted?: number },
 ): Promise<number> => {
-  console.log("Insert session:", item);
   const {
     id,
     tagId,
@@ -218,7 +217,7 @@ const fetchAndStoreSessions = async (
       headers: { Authorization: `Token ${token}` },
     });
 
-    console.log("Fetched sessions:", response.data);
+    // console.log("Fetched sessions:", response.data);
     // console.log("Response status:", response.status);
 
     if (response.status === 200) {
@@ -245,10 +244,10 @@ const fetchAndStoreSessions = async (
           endTime: session.endTime,
         });
       }
-      console.log(
-        "Sessions inserted - end result:",
-        await db.select().from(sessions),
-      );
+      // console.log(
+      //   "Sessions inserted - end result:",
+      //   await db.select().from(sessions),
+      // );
 
       // console.log("Sessions inserted into local database successfully.");
     } else {

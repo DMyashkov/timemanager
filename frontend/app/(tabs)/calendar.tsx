@@ -57,66 +57,75 @@ function CalendarScreenInner(): [ReactNode, ReactNode] {
 
   const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
 
-  const sessions =
-    sessionsData
-      ?.map((data: SessionData) => {
-        const intervals = data?.intervals?.map(
-          (interval: {
-            startTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            endTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            type: IntervalType;
-          }) =>
-            new Interval(
-              new DateTime(
-                interval.startTime.date,
-                new Time(
-                  interval.startTime.time.hours,
-                  interval.startTime.time.minutes,
-                  interval.startTime.time.seconds,
+  const sessions = useMemo(
+    () =>
+      sessionsData
+        ?.map((data: SessionData) => {
+          const intervals = data?.intervals?.map(
+            (interval: {
+              startTime: {
+                date: DateStruct;
+                time: { hours: number; minutes: number; seconds: number };
+              };
+              endTime: {
+                date: DateStruct;
+                time: { hours: number; minutes: number; seconds: number };
+              };
+              type: IntervalType;
+            }) =>
+              new Interval(
+                new DateTime(
+                  interval.startTime.date,
+                  new Time(
+                    interval.startTime.time.hours,
+                    interval.startTime.time.minutes,
+                    interval.startTime.time.seconds,
+                  ),
                 ),
-              ),
-              new DateTime(
-                interval.endTime.date,
-                new Time(
-                  interval.endTime.time.hours,
-                  interval.endTime.time.minutes,
-                  interval.endTime.time.seconds,
+                new DateTime(
+                  interval.endTime.date,
+                  new Time(
+                    interval.endTime.time.hours,
+                    interval.endTime.time.minutes,
+                    interval.endTime.time.seconds,
+                  ),
                 ),
+                interval.type as IntervalType,
               ),
-              interval.type as IntervalType,
-            ),
-        );
-        return new Session(data.tagId, intervals, data.laps);
-      })
-      ?.sort((a, b) => {
-        const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        return bEnd - aEnd; // descending
-      }) ?? [];
+          );
+          return new Session(data.tagId, intervals, data.laps);
+        })
+        ?.sort((a, b) => {
+          const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+          const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
+          return bEnd - aEnd; // descending
+        }) ?? [],
+    [sessionsData],
+  );
 
-  // const { productiveTime, setProductiveTime } = useFocusedDate();
-  //
-  // const productiveTimeLocal = useMemo(() => {
-  //   const result = new Time(0, 0, 0);
-  //   for (const session of sessions) {
-  //     const workTime = session.getWorkTime();
-  //     result.add(workTime);
-  //   }
-  //   return result;
-  // }, [sessions]);
-  //
-  // useEffect(() => {
-  //   console.log("INSIDE PRODUCTIVE TIME USEEFFECT");
-  //   if (!productiveTimeLocal.equals(productiveTime)) {
-  //     setProductiveTime(productiveTimeLocal);
-  //   }
-  // }, [productiveTimeLocal, setProductiveTime, productiveTime]);
+  const { productiveTime, setProductiveTime } = useFocusedDate();
+
+  const productiveTimeLocal = useMemo(() => {
+    let result = new Time(0, 0, 0);
+    for (const session of sessions) {
+      const workTime = session.getWorkTime();
+      console.log("Work time:", workTime);
+      result = result.add(workTime);
+    }
+    return result;
+  }, [sessions]);
+
+  useEffect(() => {
+    console.log("Sessions:", sessions);
+    console.log("Productive time local:", productiveTimeLocal);
+  }, [sessions, productiveTimeLocal]);
+
+  useEffect(() => {
+    console.log("Productive time changed:", productiveTimeLocal);
+    if (!productiveTimeLocal.equals(productiveTime)) {
+      setProductiveTime(productiveTimeLocal);
+    }
+  }, [productiveTimeLocal, setProductiveTime, productiveTime]);
 
   return [
     <SessionList style={styles.leftScreen} sessions={sessions} key="list" />,
