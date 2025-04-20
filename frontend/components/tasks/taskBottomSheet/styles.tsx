@@ -128,6 +128,7 @@ export default function useStyles() {
       columnGap: 5,
     },
     bigSeparator: {
+      marginTop: 10,
       height: 7,
       backgroundColor: theme.color.defGrey,
       width: "200%",
@@ -150,6 +151,18 @@ export default function useStyles() {
     buttonRowBottom: {
       flexDirection: "row",
       gap: 7,
+    },
+    deleteRow: {
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+    },
+    deleteText: {
+      fontFamily: theme.font.regular,
+      fontSize: theme.fontSize.small,
+      textDecorationLine: "underline",
+      color: theme.color.darkGrey,
     },
   });
 }

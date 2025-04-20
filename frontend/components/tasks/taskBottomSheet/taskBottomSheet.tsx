@@ -49,6 +49,7 @@ import { DateStruct } from "@/utils/dateTimeSession";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import { ButtonInsideFooterComponent } from "@components/tasks/addTask/addTaskBottomSheet";
 import XMark from "@assets/icons/x.svg";
+import TextField from "@/components/form/textField/textField";
 
 interface TaskBottomSheetProps {
   bottomSheetRef: React.RefObject<BottomSheet>;
@@ -461,7 +462,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                     color={theme.color.darkGrey}
                     style={{
                       marginTop: -2,
-                      marginBottom: 14,
                     }}
                     onPress={() => {
                       setIsPickActivityVisible(true);
@@ -473,7 +473,6 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                     color={theme.color.darkGrey}
                     style={{
                       marginTop: -2,
-                      marginBottom: 14,
                     }}
                     onPress={() => {
                       handleActivitySelected(null);
@@ -481,6 +480,11 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   />
                 </View>
               )}
+              <View style={styles.deleteRow}>
+                <TouchableOpacity>
+                  <Text style={styles.deleteText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.bigSeparator} />
             </BottomSheetView>
           </BottomSheetScrollView>
