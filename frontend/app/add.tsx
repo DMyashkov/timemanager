@@ -424,24 +424,26 @@ function AddSegment(props: AddSegmentProps) {
 
       {/* Productivity picker */}
       <Picker
+        initialValue={productivity ? 0 : 1}
         buttons={
-          current == null
-            ? [
-                {
-                  text: "Productive",
-                  onPress: () => setProductivity(true),
-                },
-                {
-                  text: "Unproductive",
-                  onPress: () => setProductivity(false),
-                },
-              ]
-            : [
-                {
-                  text: productivity ? "Productive" : "Unproductive",
-                  onPress: () => {},
-                },
-              ]
+          // current == null
+          //   ? [
+          [
+            {
+              text: "Productive",
+              onPress: () => setProductivity(true),
+            },
+            {
+              text: "Unproductive",
+              onPress: () => setProductivity(false),
+            },
+          ]
+          // : [
+          //     {
+          //       text: productivity ? "Productive" : "Unproductive",
+          //       onPress: () => {},
+          //     },
+          //   ]
         }
       />
 

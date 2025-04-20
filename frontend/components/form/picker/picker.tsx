@@ -18,16 +18,18 @@ interface Button {
 
 interface SwitchProps {
   buttons: Button[];
+  initialValue?: number;
 }
 
-export default function Switch({ buttons = [] }: SwitchProps) {
+export default function Switch({ buttons = [], initialValue }: SwitchProps) {
   const styles = useStyles();
   const { theme } = useTheme();
   const [buttonWidth, setButtonWidth] = useState(0);
-  const positionAnim = useSharedValue(0);
+  const positionAnim = useSharedValue(initialValue || 0);
   const scaleAnim = useSharedValue(1);
-  const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
-
+  const [selectedButtonIndex, setSelectedButtonIndex] = useState(
+    initialValue || 0,
+  );
   const colorAnims = buttons.map(() => useSharedValue(0)); // Create individual color animations for each button
 
   useEffect(() => {
