@@ -19,7 +19,13 @@ import TagIcon from "@assets/icons/tag.svg";
 import { useRelevantSessions } from "@/hooks/useRelevantSessions";
 import { useFocusedDate } from "@/context/focusedDateContext";
 
-export default function SessionCalendar({ style = {} }: { style?: object }) {
+export default function SessionCalendar({
+  style = {},
+  sessions = [],
+}: {
+  style?: object;
+  sessions: Session[];
+}) {
   const { theme } = useTheme();
   const textColor = theme.color.white;
   const styles = useStyles(textColor);
@@ -32,57 +38,6 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
     const period = i < 12 ? "AM" : "PM";
     return `${hour}:00 ${period}`;
   });
-
-  // Convert DateStruct to Date
-  const date = new Date(
-    focusedDate.year,
-    focusedDate.month - 1, // JavaScript months are 0-based
-    focusedDate.day,
-  );
-
-  // Get sessions for the focused date from the hook
-  const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
-  // console.log(
-  //   "Sessions data taken in from useReleaventSessions(sessionCalendar):",
-  //   sessionsData,
-  // );
-  // Convert SessionData to Session instances
-  const sessions =
-    sessionsData?.map((data) => {
-      const intervals = data?.intervals?.map(
-        (interval: {
-          startTime: {
-            date: DateStruct;
-            time: { hours: number; minutes: number; seconds: number };
-          };
-          endTime: {
-            date: DateStruct;
-            time: { hours: number; minutes: number; seconds: number };
-          };
-          type: IntervalType;
-        }) =>
-          new Interval(
-            new DateTime(
-              interval.startTime.date,
-              new Time(
-                interval.startTime.time.hours,
-                interval.startTime.time.minutes,
-                interval.startTime.time.seconds,
-              ),
-            ),
-            new DateTime(
-              interval.endTime.date,
-              new Time(
-                interval.endTime.time.hours,
-                interval.endTime.time.minutes,
-                interval.endTime.time.seconds,
-              ),
-            ),
-            interval.type as IntervalType,
-          ),
-      );
-      return new Session(data.tagId, intervals, data.laps);
-    }) ?? [];
 
   // State to keep track of current time
   const [currentTime, setCurrentTime] = useState(new Date());

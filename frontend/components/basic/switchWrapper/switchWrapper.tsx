@@ -8,10 +8,10 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { useState } from "react";
+import { Children, ReactNode } from "react";
 
 interface SwitchWrapperProps extends SwitchProps {
-  children: [React.ReactNode, React.ReactNode];
+  children: ReactNode | [ReactNode, ReactNode]; // Accepts fragment or tuple
   styleSwitch?: object;
   TopElement?: React.FC;
 }
@@ -33,6 +33,8 @@ export default function SwitchWrapper({
     })),
   };
 
+  const [child1, child2] = Children.toArray(children);
+
   return (
     <View style={styles.container}>
       <View style={styleSwitch}>
@@ -40,8 +42,8 @@ export default function SwitchWrapper({
       </View>
       {TopElement && <TopElement />}
       <Animated.View style={[styles.main, animStyles.main]}>
-        {children[0]}
-        {children[1]}
+        {child1}
+        {child2}
       </Animated.View>
     </View>
   );

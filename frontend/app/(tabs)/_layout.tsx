@@ -6,6 +6,7 @@ import House from "@assets/icons/house.svg";
 import Calendar from "@assets/icons/calendar.svg";
 import CalendarDays from "@assets/icons/calendar-days.svg";
 import CalendarWeek from "@assets/icons/calendar-week.svg";
+import { FocusedDateProvider } from "@/context/focusedDateContext";
 
 export default function TabsLayout() {
   const { theme } = useTheme();

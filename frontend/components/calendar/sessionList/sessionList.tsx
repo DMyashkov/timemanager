@@ -16,71 +16,15 @@ import {
 import { SessionData } from "@/constants/interfaces";
 import { useFocusedDate } from "@/context/focusedDateContext";
 
-export default function SessionList({ style = {} }: { style?: object }) {
+export default function SessionList({
+  style = {},
+  sessions,
+}: {
+  style?: object;
+  sessions: Session[];
+}) {
   const styles = useStyles();
   const { theme } = useTheme();
-
-  // Get today's sessions from the hook
-  const { focusedDate } = useFocusedDate();
-
-  // Convert DateStruct to Date
-  const date = new Date(
-    focusedDate.year,
-    focusedDate.month - 1, // JavaScript months are 0-based
-    focusedDate.day,
-  );
-
-  // Get sessions for the focused date from the hook
-  const sessionsData: SessionData[] = useRelevantSessions(focusedDate);
-  // console.log(
-  //   "Sessions data taken in from useReleaventSessions (sessionList):",
-  //   sessionsData,
-  // );
-
-  // Convert SessionData to Session instances
-  const sessions =
-    sessionsData
-      ?.map((data: SessionData) => {
-        const intervals = data?.intervals?.map(
-          (interval: {
-            startTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            endTime: {
-              date: DateStruct;
-              time: { hours: number; minutes: number; seconds: number };
-            };
-            type: IntervalType;
-          }) =>
-            new Interval(
-              new DateTime(
-                interval.startTime.date,
-                new Time(
-                  interval.startTime.time.hours,
-                  interval.startTime.time.minutes,
-                  interval.startTime.time.seconds,
-                ),
-              ),
-              new DateTime(
-                interval.endTime.date,
-                new Time(
-                  interval.endTime.time.hours,
-                  interval.endTime.time.minutes,
-                  interval.endTime.time.seconds,
-                ),
-              ),
-              interval.type as IntervalType,
-            ),
-        );
-        return new Session(data.tagId, intervals, data.laps);
-      })
-      ?.sort((a, b) => {
-        const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
-        return bEnd - aEnd; // descending
-      }) ?? [];
-
   console.log(sessions);
 
   return (
