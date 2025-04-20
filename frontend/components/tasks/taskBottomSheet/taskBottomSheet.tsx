@@ -481,7 +481,7 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                 </View>
               )}
               <View style={styles.deleteRow}>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleDelete}>
                   <Text style={styles.deleteText}>Delete</Text>
                 </TouchableOpacity>
               </View>

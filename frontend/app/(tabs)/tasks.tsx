@@ -76,7 +76,17 @@ export default function TasksScreen() {
   const { theme } = useTheme();
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
-  const { parseTask, updateTask } = useTaskContext();
+  const { parseTask, updateTask, deleteTask } = useTaskContext();
+
+  const handleDeleteTask = async (taskId: number) => {
+    try {
+      await deleteTask(db, taskId);
+      // Refresh the task list by triggering a re-render
+      // The useLiveQuery hook will automatically update the list
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
 
   const [rescheduleDate, setRescheduleDate] = useState<number | null>(null);
   const calendarSheetRef = useRef<BottomSheet>(null);
@@ -266,6 +276,7 @@ export default function TasksScreen() {
       <TaskBottomSheet
         bottomSheetRef={taskSheetRef}
         task={selectedTask ?? dummyTask}
+        onTaskDelete={handleDeleteTask}
       />
       {/* {selectedTask && ( */}
       {/* )} */}

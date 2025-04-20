@@ -146,10 +146,7 @@ const syncUnsyncedTasks = async (
     });
 
     if (response.ok) {
-      await db
-        .update(tasks)
-        .set({ synced: 1 })
-        .where(eq(tasks.synced, 0));
+      await db.update(tasks).set({ synced: 1 }).where(eq(tasks.synced, 0));
       await cleanupDeletedRows(db);
     } else {
       throw new Error("Failed to sync with backend");
