@@ -73,6 +73,8 @@ export default function Watch() {
   const [currentIntervalStartTime, setCurrentIntervalStartTime] =
     useState<DateTime | null>(null);
   const [timerState, setTimerState] = useState(timerStateEnum.IDLE);
+  const [currentSessionLaps, setCurrentSessionLaps] = useState<Time[]>([]);
+  const [currentLapSeconds, setCurrentLapSeconds] = useState(0);
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
@@ -88,6 +90,9 @@ export default function Watch() {
     if (timerState !== timerStateEnum.IDLE) {
       interval = setInterval(() => {
         setTimerSeconds((prev) => prev + 1);
+        if (timerState === timerStateEnum.RUNNING) {
+          setCurrentLapSeconds((prev) => prev + 1);
+        }
       }, 1000);
     }
     return () => {
@@ -122,13 +127,10 @@ export default function Watch() {
     setTimerState(timerStateEnum.RUNNING);
   };
 
-  const [intervalsCurrentSessions, setIntervalsCurrentSession] = useState<
-    Interval[]
-  >([]);
-
   const logNewInterval = (): Interval[] => {
     if (timerState === timerStateEnum.IDLE) {
       console.error("Cannot log interval when timer is idle");
+      return [];
     }
     console.log("Logging new interval timerstate is not idle");
     try {
@@ -142,17 +144,33 @@ export default function Watch() {
         return [];
       }
       const newInterval = new Interval(currentIntervalStartTime, endTime, type);
-      // console.log("New interval created:", newInterval);
-      // console.log("Previous sessions", intervalsCurrentSessions);
-      const newIntervals = [...intervalsCurrentSessions, newInterval];
-      setIntervalsCurrentSession(newIntervals);
-      // console.log("New sessions", intervalsCurrentSessions);
+      console.log("New interval created:", newInterval);
       setCurrentIntervalStartTime(endTime);
-      return newIntervals;
+      return [newInterval];
     } catch (error) {
       console.error("Error logging new interval:", error);
     }
     return [];
+  };
+
+  const handleLap = () => {
+    console.log("Handling lap");
+    if (timerState !== timerStateEnum.RUNNING) {
+      return;
+    }
+
+    // Create a new lap time from currentLapSeconds
+    const lapTime = Time.fromSeconds(currentLapSeconds);
+
+    console.log("Current lap seconds", currentLapSeconds);
+    console.log("Current session laps", currentSessionLaps);
+    console.log("Lap time", lapTime);
+
+    // Add the lap time to the laps array
+    setCurrentSessionLaps((prev) => [...prev, lapTime]);
+
+    // Reset the current lap timer
+    setCurrentLapSeconds(0);
   };
 
   // Handle session start/stop
@@ -160,10 +178,16 @@ export default function Watch() {
     if (timerState === timerStateEnum.IDLE) {
       startNewTimer();
       setIsContinuousSessionRunning(true);
+      setCurrentLapSeconds(0);
+      setCurrentSessionLaps([]);
     } else {
-      logNewInterval();
-      setTimerState(timerStateEnum.RUNNING + timerStateEnum.BREAK - timerState);
-      setTimerSeconds(0);
+      const newInterval = logNewInterval();
+      if (newInterval.length > 0) {
+        setTimerState(
+          timerStateEnum.RUNNING + timerStateEnum.BREAK - timerState,
+        );
+        setTimerSeconds(0);
+      }
     }
   };
 
@@ -174,7 +198,9 @@ export default function Watch() {
     setSelectedTagID(null);
     setTimerSeconds(0);
     setCurrentIntervalStartTime(null);
-    setIntervalsCurrentSession([]);
+    setCurrentLapSeconds(0);
+    setCurrentSessionLaps([]);
+    setCurrentIntervalStartTime(null);
   };
 
   // Handle session terminate
@@ -191,15 +217,17 @@ export default function Watch() {
           text: "End",
           style: "destructive",
           onPress: async () => {
-            console.log("Before logging interval", intervalsCurrentSessions);
             const finalIntervals: Interval[] = logNewInterval();
             if (!finalIntervals) {
               console.error("No intervals to log");
               return;
             }
-            console.log("After logging interval", intervalsCurrentSessions);
 
-            const finalSession = new Session(selectedTagID, finalIntervals);
+            const finalSession = new Session(
+              selectedTagID,
+              finalIntervals,
+              currentSessionLaps,
+            );
 
             try {
               await createSession(db, finalSession.toSessionData());
@@ -227,9 +255,12 @@ export default function Watch() {
     setTimerState(timerStateEnum.RUNNING);
     if (timerState === timerStateEnum.IDLE) {
       setIsContinuousSessionRunning(true);
-      setCurrentIntervalStartTime(getDateTimeFromDate(new Date()));
+      const startTime = getDateTimeFromDate(new Date());
+      setCurrentIntervalStartTime(startTime);
+      setCurrentLapStartTime(startTime);
       setTimerSeconds(0);
-      setIntervalsCurrentSession([]);
+      setCurrentLapSeconds(0);
+      setCurrentSessionLaps([]);
       setSelectedTagID(activity.id);
       return;
     }
@@ -238,9 +269,15 @@ export default function Watch() {
       return;
     }
     const finalIntervals = logNewInterval();
-    const finalSession = new Session(activity.id, finalIntervals);
+    const finalSession = new Session(
+      activity.id,
+      finalIntervals,
+      currentSessionLaps,
+    );
     setTimerSeconds(0);
-    setIntervalsCurrentSession([]);
+    setCurrentLapSeconds(0);
+    setCurrentSessionLaps([]);
+    setCurrentLapStartTime(null);
 
     try {
       const sessionData = finalSession.toSessionData();
@@ -466,10 +503,10 @@ export default function Watch() {
                   styles.filledButton,
                   { backgroundColor: getButtonColor() },
                 ]}
-                onPress={() => {}}
-                disabled={timerState !== timerStateEnum.BREAK}
+                onPress={handleLap}
+                disabled={timerState !== timerStateEnum.RUNNING}
               >
-                <Text style={styles.textInsideButton}>Next</Text>
+                <Text style={styles.textInsideButton}>Lap</Text>
               </TouchableOpacity>
             </Animated.View>
             <Animated.View style={buttonAnimStyles.idleButtons}>
@@ -521,22 +558,33 @@ export default function Watch() {
       <Animated.View style={[styles.lapsView, animStyles.lapsView]}>
         <View style={styles.lapsViewContent}>
           <FlatList
-            data={[
-              { id: 1, time: "0:01" },
-              { id: 2, time: "0:03" },
-              { id: 3, time: "0:05" },
-              { id: 4, time: "0:10" },
-            ]}
-            renderItem={({ item }) => (
-              <View style={styles.lapContainer}>
-                <Text style={styles.lapText}>
-                  {activityNode?.lapName} {item.id}
-                </Text>
-                <Text style={styles.lapText}>{item.time}</Text>
-              </View>
+            data={[...currentSessionLaps].reverse()}
+            renderItem={({ item, index }) => (
+              <>
+                <View style={styles.lapContainer}>
+                  <Text style={styles.lapText}>
+                    {activityNode?.lapName ?? "Lap"}{" "}
+                    {currentSessionLaps.length - index}
+                  </Text>
+                  <Text style={styles.lapText}>{item.toString()}</Text>
+                </View>
+                <View style={styles.separator} />
+              </>
             )}
-            ListFooterComponent={() => <View style={styles.separator} />}
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListHeaderComponent={() => (
+              <>
+                <View style={styles.lapContainer}>
+                  <Text style={styles.lapText}>
+                    {activityNode?.lapName ?? "Lap"}{" "}
+                    {currentSessionLaps.length + 1}
+                  </Text>
+                  <Text style={styles.lapText}>
+                    {Time.fromSeconds(currentLapSeconds).toString()}
+                  </Text>
+                </View>
+                <View style={styles.separator} />
+              </>
+            )}
           />
         </View>
       </Animated.View>

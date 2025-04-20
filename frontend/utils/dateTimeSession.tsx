@@ -176,16 +176,18 @@ export class Session {
   private startTime: number; // Unix timestamp in milliseconds
   private endTime: number; // Unix timestamp in milliseconds
 
-  constructor(tagId: number | null, intervals?: Interval[]);
+  constructor(tagId: number | null, intervals?: Interval[], laps?: Time[]);
   constructor(sessionData: SessionData);
   constructor(
     activityIdOrData: number | SessionData | null,
     intervals: Interval[] = [],
+    laps: Time[] = [],
   ) {
     if (typeof activityIdOrData === "number" || activityIdOrData === null) {
       // Regular constructor
       this.tagId = activityIdOrData;
       this.intervals = intervals;
+      this.laps = laps;
       this.recalculateTotals();
       // Set timestamps from first and last intervals
       if (intervals.length > 0) {
@@ -218,14 +220,14 @@ export class Session {
       this.totalWorkTime = sessionData.totalWorkTime;
       this.totalBreakTime = sessionData.totalBreakTime;
       this.intervals = sessionData.intervals;
-      this.laps = sessionData.laps;
+      this.laps = sessionData.laps.map(time => new Time(time.hours, time.minutes, time.seconds));
       this.startTime = sessionData.startTime;
       this.endTime = sessionData.endTime;
     }
   }
 
   sameSessionWithDifferentTagId(tagId: number): Session {
-    return new Session(tagId, this.intervals);
+    return new Session(tagId, this.intervals, this.laps);
   }
 
   // Convert to SessionData
@@ -238,7 +240,11 @@ export class Session {
       totalWorkTime: this.totalWorkTime,
       totalBreakTime: this.totalBreakTime,
       intervals: this.intervals,
-      laps: this.laps,
+      laps: this.laps.map(time => ({
+        hours: time.hours,
+        minutes: time.minutes,
+        seconds: time.seconds
+      })),
       deleted: 0,
       synced: 0,
     };
