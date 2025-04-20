@@ -37,7 +37,7 @@ export default function SessionElement({
 
   const colorPallete: Color =
     theme.color.presets[
-      activityNode?.colorPreset ?? projectNode?.colorPreset ?? "green"
+      activityNode?.colorPreset ?? projectNode?.colorPreset ?? "grey"
     ];
   const styles = useStyles(colorPallete);
   const workTime: Time = session.getWorkTime();
@@ -88,26 +88,35 @@ export default function SessionElement({
           </View>
         )}
       </View>
-      <View style={styles.content}>
-        <View style={styles.tagContainer}>
-          {activityNode && (
-            <Tag
-              text={activityNode.title}
-              colorPallete={colorPallete}
-              desiredHeight={29}
-              textSize={theme.fontSize.small}
-            />
-          )}
-          {projectNode && (
-            <Tag
-              text={projectNode.title}
-              colorPallete={colorPallete}
-              isProject={true}
-              desiredHeight={29}
-              textSize={theme.fontSize.small}
-            />
-          )}
-        </View>
+      <View
+        style={[
+          styles.content,
+          {
+            paddingTop: activityNode || projectNode ? 14 : 3,
+          },
+        ]}
+      >
+        {(activityNode || projectNode) && (
+          <View style={styles.tagContainer}>
+            {activityNode && (
+              <Tag
+                text={activityNode.title}
+                colorPallete={colorPallete}
+                desiredHeight={29}
+                textSize={theme.fontSize.small}
+              />
+            )}
+            {projectNode && (
+              <Tag
+                text={projectNode.title}
+                colorPallete={colorPallete}
+                isProject={true}
+                desiredHeight={29}
+                textSize={theme.fontSize.small}
+              />
+            )}
+          </View>
+        )}
         <View style={[styles.footer]}>
           <View style={styles.rightFooter}>
             <Text style={styles.textFooter}>

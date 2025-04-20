@@ -68,7 +68,7 @@ const insertSession = async (
     .insert(sessions)
     .values({
       id: actualID,
-      tagId,
+      tagId: tagId ?? -1,
       totalWorkTime,
       totalBreakTime,
       intervals: intervalsStr,

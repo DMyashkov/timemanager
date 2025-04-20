@@ -29,6 +29,13 @@ export const THEME = {
           medium: "#F5AB71",
           dark: "#EE812C",
         },
+        grey: {
+          veryLight: "#EAEAEA",
+
+          light: "#D3D3D3",
+          medium: "#8B8C90",
+          dark: "#7A7A7A",
+        },
         yellow: {
           light: "#F7B98826",
           dark: "#F2B585",

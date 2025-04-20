@@ -73,7 +73,7 @@ export function useDerivedTags(tagId: number | null) {
     }
   }, [parseTag, parentTagData]);
 
-  if (tagId === null) {
+  if (tagId === null || tagId === -1) {
     return { activityNode: null, projectNode: null };
   }
 
