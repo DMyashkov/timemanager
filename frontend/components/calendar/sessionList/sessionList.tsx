@@ -27,7 +27,7 @@ export default function SessionList({ style = {} }: { style?: object }) {
   const date = new Date(
     focusedDate.year,
     focusedDate.month - 1, // JavaScript months are 0-based
-    focusedDate.day
+    focusedDate.day,
   );
 
   // Get sessions for the focused date from the hook
@@ -40,7 +40,7 @@ export default function SessionList({ style = {} }: { style?: object }) {
   // Convert SessionData to Session instances
   const sessions =
     sessionsData
-      ?.map((data) => {
+      ?.map((data: SessionData) => {
         const intervals = data?.intervals?.map(
           (interval: {
             startTime: {
@@ -73,13 +73,15 @@ export default function SessionList({ style = {} }: { style?: object }) {
               interval.type as IntervalType,
             ),
         );
-        return new Session(data.tagId, intervals);
+        return new Session(data.tagId, intervals, data.laps);
       })
       ?.sort((a, b) => {
         const aEnd = a.getLatestEndTime()?.toDate()?.getTime() ?? 0;
         const bEnd = b.getLatestEndTime()?.toDate()?.getTime() ?? 0;
         return bEnd - aEnd; // descending
       }) ?? [];
+
+  console.log(sessions);
 
   return (
     <View style={[styles.container, style]}>

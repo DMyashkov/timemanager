@@ -37,7 +37,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
   const date = new Date(
     focusedDate.year,
     focusedDate.month - 1, // JavaScript months are 0-based
-    focusedDate.day
+    focusedDate.day,
   );
 
   // Get sessions for the focused date from the hook
@@ -81,7 +81,7 @@ export default function SessionCalendar({ style = {} }: { style?: object }) {
             interval.type as IntervalType,
           ),
       );
-      return new Session(data.tagId, intervals);
+      return new Session(data.tagId, intervals, data.laps);
     }) ?? [];
 
   // State to keep track of current time

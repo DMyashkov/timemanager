@@ -28,7 +28,7 @@ export type SessionData = {
   totalWorkTime: number;
   totalBreakTime: number;
   intervals: Interval[];
-  laps: DateTime[];
+  laps: Time[];
   deleted: number;
   synced: number;
 };

@@ -220,7 +220,9 @@ export class Session {
       this.totalWorkTime = sessionData.totalWorkTime;
       this.totalBreakTime = sessionData.totalBreakTime;
       this.intervals = sessionData.intervals;
-      this.laps = sessionData.laps.map(time => new Time(time.hours, time.minutes, time.seconds));
+      this.laps = sessionData.laps.map(
+        (time) => new Time(time.hours, time.minutes, time.seconds),
+      );
       this.startTime = sessionData.startTime;
       this.endTime = sessionData.endTime;
     }
@@ -240,10 +242,10 @@ export class Session {
       totalWorkTime: this.totalWorkTime,
       totalBreakTime: this.totalBreakTime,
       intervals: this.intervals,
-      laps: this.laps.map(time => ({
+      laps: this.laps.map((time) => ({
         hours: time.hours,
         minutes: time.minutes,
-        seconds: time.seconds
+        seconds: time.seconds,
       })),
       deleted: 0,
       synced: 0,
@@ -318,6 +320,13 @@ export class Session {
       return 0;
     }
     return this.laps.length;
+  }
+
+  getLaps(): Time[] {
+    if (!this.laps) {
+      return [];
+    }
+    return this.laps;
   }
 
   getStartTime(): Time {
