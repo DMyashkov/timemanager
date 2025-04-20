@@ -37,7 +37,7 @@ export function useRelevantSessions(dateStruct?: DateStruct) {
   }), [date]);
 
   // Fetch sessions that overlap with the specified date using the indexed startTime field
-  const sessionsData = useLiveQuery(
+  const { data: sessionsData } = useLiveQuery(
     db
       .select()
       .from(sessions)
@@ -52,22 +52,25 @@ export function useRelevantSessions(dateStruct?: DateStruct) {
     [dateStart, dateEnd],
   );
 
-  // Transform database sessions to SessionData
-  const relevantSessions = (sessionsData?.data ?? []).map(
-    (data: DBSession) =>
-      ({
-        id: data.id,
-        tagId: data.tagId ?? 0,
-        startTime: data.startTime ?? 0,
-        endTime: data.endTime ?? 0,
-        totalWorkTime: data.totalWorkTime ?? 0,
-        totalBreakTime: data.totalBreakTime ?? 0,
-        intervals: JSON.parse(data.intervals || "[]"),
-        laps: JSON.parse(data.laps || "[]"),
-        deleted: data.deleted ?? 0,
-        synced: data.synced ?? 0,
-      }) as SessionData,
-  );
+  // Transform database sessions to SessionData and memoize the result
+  const relevantSessions = useMemo(() => {
+    if (!sessionsData?.length) return [];
+    return sessionsData.map(
+      (data: DBSession) =>
+        ({
+          id: data.id,
+          tagId: data.tagId ?? 0,
+          startTime: data.startTime ?? 0,
+          endTime: data.endTime ?? 0,
+          totalWorkTime: data.totalWorkTime ?? 0,
+          totalBreakTime: data.totalBreakTime ?? 0,
+          intervals: JSON.parse(data.intervals || "[]"),
+          laps: JSON.parse(data.laps || "[]"),
+          deleted: data.deleted ?? 0,
+          synced: data.synced ?? 0,
+        }) as SessionData,
+    );
+  }, [sessionsData]);
 
   return relevantSessions;
 }

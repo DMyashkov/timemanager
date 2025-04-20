@@ -1,21 +1,13 @@
 import { View, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
-import type { Color, TagData } from "@interfaces";
+import type { Color } from "@interfaces";
 import type { Session, Time } from "@/utils/dateTimeSession";
-import { dataIndex } from "@/constants/exampleData";
-import { TagsFromId } from "@/utils/getComponentsFromTag";
-import { useEffect, useState } from "react";
-
-import { useSQLiteContext } from "expo-sqlite";
-import { drizzle, useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { schema, tags } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { useTagContext } from "@/context/TagContext";
-import Tag from "@/components/tag/tagComponent";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
+import { memo } from "react";
+import Tag from "@/components/tag/tagComponent";
 
-export default function SessionElement({
+const SessionElement = memo(function SessionElement({
   style = {},
   session,
 }: {
@@ -25,15 +17,6 @@ export default function SessionElement({
   const { theme } = useTheme();
   const tagId = session.getTagId();
   const { activityNode, projectNode } = useDerivedTags(tagId);
-  // console.log(
-  //   "tagId in sessionElement:",
-  //   tagId,
-  // );
-  // console.log(
-  //   "activityNode and projectNode in sessionElement:",
-  //   activityNode,
-  //   projectNode,
-  // );
 
   const colorPallete: Color =
     theme.color.presets[
@@ -55,7 +38,7 @@ export default function SessionElement({
   })();
 
   return (
-    <View style={styles.outer}>
+    <View style={[styles.outer, style]}>
       <View style={styles.header}>
         {roundedRatioPercentage !== 0 && (
           <View
@@ -82,7 +65,6 @@ export default function SessionElement({
               },
             ]}
           >
-            {/* Mask to hide the left border */}
             {roundedRatioPercentage !== 0 && <View style={styles.leftMask} />}
             <Text style={styles.breakTimeText}>{breakTime.toString()}</Text>
           </View>
@@ -133,4 +115,6 @@ export default function SessionElement({
       </View>
     </View>
   );
-}
+});
+
+export default SessionElement;
