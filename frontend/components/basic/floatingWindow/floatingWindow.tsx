@@ -1,18 +1,25 @@
-import React, { useCallback, useState } from 'react';
-import { View, Dimensions, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useCallback, useState } from "react";
+import {
+  View,
+  Dimensions,
+  TouchableOpacity,
+  Platform,
+  Text,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
   runOnJS,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { useTheme } from '@context/ThemeContext';
-import useStyles from './styles';
-import { useAuthContext } from '@context/AuthContext';
+} from "react-native-reanimated";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useTheme } from "@context/ThemeContext";
+import useStyles from "./styles";
+import { useAuthContext } from "@context/AuthContext";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const SNAP_INDICATOR_SIZE = 20; // Size of the snap point indicators
 const BUTTON_SIZE = 60; // Size of the floating button
 const EDGE_PADDING = 20; // Padding from the edges
@@ -24,21 +31,52 @@ interface FloatingWindowProps {
   onPress?: () => void;
 }
 
-export default function FloatingWindow({ children, onPress }: FloatingWindowProps) {
+export default function FloatingWindow({
+  children,
+  onPress,
+}: FloatingWindowProps) {
   const { theme } = useTheme();
   const { isLoggedIn } = useAuthContext();
   const styles = useStyles();
 
   // Define snap positions for indicators
   const snapPositions = [
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'red' }, // Top-left
-    { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'orange' }, // Top-center
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'yellow' }, // Top-right
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'green' }, // Mid-left
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'blue' }, // Mid-right
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'purple' }, // Bottom-left
-    { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'pink' }, // Bottom-center
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'cyan' }, // Bottom-right
+    {
+      x: EDGE_PADDING + BUTTON_SIZE / 2,
+      y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      color: "red",
+    }, // Top-left
+    {
+      x: SCREEN_WIDTH / 2,
+      y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      color: "orange",
+    }, // Top-center
+    {
+      x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+      y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      color: "yellow",
+    }, // Top-right
+    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: "green" }, // Mid-left
+    {
+      x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+      y: SCREEN_HEIGHT / 2,
+      color: "blue",
+    }, // Mid-right
+    {
+      x: EDGE_PADDING + BUTTON_SIZE / 2,
+      y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2,
+      color: "purple",
+    }, // Bottom-left
+    {
+      x: SCREEN_WIDTH / 2,
+      y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2,
+      color: "pink",
+    }, // Bottom-center
+    {
+      x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+      y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2,
+      color: "cyan",
+    }, // Bottom-right
   ];
 
   const translateX = useSharedValue(snapPositions[5].x - BUTTON_SIZE / 2); // Bottom-left position
@@ -49,14 +87,32 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
   const snapToPosition = useCallback((x: number, y: number) => {
     // Define snap positions (corners and mid-sides)
     const snapPositions = [
-      { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-left
-      { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-center
-      { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-right
+      {
+        x: EDGE_PADDING + BUTTON_SIZE / 2,
+        y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      }, // Top-left
+      {
+        x: SCREEN_WIDTH / 2,
+        y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      }, // Top-center
+      {
+        x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+        y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2,
+      }, // Top-right
       { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2 }, // Mid-left
-      { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2 }, // Mid-right
-      { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2 }, // Bottom-left
+      {
+        x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+        y: SCREEN_HEIGHT / 2,
+      }, // Mid-right
+      {
+        x: EDGE_PADDING + BUTTON_SIZE / 2,
+        y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2,
+      }, // Bottom-left
       { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2 }, // Bottom-center
-      { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2 }, // Bottom-right
+      {
+        x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2,
+        y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2,
+      }, // Bottom-right
     ];
 
     // Find the closest snap position
@@ -65,7 +121,7 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
 
     snapPositions.forEach((pos) => {
       const distance = Math.sqrt(
-        Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2)
+        Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2),
       );
       if (distance < minDistance) {
         minDistance = distance;
@@ -99,17 +155,28 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
       runOnJS(snapToPosition)(finalX, finalY);
     });
 
+  const scale = useSharedValue(1);
+
+  const handlePressIn = useCallback(() => {
+    scale.value = withSpring(0.85, { damping: 15, stiffness: 100 });
+  }, []);
+
+  const handlePressOut = useCallback(() => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 100 });
+  }, []);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
+        { scale: scale.value },
       ],
     };
   });
 
   const handlePress = useCallback(() => {
-    console.log('Floating window button pressed!');
+    console.log("Floating window button pressed!");
     onPress?.();
   }, [onPress]);
 
@@ -118,21 +185,26 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']} pointerEvents="box-none">
+    <SafeAreaView
+      style={styles.safeArea}
+      edges={["top", "bottom"]}
+      pointerEvents="box-none"
+    >
       {/* Snap point indicators */}
-      {SHOW_SNAP_POINTS && snapPositions.map((pos, index) => (
-        <View
-          key={index}
-          style={[
-            styles.snapIndicator,
-            {
-              left: pos.x - SNAP_INDICATOR_SIZE / 2,
-              top: pos.y - SNAP_INDICATOR_SIZE / 2,
-              backgroundColor: pos.color,
-            },
-          ]}
-        />
-      ))}
+      {SHOW_SNAP_POINTS &&
+        snapPositions.map((pos, index) => (
+          <View
+            key={index}
+            style={[
+              styles.snapIndicator,
+              {
+                left: pos.x - SNAP_INDICATOR_SIZE / 2,
+                top: pos.y - SNAP_INDICATOR_SIZE / 2,
+                backgroundColor: pos.color,
+              },
+            ]}
+          />
+        ))}
 
       {/* Floating window */}
       <GestureDetector gesture={gesture}>
@@ -143,11 +215,17 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
             { backgroundColor: theme.color.white },
           ]}
         >
-          <TouchableOpacity onPress={handlePress} style={styles.content}>
-            {children}
+          <TouchableOpacity
+            onPress={handlePress}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            style={styles.content}
+            activeOpacity={1}
+          >
+            <Text style={{ fontSize: 30 }}>🧠</Text>
           </TouchableOpacity>
         </Animated.View>
       </GestureDetector>
     </SafeAreaView>
   );
-} 
+}

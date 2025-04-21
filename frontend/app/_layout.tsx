@@ -26,7 +26,7 @@ import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { useTaskContext } from "@/context/TaskContext";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import FloatingWindow from "@/components/basic/floatingWindow/floatingWindow";
-import Plus from "@assets/icons/plus.svg";
+import AIIcon from "@assets/icons/plus.svg";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -254,7 +254,7 @@ function AppContent({
       </Stack>
 
       <FloatingWindow onPress={() => console.log("Floating window pressed")}>
-        <Plus height={25} width={23} fill={theme.color.black} />
+        <AIIcon height={25} width={23} fill={theme.color.black} />
       </FloatingWindow>
     </>
   );

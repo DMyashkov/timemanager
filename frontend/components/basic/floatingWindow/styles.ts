@@ -1,9 +1,9 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export default function useStyles() {
   return StyleSheet.create({
     safeArea: {
-      position: 'absolute',
+      position: "absolute",
       top: 0,
       left: 0,
       right: 0,
@@ -11,11 +11,11 @@ export default function useStyles() {
       zIndex: 1,
     },
     container: {
-      position: 'absolute',
+      position: "absolute",
       width: 60,
       height: 60,
-      borderRadius: 30,
-      shadowColor: '#000',
+      borderRadius: 13,
+      shadowColor: "#000",
       shadowOffset: {
         width: 0,
         height: 2,
@@ -27,18 +27,19 @@ export default function useStyles() {
     },
     content: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
     },
     snapIndicator: {
-      position: 'absolute',
+      position: "absolute",
       width: 20,
       height: 20,
       borderRadius: 10,
       zIndex: 9998,
       opacity: 0.7,
       borderWidth: 2,
-      borderColor: '#000',
+      borderColor: "#000",
     },
   });
-} 
+}
+
