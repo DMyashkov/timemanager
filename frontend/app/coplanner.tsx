@@ -18,11 +18,26 @@ import SendIcon from "@assets/icons/arrow-up.svg";
 import ResetIcon from "@assets/icons/arrow-rotate-left.svg";
 
 const suggestions = [
-  "I have to walk the dog today",
-  "Need to finish the project by Friday",
-  "Schedule a meeting with the team",
-  "Buy groceries for the week",
-  "Call mom for her birthday",
+  {
+    context: "On Saturday I need to",
+    task: "Plan my weekend workout routine and meal prep",
+  },
+  {
+    context: "For my project I should",
+    task: "Create a timeline for the next sprint and assign tasks",
+  },
+  {
+    context: "This week I want to",
+    task: "Learn a new programming language and build a small project",
+  },
+  {
+    context: "In the morning I need to",
+    task: "Review my emails and prepare for the team meeting",
+  },
+  {
+    context: "Before the deadline I should",
+    task: "Complete the documentation and run final tests",
+  },
 ];
 
 interface CoplannerProps {
@@ -63,7 +78,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     console.log("Sending:", text);
   };
 
-  const SUGGESTION_HEIGHT = 80;
+  const SUGGESTION_HEIGHT = 85;
+  const SUGGESTION_WIDTH = screenWidth * 0.7;
 
   const styles = StyleSheet.create({
     container: {
@@ -84,7 +100,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       height: SUGGESTION_HEIGHT,
     },
     suggestionItem: {
-      width: screenWidth * 0.4,
+      width: SUGGESTION_WIDTH,
       height: SUGGESTION_HEIGHT,
       paddingHorizontal: 15,
       marginRight: 10,
@@ -94,11 +110,18 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       padding: 10,
     },
     suggestionText: {
-      color: theme.color.black,
+      color: theme.color.darkestGrey,
       fontSize: theme.fontSize.medium,
       flexWrap: "wrap",
       textAlign: "left",
-      lineHeight: 20,
+    },
+    suggestionContext: {
+      fontFamily: theme.font.semibold,
+      marginBottom: 4,
+    },
+    suggestionTask: {
+      fontFamily: theme.font.regular,
+      color: theme.color.darkGrey,
     },
     inputContainer: {
       borderWidth: 1,
@@ -167,11 +190,20 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 <TouchableOpacity
                   key={index}
                   style={styles.suggestionItem}
-                  onPress={() => handleSuggestionPress(suggestion)}
+                  onPress={() =>
+                    handleSuggestionPress(
+                      `${suggestion.context} ${suggestion.task}`,
+                    )
+                  }
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.suggestionText} numberOfLines={3}>
-                    {suggestion}
+                  <Text
+                    style={[styles.suggestionText, styles.suggestionContext]}
+                  >
+                    {suggestion.context}
+                  </Text>
+                  <Text style={[styles.suggestionText, styles.suggestionTask]}>
+                    {suggestion.task}
                   </Text>
                 </TouchableOpacity>
               ))}
