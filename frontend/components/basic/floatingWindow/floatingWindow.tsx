@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useAnimatedStyle,
@@ -108,6 +108,11 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
     };
   });
 
+  const handlePress = useCallback(() => {
+    console.log('Floating window button pressed!');
+    onPress?.();
+  }, [onPress]);
+
   if (!isLoggedIn) {
     return null;
   }
@@ -138,7 +143,9 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
             { backgroundColor: theme.color.white },
           ]}
         >
-          <View style={styles.content}>{children}</View>
+          <TouchableOpacity onPress={handlePress} style={styles.content}>
+            {children}
+          </TouchableOpacity>
         </Animated.View>
       </GestureDetector>
     </SafeAreaView>
