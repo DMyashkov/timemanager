@@ -149,9 +149,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     button: {
       backgroundColor: theme.color.black,
-      borderRadius: 20,
-      width: 40,
-      height: 40,
+      borderRadius: 18,
+      width: 36,
+      height: 36,
       justifyContent: "center",
       alignItems: "center",
     },
