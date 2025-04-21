@@ -129,6 +129,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       borderRadius: 12,
       padding: 15,
       paddingVertical: 8,
+      paddingBottom: 12,
       marginBottom: 30,
       backgroundColor: BACKGROUND_FOR_SUGGESTIONS,
       minHeight: 100,
