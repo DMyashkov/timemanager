@@ -173,7 +173,7 @@ const fetchAndStoreTasks = async (
       },
     });
 
-    console.log("Fetched tasks:", response.data);
+    // console.log ("Fetched tasks:", response.data);
 
     if (response.status === 200) {
       const fetchedTasks = response.data;

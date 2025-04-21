@@ -221,7 +221,7 @@ const fetchAndStoreSessions = async (
       headers: { Authorization: `Token ${token}` },
     });
 
-    // console.log("Fetched sessions:", response.data);
+    console.log("Fetched sessions:", response.data);
     // console.log("Response status:", response.status);
 
     if (response.status === 200) {

@@ -222,6 +222,7 @@ export default function Watch() {
               console.error("No intervals to log");
               return;
             }
+            console.log("Final intervals", finalIntervals);
 
             const finalSession = new Session(
               selectedTagID,
@@ -257,11 +258,11 @@ export default function Watch() {
       setIsContinuousSessionRunning(true);
       const startTime = getDateTimeFromDate(new Date());
       setCurrentIntervalStartTime(startTime);
-      setCurrentLapStartTime(startTime);
       setTimerSeconds(0);
       setCurrentLapSeconds(0);
       setCurrentSessionLaps([]);
       setSelectedTagID(activity.id);
+      console.log("Selected activity ID:", activity.id);
       return;
     }
     if (!selectedTagID) {
@@ -277,7 +278,6 @@ export default function Watch() {
     setTimerSeconds(0);
     setCurrentLapSeconds(0);
     setCurrentSessionLaps([]);
-    setCurrentLapStartTime(null);
 
     try {
       const sessionData = finalSession.toSessionData();
