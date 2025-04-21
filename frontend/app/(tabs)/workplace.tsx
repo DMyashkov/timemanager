@@ -17,6 +17,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { useTagContext } from "@/context/TagContext";
 import type { TagData } from "@/constants/interfaces";
@@ -32,6 +33,7 @@ export default function WorkplaceScreen() {
   // State and animation for the add screen toggle
   const [addScreen, setAddScreen] = useState(false);
   const addAnim = useSharedValue(0);
+  const emptyStateAnim = useSharedValue(0);
 
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema: schema });
@@ -45,6 +47,15 @@ export default function WorkplaceScreen() {
       rerender((prev) => prev + 1);
     }
   }, [data]);
+
+  // Animate empty state based on data length and addScreen state
+  useEffect(() => {
+    const shouldShowEmptyState = data?.length <= 1 && !addScreen;
+    emptyStateAnim.value = withSpring(shouldShowEmptyState ? 1 : 0, {
+      damping: 15,
+      stiffness: 100,
+    });
+  }, [data?.length, addScreen, emptyStateAnim]);
 
   const EmptyState = () => {
     const emptyStateStyles = StyleSheet.create({
@@ -97,6 +108,17 @@ export default function WorkplaceScreen() {
     })),
   };
 
+  const emptyStateAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: emptyStateAnim.value,
+      transform: [
+        {
+          translateY: interpolate(emptyStateAnim.value, [0, 1], [-20, 0]),
+        },
+      ],
+    };
+  });
+
   return (
     <View style={[styles.workplaceScreen]}>
       <Header
@@ -129,20 +151,21 @@ export default function WorkplaceScreen() {
         }}
       >
         <FocusProvider>
-          {data?.length <= 1 && !addScreen && (
-            <View
-              style={{
+          <Animated.View
+            style={[
+              {
                 position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
                 paddingTop: 20,
                 justifyContent: "flex-start",
-              }}
-            >
-              <EmptyState />
-            </View>
-          )}
+              },
+              emptyStateAnimatedStyle,
+            ]}
+          >
+            <EmptyState />
+          </Animated.View>
 
           <FlatList
             data={[{ id: 0 }]} // Ensure item has an `id` field
