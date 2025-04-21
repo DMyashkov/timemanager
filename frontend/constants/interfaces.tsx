@@ -76,7 +76,7 @@ export interface TaskData {
   description?: string;
   date: number | null; // Unix timestamp in milliseconds
   priority: number;
-  completed: boolean;
+  completed: number;
   synced: number;
   deleted: number;
   tagId: number | null;

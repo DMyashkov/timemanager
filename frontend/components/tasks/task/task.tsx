@@ -8,11 +8,11 @@ import Checkmark from "@/assets/icons/checkmark.svg";
 import { priorityEnum } from "@/constants/interfaces";
 import { TaskData } from "@/constants/interfaces";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
+import { useTaskContext } from "@/context/TaskContext";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema, tasks } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 function formatDate(timestamp: number, today: Date): string {
   const date = new Date(timestamp);
@@ -53,22 +53,29 @@ export default function Task({
 }: TaskProps) {
   const styles = useStyles(task.priority);
   const { theme } = useTheme();
-  const checkMarkAnim = useSharedValue(task.completed ? 1 : 0);
+  const [isCompleted, setIsCompleted] = useState(task.completed);
   const todayDate = new Date();
   const { activityNode, projectNode } = useDerivedTags(
     task.tagId ? Number(task.tagId) : null,
   );
+  const { updateTask } = useTaskContext();
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
 
-  const toggleCheckmark = useCallback(() => {
-    checkMarkAnim.value = withSpring(checkMarkAnim.value ? 0 : 1);
-  }, []);
+  const handleCheckmarkPress = useCallback(async () => {
+    if (!task.id) return;
 
-  const checkmarkAnimStyle = useAnimatedStyle(() => {
-    return {
-      opacity: checkMarkAnim.value,
-      transform: [{ scale: 1 - checkMarkAnim.value * 0.1 }],
-    };
-  });
+    const newCompletedState = !isCompleted ? 1 : 0;
+    setIsCompleted(newCompletedState);
+
+    try {
+      await updateTask(db, task.id, { completed: newCompletedState });
+    } catch (error) {
+      console.error("Error updating task completion:", error);
+      // Revert the state if the update fails
+      setIsCompleted(isCompleted);
+    }
+  }, [task.id, isCompleted, updateTask, db]);
 
   let colorCheckmarkStyles: object;
   switch (task.priority) {
@@ -97,22 +104,15 @@ export default function Task({
       };
   }
 
-  const [checkMark, setCheckMark] = useState(false);
-
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, isCompleted === 1 && { opacity: 0.7 }]}
       onPress={onPress}
       activeOpacity={0.7}
     >
       <View style={styles.leftColumn}>
-        <TouchableOpacity
-          onPress={() => {
-            setCheckMark(!checkMark);
-          }}
-          activeOpacity={1}
-        >
-          {!checkMark ? (
+        <TouchableOpacity onPress={handleCheckmarkPress} activeOpacity={1}>
+          {!isCompleted ? (
             <View style={[styles.checkMark, colorCheckmarkStyles]} />
           ) : (
             <Checkmark fill={theme.color.darkGrey} height={22.3} width={22.3} />
@@ -123,13 +123,15 @@ export default function Task({
         <View style={styles.header}>
           <Text style={styles.title}>{task.title}</Text>
           {showDateAlways ||
-            (showDateIfPassed && task.date < todayDate.getTime() && (
-              <View style={styles.date}>
-                <Text style={styles.dateText}>
-                  {formatDate(task.date, todayDate)}
-                </Text>
-              </View>
-            ))}
+            (showDateIfPassed &&
+              task.date &&
+              task.date < todayDate.getTime() && (
+                <View style={styles.date}>
+                  <Text style={styles.dateText}>
+                    {formatDate(task.date, todayDate)}
+                  </Text>
+                </View>
+              ))}
         </View>
         {task.description && (
           <Text style={styles.description} numberOfLines={1}>

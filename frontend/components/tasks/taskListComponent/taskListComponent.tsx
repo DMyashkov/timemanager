@@ -35,12 +35,14 @@ export default function TaskListComponent({
   onReschedule,
   onTaskPress,
   showDateNextToTasks = false,
+  isCompleted = false,
 }: {
   title: string;
   tasks: TaskData[];
   onReschedule?: () => void;
   onTaskPress: (task: TaskData) => void;
   showDateNextToTasks?: boolean;
+  isCompleted?: boolean;
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
@@ -51,7 +53,9 @@ export default function TaskListComponent({
     <TouchableOpacity style={styles.container} activeOpacity={1}>
       <View style={styles.header}>
         <View style={styles.leftHeader}>
-          <Text style={styles.date}>{title}</Text>
+          <Text style={[styles.date, isCompleted && { color: theme.color.darkGrey }]}>
+            {title}
+          </Text>
           <Text style={styles.amount}>{tasks.length}</Text>
         </View>
         {onReschedule && (

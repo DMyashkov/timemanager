@@ -42,6 +42,12 @@ type OverdueGroup = {
   onReschedule: () => void;
 };
 
+type CompletedGroup = {
+  type: "completed";
+  title: string;
+  tasks: TaskData[];
+};
+
 type NoDateGroup = {
   type: "noDate";
   title: string;
@@ -145,8 +151,12 @@ export default function TasksScreen() {
     ?.map((result) => parseTask([result]))
     .filter(Boolean) as TaskData[];
 
-  // Group tasks by date
-  const taskGroups = allTasks.reduce(
+  // Separate completed and active tasks
+  const completedTasks = allTasks.filter((task) => task.completed);
+  const activeTasks = allTasks.filter((task) => !task.completed);
+
+  // Group active tasks by date
+  const taskGroups = activeTasks.reduce(
     (groups, task) => {
       if (!task.date) {
         if (!groups.noDate) {
@@ -174,8 +184,8 @@ export default function TasksScreen() {
     {} as Record<number | "noDate", TaskData[]>,
   );
 
-  // Get overdue tasks
-  const overdueTasks = allTasks.filter(
+  // Get overdue tasks (only from active tasks)
+  const overdueTasks = activeTasks.filter(
     (task) => task.date && task.date < todayStart,
   );
 
@@ -191,7 +201,7 @@ export default function TasksScreen() {
     }));
 
   // Prepare data for FlatList
-  const listData: (TaskGroup | OverdueGroup | NoDateGroup)[] = [
+  const listData: (TaskGroup | OverdueGroup | CompletedGroup | NoDateGroup)[] = [
     ...(overdueTasks.length > 0
       ? [
           {
@@ -205,6 +215,15 @@ export default function TasksScreen() {
         ]
       : []),
     ...sortedGroups.filter((group) => group.title === "Today"),
+    ...(completedTasks.length > 0
+      ? [
+          {
+            type: "completed" as const,
+            title: "Recently Completed",
+            tasks: completedTasks,
+          },
+        ]
+      : []),
     ...(taskGroups.noDate
       ? [
           {
@@ -295,14 +314,17 @@ export default function TasksScreen() {
                 }
                 showDateNextToTasks={item.type === "overdue"}
                 onTaskPress={openTaskBottomSheet}
+                isCompleted={item.type === "completed"}
               />
             )}
             keyExtractor={(item) =>
               item.type === "overdue"
                 ? "overdue"
-                : item.type === "noDate"
-                  ? "noDate"
-                  : item.date.toString()
+                : item.type === "completed"
+                  ? "completed"
+                  : item.type === "noDate"
+                    ? "noDate"
+                    : item.date.toString()
             }
             ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
           />
