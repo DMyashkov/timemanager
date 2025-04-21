@@ -63,7 +63,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     console.log("Sending:", text);
   };
 
-  const SUGGESTION_HEIGHT = 80;
+  const SUGGESTION_HEIGHT = 90;
+  const SUGGESTION_WIDTH = screenWidth * 0.4;
 
   const styles = StyleSheet.create({
     container: {
@@ -78,36 +79,54 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     suggestionsWrapper: {
       height: SUGGESTION_HEIGHT,
-      marginBottom: 20,
+      marginBottom: 30,
     },
     suggestionsContainer: {
       height: SUGGESTION_HEIGHT,
     },
     suggestionItem: {
-      width: screenWidth * 0.4,
+      width: SUGGESTION_WIDTH,
       height: SUGGESTION_HEIGHT,
       paddingHorizontal: 15,
-      marginRight: 10,
-      backgroundColor: theme.color.lightGrey,
-      borderRadius: 8,
+      marginRight: 12,
+      backgroundColor: theme.color.lightestGrey,
+      borderRadius: 12,
       justifyContent: "flex-start",
-      padding: 10,
+      padding: 12,
+      shadowColor: theme.color.black,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 3,
     },
     suggestionText: {
-      color: theme.color.black,
+      color: theme.color.darkestGrey,
       fontSize: theme.fontSize.medium,
       flexWrap: "wrap",
       textAlign: "left",
-      lineHeight: 20,
+      lineHeight: 22,
+      fontFamily: theme.font.medium,
     },
     inputContainer: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-start",
       borderWidth: 1,
       borderColor: theme.color.lightGrey,
-      borderRadius: 8,
-      padding: 10,
-      marginBottom: 20,
+      borderRadius: 12,
+      padding: 15,
+      marginBottom: 30,
+      backgroundColor: theme.color.white,
+      shadowColor: theme.color.black,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 3,
     },
     textInput: {
       flex: 1,
@@ -115,10 +134,21 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       color: theme.color.black,
       fontSize: theme.fontSize.medium,
       textAlignVertical: "top",
+      fontFamily: theme.font.regular,
+      lineHeight: 22,
     },
     button: {
       padding: 10,
       marginLeft: 10,
+      backgroundColor: theme.color.lightestGrey,
+      borderRadius: 8,
+      width: 44,
+      height: 44,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    buttonIcon: {
+      opacity: 0.8,
     },
   });
 
@@ -171,10 +201,20 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
             {text ? (
               <>
                 <TouchableOpacity style={styles.button} onPress={handleReset}>
-                  <ResetIcon height={24} width={24} fill={theme.color.black} />
+                  <ResetIcon
+                    height={24}
+                    width={24}
+                    fill={theme.color.black}
+                    style={styles.buttonIcon}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={handleSend}>
-                  <SendIcon height={24} width={24} fill={theme.color.black} />
+                  <SendIcon
+                    height={24}
+                    width={24}
+                    fill={theme.color.black}
+                    style={styles.buttonIcon}
+                  />
                 </TouchableOpacity>
               </>
             ) : (
@@ -186,6 +226,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   height={24}
                   width={24}
                   fill={theme.color.black}
+                  style={styles.buttonIcon}
                 />
               </TouchableOpacity>
             )}
