@@ -90,7 +90,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     contentContainer: {
       flex: 1,
-      padding: 20,
+      padding: 15,
       paddingBottom: Platform.OS === "ios" ? 60 : 40,
       justifyContent: "flex-end",
     },
@@ -219,10 +219,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
               {text ? (
                 <>
                   <TouchableOpacity
-                    style={[
-                      styles.button,
-                      { backgroundColor: theme.color.presets.grey.light },
-                    ]}
+                    style={[styles.button, { backgroundColor: "#E5E0DA" }]}
                     onPress={handleReset}
                   >
                     <ResetIcon
