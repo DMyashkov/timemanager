@@ -127,10 +127,13 @@ export default function Watch() {
     setTimerState(timerStateEnum.RUNNING);
   };
 
+  const [intervalsCurrentSessions, setIntervalsCurrentSession] = useState<
+    Interval[]
+  >([]);
+
   const logNewInterval = (): Interval[] => {
     if (timerState === timerStateEnum.IDLE) {
       console.error("Cannot log interval when timer is idle");
-      return [];
     }
     console.log("Logging new interval timerstate is not idle");
     try {
@@ -144,9 +147,13 @@ export default function Watch() {
         return [];
       }
       const newInterval = new Interval(currentIntervalStartTime, endTime, type);
-      console.log("New interval created:", newInterval);
+      // console.log("New interval created:", newInterval);
+      // console.log("Previous sessions", intervalsCurrentSessions);
+      const newIntervals = [...intervalsCurrentSessions, newInterval];
+      setIntervalsCurrentSession(newIntervals);
+      // console.log("New sessions", intervalsCurrentSessions);
       setCurrentIntervalStartTime(endTime);
-      return [newInterval];
+      return newIntervals;
     } catch (error) {
       console.error("Error logging new interval:", error);
     }
@@ -201,6 +208,7 @@ export default function Watch() {
     setCurrentLapSeconds(0);
     setCurrentSessionLaps([]);
     setCurrentIntervalStartTime(null);
+    setIntervalsCurrentSession([]);
   };
 
   // Handle session terminate
@@ -285,6 +293,8 @@ export default function Watch() {
     } catch (error) {
       console.error("Failed to save session:", error);
     }
+
+    setIntervalsCurrentSession([]);
 
     setSelectedTagID(activity.id);
   };
