@@ -26,6 +26,7 @@ import Animated, {
   interpolate,
   useSharedValue,
   Easing,
+  withSpring,
 } from "react-native-reanimated";
 
 const suggestions = [
@@ -70,21 +71,26 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const rotation = useSharedValue(0);
   const scale = useSharedValue(1);
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const skewX = useSharedValue(0);
+  const skewY = useSharedValue(0);
+  const scaleX = useSharedValue(1);
+  const scaleY = useSharedValue(1);
+  const borderRadius = useSharedValue(0.5);
+  const perspective = useSharedValue(1000);
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       (e) => {
         setKeyboardHeight(e.endCoordinates.height);
-      }
+      },
     );
 
     const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
       () => {
         setKeyboardHeight(0);
-      }
+      },
     );
 
     return () => {
@@ -105,37 +111,37 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
 
   useEffect(() => {
     if (visible) {
-      // Start rotation animation
+      // Start continuous clockwise rotation
       rotation.value = withRepeat(
-        withTiming(360, { duration: 8000, easing: Easing.linear }),
+        withTiming(360, { duration: 20000, easing: Easing.linear }),
         -1,
-        false
+        false,
       );
 
-      // Start pulsating animation when text is entered
-      if (text.length > 0) {
-        scale.value = withRepeat(
-          withSequence(
-            withTiming(1.2, { duration: 2000 }),
-            withTiming(1, { duration: 2000 })
-          ),
-          -1,
-          true
-        );
-        opacity.value = withTiming(0.15, { duration: 500 });
-      } else {
-        scale.value = 1;
-        opacity.value = 0;
-      }
+      // Constant scale animation
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.1, {
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+          }),
+          withTiming(0.9, {
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+          }),
+        ),
+        -1,
+        true,
+      );
+
+      // Constant opacity
+      opacity.value = withTiming(1, { duration: 500 });
     }
   }, [visible, text]);
 
   const animatedBlobStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-        { rotate: `${rotation.value}deg` },
-        { scale: scale.value },
-      ],
+      transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
       opacity: opacity.value,
     };
   });
@@ -237,13 +243,13 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       opacity: 1,
     },
     animatedBlob: {
-      position: 'absolute',
+      position: "absolute",
       width: screenWidth * 0.4,
       height: screenWidth * 0.4,
-      borderRadius: (screenWidth * 0.4) / 2,
-      backgroundColor: theme.color.red,
-      alignSelf: 'center',
+      backgroundColor: theme.color.lightRed,
+      alignSelf: "center",
       top: keyboardHeight > 0 ? screenHeight * 0.1 : screenHeight * 0.3,
+      borderRadius: (screenWidth * 0.4) / 2,
     },
   });
 
