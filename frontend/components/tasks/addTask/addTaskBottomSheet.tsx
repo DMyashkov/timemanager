@@ -58,7 +58,7 @@ export default function AddTaskSheet({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<priorityEnum>(priorityEnum.none);
-  const [date, setDate] = useState<number | null>(Date.now());
+  const [date, setDate] = useState<number | null>(null);
   const [activityId, setActivityId] = useState<number | null>(null);
   const [projectId, setProjectId] = useState<number | null>(null);
   const [selectedTag, setSelectedTag] = useState<number | null>(null);
@@ -77,7 +77,7 @@ export default function AddTaskSheet({
     setTitle("");
     setDescription("");
     setPriority(priorityEnum.none);
-    setDate(Date.now());
+    setDate(null);
     setActivityId(null);
     setProjectId(null);
     setSelectedTag(null);
