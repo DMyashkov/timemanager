@@ -18,26 +18,11 @@ import SendIcon from "@assets/icons/arrow-up.svg";
 import ResetIcon from "@assets/icons/arrow-rotate-left.svg";
 
 const suggestions = [
-  {
-    context: "On Saturday I need to",
-    task: "Plan my weekend workout routine and meal prep",
-  },
-  {
-    context: "For my project I should",
-    task: "Create a timeline for the next sprint and assign tasks",
-  },
-  {
-    context: "This week I want to",
-    task: "Learn a new programming language",
-  },
-  {
-    context: "In the morning I need to",
-    task: "Review my emails and prepare for the team meeting",
-  },
-  {
-    context: "Before the deadline I should",
-    task: "Complete the documentation and run final tests",
-  },
+  "I have to walk the dog today",
+  "Need to finish the project by Friday",
+  "Schedule a meeting with the team",
+  "Buy groceries for the week",
+  "Call mom for her birthday",
 ];
 
 interface CoplannerProps {
@@ -78,59 +63,44 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     console.log("Sending:", text);
   };
 
-  const SUGGESTION_HEIGHT = 90;
-  const SUGGESTION_WIDTH = screenWidth * 0.7;
+  const SUGGESTION_HEIGHT = 80;
 
   const styles = StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.color.white,
-      overflow: "visible",
     },
     contentContainer: {
       flex: 1,
       padding: 20,
       paddingBottom: Platform.OS === "ios" ? 60 : 40,
       justifyContent: "flex-end",
-      overflow: "visible",
     },
     suggestionsWrapper: {
       height: SUGGESTION_HEIGHT,
-      marginBottom: 30,
-      overflow: "visible",
+      marginBottom: 20,
     },
     suggestionsContainer: {
-      overflow: "visible",
-
       height: SUGGESTION_HEIGHT,
     },
     suggestionItem: {
-      width: SUGGESTION_WIDTH,
+      width: screenWidth * 0.4,
       height: SUGGESTION_HEIGHT,
       paddingHorizontal: 15,
-      marginRight: 12,
-      backgroundColor: theme.color.lightestGrey,
-      borderRadius: 12,
+      marginRight: 10,
+      backgroundColor: theme.color.lightGrey,
+      borderRadius: 8,
       justifyContent: "flex-start",
-      padding: 12,
+      padding: 10,
     },
     suggestionText: {
-      color: theme.color.darkestGrey,
+      color: theme.color.black,
       fontSize: theme.fontSize.medium,
       flexWrap: "wrap",
       textAlign: "left",
-    },
-    suggestionContext: {
-      fontFamily: theme.font.semibold,
-      marginBottom: 4,
-    },
-    suggestionTask: {
-      fontFamily: theme.font.regular,
-      color: theme.color.darkGrey,
+      lineHeight: 20,
     },
     inputContainer: {
-      flexDirection: "row",
-      alignItems: "flex-start",
       borderWidth: 1,
       borderColor: theme.color.lightGrey,
       borderRadius: 12,
@@ -145,23 +115,27 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       shadowOpacity: 0.1,
       shadowRadius: 3,
       elevation: 3,
+      minHeight: 100,
     },
     textInput: {
-      flex: 1,
-      minHeight: 100,
       color: theme.color.black,
       fontSize: theme.fontSize.medium,
       textAlignVertical: "top",
       fontFamily: theme.font.regular,
       lineHeight: 22,
+      paddingBottom: 10,
+    },
+    buttonsRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      gap: 8,
+      marginTop: 10,
     },
     button: {
-      padding: 10,
-      marginLeft: 10,
       backgroundColor: theme.color.lightestGrey,
       borderRadius: 8,
-      width: 44,
-      height: 44,
+      width: 36,
+      height: 36,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -193,20 +167,11 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 <TouchableOpacity
                   key={index}
                   style={styles.suggestionItem}
-                  onPress={() =>
-                    handleSuggestionPress(
-                      `${suggestion.context} ${suggestion.task}`,
-                    )
-                  }
+                  onPress={() => handleSuggestionPress(suggestion)}
                   activeOpacity={0.7}
                 >
-                  <Text
-                    style={[styles.suggestionText, styles.suggestionContext]}
-                  >
-                    {suggestion.context}
-                  </Text>
-                  <Text style={[styles.suggestionText, styles.suggestionTask]}>
-                    {suggestion.task}
+                  <Text style={styles.suggestionText} numberOfLines={3}>
+                    {suggestion}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -225,38 +190,40 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
               blurOnSubmit={false}
               returnKeyType="none"
             />
-            {text ? (
-              <>
-                <TouchableOpacity style={styles.button} onPress={handleReset}>
-                  <ResetIcon
-                    height={24}
-                    width={24}
+            <View style={styles.buttonsRow}>
+              {text ? (
+                <>
+                  <TouchableOpacity style={styles.button} onPress={handleReset}>
+                    <ResetIcon
+                      height={20}
+                      width={20}
+                      fill={theme.color.black}
+                      style={styles.buttonIcon}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.button} onPress={handleSend}>
+                    <SendIcon
+                      height={20}
+                      width={20}
+                      fill={theme.color.black}
+                      style={styles.buttonIcon}
+                    />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setIsRecording(!isRecording)}
+                >
+                  <MicrophoneIcon
+                    height={20}
+                    width={20}
                     fill={theme.color.black}
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={handleSend}>
-                  <SendIcon
-                    height={24}
-                    width={24}
-                    fill={theme.color.black}
-                    style={styles.buttonIcon}
-                  />
-                </TouchableOpacity>
-              </>
-            ) : (
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => setIsRecording(!isRecording)}
-              >
-                <MicrophoneIcon
-                  height={24}
-                  width={24}
-                  fill={theme.color.black}
-                  style={styles.buttonIcon}
-                />
-              </TouchableOpacity>
-            )}
+              )}
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
