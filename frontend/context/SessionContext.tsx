@@ -62,6 +62,10 @@ const insertSession = async (
   const intervalsStr =
     typeof intervals === "string" ? intervals : JSON.stringify(intervals);
   const lapsStr = typeof laps === "string" ? laps : JSON.stringify(laps);
+  if (totalWorkTime === 0) {
+    console.log("tried to log session with 0 work time");
+    return 0;
+  }
 
   const result = await db
     .insert(sessions)
