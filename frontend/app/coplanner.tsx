@@ -128,7 +128,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       borderColor: theme.color.lightGrey,
       borderRadius: 12,
       padding: 15,
-      paddingVertical: 6,
+      paddingVertical: 8,
       marginBottom: 30,
       backgroundColor: theme.color.white,
       shadowColor: theme.color.black,
