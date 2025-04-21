@@ -2,6 +2,9 @@
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.1.2",
     "@react-native-community/netinfo": "^11.4.1",
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "expo": "^52.0.46",
+    "expo-linear-gradient": "~12.7.1",
+    "react-native-linear-gradient": "^2.8.3"
   }
 }

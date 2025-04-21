@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
@@ -16,6 +17,16 @@ import { useEffect, useRef, useState } from "react";
 import MicrophoneIcon from "@assets/icons/microphone.svg";
 import SendIcon from "@assets/icons/arrow-up.svg";
 import ResetIcon from "@assets/icons/arrow-rotate-left.svg";
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withSequence,
+  withDelay,
+  interpolate,
+  useSharedValue,
+  Easing,
+} from "react-native-reanimated";
 
 const suggestions = [
   {
@@ -50,8 +61,37 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
+  const screenHeight = Dimensions.get("window").height;
+
+  // Animation values
+  const rotation = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(0);
+
+  useEffect(() => {
+    const keyboardWillShow = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+
+    const keyboardWillHide = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+      }
+    );
+
+    return () => {
+      keyboardWillShow.remove();
+      keyboardWillHide.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -62,6 +102,43 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       return () => clearTimeout(timer);
     }
   }, [visible]);
+
+  useEffect(() => {
+    if (visible) {
+      // Start rotation animation
+      rotation.value = withRepeat(
+        withTiming(360, { duration: 8000, easing: Easing.linear }),
+        -1,
+        false
+      );
+
+      // Start pulsating animation when text is entered
+      if (text.length > 0) {
+        scale.value = withRepeat(
+          withSequence(
+            withTiming(1.2, { duration: 2000 }),
+            withTiming(1, { duration: 2000 })
+          ),
+          -1,
+          true
+        );
+        opacity.value = withTiming(0.15, { duration: 500 });
+      } else {
+        scale.value = 1;
+        opacity.value = 0;
+      }
+    }
+  }, [visible, text]);
+
+  const animatedBlobStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { rotate: `${rotation.value}deg` },
+        { scale: scale.value },
+      ],
+      opacity: opacity.value,
+    };
+  });
 
   const handleSuggestionPress = (suggestion: string) => {
     setText(suggestion);
@@ -159,6 +236,15 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     buttonIcon: {
       opacity: 1,
     },
+    animatedBlob: {
+      position: 'absolute',
+      width: screenWidth * 0.4,
+      height: screenWidth * 0.4,
+      borderRadius: (screenWidth * 0.4) / 2,
+      backgroundColor: theme.color.red,
+      alignSelf: 'center',
+      top: keyboardHeight > 0 ? screenHeight * 0.1 : screenHeight * 0.3,
+    },
   });
 
   return (
@@ -173,6 +259,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
         style={styles.container}
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
+        {text.length > 0 && (
+          <Animated.View style={[styles.animatedBlob, animatedBlobStyle]} />
+        )}
         <View style={styles.contentContainer}>
           <View style={styles.suggestionsWrapper}>
             <ScrollView
