@@ -28,7 +28,7 @@ const suggestions = [
   },
   {
     context: "This week I want to",
-    task: "Learn a new programming language and build a small project",
+    task: "Learn a new language and build a small project",
   },
   {
     context: "In the morning I need to",
@@ -81,6 +81,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const SUGGESTION_HEIGHT = 85;
   const SUGGESTION_WIDTH = screenWidth * 0.7;
 
+  const BACKGROUND_FOR_SUGGESTIONS = "#F6F5F3";
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -104,7 +106,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       height: SUGGESTION_HEIGHT,
       paddingHorizontal: 15,
       marginRight: 10,
-      backgroundColor: theme.color.lightestGrey,
+      backgroundColor: BACKGROUND_FOR_SUGGESTIONS,
       borderRadius: 8,
       justifyContent: "flex-start",
       padding: 10,
@@ -124,22 +126,11 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       color: theme.color.darkGrey,
     },
     inputContainer: {
-      borderWidth: 1,
-      borderColor: theme.color.lightestGrey,
       borderRadius: 12,
       padding: 15,
       paddingVertical: 8,
-      paddingBottom: 13,
       marginBottom: 30,
-      backgroundColor: theme.color.lightestGrey,
-      shadowColor: theme.color.black,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: 3,
-      elevation: 3,
+      backgroundColor: BACKGROUND_FOR_SUGGESTIONS,
       minHeight: 100,
     },
     textInput: {
@@ -227,11 +218,17 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
             <View style={styles.buttonsRow}>
               {text ? (
                 <>
-                  <TouchableOpacity style={styles.button} onPress={handleReset}>
+                  <TouchableOpacity
+                    style={[
+                      styles.button,
+                      { backgroundColor: theme.color.presets.grey.light },
+                    ]}
+                    onPress={handleReset}
+                  >
                     <ResetIcon
                       height={20}
                       width={20}
-                      fill={theme.color.white}
+                      fill={theme.color.black}
                       style={styles.buttonIcon}
                     />
                   </TouchableOpacity>
