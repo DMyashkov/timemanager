@@ -8,7 +8,7 @@ export default function useStyles() {
       left: 0,
       right: 0,
       bottom: 0,
-      zIndex: 9997,
+      zIndex: 1,
     },
     container: {
       position: 'absolute',

@@ -15,6 +15,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SNAP_INDICATOR_SIZE = 20; // Size of the snap point indicators
 const BUTTON_SIZE = 60; // Size of the floating button
 const EDGE_PADDING = 20; // Padding from the edges
+const STATUS_BAR_PADDING = 40; // Additional padding from the top for status bar
+const SHOW_SNAP_POINTS = false; // Whether to show the snap point indicators
 
 interface FloatingWindowProps {
   children: React.ReactNode;
@@ -32,9 +34,9 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
   const snapToPosition = useCallback((x: number, y: number) => {
     // Define snap positions (corners and mid-sides)
     const snapPositions = [
-      { x: EDGE_PADDING + BUTTON_SIZE / 2, y: EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-left
-      { x: SCREEN_WIDTH / 2, y: EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-center
-      { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-right
+      { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-left
+      { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-center
+      { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2 }, // Top-right
       { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2 }, // Mid-left
       { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2 }, // Mid-right
       { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2 }, // Bottom-left
@@ -93,9 +95,9 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
 
   // Define snap positions for indicators
   const snapPositions = [
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: EDGE_PADDING + BUTTON_SIZE / 2, color: 'red' }, // Top-left
-    { x: SCREEN_WIDTH / 2, y: EDGE_PADDING + BUTTON_SIZE / 2, color: 'orange' }, // Top-center
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: EDGE_PADDING + BUTTON_SIZE / 2, color: 'yellow' }, // Top-right
+    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'red' }, // Top-left
+    { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'orange' }, // Top-center
+    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'yellow' }, // Top-right
     { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'green' }, // Mid-left
     { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'blue' }, // Mid-right
     { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'purple' }, // Bottom-left
@@ -104,9 +106,9 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
   ];
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']} pointerEvents="box-none">
       {/* Snap point indicators */}
-      {snapPositions.map((pos, index) => (
+      {SHOW_SNAP_POINTS && snapPositions.map((pos, index) => (
         <View
           key={index}
           style={[
