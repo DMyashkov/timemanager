@@ -26,7 +26,6 @@ import { useSQLiteContext } from "expo-sqlite";
 import { schema, tags } from "@/db/schema";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { eq } from "drizzle-orm";
-import FloatingWindow from "@/components/basic/floatingWindow/floatingWindow";
 
 export default function WorkplaceScreen() {
   const { theme } = useTheme();
@@ -182,10 +181,6 @@ export default function WorkplaceScreen() {
           />
         </FocusProvider>
       </View>
-
-      <FloatingWindow onPress={() => console.log("Floating window pressed")}>
-        <Plus height={25} width={23} fill={theme.color.black} />
-      </FloatingWindow>
     </View>
   );
 }

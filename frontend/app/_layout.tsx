@@ -25,6 +25,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { useTaskContext } from "@/context/TaskContext";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import FloatingWindow from "@/components/basic/floatingWindow/floatingWindow";
+import Plus from "@assets/icons/plus.svg";
 
 const loadFonts = () => {
   return Font.loadAsync({
@@ -120,6 +122,7 @@ function AppContent({
   const { syncUnsyncedRows: syncUnsyncedSessions, fetchAndStoreSessions } =
     useSessionContext();
   const { syncUnsyncedTasks } = useTaskContext();
+  const { theme } = useTheme();
 
   const syncEverything = useCallback(async () => {
     if (authToken) {
@@ -157,96 +160,102 @@ function AppContent({
   }, [authToken, syncEverything]);
 
   return (
-    <Stack screenOptions={{}}>
-      <Stack.Screen
-        name="(tabs)"
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name="add"
-        options={{
-          presentation: "modal",
-          headerLeft: () => (
-            <SysButton
-              text="Cancel"
-              onPress={() => {
-                router.back();
-              }}
-            />
-          ),
-          headerTitle: (props) => (
-            <Text
-              {...props}
-              style={{
-                fontSize: useTheme().theme.fontSize.medium,
-                fontFamily: useTheme().theme.font.semibold,
-              }}
-            >
-              Create tag
-            </Text>
-          ),
-        }}
-      />
+    <>
+      <Stack screenOptions={{}}>
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="add"
+          options={{
+            presentation: "modal",
+            headerLeft: () => (
+              <SysButton
+                text="Cancel"
+                onPress={() => {
+                  router.back();
+                }}
+              />
+            ),
+            headerTitle: (props) => (
+              <Text
+                {...props}
+                style={{
+                  fontSize: useTheme().theme.fontSize.medium,
+                  fontFamily: useTheme().theme.font.semibold,
+                }}
+              >
+                Create tag
+              </Text>
+            ),
+          }}
+        />
 
-      <Stack.Screen
-        name="pickActivity"
-        options={{
-          presentation: "modal",
-          headerShown: false,
-          headerLeft: () => (
-            <SysButton
-              text="Cancel"
-              onPress={() => {
-                router.back();
-              }}
-              isRegular={true}
-            />
-          ),
-          headerTitle: (props) => (
-            <Text
-              {...props}
-              style={{
-                fontSize: useTheme().theme.fontSize.medium,
-                fontFamily: useTheme().theme.font.semibold,
-              }}
-            >
-              Change Activity
-            </Text>
-          ),
-          headerRight: () => (
-            <SysButton
-              text="Choose"
-              onPress={() => {
-                router.back();
-              }}
-            />
-          ),
-        }}
-      />
+        <Stack.Screen
+          name="pickActivity"
+          options={{
+            presentation: "modal",
+            headerShown: false,
+            headerLeft: () => (
+              <SysButton
+                text="Cancel"
+                onPress={() => {
+                  router.back();
+                }}
+                isRegular={true}
+              />
+            ),
+            headerTitle: (props) => (
+              <Text
+                {...props}
+                style={{
+                  fontSize: useTheme().theme.fontSize.medium,
+                  fontFamily: useTheme().theme.font.semibold,
+                }}
+              >
+                Change Activity
+              </Text>
+            ),
+            headerRight: () => (
+              <SysButton
+                text="Choose"
+                onPress={() => {
+                  router.back();
+                }}
+              />
+            ),
+          }}
+        />
 
-      <Stack.Screen
-        name="login"
-        options={{
-          headerShown: false,
-          presentation: "modal",
-        }}
-      />
-      <Stack.Screen
-        name="signup"
-        options={{
-          headerShown: false,
-          presentation: "modal",
-        }}
-      />
+        <Stack.Screen
+          name="login"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
+        <Stack.Screen
+          name="signup"
+          options={{
+            headerShown: false,
+            presentation: "modal",
+          }}
+        />
 
-      <Stack.Screen
-        name="authSelection"
-        options={{
-          headerShown: false,
-        }}
-      />
-    </Stack>
+        <Stack.Screen
+          name="authSelection"
+          options={{
+            headerShown: false,
+          }}
+        />
+      </Stack>
+
+      <FloatingWindow onPress={() => console.log("Floating window pressed")}>
+        <Plus height={25} width={23} fill={theme.color.black} />
+      </FloatingWindow>
+    </>
   );
 }

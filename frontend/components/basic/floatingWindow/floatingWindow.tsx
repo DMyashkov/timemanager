@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -10,6 +10,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useTheme } from '@context/ThemeContext';
 import useStyles from './styles';
+import { useAuthContext } from '@context/AuthContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SNAP_INDICATOR_SIZE = 20; // Size of the snap point indicators
@@ -25,9 +26,23 @@ interface FloatingWindowProps {
 
 export default function FloatingWindow({ children, onPress }: FloatingWindowProps) {
   const { theme } = useTheme();
+  const { isLoggedIn } = useAuthContext();
   const styles = useStyles();
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
+
+  // Define snap positions for indicators
+  const snapPositions = [
+    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'red' }, // Top-left
+    { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'orange' }, // Top-center
+    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'yellow' }, // Top-right
+    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'green' }, // Mid-left
+    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'blue' }, // Mid-right
+    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'purple' }, // Bottom-left
+    { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'pink' }, // Bottom-center
+    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'cyan' }, // Bottom-right
+  ];
+
+  const translateX = useSharedValue(snapPositions[5].x - BUTTON_SIZE / 2); // Bottom-left position
+  const translateY = useSharedValue(snapPositions[5].y - BUTTON_SIZE / 2);
   const startX = useSharedValue(0);
   const startY = useSharedValue(0);
 
@@ -93,17 +108,9 @@ export default function FloatingWindow({ children, onPress }: FloatingWindowProp
     };
   });
 
-  // Define snap positions for indicators
-  const snapPositions = [
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'red' }, // Top-left
-    { x: SCREEN_WIDTH / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'orange' }, // Top-center
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: STATUS_BAR_PADDING + EDGE_PADDING + BUTTON_SIZE / 2, color: 'yellow' }, // Top-right
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'green' }, // Mid-left
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT / 2, color: 'blue' }, // Mid-right
-    { x: EDGE_PADDING + BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'purple' }, // Bottom-left
-    { x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'pink' }, // Bottom-center
-    { x: SCREEN_WIDTH - EDGE_PADDING - BUTTON_SIZE / 2, y: SCREEN_HEIGHT - 100 - BUTTON_SIZE / 2, color: 'cyan' }, // Bottom-right
-  ];
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']} pointerEvents="box-none">
