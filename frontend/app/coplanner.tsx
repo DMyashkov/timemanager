@@ -104,13 +104,13 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       height: SUGGESTION_HEIGHT,
       paddingHorizontal: 15,
       marginRight: 10,
-      backgroundColor: theme.color.lightGrey,
+      backgroundColor: theme.color.lightestGrey,
       borderRadius: 8,
       justifyContent: "flex-start",
       padding: 10,
     },
     suggestionText: {
-      color: theme.color.darkestGrey,
+      color: theme.color.black,
       fontSize: theme.fontSize.medium,
       flexWrap: "wrap",
       textAlign: "left",
@@ -125,12 +125,13 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     inputContainer: {
       borderWidth: 1,
-      borderColor: theme.color.lightGrey,
+      borderColor: theme.color.lightestGrey,
       borderRadius: 12,
       padding: 15,
       paddingVertical: 8,
+      paddingBottom: 13,
       marginBottom: 30,
-      backgroundColor: theme.color.white,
+      backgroundColor: theme.color.lightestGrey,
       shadowColor: theme.color.black,
       shadowOffset: {
         width: 0,
@@ -156,15 +157,15 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       marginTop: 10,
     },
     button: {
-      backgroundColor: theme.color.lightestGrey,
-      borderRadius: 8,
-      width: 36,
-      height: 36,
+      backgroundColor: theme.color.black,
+      borderRadius: 20,
+      width: 40,
+      height: 40,
       justifyContent: "center",
       alignItems: "center",
     },
     buttonIcon: {
-      opacity: 0.8,
+      opacity: 1,
     },
   });
 
@@ -230,7 +231,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                     <ResetIcon
                       height={20}
                       width={20}
-                      fill={theme.color.black}
+                      fill={theme.color.white}
                       style={styles.buttonIcon}
                     />
                   </TouchableOpacity>
@@ -238,7 +239,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                     <SendIcon
                       height={20}
                       width={20}
-                      fill={theme.color.black}
+                      fill={theme.color.white}
                       style={styles.buttonIcon}
                     />
                   </TouchableOpacity>
@@ -251,7 +252,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   <MicrophoneIcon
                     height={20}
                     width={20}
-                    fill={theme.color.black}
+                    fill={theme.color.white}
                     style={styles.buttonIcon}
                   />
                 </TouchableOpacity>
