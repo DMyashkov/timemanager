@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, StyleSheet, Text } from "react-native";
 import useStyles from "./styles";
 import { useTheme } from "@context/ThemeContext";
 import SessionElement from "../session/session";
@@ -25,6 +25,30 @@ const SessionList = memo(function SessionList({
 }) {
   const styles = useStyles();
   const { theme } = useTheme();
+
+  const EmptyState = () => {
+    const emptyStateStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+      },
+      text: {
+        fontSize: 18,
+        marginTop: 16,
+        marginBottom: 24,
+        textAlign: 'center',
+        color: theme.color.darkGrey,
+      },
+    });
+
+    return (
+      <View style={emptyStateStyles.container}>
+        <Text style={emptyStateStyles.text}>No sessions recorded for this day</Text>
+      </View>
+    );
+  };
 
   const renderItem = React.useCallback(
     ({ item }: { item: Session }) => <SessionElement session={item} />,
@@ -53,18 +77,22 @@ const SessionList = memo(function SessionList({
 
   return (
     <View style={[styles.container, style]}>
-      <FlatList
-        style={styles.outer}
-        data={sessions}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        ItemSeparatorComponent={ItemSeparator}
-        ListHeaderComponent={ListHeader}
-        ListFooterComponent={ListFooter}
-        removeClippedSubviews={true}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-      />
+      {sessions.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <FlatList
+          style={styles.outer}
+          data={sessions}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          ItemSeparatorComponent={ItemSeparator}
+          ListHeaderComponent={ListHeader}
+          ListFooterComponent={ListFooter}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+        />
+      )}
     </View>
   );
 });

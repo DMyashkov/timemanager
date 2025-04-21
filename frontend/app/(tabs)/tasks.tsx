@@ -6,6 +6,7 @@ import {
   Keyboard,
   Touchable,
   FlatList,
+  StyleSheet,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import TaskBottomSheetAdd from "@/components/tasks/addTask/addTaskBottomSheet";
@@ -215,16 +216,46 @@ export default function TasksScreen() {
       : []),
     ...sortedGroups.filter((group) => group.title !== "Today"),
   ];
-  const dummyTask: TaskData = {
-    id: 0,
-    title: "Dummy",
-    description: "",
-    date: 0,
-    priority: priorityEnum.none,
-    completed: false,
-    synced: 0,
-    deleted: 0,
-    tagId: -1,
+
+  const EmptyState = () => {
+    const emptyStateStyles = StyleSheet.create({
+      container: {
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 20,
+        backgroundColor: theme.color.white,
+      },
+      text: {
+        fontSize: 18,
+        marginTop: 16,
+        marginBottom: 24,
+        textAlign: "center",
+        color: theme.color.darkGrey,
+      },
+      button: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: theme.color.red,
+      },
+      buttonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: theme.color.white,
+      },
+    });
+
+    return (
+      <View style={emptyStateStyles.container}>
+        <Text style={emptyStateStyles.text}>No tasks yet.</Text>
+        {/* <TouchableOpacity */}
+        {/*   style={emptyStateStyles.button} */}
+        {/*   onPress={openAddBottomSheet} */}
+        {/* > */}
+        {/*   <Text style={emptyStateStyles.buttonText}>Add your first task</Text> */}
+        {/* </TouchableOpacity> */}
+      </View>
+    );
   };
 
   return (
@@ -249,37 +280,41 @@ export default function TasksScreen() {
         }}
         activeOpacity={1}
       >
-        <FlatList
-          contentContainerStyle={{ paddingHorizontal: 15 }}
-          data={listData}
-          renderItem={({ item }) => (
-            <TaskListComponent
-              title={item.title}
-              tasks={item.tasks}
-              onReschedule={
-                item.type === "overdue" ? item.onReschedule : undefined
-              }
-              showDateNextToTasks={item.type === "overdue"}
-              onTaskPress={openTaskBottomSheet}
-            />
-          )}
-          keyExtractor={(item) =>
-            item.type === "overdue"
-              ? "overdue"
-              : item.type === "noDate"
-                ? "noDate"
-                : item.date.toString()
-          }
-          ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
-        />
+        {listData.length === 0 ? (
+          <EmptyState />
+        ) : (
+          <FlatList
+            contentContainerStyle={{ paddingHorizontal: 15 }}
+            data={listData}
+            renderItem={({ item }) => (
+              <TaskListComponent
+                title={item.title}
+                tasks={item.tasks}
+                onReschedule={
+                  item.type === "overdue" ? item.onReschedule : undefined
+                }
+                showDateNextToTasks={item.type === "overdue"}
+                onTaskPress={openTaskBottomSheet}
+              />
+            )}
+            keyExtractor={(item) =>
+              item.type === "overdue"
+                ? "overdue"
+                : item.type === "noDate"
+                  ? "noDate"
+                  : item.date.toString()
+            }
+            ItemSeparatorComponent={() => <View style={{ height: 13 }} />}
+          />
+        )}
       </TouchableOpacity>
-      <TaskBottomSheet
-        bottomSheetRef={taskSheetRef}
-        task={selectedTask ?? dummyTask}
-        onTaskDelete={handleDeleteTask}
-      />
-      {/* {selectedTask && ( */}
-      {/* )} */}
+      {selectedTask && (
+        <TaskBottomSheet
+          bottomSheetRef={taskSheetRef}
+          task={selectedTask}
+          onTaskDelete={handleDeleteTask}
+        />
+      )}
       <AddTaskSheet bottomSheetRef={addSheetRef} />
       <PickDateCalendar
         bottomSheetRef={calendarSheetRef}
@@ -288,3 +323,14 @@ export default function TasksScreen() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  contentContainer: {
+    flex: 1,
+    paddingTop: 15,
+  },
+} as const);

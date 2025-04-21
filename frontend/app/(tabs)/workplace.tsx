@@ -1,7 +1,13 @@
 import Header from "@/components/header/headerBasic/header";
 import Plus from "@assets/icons/plus.svg";
 import Bars from "@assets/icons/bars.svg";
-import { FlatList, StyleSheet, View, Text } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import ListModule from "@/components/module/listModule/listModule";
 import { FocusProvider } from "@context/FocusContext";
@@ -40,6 +46,43 @@ export default function WorkplaceScreen() {
     }
   }, [data]);
 
+  const EmptyState = () => {
+    const emptyStateStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingHorizontal: 20,
+      },
+      text: {
+        fontSize: 18,
+        marginTop: 16,
+        marginBottom: 24,
+        textAlign: "center",
+        color: theme.color.darkGrey,
+      },
+      button: {
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+        backgroundColor: theme.color.red,
+      },
+      buttonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: theme.color.white,
+      },
+    });
+
+    return (
+      <View style={emptyStateStyles.container}>
+        <Text style={emptyStateStyles.text}>
+          No tags yet. Add your first tag
+        </Text>
+      </View>
+    );
+  };
+
   // Animate the plus icon on `addScreen` toggle
   useEffect(() => {
     addAnim.value = withTiming(addScreen ? 1 : 0, { duration: 250 });
@@ -55,7 +98,7 @@ export default function WorkplaceScreen() {
   };
 
   return (
-    <View style={styles.workplaceScreen}>
+    <View style={[styles.workplaceScreen]}>
       <Header
         title="Workplace"
         buttons={[
@@ -79,20 +122,42 @@ export default function WorkplaceScreen() {
         showSearchBar
       />
 
-      <FocusProvider>
-        <FlatList
-          data={[{ id: 0 }]} // Ensure item has an `id` field
-          keyExtractor={(item) => String(item.id)}
-          renderItem={() => (
-            <ListModule
-              addAnim={addAnim}
-              onFocusAdditional={() => setAddScreen(false)}
-              moduleID={0} // Root node
-            />
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: theme.color.white,
+        }}
+      >
+        <FocusProvider>
+          {data?.length <= 1 && !addScreen && (
+            <View
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                paddingTop: 20,
+                justifyContent: "flex-start",
+              }}
+            >
+              <EmptyState />
+            </View>
           )}
-          style={styles.listView}
-        />
-      </FocusProvider>
+
+          <FlatList
+            data={[{ id: 0 }]} // Ensure item has an `id` field
+            keyExtractor={(item) => String(item.id)}
+            renderItem={() => (
+              <ListModule
+                addAnim={addAnim}
+                onFocusAdditional={() => setAddScreen(false)}
+                moduleID={0} // Root node
+              />
+            )}
+            style={styles.listView}
+          />
+        </FocusProvider>
+      </View>
     </View>
   );
 }
