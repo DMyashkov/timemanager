@@ -56,6 +56,8 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema, tasks, tags } from "@/db/schema";
 import { useFocusSession } from "@/hooks/useFocusSession";
 import type { InferModel } from "drizzle-orm";
+import { useTagContext } from "@/context/TagContext";
+import { useTaskContext } from "@/context/TaskContext";
 
 const suggestions = [
   {
@@ -289,9 +291,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [thinkingStep, setThinkingStep] = useState(0);
   const [tasks, setTasks] = useState<(TaskData & { selected?: boolean })[]>([]);
   const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>([]);
-  const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([
-    { selected: false },
-  ]);
+  const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([]);
   const { activityNode, projectNode } = useDerivedTags(19827382);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
@@ -301,6 +301,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
   const { startFocusSession } = useFocusSession();
+  const { createTask: createTaskContext } = useTaskContext();
+  const { createTag: createTagContext } = useTagContext();
 
   // Animation values
   const rotation = useSharedValue(0);
@@ -415,36 +417,40 @@ The user will describe what they want to do. Respond with a JSON object containi
       const response = await sendMessage(text, systemPrompt);
       const parsedResponse = JSON.parse(response);
       setAiResponse(parsedResponse);
-      
+
       // Update tasks and tags from AI response
       if (parsedResponse.tasks) {
-        setTasks(parsedResponse.tasks.map((task: any) => ({
-          ...task,
-          id: Math.floor(Math.random() * 1000000), // Generate temporary ID
-          date: new Date().getTime(),
-          completed: 0,
-          synced: 0,
-          deleted: 0,
-          tagId: null,
-          selected: true
-        })));
+        setTasks(
+          parsedResponse.tasks.map((task: any) => ({
+            ...task,
+            id: Math.floor(Math.random() * 1000000), // Generate temporary ID
+            date: new Date().getTime(),
+            completed: 0,
+            synced: 0,
+            deleted: 0,
+            tagId: null,
+            selected: true,
+          })),
+        );
       } else {
         setTasks([]);
       }
 
       if (parsedResponse.tags) {
-        setTags(parsedResponse.tags.map((tag: any) => ({
-          ...tag,
-          id: Math.floor(Math.random() * 1000000), // Generate temporary ID
-          moduleType: moduleTypeEnum.activity,
-          productive: true,
-          lapName: tag.title,
-          children: [],
-          parent: null,
-          deleted: 0,
-          synced: 0,
-          selected: true
-        })));
+        setTags(
+          parsedResponse.tags.map((tag: any) => ({
+            ...tag,
+            id: Math.floor(Math.random() * 1000000), // Generate temporary ID
+            moduleType: moduleTypeEnum.activity,
+            productive: true,
+            lapName: tag.title,
+            children: [],
+            parent: null,
+            deleted: 0,
+            synced: 0,
+            selected: true,
+          })),
+        );
       } else {
         setTags([]);
       }
@@ -455,7 +461,7 @@ The user will describe what they want to do. Respond with a JSON object containi
       } else {
         setFocusSessions([]);
       }
-      
+
       // Show "Thinking of names..." for 1 second
       setTimeout(() => {
         setThinkingStep(1);
@@ -477,50 +483,42 @@ The user will describe what they want to do. Respond with a JSON object containi
     textInputRef.current?.focus();
   };
 
-  const createTask = async (taskData: { title: string; description: string; priority: string }) => {
-    const taskValues: NewTask = {
-      title: taskData.title,
-      description: taskData.description,
-      priority: taskData.priority,
-      date: new Date().getTime(),
-      completed: 0,
-      synced: 0,
-      deleted: 0,
-      tagId: null,
-    };
-    await db.insert(tasks).values(taskValues);
-  };
-
-  const createTag = async (tagData: { title: string; colorPreset: string }) => {
-    const tagValues: NewTag = {
-      title: tagData.title,
-      colorPreset: tagData.colorPreset,
-      moduleType: "activity",
-      productive: 1,
-      lapName: tagData.title,
-      children: "[]",
-      parent: null,
-      deleted: 0,
-      synced: 0,
-    };
-    await db.insert(tags).values(tagValues);
-  };
-
   const handleApplyChanges = async () => {
     if (!aiResponse) return;
 
     try {
       // Create tasks
-      if (aiResponse.tasks) {
-        for (const task of aiResponse.tasks) {
-          await createTask(task);
+      for (const task of tasks) {
+        if (task.selected && task.title && task.description && task.priority !== undefined) {
+          await createTaskContext(db, {
+            title: task.title,
+            description: task.description,
+            priority: typeof task.priority === 'string' 
+              ? (task.priority === "high" ? 2 : task.priority === "medium" ? 1 : 0)
+              : task.priority,
+            date: new Date().getTime(),
+            completed: 0,
+            synced: 0,
+            deleted: 0,
+            tagId: null,
+          });
         }
       }
 
       // Create tags
-      if (aiResponse.tags) {
-        for (const tag of aiResponse.tags) {
-          await createTag(tag);
+      for (const tag of tags) {
+        if (tag.selected && tag.title && tag.colorPreset) {
+          await createTagContext(db, {
+            title: tag.title,
+            colorPreset: tag.colorPreset,
+            moduleType: moduleTypeEnum.activity,
+            productive: true,
+            lapName: tag.title,
+            children: [],
+            parent: null,
+            deleted: 0,
+            synced: 0,
+          });
         }
       }
 
@@ -534,6 +532,21 @@ The user will describe what they want to do. Respond with a JSON object containi
     } catch (error) {
       console.error("Error applying changes:", error);
     }
+  };
+
+  const getTotalChanges = () => {
+    let total = 0;
+
+    // Count selected tasks
+    total += tasks.filter((task) => task.selected).length;
+
+    // Count selected tags
+    total += tags.filter((tag) => tag.selected).length;
+
+    // Count selected focus sessions
+    total += focusSessions.filter((session) => session.selected).length;
+
+    return total;
   };
 
   const handleTaskSelect = (taskId: number) => {
@@ -897,7 +910,7 @@ The user will describe what they want to do. Respond with a JSON object containi
                 <View style={styles.thinkingContainer}>
                   <Text style={styles.thinkingText}>
                     {thinkingStep === 0
-                      ? "Thinking of names..."
+                      ? "Evaluating changes..."
                       : "Building tasks and tags..."}
                   </Text>
                 </View>
@@ -1009,21 +1022,33 @@ The user will describe what they want to do. Respond with a JSON object containi
               </View>
               <SectionList<SectionItem["data"][number]>
                 sections={[
-                  ...(focusSessions.length > 0 ? [{
-                    type: "focus",
-                    title: "Start focus session",
-                    data: focusSessions,
-                  }] : []),
-                  ...(tasks.length > 0 ? [{
-                    type: "tasks",
-                    title: "Pick tasks for your schedule",
-                    data: tasks,
-                  }] : []),
-                  ...(tags.length > 0 ? [{
-                    type: "tags",
-                    title: "Pick tags for your workplace",
-                    data: tags,
-                  }] : []),
+                  ...(focusSessions.length > 0
+                    ? [
+                        {
+                          type: "focus",
+                          title: "Start focus session",
+                          data: focusSessions,
+                        },
+                      ]
+                    : []),
+                  ...(tasks.length > 0
+                    ? [
+                        {
+                          type: "tasks",
+                          title: "Pick tasks for your schedule",
+                          data: tasks,
+                        },
+                      ]
+                    : []),
+                  ...(tags.length > 0
+                    ? [
+                        {
+                          type: "tags",
+                          title: "Pick tags for your workplace",
+                          data: tags,
+                        },
+                      ]
+                    : []),
                 ]}
                 keyExtractor={(item, index) => {
                   if ("id" in item) {
@@ -1157,7 +1182,9 @@ The user will describe what they want to do. Respond with a JSON object containi
                   style={styles.largeButton}
                   onPress={handleApplyChanges}
                 >
-                  <Text style={styles.buttonText}>Apply changes (3)</Text>
+                  <Text style={styles.buttonText}>
+                    Apply changes ({getTotalChanges()})
+                  </Text>
                   <SendIcon height={20} width={20} fill={theme.color.white} />
                 </TouchableOpacity>
                 <View style={styles.coverView} />
