@@ -50,14 +50,14 @@ import CheckIcon from "@assets/icons/check.svg";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import StopwatchIcon from "@assets/icons/stopwatch.svg";
-import { useChatGPT } from "@/hooks/useChatGPT";
+import { useChatGPT } from "../hooks/useChatGPT";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema, tasks, tags } from "@/db/schema";
-import { useFocusSession } from "@/hooks/useFocusSession";
+import { useFocusSession } from "../hooks/useFocusSession";
 import type { InferModel } from "drizzle-orm";
-import { useTagContext } from "@/context/TagContext";
 import { useTaskContext } from "@/context/TaskContext";
+import { useTagContext } from "@/context/TagContext";
 
 const suggestions = [
   {
@@ -291,7 +291,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [thinkingStep, setThinkingStep] = useState(0);
   const [tasks, setTasks] = useState<(TaskData & { selected?: boolean })[]>([]);
   const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>([]);
-  const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([]);
+  const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([
+    { selected: false },
+  ]);
   const { activityNode, projectNode } = useDerivedTags(19827382);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
@@ -301,8 +303,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
   const { startFocusSession } = useFocusSession();
-  const { createTask: createTaskContext } = useTaskContext();
-  const { createTag: createTagContext } = useTagContext();
+  const { createTask: taskContextCreateTask } = useTaskContext();
+  const { createTag: tagContextCreateTag, getAllTags } = useTagContext();
 
   // Animation values
   const rotation = useSharedValue(0);
@@ -401,17 +403,51 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     setIsTransitioning(true);
     setThinkingStep(0);
 
+    // Fetch all existing tags
+    const existingTags = await getAllTags(db);
+
     const systemPrompt = `You are an AI assistant for a time management app. You can:
-1. Create tasks with titles, descriptions, and priorities
-2. Create tags with names and colors
+1. Create tasks with titles, descriptions, priorities (1-4, where 1 is highest), and dates
+2. Create tags with names, colors, and hierarchical structure
 3. Suggest focus sessions with specific tags
+
+Here are the existing tags in the system:
+${JSON.stringify(existingTags, null, 2)}
 
 The user will describe what they want to do. Respond with a JSON object containing:
 {
-  "tasks": [{ "title": string, "description": string, "priority": "high" | "medium" | "low" }],
-  "tags": [{ "title": string, "colorPreset": "green" | "orange" | "blue" | "purple" | "red" | "grey" }],
+  "tasks": [{ 
+    "title": string, 
+    "description": string, 
+    "priority": number,
+    "date": number, // Unix timestamp in milliseconds
+    "tagId": number | null // Use existing tag IDs when possible
+  }],
+  "tags": [{ 
+    "title": string, 
+    "colorPreset": "green" | "orange" | "blue" | "purple" | "red" | "grey",
+    "moduleType": "activity" | "project",
+    "productive": boolean,
+    "lapName": string,
+    "children": number[], // Array of child tag IDs
+    "parent": number | null // ID of parent tag or null for root tags
+  }],
   "focusTags": [number] // IDs of tags to use for focus session
-}`;
+}
+
+Important rules for tag creation:
+1. Tags can be either "activity" or "project" type
+2. Tags can have a parent-child relationship forming a tree structure
+3. Root tags have parent: null
+4. Child tags must reference an existing parent tag ID
+5. The children array should contain IDs of all direct child tags
+6. Color presets must be one of: "green", "orange", "blue", "purple", "red", "grey"
+7. lapName is typically the same as the title but can be different for display purposes
+8. productive indicates if the tag represents productive work (true) or leisure (false)
+9. Try to use existing tags when possible instead of creating new ones
+10. When creating new tags, make sure their names are distinct from existing tags
+
+`;
 
     try {
       const response = await sendMessage(text, systemPrompt);
@@ -423,13 +459,13 @@ The user will describe what they want to do. Respond with a JSON object containi
         setTasks(
           parsedResponse.tasks.map((task: any) => ({
             ...task,
-            id: Math.floor(Math.random() * 1000000), // Generate temporary ID
-            date: new Date().getTime(),
+            id: Math.floor(Math.random() * 1000000),
             completed: 0,
             synced: 0,
             deleted: 0,
-            tagId: null,
             selected: true,
+            date: task.date || new Date().getTime(),
+            tagId: task.tagId || null,
           })),
         );
       } else {
@@ -440,12 +476,7 @@ The user will describe what they want to do. Respond with a JSON object containi
         setTags(
           parsedResponse.tags.map((tag: any) => ({
             ...tag,
-            id: Math.floor(Math.random() * 1000000), // Generate temporary ID
-            moduleType: moduleTypeEnum.activity,
-            productive: true,
-            lapName: tag.title,
-            children: [],
-            parent: null,
+            id: Math.floor(Math.random() * 1000000),
             deleted: 0,
             synced: 0,
             selected: true,
@@ -487,66 +518,50 @@ The user will describe what they want to do. Respond with a JSON object containi
     if (!aiResponse) return;
 
     try {
-      // Create tasks
-      for (const task of tasks) {
-        if (task.selected && task.title && task.description && task.priority !== undefined) {
-          await createTaskContext(db, {
-            title: task.title,
-            description: task.description,
-            priority: typeof task.priority === 'string' 
-              ? (task.priority === "high" ? 2 : task.priority === "medium" ? 1 : 0)
-              : task.priority,
-            date: new Date().getTime(),
-            completed: 0,
-            synced: 0,
-            deleted: 0,
-            tagId: null,
-          });
-        }
+      // Create selected tasks
+      const selectedTasks = tasks.filter((task) => task.selected);
+      for (const task of selectedTasks) {
+        await taskContextCreateTask(db, {
+          title: task.title,
+          description: task.description || "",
+          priority: task.priority,
+          date: task.date,
+          completed: 0,
+          synced: 0,
+          deleted: 0,
+          tagId: task.tagId,
+        });
       }
 
-      // Create tags
-      for (const tag of tags) {
-        if (tag.selected && tag.title && tag.colorPreset) {
-          await createTagContext(db, {
-            title: tag.title,
-            colorPreset: tag.colorPreset,
-            moduleType: moduleTypeEnum.activity,
-            productive: true,
-            lapName: tag.title,
-            children: [],
-            parent: null,
-            deleted: 0,
-            synced: 0,
-          });
-        }
+      // Create selected tags
+      const selectedTags = tags.filter((tag) => tag.selected);
+      for (const tag of selectedTags) {
+        await tagContextCreateTag(db, {
+          id: tag.id,
+          title: tag.title,
+          colorPreset: tag.colorPreset,
+          moduleType: moduleTypeEnum.activity,
+          productive: true,
+          lapName: tag.title,
+          children: [],
+          parent: null,
+          deleted: 0,
+          synced: 0,
+        });
       }
 
       // Start focus session if selected
-      const selectedFocusSession = focusSessions.find(session => session.selected);
+      const selectedFocusSession = focusSessions.find(
+        (session) => session.selected,
+      );
       if (selectedFocusSession && aiResponse.focusTags) {
-        await startFocusSession(aiResponse.focusTags);
+        await startFocusSession(aiResponse.focusTags.join(","));
       }
 
       onClose();
     } catch (error) {
       console.error("Error applying changes:", error);
     }
-  };
-
-  const getTotalChanges = () => {
-    let total = 0;
-
-    // Count selected tasks
-    total += tasks.filter((task) => task.selected).length;
-
-    // Count selected tags
-    total += tags.filter((tag) => tag.selected).length;
-
-    // Count selected focus sessions
-    total += focusSessions.filter((session) => session.selected).length;
-
-    return total;
   };
 
   const handleTaskSelect = (taskId: number) => {
@@ -910,7 +925,7 @@ The user will describe what they want to do. Respond with a JSON object containi
                 <View style={styles.thinkingContainer}>
                   <Text style={styles.thinkingText}>
                     {thinkingStep === 0
-                      ? "Evaluating changes..."
+                      ? "Thinking of names..."
                       : "Building tasks and tags..."}
                   </Text>
                 </View>
@@ -1182,9 +1197,7 @@ The user will describe what they want to do. Respond with a JSON object containi
                   style={styles.largeButton}
                   onPress={handleApplyChanges}
                 >
-                  <Text style={styles.buttonText}>
-                    Apply changes ({getTotalChanges()})
-                  </Text>
+                  <Text style={styles.buttonText}>Apply changes (3)</Text>
                   <SendIcon height={20} width={20} fill={theme.color.white} />
                 </TouchableOpacity>
                 <View style={styles.coverView} />

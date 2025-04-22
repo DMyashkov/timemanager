@@ -22,6 +22,9 @@ interface TagContextProps {
     db: ExpoSQLiteDatabase<typeof schema>,
     id: number,
   ) => Promise<TagData | null>;
+  getAllTags: (
+    db: ExpoSQLiteDatabase<typeof schema>,
+  ) => Promise<TagData[]>;
   parseTag: (result: (typeof tags.$inferSelect)[]) => TagData | null;
   updateTag: (
     db: ExpoSQLiteDatabase<typeof schema>,
@@ -408,6 +411,32 @@ const fetchAndStoreTags = async (
   }
 };
 
+const getAllTags = async (
+  db: ExpoSQLiteDatabase<typeof schema>,
+): Promise<TagData[]> => {
+  const results = await db
+    .select()
+    .from(tags)
+    .where(eq(tags.deleted, 0))
+    .all();
+
+  return results.map((row) => ({
+    id: row.id,
+    title: row.title ?? "",
+    moduleType:
+      row.moduleType === "activity"
+        ? moduleTypeEnum.activity
+        : moduleTypeEnum.project,
+    productive: row.productive === 1,
+    lapName: row.lapName ?? "Lap",
+    colorPreset: row.colorPreset as ColorPresets,
+    parent: row.parent,
+    children: JSON.parse(row.children || "[]"),
+    deleted: row.deleted ?? 0,
+    synced: row.synced ?? 0,
+  }));
+};
+
 export const TagContext = createContext<TagContextProps | null>(null);
 
 // Context Provider
@@ -419,6 +448,7 @@ export const TagProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         createTag: insertTag,
         getTag,
+        getAllTags,
         parseTag,
         updateTag,
         deleteTag,
