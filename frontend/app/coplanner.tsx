@@ -10,6 +10,7 @@ import {
   Platform,
   Dimensions,
   Keyboard,
+  SafeAreaView,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
@@ -17,6 +18,7 @@ import { useEffect, useRef, useState } from "react";
 import MicrophoneIcon from "@assets/icons/microphone.svg";
 import SendIcon from "@assets/icons/arrow-up.svg";
 import ResetIcon from "@assets/icons/arrow-rotate-left.svg";
+import BrainIcon from "@assets/icons/brain.svg";
 import Animated, {
   useAnimatedStyle,
   withRepeat,
@@ -27,6 +29,8 @@ import Animated, {
   useSharedValue,
   Easing,
   withSpring,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 
 const suggestions = [
@@ -63,6 +67,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [text, setText] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showResultScreen, setShowResultScreen] = useState(false);
+  const [thinkingStep, setThinkingStep] = useState(0);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -157,8 +164,30 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   };
 
   const handleSend = () => {
-    // TODO: Implement send functionality
-    console.log("Sending:", text);
+    Keyboard.dismiss();
+    setIsTransitioning(true);
+    setThinkingStep(0);
+
+    // Show "Thinking of names..." for 1 second
+    setTimeout(() => {
+      setThinkingStep(1);
+      // Show "Building tasks and tags..." for 1 second
+      setTimeout(() => {
+        setShowResultScreen(true);
+        setIsTransitioning(false);
+      }, 1000);
+    }, 1000);
+  };
+
+  const handleTryAgain = () => {
+    setShowResultScreen(false);
+    setText("");
+    textInputRef.current?.focus();
+  };
+
+  const handleApplyChanges = () => {
+    // TODO: Implement apply changes functionality
+    console.log("Applying changes");
   };
 
   const SUGGESTION_HEIGHT = 85;
@@ -167,6 +196,10 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const BACKGROUND_FOR_SUGGESTIONS = "#F6F5F3";
 
   const styles = StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.color.white,
+    },
     container: {
       flex: 1,
       backgroundColor: theme.color.white,
@@ -242,14 +275,98 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     buttonIcon: {
       opacity: 1,
     },
-    animatedBlob: {
+    animatedBlobWrapper: {
       position: "absolute",
       width: screenWidth * 0.4,
       height: screenWidth * 0.4,
-      backgroundColor: theme.color.lightRed,
       alignSelf: "center",
       top: keyboardHeight > 0 ? screenHeight * 0.1 : screenHeight * 0.3,
+    },
+    animatedBlob: {
+      width: "100%",
+      height: "100%",
+      backgroundColor: theme.color.darkRed,
       borderRadius: (screenWidth * 0.4) / 2,
+    },
+    resultContainer: {
+      flex: 1,
+      backgroundColor: theme.color.white,
+    },
+    promptHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 15,
+      backgroundColor: theme.color.white,
+      borderRadius: 12,
+      margin: 15,
+      shadowColor: theme.color.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    emoji: {
+      fontSize: 24,
+    },
+    promptText: {
+      flex: 1,
+      marginLeft: 10,
+      fontSize: theme.fontSize.medium,
+      color: theme.color.black,
+    },
+    buttonsContainer: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      padding: 15,
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      marginBottom: Platform.OS === "ios" ? 34 : 0,
+    },
+    smallButton: {
+      flex: 1,
+      height: 50,
+      backgroundColor: theme.color.white,
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 10,
+      borderWidth: 1,
+      borderColor: theme.color.darkGrey,
+    },
+    largeButton: {
+      flex: 2,
+      height: 50,
+      backgroundColor: theme.color.black,
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "row",
+    },
+    buttonText: {
+      color: theme.color.white,
+      fontSize: theme.fontSize.medium,
+      marginRight: 8,
+    },
+    thinkingContainer: {
+      position: "absolute",
+      top:
+        keyboardHeight > 0 ? screenHeight * 0.1 - 100 : screenHeight * 0.3 - 60,
+      left: 0,
+      right: 0,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1,
+    },
+    thinkingText: {
+      fontSize: theme.fontSize.mediumBig,
+      color: theme.color.black,
+      fontFamily: theme.font.semibold,
+      textAlign: "center",
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
     },
   });
 
@@ -260,97 +377,159 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
-      >
-        {text.length > 0 && (
-          <Animated.View style={[styles.animatedBlob, animatedBlobStyle]} />
-        )}
-        <View style={styles.contentContainer}>
-          <View style={styles.suggestionsWrapper}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.suggestionsContainer}
-            >
-              {suggestions.map((suggestion, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.suggestionItem}
-                  onPress={() =>
-                    handleSuggestionPress(
-                      `${suggestion.context} ${suggestion.task}`,
-                    )
-                  }
-                  activeOpacity={0.7}
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
+          {!showResultScreen ? (
+            <>
+              {(text.length > 0 || isTransitioning) && (
+                <Animated.View
+                  style={[styles.animatedBlobWrapper]}
+                  entering={FadeIn}
+                  exiting={FadeOut}
                 >
-                  <Text
-                    style={[styles.suggestionText, styles.suggestionContext]}
-                  >
-                    {suggestion.context}
-                  </Text>
-                  <Text style={[styles.suggestionText, styles.suggestionTask]}>
-                    {suggestion.task}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <TextInput
-              ref={textInputRef}
-              style={styles.textInput}
-              multiline
-              value={text}
-              onChangeText={setText}
-              placeholder="Type or speak your task..."
-              placeholderTextColor={theme.color.darkGrey}
-              blurOnSubmit={false}
-              returnKeyType="none"
-            />
-            <View style={styles.buttonsRow}>
-              {text ? (
-                <>
-                  <TouchableOpacity
-                    style={[styles.button, { backgroundColor: "#E5E0DA" }]}
-                    onPress={handleReset}
-                  >
-                    <ResetIcon
-                      height={20}
-                      width={20}
-                      fill={theme.color.black}
-                      style={styles.buttonIcon}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.button} onPress={handleSend}>
-                    <SendIcon
-                      height={20}
-                      width={20}
-                      fill={theme.color.white}
-                      style={styles.buttonIcon}
-                    />
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setIsRecording(!isRecording)}
-                >
-                  <MicrophoneIcon
-                    height={20}
-                    width={20}
-                    fill={theme.color.white}
-                    style={styles.buttonIcon}
+                  <Animated.View
+                    style={[styles.animatedBlob, animatedBlobStyle]}
                   />
-                </TouchableOpacity>
+                </Animated.View>
               )}
+              {isTransitioning && (
+                <View style={styles.thinkingContainer}>
+                  <Text style={styles.thinkingText}>
+                    {thinkingStep === 0
+                      ? "Thinking of names..."
+                      : "Building tasks and tags..."}
+                  </Text>
+                </View>
+              )}
+              {!isTransitioning && (
+                <View style={styles.contentContainer}>
+                  <View style={styles.suggestionsWrapper}>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      style={styles.suggestionsContainer}
+                    >
+                      {suggestions.map((suggestion, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.suggestionItem}
+                          onPress={() =>
+                            handleSuggestionPress(
+                              `${suggestion.context} ${suggestion.task}`,
+                            )
+                          }
+                          activeOpacity={0.7}
+                        >
+                          <Text
+                            style={[
+                              styles.suggestionText,
+                              styles.suggestionContext,
+                            ]}
+                          >
+                            {suggestion.context}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.suggestionText,
+                              styles.suggestionTask,
+                            ]}
+                          >
+                            {suggestion.task}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      ref={textInputRef}
+                      style={styles.textInput}
+                      multiline
+                      value={text}
+                      onChangeText={setText}
+                      placeholder="Type or speak your task..."
+                      placeholderTextColor={theme.color.darkGrey}
+                      blurOnSubmit={false}
+                      returnKeyType="none"
+                    />
+                    <View style={styles.buttonsRow}>
+                      {text ? (
+                        <>
+                          <TouchableOpacity
+                            style={[
+                              styles.button,
+                              { backgroundColor: "#E5E0DA" },
+                            ]}
+                            onPress={handleReset}
+                          >
+                            <ResetIcon
+                              height={20}
+                              width={20}
+                              fill={theme.color.black}
+                              style={styles.buttonIcon}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.button}
+                            onPress={handleSend}
+                          >
+                            <SendIcon
+                              height={20}
+                              width={20}
+                              fill={theme.color.white}
+                              style={styles.buttonIcon}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        <TouchableOpacity
+                          style={styles.button}
+                          onPress={() => setIsRecording(!isRecording)}
+                        >
+                          <MicrophoneIcon
+                            height={20}
+                            width={20}
+                            fill={theme.color.white}
+                            style={styles.buttonIcon}
+                          />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.resultContainer}>
+              <View style={styles.promptHeader}>
+                <Text style={styles.emoji}>🧠</Text>
+                <Text style={styles.promptText}>{text}</Text>
+              </View>
+
+              <View style={styles.buttonsContainer}>
+                <TouchableOpacity
+                  style={styles.smallButton}
+                  onPress={handleTryAgain}
+                >
+                  <ResetIcon height={24} width={24} fill={theme.color.black} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.largeButton}
+                  onPress={handleApplyChanges}
+                >
+                  <Text style={styles.buttonText}>Apply changes (3)</Text>
+                  <SendIcon height={20} width={20} fill={theme.color.white} />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+          )}
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   );
 }
