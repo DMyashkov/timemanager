@@ -46,6 +46,7 @@ import {
   moduleTypeEnum,
 } from "@/constants/interfaces";
 import CheckIcon from "@assets/icons/check.svg";
+import PathPicker from "@/components/form/pathPicker/pathPicker";
 
 const suggestions = [
   {
@@ -145,6 +146,30 @@ const exampleTags: TagData[] = [
     lapName: "Project X",
     children: [],
     parent: null,
+    deleted: 0,
+    synced: 0,
+  },
+  {
+    id: 4,
+    title: "New Tag 1",
+    colorPreset: ColorPresets.GREEN,
+    moduleType: moduleTypeEnum.activity,
+    productive: true,
+    lapName: "New Tag 1",
+    children: [],
+    parent: 19827386,
+    deleted: 0,
+    synced: 0,
+  },
+  {
+    id: 5,
+    title: "New Tag 2",
+    colorPreset: ColorPresets.ORANGE,
+    moduleType: moduleTypeEnum.activity,
+    productive: true,
+    lapName: "New Tag 2",
+    children: [],
+    parent: 19827385,
     deleted: 0,
     synced: 0,
   },
@@ -539,7 +564,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       bottom: 0,
       left: 0,
       right: 0,
-      marginBottom: Platform.OS === "ios" ? 44 : 10,
+      backgroundColor: theme.color.red,
+      zIndex: 3,
     },
     smallButton: {
       flex: 1,
@@ -640,6 +666,15 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       borderRadius: 18,
       aspectRatio: 1,
       flex: 1,
+    },
+    coverView: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: -400,
+      backgroundColor: theme.color.white,
+      zIndex: -1,
     },
   });
 
@@ -828,7 +863,25 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                         keyExtractor={(task) => task.id?.toString() ?? ""}
                       />
                     ) : (
-                      <View></View>
+                      <FlatList
+                        data={exampleTags.slice(3)}
+                        renderItem={({ item: tag }) => (
+                          <PathPicker
+                            key={tag.id}
+                            parent={tag.parent}
+                            setParent={() => {}}
+                            shouldDisplayNew={true}
+                            moduleColorPallete={tag.colorPreset}
+                            moduleName={tag.title}
+                            isProject={
+                              tag.moduleType === moduleTypeEnum.project
+                            }
+                            pathHeaderFlag={false}
+                          />
+                        )}
+                        keyExtractor={(tag) => tag.id.toString()}
+                        contentContainerStyle={{ gap: 15 }}
+                      />
                     )}
                   </View>
                 )}
@@ -849,6 +902,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   <Text style={styles.buttonText}>Apply changes (3)</Text>
                   <SendIcon height={20} width={20} fill={theme.color.white} />
                 </TouchableOpacity>
+                <View style={styles.coverView} />
               </View>
             </View>
           )}
