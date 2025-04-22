@@ -10,7 +10,7 @@ interface UseChatGPTReturn {
 const USE_MOCK_RESPONSE = false;
 
 // Flag to control constant response usage
-const USE_CONSTANT_RESPONSE = true;
+const USE_CONSTANT_RESPONSE = false;
 
 // Mock response for development
 const MOCK_RESPONSE = {

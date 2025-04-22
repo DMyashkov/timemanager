@@ -13,6 +13,7 @@ import {
   SafeAreaView,
   FlatList,
   SectionList,
+  Alert,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
@@ -58,6 +59,45 @@ import { useFocusSession } from "../hooks/useFocusSession";
 import type { InferModel } from "drizzle-orm";
 import { useTaskContext } from "@/context/TaskContext";
 import { useTagContext } from "@/context/TagContext";
+
+const USE_MOCK_RESPONSE = true; // Set to true to use mock response, false to use ChatGPT
+
+const mockResponse = {
+  "id": "chatcmpl-BP3JN245DREkdzsbc4UDT2ncHbfIh",
+  "object": "chat.completion",
+  "created": 1745310629,
+  "model": "gpt-3.5-turbo-0125",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "{\n  \"tasks\": [\n    {\n      \"title\": \"Call Dad\",\n      \"description\": \"Call my dad\",\n      \"priority\": 2,\n      \"date\": \"2025-04-24T08:30:29.287Z\",\n      \"tagId\": null\n    }\n  ],\n  \"tags\": [\n    {\n      \"title\": \"b\",\n      \"colorPreset\": \"orange\",\n      \"moduleType\": \"activity\",\n      \"productive\": false,\n      \"lapName\": \"b\",\n      \"children\": [],\n      \"parent\": 19827386\n    }\n  ],\n  \"focusTags\": [19827383]\n}",
+        "refusal": null,
+        "annotations": []
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 1174,
+    "completion_tokens": 139,
+    "total_tokens": 1313,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "audio_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "audio_tokens": 0,
+      "accepted_prediction_tokens": 0,
+      "rejected_prediction_tokens": 0
+    }
+  },
+  "service_tier": "default",
+  "system_fingerprint": null
+};
 
 const suggestions = [
   {
@@ -303,8 +343,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const expoDb = useSQLiteContext();
   const db = drizzle(expoDb, { schema });
   const { startFocusSession } = useFocusSession();
-  const { createTask: taskContextCreateTask } = useTaskContext();
-  const { createTag: tagContextCreateTag, getAllTags } = useTagContext();
+  const { createTask: taskContextCreateTask, getTask } = useTaskContext();
+  const { createTag: tagContextCreateTag, getAllTags, getTag } = useTagContext();
+  const [debugMode, setDebugMode] = useState(false);
 
   // Animation values
   const rotation = useSharedValue(0);
@@ -411,6 +452,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
 2. Create tags with names, colors, and hierarchical structure
 3. Suggest focus sessions with specific tags
 
+Current date and time: ${new Date().toISOString()}
+
 Here are the existing tags in the system:
 ${JSON.stringify(existingTags, null, 2)}
 
@@ -420,7 +463,7 @@ The user will describe what they want to do. Respond with a JSON object containi
     "title": string, 
     "description": string, 
     "priority": number,
-    "date": number, // Unix timestamp in milliseconds
+    "date": string, // ISO date string (e.g., "2024-03-14T10:30:00.000Z")
     "tagId": number | null // Use existing tag IDs when possible
   }],
   "tags": [{ 
@@ -446,12 +489,44 @@ Important rules for tag creation:
 8. productive indicates if the tag represents productive work (true) or leisure (false)
 9. Try to use existing tags when possible instead of creating new ones
 10. When creating new tags, make sure their names are distinct from existing tags
+11. When creating a tag with a parent, ensure the parent ID exists in the existing tags list
 
-`;
+Date Handling Rules:
+1. All dates must be returned as ISO date strings
+2. For relative dates, calculate from the current date provided above:
+   - "today" = current date
+   - "tomorrow" = current date + 1 day
+   - "next week" = current date + 7 days
+   - "next month" = current date + 30 days
+3. Never use hardcoded dates or date strings in any other format
+4. Always calculate dates relative to the current time provided above
+5. Example of correct date format: "2024-03-14T10:30:00.000Z"
+
+IMPORTANT: Your response must be valid JSON and nothing else. Do not include any additional text, explanations, or markdown formatting.`;
 
     try {
-      const response = await sendMessage(text, systemPrompt);
-      const parsedResponse = JSON.parse(response);
+      const response = USE_MOCK_RESPONSE ? mockResponse : await sendMessage(text, systemPrompt);
+      console.log("Raw AI response:", response);
+      
+      // Clean the response string
+      const responseContent = typeof response === 'string' ? response : response.choices[0].message.content;
+      const cleanedResponse = responseContent
+        .trim()
+        .replace(/^```json\s*/, '') // Remove ```json if present
+        .replace(/```\s*$/, '') // Remove trailing ```
+        .trim();
+
+      console.log("Cleaned response:", cleanedResponse);
+      
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error("JSON parse error:", parseError);
+        console.error("Failed to parse response:", cleanedResponse);
+        throw new Error("Failed to parse AI response as JSON");
+      }
+
       setAiResponse(parsedResponse);
 
       // Update tasks and tags from AI response
@@ -464,7 +539,7 @@ Important rules for tag creation:
             synced: 0,
             deleted: 0,
             selected: true,
-            date: task.date || new Date().getTime(),
+            date: new Date(task.date).getTime(), // Convert ISO string to Unix timestamp
             tagId: task.tagId || null,
           })),
         );
@@ -504,6 +579,11 @@ Important rules for tag creation:
       }, 1000);
     } catch (error) {
       console.error("Error getting AI response:", error);
+      Alert.alert(
+        "Error",
+        "Failed to process your request. Please try again.",
+        [{ text: "OK" }]
+      );
       setIsTransitioning(false);
     }
   };
@@ -536,15 +616,24 @@ Important rules for tag creation:
       // Create selected tags
       const selectedTags = tags.filter((tag) => tag.selected);
       for (const tag of selectedTags) {
+        // Verify parent exists before creating tag
+        if (tag.parent !== null) {
+          const parentTag = await getTag(db, tag.parent);
+          if (!parentTag) {
+            console.error(`Parent tag with ID ${tag.parent} not found`);
+            continue;
+          }
+        }
+
         await tagContextCreateTag(db, {
           id: tag.id,
           title: tag.title,
           colorPreset: tag.colorPreset,
-          moduleType: moduleTypeEnum.activity,
-          productive: true,
-          lapName: tag.title,
-          children: [],
-          parent: null,
+          moduleType: tag.moduleType,
+          productive: tag.productive,
+          lapName: tag.lapName,
+          children: tag.children,
+          parent: tag.parent,
           deleted: 0,
           synced: 0,
         });
@@ -555,12 +644,27 @@ Important rules for tag creation:
         (session) => session.selected,
       );
       if (selectedFocusSession && aiResponse.focusTags) {
+        // Verify focus tags exist
+        for (const tagId of aiResponse.focusTags) {
+          const tag = await getTag(db, tagId);
+          if (!tag) {
+            console.error(`Focus tag with ID ${tagId} not found`);
+            continue;
+          }
+        }
         await startFocusSession(aiResponse.focusTags.join(","));
+        // Redirect to watch screen
+        router.push("/watch");
       }
 
       onClose();
     } catch (error) {
       console.error("Error applying changes:", error);
+      Alert.alert(
+        "Error",
+        "Failed to apply changes. Please try again.",
+        [{ text: "OK" }]
+      );
     }
   };
 
