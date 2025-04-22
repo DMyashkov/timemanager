@@ -16,6 +16,7 @@ interface PathPickerProps {
   parent: number | null; // We pass in the "parent" TagData if available
   setParent: (parent: number) => void; // Possibly used for changing parent
   shouldDisplayNew?: boolean; // If you want to display a "New" button
+  pathHeaderFlag?: boolean; // If you want to display a header
 }
 
 export default function PathPicker({
@@ -25,6 +26,7 @@ export default function PathPicker({
   setParent,
   isProject = false,
   shouldDisplayNew = true,
+  pathHeaderFlag = true,
 }: PathPickerProps) {
   const styles = useStyles();
   const { getTag } = useTagContext();
@@ -73,12 +75,14 @@ export default function PathPicker({
   return (
     <View style={styles.container}>
       {/* Header row with "Path" and "Change" button */}
-      <View style={styles.topRow}>
-        <Text style={styles.title}>Path</Text>
-        <TouchableOpacity onPress={handleChangePress}>
-          <Text style={styles.rightButton}>Change</Text>
-        </TouchableOpacity>
-      </View>
+      {pathHeaderFlag && (
+        <View style={styles.topRow}>
+          <Text style={styles.title}>Path</Text>
+          <TouchableOpacity onPress={handleChangePress}>
+            <Text style={styles.rightButton}>Change</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       <View style={styles.pathContainer}>
         {/* Render the chain of parents first */}

@@ -191,7 +191,7 @@ const SelectButton = ({ isSelected, onPress }: SelectButtonProps) => {
 
   const buttonStyles = StyleSheet.create({
     addButton: {
-      width: 27,
+      width: 25,
       marginLeft: 10,
       aspectRatio: 1,
     },
@@ -220,7 +220,7 @@ const SelectButton = ({ isSelected, onPress }: SelectButtonProps) => {
           },
         ]}
       >
-        <CheckIcon height={15} width={16} fill={theme.color.white} />
+        <CheckIcon height={13} width={16} fill={theme.color.white} />
       </Animated.View>
       <Animated.View
         style={[
