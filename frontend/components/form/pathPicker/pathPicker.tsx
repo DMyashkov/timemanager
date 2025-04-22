@@ -61,9 +61,9 @@ export default function PathPicker({
       setPath(chain);
     })();
   }, [parent, getTag]);
-  console.log("PathPicker path", path);
+  // console.log("PathPicker path", path);
 
-  // If you’d like to handle a "Change" button for re-selecting parent,
+  // If you'd like to handle a "Change" button for re-selecting parent,
   // you'll define a function and pass it to onPress below.
   const handleChangePress = () => {
     console.log("Change parent pressed!");
@@ -82,11 +82,9 @@ export default function PathPicker({
 
       <View style={styles.pathContainer}>
         {/* Render the chain of parents first */}
-        {path.map((tag, index) => (
+        {path.slice(0, !shouldDisplayNew ? -1 : undefined).map((tag, index) => (
           <ActivityItem
-            isExplicitlyExpanded={
-              shouldDisplayNew ? true : index !== path.length - 1
-            }
+            isExplicitlyExpanded={true}
             key={tag.id}
             activityName={tag.title}
             activityColor={tag.colorPreset}
@@ -94,21 +92,20 @@ export default function PathPicker({
           />
         ))}
         {/* Finally, render the new or edited module at the end of the path */}
-        {shouldDisplayNew &&
-          (isProject ? (
-            <ProjectItem
-              activityName={moduleName || "New Project"}
-              activityColor={moduleColorPallete}
-              clickable={false}
-            />
-          ) : (
-            <ActivityItem
-              isExplicitlyExpanded={false}
-              activityName={moduleName || "New Activity"}
-              activityColor={moduleColorPallete}
-              clickable={false}
-            />
-          ))}
+        {isProject ? (
+          <ProjectItem
+            activityName={moduleName || "New Project"}
+            activityColor={moduleColorPallete}
+            clickable={false}
+          />
+        ) : (
+          <ActivityItem
+            isExplicitlyExpanded={false}
+            activityName={moduleName || "New Activity"}
+            activityColor={moduleColorPallete}
+            clickable={false}
+          />
+        )}
       </View>
     </View>
   );
