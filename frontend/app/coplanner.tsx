@@ -161,6 +161,83 @@ interface CoplannerProps {
   onClose: () => void;
 }
 
+interface SelectButtonProps {
+  isSelected: boolean;
+  onPress: () => void;
+}
+
+const SelectButton = ({ isSelected, onPress }: SelectButtonProps) => {
+  const { theme } = useTheme();
+  const buttonAnim = useSharedValue(isSelected ? 1 : 0);
+
+  useEffect(() => {
+    buttonAnim.value = withTiming(isSelected ? 1 : 0, { duration: 300 });
+  }, [isSelected]);
+
+  const buttonAnimStyles = {
+    selectedButton: useAnimatedStyle(() => ({
+      opacity: buttonAnim.value,
+      position: "absolute",
+      width: "100%",
+      transform: [{ scale: 0.8 + buttonAnim.value * 0.2 }],
+    })),
+    unselectedButton: useAnimatedStyle(() => ({
+      opacity: 1 - buttonAnim.value,
+      position: "absolute",
+      width: "100%",
+      transform: [{ scale: 1 - buttonAnim.value * 0.2 }],
+    })),
+  };
+
+  const buttonStyles = StyleSheet.create({
+    addButton: {
+      width: 32,
+      marginLeft: 10,
+      aspectRatio: 1,
+    },
+    selectButton: {
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 18,
+      aspectRatio: 1,
+      flex: 1,
+    },
+  });
+
+  return (
+    <TouchableOpacity
+      style={buttonStyles.addButton}
+      onPress={onPress}
+      activeOpacity={1}
+    >
+      <Animated.View
+        style={[
+          buttonStyles.selectButton,
+          buttonAnimStyles.selectedButton,
+          {
+            backgroundColor: "#31bb3b",
+            borderColor: "#31bb3b",
+          },
+        ]}
+      >
+        <CheckIcon height={16} width={16} fill={theme.color.white} />
+      </Animated.View>
+      <Animated.View
+        style={[
+          buttonStyles.selectButton,
+          buttonAnimStyles.unselectedButton,
+          {
+            borderColor: theme.color.darkGrey,
+            borderWidth: 2,
+          },
+        ]}
+      >
+        <PlusIcon height={20} width={20} fill={theme.color.black} />
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
+
 export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const { theme } = useTheme();
   const router = useRouter();
@@ -301,10 +378,10 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
         t.id === taskId ? { ...t, selected: !t.selected } : t,
       );
       const isSelected = newTasks.find((t) => t.id === taskId)?.selected;
-      
+
       // Animate the transition
       buttonAnim.value = withTiming(isSelected ? 1 : 0, { duration: 300 });
-      
+
       return newTasks;
     });
   };
@@ -740,44 +817,12 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                             <View style={{ flex: 1, marginRight: 10 }}>
                               <Task task={task} completable={false} />
                             </View>
-                            <TouchableOpacity
-                              style={styles.addButton}
-                              onPress={() => task.id && handleTaskSelect(task.id)}
-                              activeOpacity={1}
-                            >
-                              <Animated.View
-                                style={[
-                                  styles.selectButton,
-                                  buttonAnimStyles.selectedButton,
-                                  {
-                                    backgroundColor: theme.color.sysGreen,
-                                    borderColor: theme.color.sysGreen,
-                                  },
-                                ]}
-                              >
-                                <CheckIcon
-                                  height={16}
-                                  width={16}
-                                  fill={theme.color.white}
-                                />
-                              </Animated.View>
-                              <Animated.View
-                                style={[
-                                  styles.selectButton,
-                                  buttonAnimStyles.unselectedButton,
-                                  {
-                                    borderColor: theme.color.darkGrey,
-                                    borderWidth: 2,
-                                  },
-                                ]}
-                              >
-                                <PlusIcon
-                                  height={20}
-                                  width={20}
-                                  fill={theme.color.black}
-                                />
-                              </Animated.View>
-                            </TouchableOpacity>
+                            <SelectButton
+                              isSelected={task.selected ?? false}
+                              onPress={() =>
+                                task.id && handleTaskSelect(task.id)
+                              }
+                            />
                           </View>
                         )}
                         keyExtractor={(task) => task.id?.toString() ?? ""}
