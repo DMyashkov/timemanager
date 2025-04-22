@@ -179,7 +179,7 @@ export default function AddScreen() {
         <View style={styles.innerAddScreen}>
           {/* We use a "saveButtonPressed" state so the child can detect and handle saving */}
           <ContentWrapper
-            parent={parent}
+            parent={parentId}
             current={current}
             isAddScreen={isAddScreen}
             colorArray={colorArray}
@@ -211,7 +211,7 @@ function ContentWrapper({
   saveButtonPressed,
   setSaveButtonPressed,
 }: {
-  parent: TagData | null;
+  parent: number | null;
   current: TagData | null;
   isAddScreen: boolean;
   colorArray: ColorPresets[];
@@ -307,7 +307,7 @@ function ContentWrapper({
 }
 
 interface AddSegmentProps {
-  parent: TagData | null;
+  parent: number | null;
   current: TagData | null;
   isProject: boolean;
   colorArray: ColorPresets[];
@@ -395,7 +395,7 @@ function AddSegment(props: AddSegmentProps) {
       title: moduleName,
       colorPreset: colorArray[selectedColorIndex],
       lapName,
-      parent: parent?.id ?? 0,
+      parent: parent ?? 0,
       productive: productivity,
       children: [],
     };
@@ -474,6 +474,7 @@ function AddSegment(props: AddSegmentProps) {
           // If you allow changing the parent, you'd call getTag(...) again or something.
           // This is left as an exercise, depending on how your PathPicker is implemented.
         }}
+        shouldDisplayNew={current == null}
         moduleColorPallete={colorArray[selectedColorIndex]}
         moduleName={moduleName}
         isProject={isProject}

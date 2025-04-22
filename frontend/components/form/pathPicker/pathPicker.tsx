@@ -5,13 +5,17 @@ import ActivityItem from "@/components/module/activityItem/activityItem";
 import ProjectItem from "@/components/module/projectItem/projectItem";
 import type { TagData, ColorPresets } from "@/constants/interfaces";
 import { useTagContext } from "@/context/TagContext";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema } from "@/db/schema";
 
 interface PathPickerProps {
   moduleName?: string;
   isProject?: boolean;
   moduleColorPallete: ColorPresets;
-  parent: TagData | null; // We pass in the "parent" TagData if available
-  setParent: (parent: TagData) => void; // Possibly used for changing parent
+  parent: number | null; // We pass in the "parent" TagData if available
+  setParent: (parent: number) => void; // Possibly used for changing parent
+  shouldDisplayNew?: boolean; // If you want to display a "New" button
 }
 
 export default function PathPicker({
@@ -20,9 +24,13 @@ export default function PathPicker({
   parent,
   setParent,
   isProject = false,
+  shouldDisplayNew = true,
 }: PathPickerProps) {
   const styles = useStyles();
   const { getTag } = useTagContext();
+
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema: schema });
 
   // We'll store the *entire path* (from root -> parent -> parent's parent -> etc.)
   const [path, setPath] = useState<TagData[]>([]);
@@ -38,19 +46,14 @@ export default function PathPicker({
 
       // Build the path by walking up the tree
       const chain: TagData[] = [];
-      let current = parent;
+      let current: number = parent;
 
       while (current) {
-        chain.push(current);
-
-        // If the current has no parent ID, stop
-        if (!current.parent) break;
-
-        // Otherwise fetch the parent TagData from the DB
-        const parentTag = await getTag(current.parent);
-        if (!parentTag) break;
-
-        current = parentTag;
+        const currentTag = await getTag(db, current);
+        if (!currentTag) break; // If we can't find the tag, stop
+        chain.push(currentTag);
+        if (!currentTag.parent) break;
+        current = currentTag.parent; // Move to the parent
       }
 
       // chain is now from bottom -> top, so reverse it if you want top -> bottom
@@ -58,6 +61,7 @@ export default function PathPicker({
       setPath(chain);
     })();
   }, [parent, getTag]);
+  console.log("PathPicker path", path);
 
   // If you’d like to handle a "Change" button for re-selecting parent,
   // you'll define a function and pass it to onPress below.
@@ -78,9 +82,11 @@ export default function PathPicker({
 
       <View style={styles.pathContainer}>
         {/* Render the chain of parents first */}
-        {path.map((tag) => (
+        {path.map((tag, index) => (
           <ActivityItem
-            isExplicitlyExpanded
+            isExplicitlyExpanded={
+              shouldDisplayNew ? true : index !== path.length - 1
+            }
             key={tag.id}
             activityName={tag.title}
             activityColor={tag.colorPreset}
@@ -88,20 +94,21 @@ export default function PathPicker({
           />
         ))}
         {/* Finally, render the new or edited module at the end of the path */}
-        {isProject ? (
-          <ProjectItem
-            activityName={moduleName || "New Project"}
-            activityColor={moduleColorPallete}
-            clickable={false}
-          />
-        ) : (
-          <ActivityItem
-            isExplicitlyExpanded
-            activityName={moduleName || "New Activity"}
-            activityColor={moduleColorPallete}
-            clickable={false}
-          />
-        )}
+        {shouldDisplayNew &&
+          (isProject ? (
+            <ProjectItem
+              activityName={moduleName || "New Project"}
+              activityColor={moduleColorPallete}
+              clickable={false}
+            />
+          ) : (
+            <ActivityItem
+              isExplicitlyExpanded={false}
+              activityName={moduleName || "New Activity"}
+              activityColor={moduleColorPallete}
+              clickable={false}
+            />
+          ))}
       </View>
     </View>
   );
