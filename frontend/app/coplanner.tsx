@@ -50,6 +50,12 @@ import CheckIcon from "@assets/icons/check.svg";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
 import { useDerivedTags } from "@/hooks/useDerivedTags";
 import StopwatchIcon from "@assets/icons/stopwatch.svg";
+import { useChatGPT } from "@/hooks/useChatGPT";
+import { useSQLiteContext } from "expo-sqlite";
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { schema, tasks, tags } from "@/db/schema";
+import { useFocusSession } from "@/hooks/useFocusSession";
+import type { InferModel } from "drizzle-orm";
 
 const suggestions = [
   {
@@ -269,6 +275,9 @@ const SelectButton = ({ isSelected, onPress }: SelectButtonProps) => {
   );
 };
 
+type NewTask = InferModel<typeof tasks, "insert">;
+type NewTag = InferModel<typeof tags, "insert">;
+
 export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const { theme } = useTheme();
   const router = useRouter();
@@ -278,11 +287,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showResultScreen, setShowResultScreen] = useState(false);
   const [thinkingStep, setThinkingStep] = useState(0);
-  const [tasks, setTasks] =
-    useState<(TaskData & { selected?: boolean })[]>(exampleTasks);
-  const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>(
-    exampleTags.slice(3).map((tag) => ({ ...tag, selected: false })),
-  );
+  const [tasks, setTasks] = useState<(TaskData & { selected?: boolean })[]>([]);
+  const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>([]);
   const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([
     { selected: false },
   ]);
@@ -290,6 +296,11 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
+  const [aiResponse, setAiResponse] = useState<any>(null);
+  const { sendMessage } = useChatGPT();
+  const expoDb = useSQLiteContext();
+  const db = drizzle(expoDb, { schema });
+  const { startFocusSession } = useFocusSession();
 
   // Animation values
   const rotation = useSharedValue(0);
@@ -383,20 +394,81 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     setText("");
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     Keyboard.dismiss();
     setIsTransitioning(true);
     setThinkingStep(0);
 
-    // Show "Thinking of names..." for 1 second
-    setTimeout(() => {
-      setThinkingStep(1);
-      // Show "Building tasks and tags..." for 1 second
+    const systemPrompt = `You are an AI assistant for a time management app. You can:
+1. Create tasks with titles, descriptions, and priorities
+2. Create tags with names and colors
+3. Suggest focus sessions with specific tags
+
+The user will describe what they want to do. Respond with a JSON object containing:
+{
+  "tasks": [{ "title": string, "description": string, "priority": "high" | "medium" | "low" }],
+  "tags": [{ "title": string, "colorPreset": "green" | "orange" | "blue" | "purple" | "red" | "grey" }],
+  "focusTags": [number] // IDs of tags to use for focus session
+}`;
+
+    try {
+      const response = await sendMessage(text, systemPrompt);
+      const parsedResponse = JSON.parse(response);
+      setAiResponse(parsedResponse);
+      
+      // Update tasks and tags from AI response
+      if (parsedResponse.tasks) {
+        setTasks(parsedResponse.tasks.map((task: any) => ({
+          ...task,
+          id: Math.floor(Math.random() * 1000000), // Generate temporary ID
+          date: new Date().getTime(),
+          completed: 0,
+          synced: 0,
+          deleted: 0,
+          tagId: null,
+          selected: true
+        })));
+      } else {
+        setTasks([]);
+      }
+
+      if (parsedResponse.tags) {
+        setTags(parsedResponse.tags.map((tag: any) => ({
+          ...tag,
+          id: Math.floor(Math.random() * 1000000), // Generate temporary ID
+          moduleType: moduleTypeEnum.activity,
+          productive: true,
+          lapName: tag.title,
+          children: [],
+          parent: null,
+          deleted: 0,
+          synced: 0,
+          selected: true
+        })));
+      } else {
+        setTags([]);
+      }
+
+      // Update focus sessions based on focusTags
+      if (parsedResponse.focusTags && parsedResponse.focusTags.length > 0) {
+        setFocusSessions([{ selected: true }]);
+      } else {
+        setFocusSessions([]);
+      }
+      
+      // Show "Thinking of names..." for 1 second
       setTimeout(() => {
-        setShowResultScreen(true);
-        setIsTransitioning(false);
+        setThinkingStep(1);
+        // Show "Building tasks and tags..." for 1 second
+        setTimeout(() => {
+          setShowResultScreen(true);
+          setIsTransitioning(false);
+        }, 1000);
       }, 1000);
-    }, 1000);
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      setIsTransitioning(false);
+    }
   };
 
   const handleTryAgain = () => {
@@ -405,9 +477,63 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     textInputRef.current?.focus();
   };
 
-  const handleApplyChanges = () => {
-    // TODO: Implement apply changes functionality
-    console.log("Applying changes");
+  const createTask = async (taskData: { title: string; description: string; priority: string }) => {
+    const taskValues: NewTask = {
+      title: taskData.title,
+      description: taskData.description,
+      priority: taskData.priority,
+      date: new Date().getTime(),
+      completed: 0,
+      synced: 0,
+      deleted: 0,
+      tagId: null,
+    };
+    await db.insert(tasks).values(taskValues);
+  };
+
+  const createTag = async (tagData: { title: string; colorPreset: string }) => {
+    const tagValues: NewTag = {
+      title: tagData.title,
+      colorPreset: tagData.colorPreset,
+      moduleType: "activity",
+      productive: 1,
+      lapName: tagData.title,
+      children: "[]",
+      parent: null,
+      deleted: 0,
+      synced: 0,
+    };
+    await db.insert(tags).values(tagValues);
+  };
+
+  const handleApplyChanges = async () => {
+    if (!aiResponse) return;
+
+    try {
+      // Create tasks
+      if (aiResponse.tasks) {
+        for (const task of aiResponse.tasks) {
+          await createTask(task);
+        }
+      }
+
+      // Create tags
+      if (aiResponse.tags) {
+        for (const tag of aiResponse.tags) {
+          await createTag(tag);
+        }
+      }
+
+      // Start focus session if selected
+      const selectedFocusSession = focusSessions.find(session => session.selected);
+      if (selectedFocusSession && aiResponse.focusTags) {
+        await startFocusSession(aiResponse.focusTags);
+      }
+
+      onClose();
+    } catch (error) {
+      console.error("Error applying changes:", error);
+    }
   };
 
   const handleTaskSelect = (taskId: number) => {
@@ -883,21 +1009,21 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
               </View>
               <SectionList<SectionItem["data"][number]>
                 sections={[
-                  {
+                  ...(focusSessions.length > 0 ? [{
                     type: "focus",
                     title: "Start focus session",
                     data: focusSessions,
-                  },
-                  {
+                  }] : []),
+                  ...(tasks.length > 0 ? [{
                     type: "tasks",
                     title: "Pick tasks for your schedule",
                     data: tasks,
-                  },
-                  {
+                  }] : []),
+                  ...(tags.length > 0 ? [{
                     type: "tags",
                     title: "Pick tags for your workplace",
                     data: tags,
-                  },
+                  }] : []),
                 ]}
                 keyExtractor={(item, index) => {
                   if ("id" in item) {
