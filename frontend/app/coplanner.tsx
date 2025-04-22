@@ -488,6 +488,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     section: {
       paddingHorizontal: 15,
+      marginBottom: 20,
     },
     sectionTitle: {
       fontSize: theme.fontSize.mediumBig,
@@ -498,10 +499,11 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     taskRow: {
       flexDirection: "row",
       alignItems: "center",
+      marginBottom: 15,
       justifyContent: "space-between",
-      marginBottom: 10,
     },
     addButton: {
+      width: 36,
       marginLeft: 10,
     },
     addButtonCircle: {
@@ -689,44 +691,32 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                     <Text style={styles.sectionTitle}>{item.title}</Text>
                     {item.type === "tasks" ? (
                       <FlatList
-                        data={
-                          item.data as (TaskData & { selected?: boolean })[]
-                        }
+                        data={item.data as (TaskData & { selected?: boolean })[]}
                         renderItem={({ item: task }) => (
                           <View style={styles.taskRow}>
-                            <Task task={task} />
-                            <TouchableOpacity
+                            <View style={{ flex: 1, marginRight: 10 }}>
+                              <Task task={task} />
+                            </View>
+                            <TouchableOpacity 
                               style={styles.addButton}
                               onPress={() => {
                                 // Toggle between plus and checkmark
-                                const updatedTasks = exampleTasks.map((t) =>
-                                  t.id === task.id
-                                    ? { ...t, selected: !t.selected }
-                                    : t,
+                                const updatedTasks = exampleTasks.map(t => 
+                                  t.id === task.id 
+                                    ? { ...t, selected: !t.selected } 
+                                    : t
                                 );
                                 // Update the tasks state
                               }}
                             >
-                              <View
-                                style={[
-                                  styles.addButtonCircle,
-                                  task.selected && {
-                                    backgroundColor: theme.color.sysGreen,
-                                  },
-                                ]}
-                              >
+                              <View style={[
+                                styles.addButtonCircle,
+                                task.selected && { backgroundColor: theme.color.sysGreen }
+                              ]}>
                                 {task.selected ? (
-                                  <CheckIcon
-                                    height={20}
-                                    width={20}
-                                    fill={theme.color.white}
-                                  />
+                                  <CheckIcon height={20} width={20} fill={theme.color.white} />
                                 ) : (
-                                  <PlusIcon
-                                    height={20}
-                                    width={20}
-                                    fill={theme.color.black}
-                                  />
+                                  <PlusIcon height={20} width={20} fill={theme.color.black} />
                                 )}
                               </View>
                             </TouchableOpacity>
