@@ -11,6 +11,7 @@ import {
   Dimensions,
   Keyboard,
   SafeAreaView,
+  FlatList,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
@@ -32,6 +33,18 @@ import Animated, {
   FadeIn,
   FadeOut,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import PlusIcon from "@assets/icons/plus.svg";
+import Task from "@/components/tasks/task/task";
+import Tag from "@/components/tag/tagComponent";
+import {
+  priorityEnum,
+  TaskData,
+  TagData,
+  ColorPresets,
+  moduleTypeEnum,
+} from "@/constants/interfaces";
+import CheckIcon from "@assets/icons/check.svg";
 
 const suggestions = [
   {
@@ -55,6 +68,92 @@ const suggestions = [
     task: "Complete the documentation and run final tests",
   },
 ];
+
+// Example data for tasks
+const exampleTasks: (TaskData & { selected?: boolean })[] = [
+  {
+    id: 1,
+    title: "Review project documentation",
+    description: "Go through the latest updates",
+    priority: priorityEnum.medium,
+    date: new Date().getTime(),
+    completed: 0,
+    synced: 0,
+    deleted: 0,
+    tagId: null,
+    selected: false,
+  },
+  {
+    id: 2,
+    title: "Team standup meeting",
+    description: "Daily sync with the team",
+    priority: priorityEnum.high,
+    date: new Date().getTime(),
+    completed: 0,
+    synced: 0,
+    deleted: 0,
+    tagId: null,
+    selected: false,
+  },
+  {
+    id: 3,
+    title: "Code review",
+    description: "Review PRs from the team",
+    priority: priorityEnum.low,
+    date: new Date().getTime(),
+    completed: 0,
+    synced: 0,
+    deleted: 0,
+    tagId: null,
+    selected: false,
+  },
+];
+
+// Example data for tags
+const exampleTags: TagData[] = [
+  {
+    id: 1,
+    title: "Work",
+    colorPreset: ColorPresets.GREEN,
+    moduleType: moduleTypeEnum.activity,
+    productive: true,
+    lapName: "Work",
+    children: [],
+    parent: null,
+    deleted: 0,
+    synced: 0,
+  },
+  {
+    id: 2,
+    title: "Personal",
+    colorPreset: ColorPresets.ORANGE,
+    moduleType: moduleTypeEnum.activity,
+    productive: true,
+    lapName: "Personal",
+    children: [],
+    parent: null,
+    deleted: 0,
+    synced: 0,
+  },
+  {
+    id: 3,
+    title: "Project X",
+    colorPreset: ColorPresets.GREEN,
+    moduleType: moduleTypeEnum.project,
+    productive: true,
+    lapName: "Project X",
+    children: [],
+    parent: null,
+    deleted: 0,
+    synced: 0,
+  },
+];
+
+interface SectionItem {
+  type: "tasks" | "tags";
+  title: string;
+  data: TaskData[] | TagData[];
+}
 
 interface CoplannerProps {
   visible: boolean;
@@ -285,8 +384,14 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     animatedBlob: {
       width: "100%",
       height: "100%",
-      backgroundColor: theme.color.darkRed,
       borderRadius: (screenWidth * 0.4) / 2,
+      overflow: "hidden",
+      borderWidth: 5,
+      borderColor: theme.color.lightGrey,
+    },
+    gradient: {
+      width: "100%",
+      height: "100%",
     },
     resultContainer: {
       flex: 1,
@@ -381,6 +486,39 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       borderRadius: 2.5,
       marginBottom: Platform.OS === "ios" ? 0 : 8,
     },
+    section: {
+      paddingHorizontal: 15,
+    },
+    sectionTitle: {
+      fontSize: theme.fontSize.mediumBig,
+      fontFamily: theme.font.semibold,
+      color: theme.color.black,
+      marginBottom: 15,
+    },
+    taskRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    addButton: {
+      marginLeft: 10,
+    },
+    addButtonCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: theme.color.white,
+      borderWidth: 1,
+      borderColor: theme.color.lightGrey,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    tagsContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+    },
   });
 
   return (
@@ -409,7 +547,14 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 >
                   <Animated.View
                     style={[styles.animatedBlob, animatedBlobStyle]}
-                  />
+                  >
+                    <LinearGradient
+                      colors={[theme.color.darkRed, theme.color.lightRed]}
+                      style={styles.gradient}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    />
+                  </Animated.View>
                 </Animated.View>
               )}
               {isTransitioning && (
@@ -526,6 +671,76 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 <Text style={styles.emoji}>🧠</Text>
                 <Text style={styles.promptText}>{text}</Text>
               </View>
+              <FlatList
+                data={[
+                  {
+                    type: "tasks",
+                    title: "Pick tasks for your schedule",
+                    data: exampleTasks,
+                  },
+                  {
+                    type: "tags",
+                    title: "Pick tags for your workplace",
+                    data: exampleTags,
+                  },
+                ]}
+                renderItem={({ item }) => (
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>{item.title}</Text>
+                    {item.type === "tasks" ? (
+                      <FlatList
+                        data={
+                          item.data as (TaskData & { selected?: boolean })[]
+                        }
+                        renderItem={({ item: task }) => (
+                          <View style={styles.taskRow}>
+                            <Task task={task} />
+                            <TouchableOpacity
+                              style={styles.addButton}
+                              onPress={() => {
+                                // Toggle between plus and checkmark
+                                const updatedTasks = exampleTasks.map((t) =>
+                                  t.id === task.id
+                                    ? { ...t, selected: !t.selected }
+                                    : t,
+                                );
+                                // Update the tasks state
+                              }}
+                            >
+                              <View
+                                style={[
+                                  styles.addButtonCircle,
+                                  task.selected && {
+                                    backgroundColor: theme.color.sysGreen,
+                                  },
+                                ]}
+                              >
+                                {task.selected ? (
+                                  <CheckIcon
+                                    height={20}
+                                    width={20}
+                                    fill={theme.color.white}
+                                  />
+                                ) : (
+                                  <PlusIcon
+                                    height={20}
+                                    width={20}
+                                    fill={theme.color.black}
+                                  />
+                                )}
+                              </View>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                        keyExtractor={(task) => task.id?.toString() ?? ""}
+                      />
+                    ) : (
+                      <View></View>
+                    )}
+                  </View>
+                )}
+                keyExtractor={(item) => item.type}
+              />
 
               <View style={styles.buttonsContainer}>
                 <TouchableOpacity
@@ -539,7 +754,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   onPress={handleApplyChanges}
                 >
                   <Text style={styles.buttonText}>Apply changes (3)</Text>
-                  <SendIcon height={23} width={23} fill={theme.color.white} />
+                  <SendIcon height={20} width={20} fill={theme.color.white} />
                 </TouchableOpacity>
               </View>
             </View>
