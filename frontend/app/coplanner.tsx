@@ -187,6 +187,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const borderRadius = useSharedValue(0.5);
   const perspective = useSharedValue(1000);
 
+  // Add new shared values for button animations
+  const buttonAnim = useSharedValue(0);
+
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
@@ -290,6 +293,35 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const handleApplyChanges = () => {
     // TODO: Implement apply changes functionality
     console.log("Applying changes");
+  };
+
+  const handleTaskSelect = (taskId: number) => {
+    setTasks((prevTasks) => {
+      const newTasks = prevTasks.map((t) =>
+        t.id === taskId ? { ...t, selected: !t.selected } : t,
+      );
+      const isSelected = newTasks.find((t) => t.id === taskId)?.selected;
+      
+      // Animate the transition
+      buttonAnim.value = withTiming(isSelected ? 1 : 0, { duration: 300 });
+      
+      return newTasks;
+    });
+  };
+
+  const buttonAnimStyles = {
+    selectedButton: useAnimatedStyle(() => ({
+      opacity: buttonAnim.value,
+      position: "absolute",
+      width: "100%",
+      transform: [{ scale: 0.8 + buttonAnim.value * 0.2 }],
+    })),
+    unselectedButton: useAnimatedStyle(() => ({
+      opacity: 1 - buttonAnim.value,
+      position: "absolute",
+      width: "100%",
+      transform: [{ scale: 1 - buttonAnim.value * 0.2 }],
+    })),
   };
 
   const SUGGESTION_HEIGHT = 85;
@@ -710,50 +742,41 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                             </View>
                             <TouchableOpacity
                               style={styles.addButton}
-                              onPress={() => {
-                                setTasks((prevTasks) =>
-                                  prevTasks.map((t) =>
-                                    t.id === task.id
-                                      ? { ...t, selected: !t.selected }
-                                      : t,
-                                  ),
-                                );
-                              }}
+                              onPress={() => task.id && handleTaskSelect(task.id)}
                               activeOpacity={1}
                             >
-                              {task.selected ? (
-                                <View
-                                  style={[
-                                    styles.selectButton,
-                                    {
-                                      backgroundColor: theme.color.sysGreen,
-                                      borderColor: theme.color.sysGreen,
-                                    },
-                                  ]}
-                                >
-                                  <CheckIcon
-                                    height={16}
-                                    width={16}
-                                    fill={theme.color.white}
-                                  />
-                                </View>
-                              ) : (
-                                <View
-                                  style={[
-                                    styles.selectButton,
-                                    {
-                                      borderColor: theme.color.darkGrey,
-                                      borderWidth: 2,
-                                    },
-                                  ]}
-                                >
-                                  <PlusIcon
-                                    height={20}
-                                    width={20}
-                                    fill={theme.color.black}
-                                  />
-                                </View>
-                              )}
+                              <Animated.View
+                                style={[
+                                  styles.selectButton,
+                                  buttonAnimStyles.selectedButton,
+                                  {
+                                    backgroundColor: theme.color.sysGreen,
+                                    borderColor: theme.color.sysGreen,
+                                  },
+                                ]}
+                              >
+                                <CheckIcon
+                                  height={16}
+                                  width={16}
+                                  fill={theme.color.white}
+                                />
+                              </Animated.View>
+                              <Animated.View
+                                style={[
+                                  styles.selectButton,
+                                  buttonAnimStyles.unselectedButton,
+                                  {
+                                    borderColor: theme.color.darkGrey,
+                                    borderWidth: 2,
+                                  },
+                                ]}
+                              >
+                                <PlusIcon
+                                  height={20}
+                                  width={20}
+                                  fill={theme.color.black}
+                                />
+                              </Animated.View>
                             </TouchableOpacity>
                           </View>
                         )}
