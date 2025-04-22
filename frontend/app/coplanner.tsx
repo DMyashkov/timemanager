@@ -322,31 +322,32 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       bottom: 0,
       left: 0,
       right: 0,
-      marginBottom: Platform.OS === "ios" ? 34 : 0,
+      marginBottom: Platform.OS === "ios" ? 44 : 10,
     },
     smallButton: {
       flex: 1,
       height: 50,
-      backgroundColor: theme.color.white,
-      borderRadius: 8,
+      backgroundColor: theme.color.lightGrey,
+      borderRadius: 34,
       justifyContent: "center",
       alignItems: "center",
       marginRight: 10,
-      borderWidth: 1,
       borderColor: theme.color.darkGrey,
     },
     largeButton: {
-      flex: 2,
+      flex: 3,
       height: 50,
       backgroundColor: theme.color.black,
-      borderRadius: 8,
-      justifyContent: "center",
+      borderRadius: 34,
+      justifyContent: "space-between",
+      paddingHorizontal: 20,
       alignItems: "center",
       flexDirection: "row",
     },
     buttonText: {
       color: theme.color.white,
       fontSize: theme.fontSize.medium,
+      fontFamily: theme.font.semibold,
       marginRight: 8,
     },
     thinkingContainer: {
@@ -523,7 +524,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   onPress={handleApplyChanges}
                 >
                   <Text style={styles.buttonText}>Apply changes (3)</Text>
-                  <SendIcon height={20} width={20} fill={theme.color.white} />
+                  <SendIcon height={23} width={23} fill={theme.color.white} />
                 </TouchableOpacity>
               </View>
             </View>
