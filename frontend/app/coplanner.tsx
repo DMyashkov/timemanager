@@ -32,6 +32,7 @@ import Animated, {
   withSpring,
   FadeIn,
   FadeOut,
+  Layout,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import PlusIcon from "@assets/icons/plus.svg";
@@ -81,7 +82,7 @@ const exampleTasks: (TaskData & { selected?: boolean })[] = [
     synced: 0,
     deleted: 0,
     tagId: null,
-    selected: false,
+    selected: true,
   },
   {
     id: 2,
@@ -93,7 +94,7 @@ const exampleTasks: (TaskData & { selected?: boolean })[] = [
     synced: 0,
     deleted: 0,
     tagId: null,
-    selected: false,
+    selected: true,
   },
   {
     id: 3,
@@ -105,7 +106,7 @@ const exampleTasks: (TaskData & { selected?: boolean })[] = [
     synced: 0,
     deleted: 0,
     tagId: null,
-    selected: false,
+    selected: true,
   },
 ];
 
@@ -169,6 +170,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showResultScreen, setShowResultScreen] = useState(false);
   const [thinkingStep, setThinkingStep] = useState(0);
+  const [tasks, setTasks] =
+    useState<(TaskData & { selected?: boolean })[]>(exampleTasks);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -505,14 +508,15 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     addButton: {
       width: 36,
       marginLeft: 10,
+      aspectRatio: 1,
     },
     addButtonCircle: {
       width: 36,
       height: 36,
       borderRadius: 18,
       backgroundColor: theme.color.white,
-      borderWidth: 1,
-      borderColor: theme.color.lightGrey,
+      borderWidth: 2,
+      borderColor: theme.color.darkGrey,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -520,6 +524,13 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 10,
+    },
+    selectButton: {
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 18,
+      aspectRatio: 1,
+      flex: 1,
     },
   });
 
@@ -678,7 +689,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   {
                     type: "tasks",
                     title: "Pick tasks for your schedule",
-                    data: exampleTasks,
+                    data: tasks,
                   },
                   {
                     type: "tags",
@@ -691,34 +702,58 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                     <Text style={styles.sectionTitle}>{item.title}</Text>
                     {item.type === "tasks" ? (
                       <FlatList
-                        data={item.data as (TaskData & { selected?: boolean })[]}
+                        data={tasks}
                         renderItem={({ item: task }) => (
                           <View style={styles.taskRow}>
                             <View style={{ flex: 1, marginRight: 10 }}>
-                              <Task task={task} />
+                              <Task task={task} completable={false} />
                             </View>
-                            <TouchableOpacity 
+                            <TouchableOpacity
                               style={styles.addButton}
                               onPress={() => {
-                                // Toggle between plus and checkmark
-                                const updatedTasks = exampleTasks.map(t => 
-                                  t.id === task.id 
-                                    ? { ...t, selected: !t.selected } 
-                                    : t
+                                setTasks((prevTasks) =>
+                                  prevTasks.map((t) =>
+                                    t.id === task.id
+                                      ? { ...t, selected: !t.selected }
+                                      : t,
+                                  ),
                                 );
-                                // Update the tasks state
                               }}
+                              activeOpacity={1}
                             >
-                              <View style={[
-                                styles.addButtonCircle,
-                                task.selected && { backgroundColor: theme.color.sysGreen }
-                              ]}>
-                                {task.selected ? (
-                                  <CheckIcon height={20} width={20} fill={theme.color.white} />
-                                ) : (
-                                  <PlusIcon height={20} width={20} fill={theme.color.black} />
-                                )}
-                              </View>
+                              {task.selected ? (
+                                <View
+                                  style={[
+                                    styles.selectButton,
+                                    {
+                                      backgroundColor: theme.color.sysGreen,
+                                      borderColor: theme.color.sysGreen,
+                                    },
+                                  ]}
+                                >
+                                  <CheckIcon
+                                    height={16}
+                                    width={16}
+                                    fill={theme.color.white}
+                                  />
+                                </View>
+                              ) : (
+                                <View
+                                  style={[
+                                    styles.selectButton,
+                                    {
+                                      borderColor: theme.color.darkGrey,
+                                      borderWidth: 2,
+                                    },
+                                  ]}
+                                >
+                                  <PlusIcon
+                                    height={20}
+                                    width={20}
+                                    fill={theme.color.black}
+                                  />
+                                </View>
+                              )}
                             </TouchableOpacity>
                           </View>
                         )}

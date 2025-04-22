@@ -43,6 +43,7 @@ interface TaskProps {
   showDateIfPassed?: boolean;
   showDateAlways?: boolean;
   onPress?: () => void;
+  completable?: boolean;
 }
 
 export default function Task({
@@ -50,6 +51,7 @@ export default function Task({
   showDateIfPassed = true,
   showDateAlways = false,
   onPress,
+  completable = true,
 }: TaskProps) {
   const styles = useStyles(task.priority);
   const { theme } = useTheme();
@@ -63,7 +65,7 @@ export default function Task({
   const db = drizzle(expoDb, { schema });
 
   const handleCheckmarkPress = useCallback(async () => {
-    if (!task.id) return;
+    if (!task.id || !completable) return;
 
     const newCompletedState = !isCompleted ? 1 : 0;
     setIsCompleted(newCompletedState);
@@ -75,7 +77,7 @@ export default function Task({
       // Revert the state if the update fails
       setIsCompleted(isCompleted);
     }
-  }, [task.id, isCompleted, updateTask, db]);
+  }, [task.id, isCompleted, updateTask, db, completable]);
 
   let colorCheckmarkStyles: object;
   switch (task.priority) {
@@ -111,7 +113,10 @@ export default function Task({
       activeOpacity={0.7}
     >
       <View style={styles.leftColumn}>
-        <TouchableOpacity onPress={handleCheckmarkPress} activeOpacity={1}>
+        <TouchableOpacity 
+          onPress={handleCheckmarkPress} 
+          activeOpacity={completable ? 1 : 0.5}
+        >
           {!isCompleted ? (
             <View style={[styles.checkMark, colorCheckmarkStyles]} />
           ) : (
