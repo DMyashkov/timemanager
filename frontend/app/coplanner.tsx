@@ -63,40 +63,41 @@ import { useTagContext } from "@/context/TagContext";
 const USE_MOCK_RESPONSE = true; // Set to true to use mock response, false to use ChatGPT
 
 const mockResponse = {
-  "id": "chatcmpl-BP3JN245DREkdzsbc4UDT2ncHbfIh",
-  "object": "chat.completion",
-  "created": 1745310629,
-  "model": "gpt-3.5-turbo-0125",
-  "choices": [
+  id: "chatcmpl-BP3JN245DREkdzsbc4UDT2ncHbfIh",
+  object: "chat.completion",
+  created: 1745310629,
+  model: "gpt-3.5-turbo-0125",
+  choices: [
     {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "{\n  \"tasks\": [\n    {\n      \"title\": \"Call Dad\",\n      \"description\": \"Call my dad\",\n      \"priority\": 2,\n      \"date\": \"2025-04-24T08:30:29.287Z\",\n      \"tagId\": null\n    }\n  ],\n  \"tags\": [\n    {\n      \"title\": \"b\",\n      \"colorPreset\": \"orange\",\n      \"moduleType\": \"activity\",\n      \"productive\": false,\n      \"lapName\": \"b\",\n      \"children\": [],\n      \"parent\": 19827386\n    }\n  ],\n  \"focusTags\": [19827383]\n}",
-        "refusal": null,
-        "annotations": []
+      index: 0,
+      message: {
+        role: "assistant",
+        content:
+          '{\n  "tasks": [\n    {\n      "title": "Call Dad",\n      "description": "Call my dad",\n      "priority": 2,\n      "date": "2025-04-24T08:30:29.287Z",\n      "tagId": null\n    }\n  ],\n  "tags": [\n    {\n      "title": "b",\n      "colorPreset": "orange",\n      "moduleType": "activity",\n      "productive": false,\n      "lapName": "b",\n      "children": [],\n      "parent": 19827386\n    }\n  ],\n  "focusTags": [19827383]\n}',
+        refusal: null,
+        annotations: [],
       },
-      "logprobs": null,
-      "finish_reason": "stop"
-    }
-  ],
-  "usage": {
-    "prompt_tokens": 1174,
-    "completion_tokens": 139,
-    "total_tokens": 1313,
-    "prompt_tokens_details": {
-      "cached_tokens": 0,
-      "audio_tokens": 0
+      logprobs: null,
+      finish_reason: "stop",
     },
-    "completion_tokens_details": {
-      "reasoning_tokens": 0,
-      "audio_tokens": 0,
-      "accepted_prediction_tokens": 0,
-      "rejected_prediction_tokens": 0
-    }
+  ],
+  usage: {
+    prompt_tokens: 1174,
+    completion_tokens: 139,
+    total_tokens: 1313,
+    prompt_tokens_details: {
+      cached_tokens: 0,
+      audio_tokens: 0,
+    },
+    completion_tokens_details: {
+      reasoning_tokens: 0,
+      audio_tokens: 0,
+      accepted_prediction_tokens: 0,
+      rejected_prediction_tokens: 0,
+    },
   },
-  "service_tier": "default",
-  "system_fingerprint": null
+  service_tier: "default",
+  system_fingerprint: null,
 };
 
 const suggestions = [
@@ -344,7 +345,11 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const db = drizzle(expoDb, { schema });
   const { startFocusSession } = useFocusSession();
   const { createTask: taskContextCreateTask, getTask } = useTaskContext();
-  const { createTag: tagContextCreateTag, getAllTags, getTag } = useTagContext();
+  const {
+    createTag: tagContextCreateTag,
+    getAllTags,
+    getTag,
+  } = useTagContext();
   const [debugMode, setDebugMode] = useState(false);
 
   // Animation values
@@ -505,19 +510,24 @@ Date Handling Rules:
 IMPORTANT: Your response must be valid JSON and nothing else. Do not include any additional text, explanations, or markdown formatting.`;
 
     try {
-      const response = USE_MOCK_RESPONSE ? mockResponse : await sendMessage(text, systemPrompt);
+      const response = USE_MOCK_RESPONSE
+        ? mockResponse
+        : await sendMessage(text, systemPrompt);
       console.log("Raw AI response:", response);
-      
+
       // Clean the response string
-      const responseContent = typeof response === 'string' ? response : response.choices[0].message.content;
+      const responseContent =
+        typeof response === "string"
+          ? response
+          : response.choices[0].message.content;
       const cleanedResponse = responseContent
         .trim()
-        .replace(/^```json\s*/, '') // Remove ```json if present
-        .replace(/```\s*$/, '') // Remove trailing ```
+        .replace(/^```json\s*/, "") // Remove ```json if present
+        .replace(/```\s*$/, "") // Remove trailing ```
         .trim();
 
       console.log("Cleaned response:", cleanedResponse);
-      
+
       let parsedResponse;
       try {
         parsedResponse = JSON.parse(cleanedResponse);
@@ -582,7 +592,7 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
       Alert.alert(
         "Error",
         "Failed to process your request. Please try again.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
       setIsTransitioning(false);
     }
@@ -660,11 +670,9 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
       onClose();
     } catch (error) {
       console.error("Error applying changes:", error);
-      Alert.alert(
-        "Error",
-        "Failed to apply changes. Please try again.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Error", "Failed to apply changes. Please try again.", [
+        { text: "OK" },
+      ]);
     }
   };
 
