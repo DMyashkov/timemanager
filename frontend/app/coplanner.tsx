@@ -631,7 +631,7 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
       // Create selected tags
       const selectedTags = tags.filter((tag) => tag.selected);
       const createdTagIds = new Map<number, number>(); // Map from temporary ID to actual ID
-      
+
       for (const tag of selectedTags) {
         // Verify parent exists before creating tag
         if (tag.parent !== null) {
@@ -653,7 +653,7 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
           children: [], // Start with empty children array
           parent: tag.parent,
           deleted: 0,
-          synced: 0
+          synced: 0,
         };
 
         // Create tag and get the actual ID assigned by SQLite
@@ -678,21 +678,26 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
       const selectedFocusSession = focusSessions.find(
         (session) => session.selected,
       );
-      if (selectedFocusSession && aiResponse.focusTags && aiResponse.focusTags.length > 0) {
+      if (
+        selectedFocusSession &&
+        aiResponse.focusTags &&
+        aiResponse.focusTags.length > 0
+      ) {
         const focusTagId = aiResponse.focusTags[0];
+        console.log(focusTagId);
         // Check if this was a newly created tag
-        const actualTagId = createdTagIds.get(focusTagId) || focusTagId;
-        
+        const actualTagId = focusTagId;
+
         // Get the tag to verify it exists
         const focusTag = await getTag(db, actualTagId);
         if (focusTag) {
           // Start the focus session first
-          await startFocusSession(actualTagId.toString());
-          
+          await startFocusSession(actualTagId);
+
           // Then navigate to the watch screen with the activity
           router.push({
             pathname: "/watch",
-            params: { activityId: actualTagId }
+            params: { activityId: actualTagId },
           });
         } else {
           console.error("Could not find focus tag to start session");
