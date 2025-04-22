@@ -16,7 +16,7 @@ import {
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { act, useEffect, useRef, useState } from "react";
 import MicrophoneIcon from "@assets/icons/microphone.svg";
 import SendIcon from "@assets/icons/arrow-up.svg";
 import ResetIcon from "@assets/icons/arrow-rotate-left.svg";
@@ -48,6 +48,8 @@ import {
 } from "@/constants/interfaces";
 import CheckIcon from "@assets/icons/check.svg";
 import PathPicker from "@/components/form/pathPicker/pathPicker";
+import { useDerivedTags } from "@/hooks/useDerivedTags";
+import StopwatchIcon from "@assets/icons/stopwatch.svg";
 
 const suggestions = [
   {
@@ -177,9 +179,12 @@ const exampleTags: TagData[] = [
 ];
 
 interface SectionItem {
-  type: "tasks" | "tags";
+  type: "tasks" | "tags" | "focus";
   title: string;
-  data: (TaskData & { selected?: boolean })[] | TagData[];
+  data:
+    | (TaskData & { selected?: boolean })[]
+    | (TagData & { selected?: boolean })[]
+    | { selected?: boolean }[];
 }
 
 interface CoplannerProps {
@@ -278,6 +283,10 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>(
     exampleTags.slice(3).map((tag) => ({ ...tag, selected: false })),
   );
+  const [focusSessions, setFocusSessions] = useState<{ selected?: boolean }[]>([
+    { selected: false },
+  ]);
+  const { activityNode, projectNode } = useDerivedTags(19827382);
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -421,6 +430,17 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
         t.id === tagId ? { ...t, selected: !t.selected } : t,
       );
       return newTags;
+    });
+  };
+
+  const handleFocusSelect = (index: number) => {
+    setFocusSessions((prevSessions) => {
+      const newSessions = [...prevSessions];
+      newSessions[index] = {
+        ...newSessions[index],
+        selected: !newSessions[index].selected,
+      };
+      return newSessions;
     });
   };
 
@@ -697,6 +717,18 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       backgroundColor: theme.color.white,
       zIndex: -1,
     },
+    focusSessionContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      backgroundColor: theme.color.white,
+      borderRadius: 8,
+      padding: 12,
+      ...theme.shadow,
+    },
+    tagsScrollView: {
+      flex: 1,
+    },
   });
 
   return (
@@ -849,8 +881,13 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 <Text style={styles.emoji}>🧠</Text>
                 <Text style={styles.promptText}>{text}</Text>
               </View>
-              <SectionList<(TaskData & { selected?: boolean }) | TagData>
+              <SectionList<SectionItem["data"][number]>
                 sections={[
+                  {
+                    type: "focus",
+                    title: "Start focus session",
+                    data: focusSessions,
+                  },
                   {
                     type: "tasks",
                     title: "Pick tasks for your schedule",
@@ -862,15 +899,18 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                     data: tags,
                   },
                 ]}
-                keyExtractor={(item, index) =>
-                  item.id?.toString?.() ?? `item-${index}`
-                }
+                keyExtractor={(item, index) => {
+                  if ("id" in item) {
+                    return item.id?.toString() ?? `item-${index}`;
+                  }
+                  return `item-${index}`;
+                }}
                 renderSectionHeader={({ section: { title } }) => (
                   <View style={[styles.sectionTitleContainer]}>
                     <Text style={styles.sectionTitle}>{title}</Text>
                   </View>
                 )}
-                renderItem={({ item, section }) => {
+                renderItem={({ item, section, index }) => {
                   if (section.type === "tasks") {
                     const taskItem = item as TaskData & { selected?: boolean };
                     return (
@@ -886,7 +926,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                         />
                       </View>
                     );
-                  } else {
+                  } else if (section.type === "tags") {
                     const tagItem = item as TagData & { selected?: boolean };
                     return (
                       <View style={styles.taskRow}>
@@ -913,10 +953,66 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                         />
                       </View>
                     );
+                  } else {
+                    return (
+                      <View style={styles.taskRow}>
+                        <View style={{ flex: 1, marginRight: 10 }}>
+                          <View style={styles.focusSessionContainer}>
+                            <StopwatchIcon
+                              height={28}
+                              width={28}
+                              fill={
+                                theme.color.presets[
+                                  activityNode?.colorPreset ?? "grey"
+                                ].light
+                              }
+                            />
+                            <ScrollView
+                              horizontal
+                              showsHorizontalScrollIndicator={false}
+                              style={styles.tagsScrollView}
+                            >
+                              {activityNode && (
+                                <Tag
+                                  text={activityNode.title}
+                                  isProject={
+                                    activityNode.moduleType ===
+                                    moduleTypeEnum.project
+                                  }
+                                  colorPallete={
+                                    theme.color.presets[
+                                      activityNode.colorPreset
+                                    ]
+                                  }
+                                  style={{ marginRight: 10 }}
+                                />
+                              )}
+                              {projectNode && (
+                                <Tag
+                                  text={projectNode.title}
+                                  isProject={
+                                    projectNode.moduleType ===
+                                    moduleTypeEnum.project
+                                  }
+                                  colorPallete={
+                                    theme.color.presets[projectNode.colorPreset]
+                                  }
+                                  style={{ marginRight: 10 }}
+                                />
+                              )}
+                            </ScrollView>
+                          </View>
+                        </View>
+                        <SelectButton
+                          isSelected={item.selected ?? false}
+                          onPress={() => handleFocusSelect(index)}
+                        />
+                      </View>
+                    );
                   }
                 }}
                 contentContainerStyle={{
-                  paddingBottom: 2000,
+                  paddingBottom: 200,
                   paddingHorizontal: 15,
                 }}
                 SectionSeparatorComponent={() => (
