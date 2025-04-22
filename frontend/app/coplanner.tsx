@@ -12,6 +12,7 @@ import {
   Keyboard,
   SafeAreaView,
   FlatList,
+  SectionList,
 } from "react-native";
 import { useTheme } from "@context/ThemeContext";
 import { useRouter } from "expo-router";
@@ -178,7 +179,7 @@ const exampleTags: TagData[] = [
 interface SectionItem {
   type: "tasks" | "tags";
   title: string;
-  data: TaskData[] | TagData[];
+  data: (TaskData & { selected?: boolean })[] | TagData[];
 }
 
 interface CoplannerProps {
@@ -274,6 +275,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
   const [thinkingStep, setThinkingStep] = useState(0);
   const [tasks, setTasks] =
     useState<(TaskData & { selected?: boolean })[]>(exampleTasks);
+  const [tags, setTags] = useState<(TagData & { selected?: boolean })[]>(
+    exampleTags.slice(3).map((tag) => ({ ...tag, selected: false })),
+  );
   const textInputRef = useRef<TextInput>(null);
   const screenWidth = Dimensions.get("window").width;
   const screenHeight = Dimensions.get("window").height;
@@ -408,6 +412,15 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       buttonAnim.value = withTiming(isSelected ? 1 : 0, { duration: 300 });
 
       return newTasks;
+    });
+  };
+
+  const handleTagSelect = (tagId: number) => {
+    setTags((prevTags) => {
+      const newTags = prevTags.map((t) =>
+        t.id === tagId ? { ...t, selected: !t.selected } : t,
+      );
+      return newTags;
     });
   };
 
@@ -561,7 +574,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       justifyContent: "space-between",
       padding: 15,
       position: "absolute",
-      bottom: 0,
+      bottom: 50,
       left: 0,
       right: 0,
       backgroundColor: theme.color.red,
@@ -626,13 +639,21 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     },
     section: {
       paddingHorizontal: 15,
-      marginBottom: 20,
+      marginBottom: 8,
+    },
+    sectionTitleContainer: {
+      backgroundColor: theme.color.white,
+      paddingVertical: 10,
+      position: "sticky",
+      top: 0,
+      zIndex: 1,
+      marginHorizontal: -15,
+      paddingHorizontal: 30,
     },
     sectionTitle: {
       fontSize: theme.fontSize.mediumBig,
       fontFamily: theme.font.semibold,
       color: theme.color.black,
-      marginBottom: 15,
     },
     taskRow: {
       flexDirection: "row",
@@ -828,8 +849,8 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                 <Text style={styles.emoji}>🧠</Text>
                 <Text style={styles.promptText}>{text}</Text>
               </View>
-              <FlatList
-                data={[
+              <SectionList<(TaskData & { selected?: boolean }) | TagData>
+                sections={[
                   {
                     type: "tasks",
                     title: "Pick tasks for your schedule",
@@ -838,54 +859,69 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
                   {
                     type: "tags",
                     title: "Pick tags for your workplace",
-                    data: exampleTags,
+                    data: tags,
                   },
                 ]}
-                renderItem={({ item }) => (
-                  <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>{item.title}</Text>
-                    {item.type === "tasks" ? (
-                      <FlatList
-                        data={tasks}
-                        renderItem={({ item: task }) => (
-                          <View style={styles.taskRow}>
-                            <View style={{ flex: 1, marginRight: 10 }}>
-                              <Task task={task} completable={false} />
-                            </View>
-                            <SelectButton
-                              isSelected={task.selected ?? false}
-                              onPress={() =>
-                                task.id && handleTaskSelect(task.id)
-                              }
-                            />
-                          </View>
-                        )}
-                        keyExtractor={(task) => task.id?.toString() ?? ""}
-                      />
-                    ) : (
-                      <FlatList
-                        data={exampleTags.slice(3)}
-                        renderItem={({ item: tag }) => (
-                          <PathPicker
-                            key={tag.id}
-                            parent={tag.parent}
-                            setParent={() => {}}
-                            shouldDisplayNew={true}
-                            moduleColorPallete={tag.colorPreset}
-                            moduleName={tag.title}
-                            isProject={
-                              tag.moduleType === moduleTypeEnum.project
-                            }
-                            pathHeaderFlag={false}
-                          />
-                        )}
-                        keyExtractor={(tag) => tag.id.toString()}
-                        contentContainerStyle={{ gap: 15 }}
-                      />
-                    )}
+                keyExtractor={(item, index) =>
+                  item.id?.toString?.() ?? `item-${index}`
+                }
+                renderSectionHeader={({ section: { title } }) => (
+                  <View style={[styles.sectionTitleContainer]}>
+                    <Text style={styles.sectionTitle}>{title}</Text>
                   </View>
                 )}
-                keyExtractor={(item) => item.type}
+                renderItem={({ item, section }) => {
+                  if (section.type === "tasks") {
+                    const taskItem = item as TaskData & { selected?: boolean };
+                    return (
+                      <View style={styles.taskRow}>
+                        <View style={{ flex: 1, marginRight: 10 }}>
+                          <Task task={taskItem} completable={false} />
+                        </View>
+                        <SelectButton
+                          isSelected={taskItem.selected ?? false}
+                          onPress={() =>
+                            taskItem.id && handleTaskSelect(taskItem.id)
+                          }
+                        />
+                      </View>
+                    );
+                  } else {
+                    const tagItem = item as TagData & { selected?: boolean };
+                    return (
+                      <View style={styles.taskRow}>
+                        <View style={{ flex: 1, marginRight: 10 }}>
+                          <PathPicker
+                            withShadow={true}
+                            pathHeaderFlag={false}
+                            key={tagItem.id}
+                            parent={tagItem.parent}
+                            setParent={() => {}}
+                            shouldDisplayNew={true}
+                            moduleColorPallete={tagItem.colorPreset}
+                            moduleName={tagItem.title}
+                            isProject={
+                              tagItem.moduleType === moduleTypeEnum.project
+                            }
+                          />
+                        </View>
+                        <SelectButton
+                          isSelected={tagItem.selected ?? false}
+                          onPress={() =>
+                            tagItem.id && handleTagSelect(tagItem.id)
+                          }
+                        />
+                      </View>
+                    );
+                  }
+                }}
+                contentContainerStyle={{
+                  paddingBottom: 2000,
+                  paddingHorizontal: 15,
+                }}
+                SectionSeparatorComponent={() => (
+                  <View style={styles.section} />
+                )}
               />
 
               <View style={styles.buttonsContainer}>

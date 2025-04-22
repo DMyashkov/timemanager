@@ -8,6 +8,7 @@ import { useTagContext } from "@/context/TagContext";
 import { useSQLiteContext } from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { schema } from "@/db/schema";
+import { useTheme } from "@context/ThemeContext";
 
 interface PathPickerProps {
   moduleName?: string;
@@ -17,6 +18,7 @@ interface PathPickerProps {
   setParent: (parent: number) => void; // Possibly used for changing parent
   shouldDisplayNew?: boolean; // If you want to display a "New" button
   pathHeaderFlag?: boolean; // If you want to display a header
+  withShadow?: boolean; // If you want to add shadow
 }
 
 export default function PathPicker({
@@ -27,6 +29,7 @@ export default function PathPicker({
   isProject = false,
   shouldDisplayNew = true,
   pathHeaderFlag = true,
+  withShadow = false,
 }: PathPickerProps) {
   const styles = useStyles();
   const { getTag } = useTagContext();
@@ -71,9 +74,20 @@ export default function PathPicker({
     console.log("Change parent pressed!");
     // Possibly open a modal or navigates to a screen to pick a new parent, etc.
   };
+  const { theme } = useTheme();
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          // Add shadow if withShadow is true
+          ...(withShadow ? theme.shadow : {}),
+          // Add padding if pathHeaderFlag is true
+          padding: pathHeaderFlag ? 10 : 0,
+        },
+      ]}
+    >
       {/* Header row with "Path" and "Change" button */}
       {pathHeaderFlag && (
         <View style={styles.topRow}>
