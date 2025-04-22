@@ -83,6 +83,23 @@ export default function Watch() {
   const styles = useStyles();
   const pathname = usePathname();
   const params = useLocalSearchParams();
+  const { activityId } = useLocalSearchParams();
+  const { getTag } = useTagContext();
+
+  const { activityNode, projectNode } = useDerivedTags(selectedTagID);
+
+  // Handle activity from URL parameter
+  useEffect(() => {
+    const handleActivityFromUrl = async () => {
+      if (activityId) {
+        const activity = await getTag(db, Number(activityId));
+        if (activity) {
+          handleActivitySelected(activity);
+        }
+      }
+    };
+    handleActivityFromUrl();
+  }, [activityId]);
 
   // Timer effect
   useEffect(() => {
@@ -298,8 +315,6 @@ export default function Watch() {
 
     setSelectedTagID(activity.id);
   };
-
-  const { activityNode, projectNode } = useDerivedTags(selectedTagID);
 
   const fullModeAnim = useSharedValue(0);
 

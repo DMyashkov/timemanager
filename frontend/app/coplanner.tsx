@@ -349,6 +349,7 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
     createTag: tagContextCreateTag,
     getAllTags,
     getTag,
+    updateTag,
   } = useTagContext();
   const [debugMode, setDebugMode] = useState(false);
 
@@ -607,6 +608,10 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
   const handleApplyChanges = async () => {
     if (!aiResponse) return;
 
+    // Create a map to store the mapping from temporary IDs to actual IDs
+    const createdTagIds = new Map<number, number>();
+
+    // Create selected tags
     try {
       // Create selected tasks
       const selectedTasks = tasks.filter((task) => task.selected);
@@ -625,6 +630,8 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
 
       // Create selected tags
       const selectedTags = tags.filter((tag) => tag.selected);
+      const createdTagIds = new Map<number, number>(); // Map from temporary ID to actual ID
+      
       for (const tag of selectedTags) {
         // Verify parent exists before creating tag
         if (tag.parent !== null) {
@@ -635,36 +642,61 @@ IMPORTANT: Your response must be valid JSON and nothing else. Do not include any
           }
         }
 
-        await tagContextCreateTag(db, {
-          id: tag.id,
+        // Create tag data with required fields for TagData interface
+        const tagData: TagData & { synced?: number; deleted?: number } = {
+          id: -1, // Temporary ID that will be replaced by SQLite
           title: tag.title,
           colorPreset: tag.colorPreset,
           moduleType: tag.moduleType,
           productive: tag.productive,
           lapName: tag.lapName,
-          children: tag.children,
+          children: [], // Start with empty children array
           parent: tag.parent,
           deleted: 0,
-          synced: 0,
-        });
+          synced: 0
+        };
+
+        // Create tag and get the actual ID assigned by SQLite
+        const newTagId = await tagContextCreateTag(db, tagData);
+        tagData.id = newTagId; // Update the ID with the actual one
+
+        // Store the mapping from temporary to actual ID
+        createdTagIds.set(tag.id, newTagId);
+
+        // If this tag had children in the AI response, update them to point to the new parent
+        if (tag.children && tag.children.length > 0) {
+          for (const childId of tag.children) {
+            await updateTag(db, childId, {
+              parent: newTagId,
+              children: [], // Clear children array as we're moving the tag
+            });
+          }
+        }
       }
 
       // Start focus session if selected
       const selectedFocusSession = focusSessions.find(
         (session) => session.selected,
       );
-      if (selectedFocusSession && aiResponse.focusTags) {
-        // Verify focus tags exist
-        for (const tagId of aiResponse.focusTags) {
-          const tag = await getTag(db, tagId);
-          if (!tag) {
-            console.error(`Focus tag with ID ${tagId} not found`);
-            continue;
-          }
+      if (selectedFocusSession && aiResponse.focusTags && aiResponse.focusTags.length > 0) {
+        const focusTagId = aiResponse.focusTags[0];
+        // Check if this was a newly created tag
+        const actualTagId = createdTagIds.get(focusTagId) || focusTagId;
+        
+        // Get the tag to verify it exists
+        const focusTag = await getTag(db, actualTagId);
+        if (focusTag) {
+          // Start the focus session first
+          await startFocusSession(actualTagId.toString());
+          
+          // Then navigate to the watch screen with the activity
+          router.push({
+            pathname: "/watch",
+            params: { activityId: actualTagId }
+          });
+        } else {
+          console.error("Could not find focus tag to start session");
         }
-        await startFocusSession(aiResponse.focusTags.join(","));
-        // Redirect to watch screen
-        router.push("/watch");
       }
 
       onClose();
