@@ -369,6 +369,18 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       paddingVertical: 10,
       borderRadius: 20,
     },
+    handleContainer: {
+      width: "100%",
+      alignItems: "center",
+      paddingTop: 10 + (Platform.OS === "ios" ? 0 : 8),
+    },
+    handle: {
+      width: 36,
+      height: 5,
+      backgroundColor: theme.color.darkGrey,
+      borderRadius: 2.5,
+      marginBottom: Platform.OS === "ios" ? 0 : 8,
+    },
   });
 
   return (
@@ -379,6 +391,9 @@ export default function Coplanner({ visible, onClose }: CoplannerProps) {
       onRequestClose={onClose}
     >
       <SafeAreaView style={styles.safeArea}>
+        <View style={styles.handleContainer}>
+          <View style={styles.handle} />
+        </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.container}
