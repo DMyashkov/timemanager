@@ -158,7 +158,9 @@ export default function TasksScreen() {
   // Group active tasks by date
   const taskGroups = activeTasks.reduce(
     (groups, task) => {
-      if (!task.date) {
+      // Always treat task.date as a number to avoid string timestamp issues
+      const dateValue = task.date !== undefined && task.date !== null ? Number(task.date) : null;
+      if (!dateValue) {
         if (!groups.noDate) {
           groups.noDate = [];
         }
@@ -166,7 +168,7 @@ export default function TasksScreen() {
         return groups;
       }
 
-      const taskDate = new Date(task.date);
+      const taskDate = new Date(dateValue);
       taskDate.setHours(0, 0, 0, 0);
       const dateKey = taskDate.getTime();
 
@@ -186,7 +188,11 @@ export default function TasksScreen() {
 
   // Get overdue tasks (only from active tasks)
   const overdueTasks = activeTasks.filter(
-    (task) => task.date && task.date < todayStart,
+    (task) => {
+      // Always treat task.date as a number to avoid string timestamp issues
+      const dateValue = task.date !== undefined && task.date !== null ? Number(task.date) : null;
+      return dateValue && dateValue < todayStart;
+    },
   );
 
   // Sort task groups by date

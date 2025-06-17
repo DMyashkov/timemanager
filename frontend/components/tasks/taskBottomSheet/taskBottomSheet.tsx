@@ -167,16 +167,25 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
   }, [completed, task, updateTask, db, onTaskUpdate]);
 
   const handleDateChange = async (date: DateStruct | null) => {
-    // Convert DateStruct to Date and set time to 23:59
+    // Debug: log the incoming DateStruct
+    console.log("handleDateChange called with:", date);
     if (!task.id) return;
     let newDate: number | null;
     if (date) {
       const selectedDate = new Date(date.year, date.month - 1, date.day);
       selectedDate.setHours(23, 59, 0, 0);
       newDate = selectedDate.getTime();
+      // Debug: log the constructed Date and timestamp
+      console.log("Constructed Date:", selectedDate);
+      console.log("Timestamp (ms):", newDate);
+      if (isNaN(newDate)) {
+        console.error("Invalid date generated from DateStruct:", date);
+        return;
+      }
       setDate(newDate);
     } else {
       newDate = null;
+      setDate(null);
     }
     try {
       console.log("Updating task date:", newDate);
@@ -366,8 +375,14 @@ export const TaskBottomSheet: React.FC<TaskBottomSheetProps> = ({
                   />
                 </View>
                 <Text style={styles.dateText}>
-                  {date
-                    ? new Date(date).toLocaleDateString("en-GB", {
+                  {(() => {
+                    console.log("Type of date:", typeof date, "Value:", date);
+                    const d = new Date(Number(date));
+                    console.log("Date object:", d, "toLocaleDateString:", d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }));
+                    return null;
+                  })()}
+                  {date && !isNaN(Number(date))
+                    ? new Date(Number(date)).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                       })
