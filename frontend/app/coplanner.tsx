@@ -60,7 +60,7 @@ import type { InferModel } from "drizzle-orm";
 import { useTaskContext } from "@/context/TaskContext";
 import { useTagContext } from "@/context/TagContext";
 
-const USE_MOCK_RESPONSE = true; // Set to true to use mock response, false to use ChatGPT
+const USE_MOCK_RESPONSE = false; // Set to true to use mock response, false to use ChatGPT
 
 const mockResponse = {
   id: "chatcmpl-BP3JN245DREkdzsbc4UDT2ncHbfIh",
