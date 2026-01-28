@@ -17,26 +17,22 @@ def home(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_page(request):
-    email = request.data.get('email')  # Use email instead of username
+    email = request.data.get('email')
     password = request.data.get('password')
 
-    # Validate email format
     try:
         validate_email(email)
     except ValidationError:
         return Response({"error": "Invalid Email Format"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if email exists in the system
     if not CustomUser.objects.filter(email=email).exists():
         return Response({"error": "Invalid Email"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Authenticate user
     user = authenticate(request, email=email, password=password)
 
     if user is None:
         return Response({"error": "Invalid Password"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Get or create a token for the authenticated user
     token, _ = Token.objects.get_or_create(user=user)
 
     return Response({"message": "Login successful", "token": token.key}, status=status.HTTP_200_OK)
@@ -45,27 +41,23 @@ def login_page(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_page(request):
-    email = request.data.get('email')  # Use email for registration
+    email = request.data.get('email')
     password = request.data.get('password')
 
-    # Validate email format
     try:
         validate_email(email)
     except ValidationError:
         return Response({"error": "Invalid Email Format"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if email is already taken
     if CustomUser.objects.filter(email=email).exists():
         return Response({"error": "Email already taken"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Create user
-    user = CustomUser.objects.create_user(  # type: ignore
+    user = CustomUser.objects.create_user(
         email=email,
         password=password,
     )
     user.save()
 
-    # Create token for the new user
     token, _ = Token.objects.get_or_create(user=user)
 
     return Response({"message": "Account created successfully", "token": token.key}, status=status.HTTP_201_CREATED)

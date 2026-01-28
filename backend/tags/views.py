@@ -27,11 +27,9 @@ class SyncTagsView(APIView):
         print("TAGS BEFORE SERIALIZER:")
         print(json.dumps(request.data, indent=4, sort_keys=True))
 
-        # Validate the incoming payload
         payload_serializer = TagSyncWithDeletedSerializer(
             data=request.data, many=True)
         if not payload_serializer.is_valid():
-            # print("Serializer ERRRRRROOOORS:", payload_serializer.errors)
             return Response(payload_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         payload = list(payload_serializer.validated_data) if isinstance(
@@ -71,10 +69,7 @@ class DeleteAllTagsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
-        """
-        Deletes all tags for the authenticated user.
-        """
-        deleted_count, _ = Tag.objects.all().delete()  # Delete all records
+        deleted_count, _ = Tag.objects.all().delete()
 
         return Response(
             {"message": f"Deleted {deleted_count} tags successfully."},

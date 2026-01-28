@@ -20,9 +20,6 @@ class TagSyncSerializer(serializers.ModelSerializer):
         ]
 
     def to_internal_value(self, data):
-        """
-        Converts incoming camelCase JSON keys to snake_case for Django model.
-        """
         converted_data = {
             "id": data.get("id"),
             "title": data.get("title"),
@@ -36,9 +33,6 @@ class TagSyncSerializer(serializers.ModelSerializer):
         return super().to_internal_value(converted_data)
 
     def to_representation(self, instance):
-        """
-        Converts Django model fields (snake_case) to camelCase for JSON response.
-        """
         representation = super().to_representation(instance)
         return {
             "id": representation["id"],
@@ -59,11 +53,8 @@ class TagSyncWithDeletedSerializer(TagSyncSerializer):
         fields = TagSyncSerializer.Meta.fields + ['deleted']
 
     def to_internal_value(self, data):
-        """
-        Ensure `deleted` is preserved if provided, otherwise set to -1.
-        """
         converted_data = super().to_internal_value(data)
 
-        converted_data["deleted"] = data.get("deleted", -1)  # 🔥 FIX HERE
+        converted_data["deleted"] = data.get("deleted", -1) 
 
         return converted_data
